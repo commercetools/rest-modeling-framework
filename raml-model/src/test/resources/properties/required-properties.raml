@@ -1,0 +1,18 @@
+#%RAML 1.0 Library
+
+usage: Type with implicit optional and required properties
+
+types:
+    WithProperties:
+        type: object
+        properties:
+            optional?:
+                type: string
+            optional??:
+                type: string
+            required:
+                type: string
+            required?:
+                required: true
+            ??:
+                required: false

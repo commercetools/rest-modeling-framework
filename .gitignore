@@ -1,0 +1,19 @@
+.gradle
+build/
+generated/
+out/
+.project
+.settings/
+classes/
+.classpath
+bin
+
+# Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
+!gradle-wrapper.jar
+
+!gradlew.bat
+
+# Cache of project
+.gradletasknamecache
+
+.idea

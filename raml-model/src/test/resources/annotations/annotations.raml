@@ -1,0 +1,13 @@
+#%RAML 1.0 Library
+
+usage: Type with an annotation
+
+annotationTypes:
+    PackageName:
+        type: string
+
+types:
+    AnnotatedType:
+        (PackageName): package
+        type: object
+

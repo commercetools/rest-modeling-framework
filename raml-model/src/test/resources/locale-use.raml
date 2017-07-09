@@ -1,0 +1,11 @@
+#%RAML 1.0 Library
+
+usage: Uses the locale library.
+
+uses:
+    locale: locale.raml
+
+types:
+    WithLocalizedName:
+        properties:
+            name?: locale.LocalizedString

@@ -1,0 +1,12 @@
+#%RAML 1.0 Library
+
+usage: Type with a property that has a inline type declaration
+
+types:
+    WithProperties:
+        type: object
+        properties:
+            name?:
+                type: string
+                minLength: 10
+

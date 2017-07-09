@@ -1,0 +1,27 @@
+#%RAML 1.0 Library
+
+usage: Test
+
+types:
+    StringType:
+        type: string
+        minLength: 10
+    EmptyObject:
+    WithProperties:
+        type: object
+        properties:
+            name?: string
+            super:
+                type: SuperType
+
+    SuperType:
+    SubType:
+        type: SuperType
+
+
+    Enum:
+        type: string
+        enum:
+        - v1
+        - v2
+

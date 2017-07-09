@@ -1,0 +1,52 @@
+@Ecore(nsPrefix="elements",nsURI="http://www.vrap.io/raml/elements")
+@GenModel(
+    bundleManifest="false",
+    modelDirectory="raml-model/src/main/java-gen",
+    complianceLevel="8.0"
+)
+package io.vrap.rmf.raml.model.elements
+
+interface IdentifiableElement {
+	/*
+	 * The optional name of this element.
+	 */
+	id String name
+}
+
+/*
+ * This describes the properties of an element that can be documented.
+ */
+interface DocumentableElement {
+	/*
+	 * A substantial, human-friendly description of the type. Its value is a string and MAY be formatted using markdown.
+	 */
+	String description
+
+	/*
+	 * An alternate, human-friendly name for the type.
+	 */
+	String displayName
+}
+
+
+interface TypedElement<T> {
+	/*
+	 * The type this element references.
+	 */
+	refers T typeReference
+
+	/*
+	 * A typed element can have an anonymous inline
+	 * type declaration.
+	 */
+	contains T typeDeclaration
+
+	/*
+	 * The type of a typed element is the type that it declares
+	 * or the type that it references.
+	 */
+	refers derived T ^type get {
+		if (typeDeclaration != null) typeDeclaration else typeReference
+	}
+}
+

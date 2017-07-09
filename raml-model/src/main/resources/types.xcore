@@ -1,0 +1,362 @@
+@Ecore(nsPrefix="types",nsURI="http://www.vrap.io/raml/types")
+@GenModel(
+    modelDirectory="raml-model/src/main/java-gen",
+    complianceLevel="8.0"
+)
+package io.vrap.rmf.raml.model.types
+
+import io.vrap.rmf.raml.model.elements.DocumentableElement
+import io.vrap.rmf.raml.model.elements.IdentifiableElement
+import io.vrap.rmf.raml.model.facets.*
+
+class Api extends Annotatable, TypeContainer {
+	/*
+	 * A short, plain-text label for the API. Its value is a string.
+	 */
+	String title
+	/*
+	 * A substantial, human-friendly description of the API.
+	 * Its value is a string and MAY be formatted using markdown.
+	 */
+	String description
+
+	/*
+	 * The version of the API, for example "v1".
+	 */
+	String version
+
+	/*
+	 * A URI that serves as the base for URIs of all resources. Often used as the base
+	 * of the URL of each resource containing the location of the API. Can be a template URI.
+	 */
+	String baseUri
+
+	/*
+	 * The protocols supported by the API.
+	 */
+	String[] protocols
+
+	/*
+	 * The default media types to use for request and response bodies (payloads),
+	 * for example "application/json".
+	 */
+	String[] mediaType
+
+	/*
+	 * The security schemes that apply to every resource and method in the API.
+	 */
+	String[] securedBy
+}
+
+interface TypeContainer {
+	contains LibraryUse[] uses
+
+    contains AnyType[] types
+    contains AnnotationType[] annotationTypes
+}
+
+class Library extends Annotatable, TypeContainer {
+    String usage
+}
+
+class LibraryUse {
+	String name
+	refers Library library
+}
+
+/*
+ * The location within an API specificaxtion where annotations can be applied MUST be one of the target locations
+ * in the following Target Locations table. The targets are the locations themselves, not sub-properties within the locations.
+ * For example, the Method target refers to the method node, not to the method display name, description, and so on.
+ */
+enum AnnotationTarget {
+	/*
+	 * The root of a RAML document
+	 */
+	API,
+	/*
+	 * An item in the collection of items that is the value of the root-level documentation node.
+	 */
+	DocumentationItem,
+	/*
+	 * A resource (relative URI) node, root-level or nested
+	 */
+	Resource,
+	/*
+	 * A method node.
+	 */
+	Method,
+	/*
+	 * A declaration of the responses node, whose key is an HTTP status code.
+	 */
+	Response,
+	/*
+	 * The body node of a method.
+	 */
+	RequestBody,
+	/*
+	 * The body node of a response.
+	 */
+	ResponseBody,
+	/*
+	 * A data type declaration (inline or in a global types collection), header declaration,
+	 * query parameter declaration, URI parameter declaration, or a property within any of these declarations,
+	 * where the type property can be used.
+	 */
+	TypeDeclaration,
+	/*
+	 * Either an example or examples node
+	 */
+	Example,
+	/*
+	 * A resource type node.
+	 */
+	ResourceType,
+	/*
+	 * A trait node.
+	 */
+	Trait,
+	/*
+	 * A security scheme declaration.
+	 */
+	SecurityScheme,
+	/*
+	 * The settings node of a security scheme declaration
+	 */
+	SecuritySchemeSettings,
+	/*
+	 * A declaration of the annotationTypes node, whose key is a name of an annotation type and whose value describes the annotation.
+	 */
+	AnnotationType,
+	/*
+	 * The root of a library.
+	 */
+	Library,
+	/*
+	 * The root of an overlay.
+	 */
+	Overlay,
+	/*
+	 * The root of an extension.
+	 */
+	Extension
+}
+
+interface Type<T> {
+	/*
+	 * The type which this type extends.
+	 */
+	refers T ^type
+
+	/*
+	 * The base class of a type is the super class
+	 * of this type that directly extends the {@link AnyType}.
+	 */
+	derived Class<?> baseClass get {
+		if (^class == AnyType) {
+			return null
+		}
+		var Class<?> baseClass = ^class
+		while (baseClass.superclass != AnyType) {
+			baseClass = baseClass.superclass
+		}
+		return baseClass
+	}
+}
+
+interface DataType extends Type<AnyType> {
+	
+}
+
+/*
+ * Annotation types are declared using the OPTIONAL root-level annotationTypes node.
+ * The value of the annotationsType node is a map whose keys define annotation type names,
+ * also referred to as annotations, and whose values are key-value pairs called annotation type declarations.
+ * An annotation type declaration has the same syntax as a data type declaration,
+ * and its facets have the same syntax as the corresponding ones for data types, but with the addition of the allowedTargets facet.
+ * An annotation type declaration constrains the value of an annotation of that type just as a data type declaration constrains
+ * the value of a URI parameter, query parameter, header, or body of that type.
+ * The allowedTargets node restricts the kinds of locations where the annotation can be applied. Annotation types, like data types,
+ * can extend other data types, but annotation types themselves can neither be extended nor used anywhere data types can be used.
+ */
+interface AnnotationType extends Type<AnyAnnotationType>, DocumentableElement, IdentifiableElement {
+	
+	/*
+	 * The locations to which annotations are restricted.
+	 * If this node is specified, annotations of this type may be applied only on a node corresponding to one of the locations.
+	 */
+	AnnotationTarget[] allowedTargets
+}
+
+class AnyAnnotationType extends AnnotationType {	
+}
+
+class TimeOnlyAnnotationType extends AnnotationType {
+}
+
+class DateTimeAnnotationType extends DateTimeTypeFacet, AnnotationType {
+}
+
+class DateTimeOnlyAnnotationType extends AnnotationType {
+}
+
+class DateOnlyAnnotationType extends AnnotationType {
+}
+
+class NumberAnnotationType extends NumberTypeFacet, AnnotationType {
+}
+
+class IntegerAnnotationType extends NumberAnnotationType {
+}
+
+class BooleanAnnotationType extends AnnotationType {	
+}
+
+class StringAnnotationType extends StringTypeFacet, AnnotationType {	
+}
+
+class NilAnnotationType extends AnnotationType {
+}
+
+class FileAnnotationType extends FileTypeFacet, AnnotationType {	
+}
+
+class ObjectAnnotationType extends ObjectTypeFacet<AnyAnnotationType, Property<AnyAnnotationType>>, AnnotationType {	
+}
+
+class ArrayAnnotationType extends ArrayTypeFacet<AnyAnnotationType>, AnnotationType {
+}
+
+/*
+ * Every type, whether built-in or user-defined, has the any type at the root of its inheritance tree.
+ * By definition, the any type is a type which imposes no restrictions, i.e. any instance of data is
+ * valid against it.
+ */
+class AnyType extends DataType, Annotatable, DocumentableElement, IdentifiableElement, EnumFacet {
+}
+
+interface Annotatable {
+	/*
+	 * The annotations of this element.
+	 */
+	contains Instance<?>[] annotations
+
+	/*
+	 * Returns the annotation of the given annotation type if it exists.
+	 * Otherwise returns null.
+	 */
+	op <T extends AnyType, A extends Instance<T>> A getAnnotation(T annotationType) {
+		var a = annotations.findFirst[it.^type == annotationType]
+
+		if (a != null) a as A else null
+	}
+}
+
+class ObjectType extends AnyType, ObjectTypeFacet<AnyType, Property<AnyType>> {
+	
+	op Property<AnyType> getProperty(String name) {
+		for (Property<AnyType> property : properties) {
+			if (name == property.name) return property
+		}
+		return null
+	}
+}
+
+/*
+ * A JSON array.
+ */
+class ArrayType extends AnyType, ArrayTypeFacet<AnyType> {
+}
+
+/*
+ * A JSON string.
+ */
+class StringType extends AnyType, StringTypeFacet {
+}
+
+/*
+ * Any JSON number.
+ */
+class NumberType extends AnyType, NumberTypeFacet {
+}
+
+/*
+ * A subset of JSON numbers that are positive and negative multiples of 1.
+ */
+class IntegerType extends NumberType {
+}
+
+/*
+ * A JSON boolean.
+ */
+class BooleanType extends AnyType {
+}
+
+/*
+ * The "full-date" notation of RFC3339, namely yyyy-mm-dd.
+ * Does not support time or time zone-offset notation.
+ */
+class DateOnlyType extends AnyType {
+}
+
+/*
+ * The "partial-time" notation of RFC3339, namely hh:mm:ss[.ff...].
+ * Does not support date or time zone-offset notation.
+ */
+class TimeOnlyType extends AnyType {
+}
+
+/*
+ * Combined date-only and time-only with a separator of "T", namely yyyy-mm-ddThh:mm:ss[.ff...].
+ * Does not support a time zone offset.
+ */
+class DateTimeOnlyType extends AnyType {
+}
+
+class DateTimeType extends AnyType, DateTimeTypeFacet {
+}
+
+/*
+ * The ​file​ type can constrain the content to send through forms. When this type is used in the
+ * context of web forms it SHOULD be represented as a valid file upload in JSON format.
+ * File content SHOULD be a base64-encoded string.
+ */
+class FileType extends AnyType, FileTypeFacet {
+}
+
+class NilType extends AnyType {
+}
+
+class Instance<T extends AnyType> {
+	refers T ^type
+}
+
+class StringInstance extends Instance<StringType> {
+	String value
+}
+
+class BooleanInstance extends Instance<BooleanType> {
+	Boolean value
+}
+
+class NumberInstance extends Instance<IntegerType> {
+	BigDecimal value
+}
+
+class IntegerInstance extends Instance<IntegerType> {
+	Long value
+}
+
+class ObjectInstance extends Instance<ObjectType> {
+	contains Instance<?>[] value
+
+	/*
+	 * Returns the property of the given type if it exists.
+	 * Otherwise returns null.
+	 */
+	op <T extends AnyType, V extends Instance<T>> V getPropertyy(T valueType) {
+		var p = value.findFirst[it.^type == valueType]
+
+		if (p != null) p as V else null
+	}
+}
