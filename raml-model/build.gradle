@@ -12,6 +12,7 @@ xtext {
     sourceSets {
         main {
             srcDir 'src/main/resources'
+            srcDir 'src/main/java-gen'
         }
     }
 
