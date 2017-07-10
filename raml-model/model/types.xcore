@@ -51,7 +51,7 @@ class Api extends Annotatable, TypeContainer {
 interface TypeContainer {
 	contains LibraryUse[] uses
 
-    contains AnyType[] types
+    contains DataType[] types
     contains AnnotationType[] annotationTypes
 }
 
@@ -142,7 +142,7 @@ enum AnnotationTarget {
 	Extension
 }
 
-interface Type<T> {
+interface Type<T> extends Annotatable, DocumentableElement, IdentifiableElement {
 	/*
 	 * The type which this type extends.
 	 */
@@ -179,7 +179,7 @@ interface DataType extends Type<AnyType> {
  * The allowedTargets node restricts the kinds of locations where the annotation can be applied. Annotation types, like data types,
  * can extend other data types, but annotation types themselves can neither be extended nor used anywhere data types can be used.
  */
-interface AnnotationType extends Type<AnyAnnotationType>, DocumentableElement, IdentifiableElement {
+interface AnnotationType extends Type<AnyAnnotationType> {
 	
 	/*
 	 * The locations to which annotations are restricted.
@@ -252,10 +252,10 @@ interface Annotatable {
 	}
 }
 
-class ObjectType extends AnyType, ObjectTypeFacet<AnyType, Property<AnyType>> {
+class ObjectType extends AnyType, ObjectTypeFacet<DataType, Property<DataType>> {
 	
-	op Property<AnyType> getProperty(String name) {
-		for (Property<AnyType> property : properties) {
+	op Property<DataType> getProperty(String name) {
+		for (Property<DataType> property : properties) {
 			if (name == property.name) return property
 		}
 		return null
