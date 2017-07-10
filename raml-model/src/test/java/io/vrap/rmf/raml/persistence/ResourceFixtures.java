@@ -38,7 +38,8 @@ public interface ResourceFixtures {
         return new RamlResourceSet().getResource(uri, true);
     }
 
-    default <T> T getRootObject(final Resource resource) {
+    @SuppressWarnings("unchecked")
+	default <T> T getRootObject(final Resource resource) {
         final EList<EObject> contents = resource.getContents();
 
         assertThat(contents).hasSize(1);

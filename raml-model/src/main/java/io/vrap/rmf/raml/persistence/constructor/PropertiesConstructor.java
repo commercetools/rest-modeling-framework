@@ -10,7 +10,6 @@ import java.util.Optional;
 
 import static io.vrap.functional.utils.Classes.as;
 import static io.vrap.rmf.raml.model.facets.FacetsPackage.Literals.*;
-import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.*;
 
 /**
  * Constructs a list of properties {@link Property} from a {@link MappingNode}.

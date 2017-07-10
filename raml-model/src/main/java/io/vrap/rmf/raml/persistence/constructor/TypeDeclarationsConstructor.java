@@ -16,7 +16,7 @@ import java.util.Optional;
 
 import static io.vrap.functional.utils.Classes.asOptional;
 import static io.vrap.rmf.raml.model.elements.ElementsPackage.Literals.*;
-import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.TYPE__TYPE;
+import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.*;
 
 public class TypeDeclarationsConstructor extends AbstractIdentifiableElementsConstructor {
     private final Map<EClass, Constructor<MappingNode>> metaTypeConstructors = new HashMap<>();
@@ -31,7 +31,7 @@ public class TypeDeclarationsConstructor extends AbstractIdentifiableElementsCon
     @Override
     protected EObject create(final NodeTuple nodeTuple, final Scope typesScope, final String name) {
         final Scope resolvedScope = resolve(nodeTuple.getValueNode(), typesScope);
-        final Optional<Node> optionalTypeNode = getNodeTuple(resolvedScope.getValueNode(), TYPE__TYPE)
+        final Optional<Node> optionalTypeNode = getNodeTuple(resolvedScope.getValueNode(), ANY_TYPE__TYPE)
                 .map(NodeTuple::getValueNode);
 
         final EClass typeDeclarationType = asOptional(ScalarNode.class, optionalTypeNode)

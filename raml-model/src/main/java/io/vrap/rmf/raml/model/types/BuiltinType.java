@@ -40,7 +40,7 @@ public enum BuiltinType {
     public final static URI RESOURCE_URI = URI.createURI("http://raml.org/raml/1.0/builtin-types.raml");
 
     BuiltinType(final String name, final EClass typeDeclarationType, final EClass annotationTypeDeclarationType) {
-        assert ANNOTATION_TYPE.isSuperTypeOf(annotationTypeDeclarationType);
+        assert ANY_ANNOTATION_TYPE.isSuperTypeOf(annotationTypeDeclarationType);
 
         this.typeDeclarationType = typeDeclarationType;
         this.annotationTypeDeclarationType = annotationTypeDeclarationType;
@@ -73,7 +73,7 @@ public enum BuiltinType {
      * @return the type for the given type declaration type
      */
     public EClass typeFor(final EClass typeDeclarationType) {
-        return ANNOTATION_TYPE.isSuperTypeOf(typeDeclarationType) ?
+        return ANY_ANNOTATION_TYPE.isSuperTypeOf(typeDeclarationType) ?
                 getAnnotationTypeDeclarationType() :
                 getTypeDeclarationType();
     }
@@ -87,7 +87,7 @@ public enum BuiltinType {
     public EClass getScopedMetaType(final Scope scope) {
         final boolean isAnnotationType = as(EReference.class, scope.eFeature())
                 .map(EReference::getEReferenceType)
-                .map(ANNOTATION_TYPE::isSuperTypeOf).orElse(false);
+                .map(ANY_ANNOTATION_TYPE::isSuperTypeOf).orElse(false);
         return isAnnotationType ? annotationTypeDeclarationType : typeDeclarationType;
     }
 

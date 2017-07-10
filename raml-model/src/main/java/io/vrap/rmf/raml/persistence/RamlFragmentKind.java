@@ -29,7 +29,7 @@ public enum RamlFragmentKind {
     /**
      * A single annotation type declaration.
      */
-    ANNOTATION_TYPE_DECLARATION("AnnotationTypeDeclaration", TypesPackage.Literals.ANNOTATION_TYPE);
+    ANNOTATION_TYPE_DECLARATION("AnnotationTypeDeclaration", TypesPackage.Literals.ANY_ANNOTATION_TYPE);
 
     private final static Pattern HEADER_PATTERN = Pattern.compile("(#%RAML 1.0)(\\s(\\w+))?");
 

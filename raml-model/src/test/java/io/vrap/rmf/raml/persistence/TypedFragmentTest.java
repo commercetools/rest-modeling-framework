@@ -26,11 +26,11 @@ public class TypedFragmentTest implements ResourceFixtures {
 
         assertThat(objectType.getDisplayName()).isEqualTo("Person");
 
-        final EList<Property<DataType>> properties = objectType.getProperties();
+        final EList<Property<AnyType>> properties = objectType.getProperties();
         assertThat(properties)
                 .hasSize(1);
 
-        final Property<DataType> nameProperty = properties.get(0);
+        final Property<AnyType> nameProperty = properties.get(0);
         assertThat(nameProperty.getName())
                 .isEqualTo("age");
         assertThat(nameProperty.getType().getName())

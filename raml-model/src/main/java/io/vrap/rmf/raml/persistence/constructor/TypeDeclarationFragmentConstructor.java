@@ -4,6 +4,7 @@ import io.vrap.rmf.raml.persistence.RamlFragmentKind;
 import io.vrap.rmf.raml.model.types.BuiltinType;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.yaml.snakeyaml.nodes.MappingNode;
 import org.yaml.snakeyaml.nodes.Node;
@@ -15,7 +16,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static io.vrap.functional.utils.Classes.asOptional;
-import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.TYPE__TYPE;
+import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.*;
 
 /**
  * Constructs a type declaration for a type fragment of either {@link RamlFragmentKind#DATA_TYPE}
@@ -24,9 +25,13 @@ import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.TYPE__TYPE;
 public class TypeDeclarationFragmentConstructor extends Constructor<MappingNode> {
     private final Map<EClass, Constructor<MappingNode>> metaTypeConstructors = new HashMap<>();
     private final EClass typeDeclarationType;
-
+    private final EReference typeReference;
+    
     public TypeDeclarationFragmentConstructor(final RamlFragmentKind fragmentKind) {
         this.typeDeclarationType = fragmentKind.getType();
+        this.typeReference = ANY_ANNOTATION_TYPE.isSuperTypeOf(typeDeclarationType) ?
+        		ANY_ANNOTATION_TYPE__TYPE :
+        		ANY_TYPE__TYPE;
         for (final BuiltinType metaType : BuiltinType.values()) {
             metaTypeConstructors.put(metaType.getTypeDeclarationType(),
                     new TypeDeclarationConstructor(metaType.getTypeDeclarationType()));
@@ -37,7 +42,7 @@ public class TypeDeclarationFragmentConstructor extends Constructor<MappingNode>
 
     @Override
     public Object apply(final MappingNode mappingNode, final Scope rootScope) {
-        final Optional<Node> value = getNodeTuple(mappingNode, TYPE__TYPE)
+        final Optional<Node> value = getNodeTuple(mappingNode, typeReference)
                 .map(NodeTuple::getValueNode);
         final BuiltinType builtinType = asOptional(ScalarNode.class, value)
                 .map(ScalarNode::getValue)

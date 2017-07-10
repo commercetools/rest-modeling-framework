@@ -1,7 +1,6 @@
 package io.vrap.rmf.raml.persistence;
 
 import io.vrap.rmf.raml.model.types.AnyType;
-import io.vrap.rmf.raml.model.types.DataType;
 import io.vrap.rmf.raml.model.types.Library;
 import io.vrap.rmf.raml.model.types.ObjectType;
 import io.vrap.rmf.raml.model.facets.Property;
@@ -23,7 +22,7 @@ public class IncludeTest implements ResourceFixtures {
         assertThat(resource.getErrors()).hasSize(0);
 
         final Library library = getRootObject(resource);
-        final EList<DataType> types = library.getTypes();
+        final EList<AnyType> types = library.getTypes();
 
         assertThat(types).hasSize(1);
         assertThat(types.get(0)).isInstanceOf(ObjectType.class);
@@ -34,7 +33,7 @@ public class IncludeTest implements ResourceFixtures {
         assertThat(personType.getDisplayName()).isEqualTo("Person");
         assertThat(personType.getProperties()).hasSize(1);
 
-        final Property<DataType> ageProperty = personType.getProperties().get(0);
+        final Property<AnyType> ageProperty = personType.getProperties().get(0);
 
         assertThat(ageProperty.getName()).isEqualTo("age");
         assertThat(ageProperty.getType().getName()).isEqualTo("integer");

@@ -1,6 +1,7 @@
 package io.vrap.rmf.raml.persistence.constructor;
 
 import org.eclipse.emf.ecore.EClass;
+import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.yaml.snakeyaml.nodes.MappingNode;
 import org.yaml.snakeyaml.nodes.NodeTuple;
@@ -20,7 +21,8 @@ public class TypeDeclarationConstructor extends Constructor<MappingNode> {
         eClass.getEAllAttributes().stream()
                 .filter(eAttribute -> eAttribute != IDENTIFIABLE_ELEMENT__NAME)
                 .forEach(this::addConstructor);
-        addConstruct(TYPE__TYPE, new TypeReferenceConstructor());
+        final EReference typeReference = ANY_ANNOTATION_TYPE.isSuperTypeOf(eClass) ? ANY_ANNOTATION_TYPE__TYPE : ANY_TYPE__TYPE;
+		addConstruct(typeReference, new TypeReferenceConstructor());
         addConstructor(OBJECT_TYPE_FACET__PROPERTIES, new PropertiesConstructor());
         addConstructor(new AnnotationsConstructor());
     }

@@ -51,8 +51,8 @@ class Api extends Annotatable, TypeContainer {
 interface TypeContainer {
 	contains LibraryUse[] uses
 
-    contains DataType[] types
-    contains AnnotationType[] annotationTypes
+    contains AnyType[] types
+    contains AnyAnnotationType[] annotationTypes
 }
 
 class Library extends Annotatable, TypeContainer {
@@ -142,32 +142,6 @@ enum AnnotationTarget {
 	Extension
 }
 
-interface Type<T> extends Annotatable, DocumentableElement, IdentifiableElement {
-	/*
-	 * The type which this type extends.
-	 */
-	refers T ^type
-
-	/*
-	 * The base class of a type is the super class
-	 * of this type that directly extends the {@link AnyType}.
-	 */
-	derived Class<?> baseClass get {
-		if (^class == AnyType) {
-			return null
-		}
-		var Class<?> baseClass = ^class
-		while (baseClass.superclass != AnyType) {
-			baseClass = baseClass.superclass
-		}
-		return baseClass
-	}
-}
-
-interface DataType extends Type<AnyType> {
-	
-}
-
 /*
  * Annotation types are declared using the OPTIONAL root-level annotationTypes node.
  * The value of the annotationsType node is a map whose keys define annotation type names,
@@ -179,52 +153,53 @@ interface DataType extends Type<AnyType> {
  * The allowedTargets node restricts the kinds of locations where the annotation can be applied. Annotation types, like data types,
  * can extend other data types, but annotation types themselves can neither be extended nor used anywhere data types can be used.
  */
-interface AnnotationType extends Type<AnyAnnotationType> {
+class AnyAnnotationType extends DocumentableElement, IdentifiableElement, Annotatable {	
+		/*
+	 * The type which this type extends.
+	 */
+	refers AnyAnnotationType ^type
 	
 	/*
 	 * The locations to which annotations are restricted.
 	 * If this node is specified, annotations of this type may be applied only on a node corresponding to one of the locations.
 	 */
-	AnnotationTarget[] allowedTargets
+	AnnotationTarget[] allowedTargets	
 }
 
-class AnyAnnotationType extends AnnotationType {	
+class TimeOnlyAnnotationType extends AnyAnnotationType {
 }
 
-class TimeOnlyAnnotationType extends AnnotationType {
+class DateTimeAnnotationType extends DateTimeTypeFacet, AnyAnnotationType {
 }
 
-class DateTimeAnnotationType extends DateTimeTypeFacet, AnnotationType {
+class DateTimeOnlyAnnotationType extends AnyAnnotationType {
 }
 
-class DateTimeOnlyAnnotationType extends AnnotationType {
+class DateOnlyAnnotationType extends AnyAnnotationType {
 }
 
-class DateOnlyAnnotationType extends AnnotationType {
-}
-
-class NumberAnnotationType extends NumberTypeFacet, AnnotationType {
+class NumberAnnotationType extends NumberTypeFacet, AnyAnnotationType {
 }
 
 class IntegerAnnotationType extends NumberAnnotationType {
 }
 
-class BooleanAnnotationType extends AnnotationType {	
+class BooleanAnnotationType extends AnyAnnotationType {	
 }
 
-class StringAnnotationType extends StringTypeFacet, AnnotationType {	
+class StringAnnotationType extends StringTypeFacet, AnyAnnotationType {	
 }
 
-class NilAnnotationType extends AnnotationType {
+class NilAnnotationType extends AnyAnnotationType {
 }
 
-class FileAnnotationType extends FileTypeFacet, AnnotationType {	
+class FileAnnotationType extends FileTypeFacet, AnyAnnotationType {	
 }
 
-class ObjectAnnotationType extends ObjectTypeFacet<AnyAnnotationType, Property<AnyAnnotationType>>, AnnotationType {	
+class ObjectAnnotationType extends ObjectTypeFacet<AnyAnnotationType, Property<AnyAnnotationType>>, AnyAnnotationType {	
 }
 
-class ArrayAnnotationType extends ArrayTypeFacet<AnyAnnotationType>, AnnotationType {
+class ArrayAnnotationType extends ArrayTypeFacet<AnyAnnotationType>, AnyAnnotationType {
 }
 
 /*
@@ -232,7 +207,11 @@ class ArrayAnnotationType extends ArrayTypeFacet<AnyAnnotationType>, AnnotationT
  * By definition, the any type is a type which imposes no restrictions, i.e. any instance of data is
  * valid against it.
  */
-class AnyType extends DataType, Annotatable, DocumentableElement, IdentifiableElement, EnumFacet {
+class AnyType extends Annotatable, DocumentableElement, IdentifiableElement, EnumFacet {
+	/*
+	 * The type which this type extends.
+	 */
+	refers AnyType ^type	
 }
 
 interface Annotatable {
@@ -252,10 +231,10 @@ interface Annotatable {
 	}
 }
 
-class ObjectType extends AnyType, ObjectTypeFacet<DataType, Property<DataType>> {
+class ObjectType extends AnyType, ObjectTypeFacet<AnyType, Property<AnyType>> {
 	
-	op Property<DataType> getProperty(String name) {
-		for (Property<DataType> property : properties) {
+	op Property<AnyType> getProperty(String name) {
+		for (Property<AnyType> property : properties) {
 			if (name == property.name) return property
 		}
 		return null

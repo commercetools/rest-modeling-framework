@@ -74,7 +74,8 @@ public class RamlResource extends ResourceImpl {
             final String featureName = uriFragmentPath.get(0);
             final EReference feature = (EReference) rootObject.eClass().getEStructuralFeature(featureName);
             final EAttribute idAttribute = feature.getEReferenceType().getEIDAttribute();
-            final EList<EObject> children = (EList<EObject>) rootObject.eGet(feature);
+            @SuppressWarnings("unchecked")
+			final EList<EObject> children = (EList<EObject>) rootObject.eGet(feature);
             final String id = uriFragmentPath.get(1);
             return children.stream()
                     .filter(eObject -> id.equals(eObject.eGet(idAttribute)))
@@ -85,7 +86,8 @@ public class RamlResource extends ResourceImpl {
 
     private Constructor<MappingNode> getRootConstructor(final InputStream inputStream) throws IOException {
         inputStream.mark(1024);
-        final String header = new Scanner(inputStream).useDelimiter("\\n").next();
+        @SuppressWarnings("resource")
+		final String header = new Scanner(inputStream).useDelimiter("\\n").next();
         inputStream.reset();
         final RamlFragmentKind fragmentKind = RamlFragmentKind.fromHeader(header).orElse(null);
         return ROOT_CONSTRUCTORS.get(fragmentKind);
