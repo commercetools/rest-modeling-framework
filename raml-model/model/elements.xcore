@@ -1,6 +1,6 @@
 @Ecore(nsPrefix="elements",nsURI="http://www.vrap.io/raml/elements")
 @GenModel(
-    modelDirectory="/raml-model/src/main/xcore-gen",
+    modelDirectory="/raml-model/src/main/java-gen",
     complianceLevel="8.0"
 )
 package io.vrap.rmf.raml.model.elements

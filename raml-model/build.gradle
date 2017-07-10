@@ -25,14 +25,14 @@ xtext {
         main {
             srcDir 'model'
             output {
-                dir(xtext.languages.xcore.generator.outlet, 'src/main/xcore-gen')
+                dir(xtext.languages.xcore.generator.outlet, 'src/main/java-gen')
             }
         }
 	}
 }
 
 clean {
-    delete 'src/main/xcore-gen'
+    delete 'src/main/java-gen'
 }
 
 dependencies {
