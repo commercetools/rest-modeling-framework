@@ -9,29 +9,30 @@ ext {
 xtext {
     version = xtextVersion
 
-    sourceSets {
+	languages {
+		ecore {
+			setup = 'org.eclipse.xtext.ecore.EcoreSupport'
+		}
+		codegen {
+			setup = 'org.eclipse.emf.codegen.ecore.xtext.GenModelSupport'
+		}
+		xcore {
+			setup = 'org.eclipse.emf.ecore.xcore.XcoreStandaloneSetup'
+        	generator.outlet.producesJava = true
+		}
+	}
+	sourceSets {
         main {
-            srcDir 'src/main/resources'
-            srcDir 'src/main/java-gen'
+            srcDir 'model'
+            output {
+                dir(xtext.languages.xcore.generator.outlet, 'src/main/xcore-gen')
+            }
         }
-    }
-
-    languages {
-        ecore {
-            setup = 'org.eclipse.xtext.ecore.EcoreSupport'
-        }
-        codegen {
-            setup = 'org.eclipse.emf.codegen.ecore.xtext.GenModelSupport'
-        }
-        xcore {
-            setup = 'org.eclipse.emf.ecore.xcore.XcoreStandaloneSetup'
-            generator.outlet.producesJava = true
-        }
-    }
+	}
 }
 
 clean {
-    delete 'src/main/java-gen'
+    delete 'src/main/xcore-gen'
 }
 
 dependencies {

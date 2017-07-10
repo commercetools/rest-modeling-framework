@@ -1,6 +1,6 @@
 @Ecore(nsPrefix="types",nsURI="http://www.vrap.io/raml/types")
 @GenModel(
-    modelDirectory="raml-model/src/main/java-gen",
+    modelDirectory="/raml-model/src/main/xcore-gen",
     complianceLevel="8.0"
 )
 package io.vrap.rmf.raml.model.types

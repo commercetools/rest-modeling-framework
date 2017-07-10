@@ -9,7 +9,13 @@ Bundle-Localization: plugin
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Export-Package: io.vrap.rmf.raml.model.types,
  io.vrap.rmf.raml.model.types.impl,
- io.vrap.rmf.raml.model.types.util
+ io.vrap.rmf.raml.model.types.util,
+ io.vrap.rmf.raml.model.facets,
+ io.vrap.rmf.raml.model.facets.impl,
+ io.vrap.rmf.raml.model.facets.util,
+ io.vrap.rmf.raml.model.elements,
+ io.vrap.rmf.raml.model.elements.impl,
+ io.vrap.rmf.raml.model.elements.util
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.emf.ecore;visibility:=reexport,
  org.eclipse.xtext.xbase.lib,

@@ -28,7 +28,7 @@
       <package
             uri="http://www.vrap.io/raml/types"
             class="io.vrap.rmf.raml.model.types.TypesPackage"
-            genModel="src/main/resources/types.xcore"/>
+            genModel="model/types.xcore"/>
    </extension>
 
    <extension point="org.eclipse.emf.ecore.generated_package">
@@ -36,7 +36,7 @@
       <package
             uri="http://www.vrap.io/raml/elements"
             class="io.vrap.rmf.raml.model.elements.ElementsPackage"
-            genModel="src/main/resources/elements.xcore"/>
+            genModel="model/elements.xcore"/>
    </extension>
 
    <extension point="org.eclipse.emf.ecore.generated_package">
@@ -44,7 +44,7 @@
       <package
             uri="http://www.vrap.io/raml/facets"
             class="io.vrap.rmf.raml.model.facets.FacetsPackage"
-            genModel="src/main/resources/facets.xcore"/>
+            genModel="model/facets.xcore"/>
    </extension>
 
 </plugin>
