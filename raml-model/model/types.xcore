@@ -7,7 +7,14 @@ package io.vrap.rmf.raml.model.types
 
 import io.vrap.rmf.raml.model.elements.DocumentableElement
 import io.vrap.rmf.raml.model.elements.IdentifiableElement
-import io.vrap.rmf.raml.model.facets.*
+import io.vrap.rmf.raml.model.facets.ArrayTypeFacet
+import io.vrap.rmf.raml.model.facets.DateTimeTypeFacet
+import io.vrap.rmf.raml.model.facets.EnumFacet
+import io.vrap.rmf.raml.model.facets.FileTypeFacet
+import io.vrap.rmf.raml.model.facets.NumberTypeFacet
+import io.vrap.rmf.raml.model.facets.ObjectTypeFacet
+import io.vrap.rmf.raml.model.facets.Property
+import io.vrap.rmf.raml.model.facets.StringTypeFacet
 
 class Api extends Annotatable, TypeContainer {
 	/*
@@ -65,7 +72,7 @@ class LibraryUse {
 }
 
 /*
- * The location within an API specificaxtion where annotations can be applied MUST be one of the target locations
+ * The location within an API specification where annotations can be applied MUST be one of the target locations
  * in the following Target Locations table. The targets are the locations themselves, not sub-properties within the locations.
  * For example, the Method target refers to the method node, not to the method display name, description, and so on.
  */
@@ -99,7 +106,7 @@ enum AnnotationTarget {
 	 */
 	ResponseBody,
 	/*
-	 * A data type declaration (inline or in a global types collection), header declaration,
+	 * A data type declaration (inline or in a global type collection), header declaration,
 	 * query parameter declaration, URI parameter declaration, or a property within any of these declarations,
 	 * where the type property can be used.
 	 */
