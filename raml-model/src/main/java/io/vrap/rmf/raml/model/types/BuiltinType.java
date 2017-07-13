@@ -63,7 +63,7 @@ public enum BuiltinType {
     /**
      * Returns the type for the given type declaration type.
      *
-     * If the type declaration type is a subtype of {@link com.commercetools.typesystem.AnnotationType},
+     * If the type declaration type is a subtype of {@link AnnotationType},
      * the {@link #getAnnotationTypeDeclarationType()} will be returned.
      *
      * Otherwise {@link #getTypeDeclarationType()} will be returned

@@ -1,5 +1,6 @@
 plugins {
     id "org.xtext.builder" version "1.0.18"
+    id "antlr"
 }
 
 ext {
@@ -31,6 +32,10 @@ xtext {
 	}
 }
 
+generateGrammarSource {
+    outputDirectory = file("src/main/java-gen/io/vrap/rmf/raml/persistence/antlr")
+}
+
 clean {
     delete 'src/main/java-gen'
 }
@@ -46,6 +51,8 @@ dependencies {
     compile 'org.eclipse.emf:org.eclipse.emf.ecore:2.11+'
     compile 'org.eclipse.emf:org.eclipse.emf.ecore.xcore.lib:1.1.100'
     compile "org.eclipse.xtext:org.eclipse.xtext.xbase.lib:$xtextVersion"
+
+    antlr "org.antlr:antlr4:4.7"
 
     xtextLanguages 'org.eclipse.jdt:org.eclipse.jdt.core:3.10.0'
     xtextLanguages 'org.eclipse.text:org.eclipse.text:3.5.101'
