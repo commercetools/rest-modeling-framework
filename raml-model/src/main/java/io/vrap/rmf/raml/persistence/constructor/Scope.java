@@ -3,7 +3,9 @@ package io.vrap.rmf.raml.persistence.constructor;
 import io.vrap.rmf.raml.model.types.BuiltinType;
 import io.vrap.rmf.raml.model.types.Library;
 import io.vrap.rmf.raml.model.types.LibraryUse;
+
 import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.*;
+
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EClass;
@@ -90,49 +92,51 @@ public class Scope {
         return resourceSet.getResource(uri, true);
     }
 
-    public EObject getTypeById(final String id) {
-        final ResourceSet resourceSet = resource.getResourceSet();
-        final Optional<EObject> builtinType = BuiltinType.of(id)
-                .map(builtinMetaType -> builtinMetaType.getEObject(resourceSet));
-        final EObject resolvedType = builtinType.orElseGet(() -> getTypeById(resource, id));
+    public EObject getImportedTypeById(final String id) {
+        final String uriFragment = getUriFragment(id);
+
+        final Resource builtinTypeResource = resourceSet.getResource(BuiltinType.RESOURCE_URI, true);
+        final EObject resolvedType = Optional.ofNullable(builtinTypeResource.getEObject(uriFragment))
+                .orElseGet(() -> getImportedTypeById(this.resource, id));
         return resolvedType;
     }
 
-    private EObject getTypeById(final Resource resource, final String id) {
-    	final EClass type = (EClass) feature.getEType();
-    	final String fragment = ANY_ANNOTATION_TYPE.isSuperTypeOf(type) ? 
-    			TYPE_CONTAINER__ANNOTATION_TYPES.getName() :
-    			TYPE_CONTAINER__TYPES.getName();
-        final String uriFragment = Stream.of(fragment, id)
+    private String getUriFragment(final String id) {
+        final EClass type = (EClass) feature.getEType();
+        final String fragment = ANY_ANNOTATION_TYPE.isSuperTypeOf(type) ?
+                TYPE_CONTAINER__ANNOTATION_TYPES.getName() :
+                TYPE_CONTAINER__TYPES.getName();
+        return Stream.of(fragment, id)
                 .collect(Collectors.joining("/", "/", ""));
-        final EObject eObject = resource.getEObject(uriFragment);
+    }
 
-        if (eObject == null) {
-            final EObject resolvedType;
-            final String[] segments = id.split("\\.");
-            if (segments.length == 1) {
-                final InternalEObject internalEObject;
-                internalEObject = (InternalEObject) EcoreUtil.create(type);
-                internalEObject.eSetProxyURI(resource.getURI().appendFragment(uriFragment));
-                resolvedType = internalEObject;
-            } else if (segments.length == 2) {
-                final String libraryName = segments[0];
-                final Library usedLibrary = getUsedLibrary(libraryName);
-                if (usedLibrary == null) {
-                    addError("Library use {0} doesn't exist in {1}", libraryName, resource.getURI());
-                    resolvedType = null;
-                } else {
-                    final String resolvedId = segments[1];
-                    final Scope usedLibraryScope = of(usedLibrary.eResource());
-                    resolvedType = usedLibraryScope.getTypeById(resolvedId);
-                }
-            } else {
-                addError("Uses has invalid format {0}", id);
+    private EObject getImportedTypeById(final Resource resource, final String id) {
+        final EClass type = (EClass) feature.getEType();
+        final String uriFragment = getUriFragment(id);
+
+        final EObject resolvedType;
+        final String[] segments = id.split("\\.");
+        if (segments.length == 1) {
+            final InternalEObject internalEObject;
+            internalEObject = (InternalEObject) EcoreUtil.create(type);
+            internalEObject.eSetProxyURI(resource.getURI().appendFragment(uriFragment));
+            resolvedType = internalEObject;
+        } else if (segments.length == 2) {
+            final String libraryName = segments[0];
+            final Library usedLibrary = getUsedLibrary(libraryName);
+            if (usedLibrary == null) {
+                addError("Library use {0} doesn't exist in {1}", libraryName, resource.getURI());
                 resolvedType = null;
+            } else {
+                final String resolvedId = segments[1];
+                final Scope usedLibraryScope = with(usedLibrary.eResource());
+                resolvedType = usedLibraryScope.getImportedTypeById(resolvedId);
             }
-            return resolvedType;
+        } else {
+            addError("Uses has invalid format {0}", id);
+            resolvedType = null;
         }
-        return eObject;
+        return resolvedType;
     }
 
     /**
@@ -142,8 +146,8 @@ public class Scope {
      *              a {@link EObject} or a {@link List} of these types.
      * @return the value
      */
-	@SuppressWarnings("unchecked")
-	public <T> T setValue(final T value) {
+    @SuppressWarnings("unchecked")
+    public <T> T setValue(final T value) {
         final EObject container = eObject();
         final EStructuralFeature feature = eFeature();
         if (feature.isMany() && !(value instanceof List)) {
@@ -220,6 +224,10 @@ public class Scope {
 
     public Scope with(final EStructuralFeature feature) {
         return with(eObject, feature);
+    }
+
+    public Scope with(final Resource resource) {
+        return new Scope(resource, uri, yaml, eObject, feature, valueNode);
     }
 
     public static Scope of(final Resource resource) {

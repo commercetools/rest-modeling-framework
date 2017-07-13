@@ -20,7 +20,7 @@ public class TypeReferenceConstructor extends Constructor<NodeTuple> {
                 .map(ScalarNode::getValue);
 
         final EObject typeReference = optionalTypeName
-                .map(typeScope::getTypeById)
+                .map(typeScope::getImportedTypeById)
                 .map(typeScope::setValue)
                 .orElse(null);
 
