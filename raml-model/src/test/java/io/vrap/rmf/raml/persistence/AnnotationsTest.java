@@ -1,7 +1,7 @@
 package io.vrap.rmf.raml.persistence;
 
+import io.vrap.rmf.raml.model.modules.Library;
 import io.vrap.rmf.raml.model.types.AnyType;
-import io.vrap.rmf.raml.model.types.Library;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.junit.Test;
 

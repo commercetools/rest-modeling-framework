@@ -1,6 +1,6 @@
 package io.vrap.rmf.raml.persistence;
 
-import io.vrap.rmf.raml.model.types.Library;
+import io.vrap.rmf.raml.model.modules.Library;
 import io.vrap.rmf.raml.model.types.ObjectType;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EObject;

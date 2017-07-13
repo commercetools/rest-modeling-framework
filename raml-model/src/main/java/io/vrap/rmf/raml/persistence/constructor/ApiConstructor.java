@@ -1,6 +1,6 @@
 package io.vrap.rmf.raml.persistence.constructor;
 
-import io.vrap.rmf.raml.model.types.Api;
+import io.vrap.rmf.raml.model.modules.Api;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.resource.Resource;
@@ -11,7 +11,7 @@ import org.yaml.snakeyaml.nodes.NodeTuple;
 import java.util.List;
 import java.util.Optional;
 
-import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.*;
+import static io.vrap.rmf.raml.model.modules.ModulesPackage.Literals.*;
 
 /**
  * Constructs an api {@link Api} instance.

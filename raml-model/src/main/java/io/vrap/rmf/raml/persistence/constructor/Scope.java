@@ -1,11 +1,8 @@
 package io.vrap.rmf.raml.persistence.constructor;
 
+import io.vrap.rmf.raml.model.modules.Library;
+import io.vrap.rmf.raml.model.modules.LibraryUse;
 import io.vrap.rmf.raml.model.types.BuiltinType;
-import io.vrap.rmf.raml.model.types.Library;
-import io.vrap.rmf.raml.model.types.LibraryUse;
-
-import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.*;
-
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EClass;
@@ -25,6 +22,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static io.vrap.rmf.raml.model.annotations.AnnotationsPackage.Literals.ANY_ANNOTATION_TYPE;
+import static io.vrap.rmf.raml.model.modules.ModulesPackage.Literals.TYPE_CONTAINER__ANNOTATION_TYPES;
+import static io.vrap.rmf.raml.model.modules.ModulesPackage.Literals.TYPE_CONTAINER__TYPES;
 
 /**
  * Represents the current scope during the construction phase.

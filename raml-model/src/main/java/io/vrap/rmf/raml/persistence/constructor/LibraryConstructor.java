@@ -10,7 +10,7 @@ import org.yaml.snakeyaml.nodes.NodeTuple;
 import java.util.List;
 import java.util.Optional;
 
-import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.*;
+import static io.vrap.rmf.raml.model.modules.ModulesPackage.Literals.*;
 
 /**
  * Constructs a library instance.

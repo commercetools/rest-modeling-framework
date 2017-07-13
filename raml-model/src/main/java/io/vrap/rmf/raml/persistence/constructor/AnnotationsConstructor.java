@@ -5,14 +5,14 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 
 import java.util.regex.Pattern;
 
-import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.ANNOTATABLE__ANNOTATIONS;
-import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.STRING_INSTANCE;
+import static io.vrap.rmf.raml.model.annotations.AnnotationsPackage.Literals.ANNOTATED_ELEMENT__ANNOTATIONS;
+import static io.vrap.rmf.raml.model.annotations.AnnotationsPackage.Literals.STRING_INSTANCE;
 
 public class AnnotationsConstructor extends KeyNodeMatchConstructor {
     private final static Pattern PATTERN = Pattern.compile("\\(.+\\)");
 
     public AnnotationsConstructor() {
-        super(STRING_INSTANCE, ANNOTATABLE__ANNOTATIONS, PATTERN);
+        super(STRING_INSTANCE, ANNOTATED_ELEMENT__ANNOTATIONS, PATTERN);
     }
 
     @Override

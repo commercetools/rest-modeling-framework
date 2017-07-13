@@ -1,7 +1,7 @@
 package io.vrap.rmf.raml.persistence.constructor;
 
-import io.vrap.rmf.raml.persistence.RamlFragmentKind;
 import io.vrap.rmf.raml.model.types.BuiltinType;
+import io.vrap.rmf.raml.persistence.RamlFragmentKind;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EReference;
@@ -16,7 +16,9 @@ import java.util.Map;
 import java.util.Optional;
 
 import static io.vrap.functional.utils.Classes.asOptional;
-import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.*;
+import static io.vrap.rmf.raml.model.annotations.AnnotationsPackage.Literals.ANY_ANNOTATION_TYPE;
+import static io.vrap.rmf.raml.model.annotations.AnnotationsPackage.Literals.ANY_ANNOTATION_TYPE__TYPE;
+import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.ANY_TYPE__TYPE;
 
 /**
  * Constructs a type declaration for a type fragment of either {@link RamlFragmentKind#DATA_TYPE}

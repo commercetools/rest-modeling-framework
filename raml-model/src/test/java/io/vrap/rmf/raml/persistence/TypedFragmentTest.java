@@ -1,7 +1,9 @@
 package io.vrap.rmf.raml.persistence;
 
+import io.vrap.rmf.raml.model.annotations.StringAnnotationType;
 import io.vrap.rmf.raml.model.facets.Property;
-import io.vrap.rmf.raml.model.types.*;
+import io.vrap.rmf.raml.model.types.AnyType;
+import io.vrap.rmf.raml.model.types.ObjectType;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.junit.Test;

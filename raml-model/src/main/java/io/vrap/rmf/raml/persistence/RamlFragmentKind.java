@@ -1,12 +1,15 @@
 package io.vrap.rmf.raml.persistence;
 
-import io.vrap.rmf.raml.model.types.TypesPackage;
 import org.eclipse.emf.ecore.EClass;
 
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
+
+import static io.vrap.rmf.raml.model.annotations.AnnotationsPackage.Literals.ANY_ANNOTATION_TYPE;
+import static io.vrap.rmf.raml.model.modules.ModulesPackage.Literals;
+import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.ANY_TYPE;
 
 /**
  * Enumeration of the RAML typed fragment identifiers {@link #getIdentifier()}
@@ -16,20 +19,20 @@ public enum RamlFragmentKind {
     /**
      * A RAML api specification.
      */
-    API("#%RAML 1.0", TypesPackage.Literals.API),
+    API("#%RAML 1.0", Literals.API),
 
     /**
      * A RAML library.
      */
-    LIBRARY("Library", TypesPackage.Literals.LIBRARY),
+    LIBRARY("Library", Literals.LIBRARY),
     /**
      * A data type declaration where the type node may be used.
      */
-    DATA_TYPE("DataType", TypesPackage.Literals.ANY_TYPE),
+    DATA_TYPE("DataType", ANY_TYPE),
     /**
      * A single annotation type declaration.
      */
-    ANNOTATION_TYPE_DECLARATION("AnnotationTypeDeclaration", TypesPackage.Literals.ANY_ANNOTATION_TYPE);
+    ANNOTATION_TYPE_DECLARATION("AnnotationTypeDeclaration", ANY_ANNOTATION_TYPE);
 
     private final static Pattern HEADER_PATTERN = Pattern.compile("(#%RAML 1.0)(\\s(\\w+))?");
 

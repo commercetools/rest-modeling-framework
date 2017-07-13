@@ -1,0 +1,65 @@
+@Ecore(nsPrefix="types",nsURI="http://www.vrap.io/raml/modules")
+@GenModel(
+    modelDirectory="/raml-model/src/main/java-gen",
+    complianceLevel="8.0"
+)
+package io.vrap.rmf.raml.model.modules
+
+import io.vrap.rmf.raml.model.annotations.AnnotatedElement
+import io.vrap.rmf.raml.model.annotations.AnyAnnotationType
+import io.vrap.rmf.raml.model.types.AnyType
+
+class Api extends AnnotatedElement, TypeContainer {
+	/*
+	 * A short, plain-text label for the API. Its value is a string.
+	 */
+	String title
+	/*
+	 * A substantial, human-friendly description of the API.
+	 * Its value is a string and MAY be formatted using markdown.
+	 */
+	String description
+
+	/*
+	 * The version of the API, for example "v1".
+	 */
+	String version
+
+	/*
+	 * A URI that serves as the base for URIs of all resources. Often used as the base
+	 * of the URL of each resource containing the location of the API. Can be a template URI.
+	 */
+	String baseUri
+
+	/*
+	 * The protocols supported by the API.
+	 */
+	String[] protocols
+
+	/*
+	 * The default media types to use for request and response bodies (payloads),
+	 * for example "application/json".
+	 */
+	String[] mediaType
+
+	/*
+	 * The security schemes that apply to every resource and method in the API.
+	 */
+	String[] securedBy
+}
+
+interface TypeContainer {
+	contains LibraryUse[] uses
+
+    contains AnyType[] types
+    contains AnyAnnotationType[] annotationTypes
+}
+
+class Library extends AnnotatedElement, TypeContainer {
+    String usage
+}
+
+class LibraryUse {
+	String name
+	refers Library library
+}

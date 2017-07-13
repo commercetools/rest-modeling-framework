@@ -9,7 +9,7 @@ import io.vrap.rmf.raml.persistence.constructor.Scope;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.junit.Test;
 
-import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.TYPE_CONTAINER__TYPES;
+import static io.vrap.rmf.raml.model.modules.ModulesPackage.Literals.TYPE_CONTAINER__TYPES;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class TypeExpressionsParserTest implements ResourceFixtures {

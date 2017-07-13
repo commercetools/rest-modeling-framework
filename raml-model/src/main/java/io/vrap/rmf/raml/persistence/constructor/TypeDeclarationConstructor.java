@@ -9,9 +9,11 @@ import org.yaml.snakeyaml.nodes.NodeTuple;
 import java.util.List;
 import java.util.Optional;
 
-import static io.vrap.rmf.raml.model.facets.FacetsPackage.Literals.*;
-import static io.vrap.rmf.raml.model.elements.ElementsPackage.Literals.*;
-import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.*;
+import static io.vrap.rmf.raml.model.annotations.AnnotationsPackage.Literals.ANY_ANNOTATION_TYPE;
+import static io.vrap.rmf.raml.model.annotations.AnnotationsPackage.Literals.ANY_ANNOTATION_TYPE__TYPE;
+import static io.vrap.rmf.raml.model.elements.ElementsPackage.Literals.IDENTIFIABLE_ELEMENT__NAME;
+import static io.vrap.rmf.raml.model.facets.FacetsPackage.Literals.OBJECT_TYPE_FACET__PROPERTIES;
+import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.ANY_TYPE__TYPE;
 
 public class TypeDeclarationConstructor extends Constructor<MappingNode> {
     private final EClass eClass;
