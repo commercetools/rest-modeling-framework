@@ -5,11 +5,14 @@ package io.vrap.rmf.raml.persistence.antlr;
 }
 
 type_expr:
-    ID                           # TypeReference
+    qualified_name               # TypeReference
     | type_expr '[]'             # ArrayType
     | type_expr '|' type_expr    # UnionType
     | '(' type_expr ')'          # Parens
     ;
 
-ID : [a-zA-Z_]+ [a-zA-Z0-9_]* ;
+qualified_name:
+    ID ('.' ID)?;
+
+ID : [a-zA-Z_]+ [a-zA-Z0-9_-]* ;
 WS : [ \t\n\r]+ -> channel(HIDDEN) ;

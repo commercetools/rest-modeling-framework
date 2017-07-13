@@ -19,7 +19,7 @@ public class TypeExpressionsParserTest implements ResourceFixtures {
 
     @Test
     public void typeReference() {
-        final AnyType myType = parser.parse("string", builinTypeScope);
+        final AnyType myType = (AnyType) parser.parse("string", builinTypeScope);
 
         assertThat(myType).isNotNull();
         assertThat(myType.getName()).isEqualTo("string");
@@ -27,7 +27,7 @@ public class TypeExpressionsParserTest implements ResourceFixtures {
 
     @Test
     public void arrayType() {
-        final AnyType anyType = parser.parse("string[]", builinTypeScope);
+        final AnyType anyType = (AnyType) parser.parse("string[]", builinTypeScope);
 
         assertThat(anyType).isInstanceOf(ArrayType.class);
         final ArrayType arrayType = (ArrayType) anyType;
@@ -38,7 +38,7 @@ public class TypeExpressionsParserTest implements ResourceFixtures {
 
     @Test
     public void multiDimArrayType() {
-        final AnyType anyType = parser.parse("string[][]", builinTypeScope);
+        final AnyType anyType = (AnyType) parser.parse("string[][]", builinTypeScope);
 
         assertThat(anyType).isInstanceOf(ArrayType.class);
 

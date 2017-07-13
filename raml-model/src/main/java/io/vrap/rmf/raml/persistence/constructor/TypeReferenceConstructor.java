@@ -1,5 +1,6 @@
 package io.vrap.rmf.raml.persistence.constructor;
 
+import io.vrap.rmf.raml.persistence.typeexpressions.TypeExpressionsParser;
 import org.eclipse.emf.ecore.EObject;
 import org.yaml.snakeyaml.nodes.NodeTuple;
 import org.yaml.snakeyaml.nodes.ScalarNode;
@@ -13,6 +14,7 @@ import static io.vrap.functional.utils.Classes.as;
  * are resolved against the libraries imported in the current scope.
  */
 public class TypeReferenceConstructor extends Constructor<NodeTuple> {
+    private final TypeExpressionsParser typeExpressionsParser = new TypeExpressionsParser();
 
     @Override
     public Object apply(final NodeTuple nodeTuple, final Scope typeScope) {
@@ -20,7 +22,7 @@ public class TypeReferenceConstructor extends Constructor<NodeTuple> {
                 .map(ScalarNode::getValue);
 
         final EObject typeReference = optionalTypeName
-                .map(typeScope::getImportedTypeById)
+                .map(typeExr -> typeExpressionsParser.parse(typeExr, typeScope))
                 .map(typeScope::setValue)
                 .orElse(null);
 

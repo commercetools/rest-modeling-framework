@@ -8,6 +8,7 @@ package io.vrap.rmf.raml.model.types
 import io.vrap.rmf.raml.model.annotations.AnnotatedElement
 import io.vrap.rmf.raml.model.elements.DocumentableElement
 import io.vrap.rmf.raml.model.elements.IdentifiableElement
+import io.vrap.rmf.raml.model.elements.Type
 import io.vrap.rmf.raml.model.facets.ArrayTypeFacet
 import io.vrap.rmf.raml.model.facets.DateTimeTypeFacet
 import io.vrap.rmf.raml.model.facets.EnumFacet
@@ -22,7 +23,7 @@ import io.vrap.rmf.raml.model.facets.StringTypeFacet
  * By definition, the any type is a type which imposes no restrictions, i.e. any instance of data is
  * valid against it.
  */
-class AnyType extends AnnotatedElement, DocumentableElement, IdentifiableElement, EnumFacet {
+class AnyType extends AnnotatedElement, DocumentableElement, IdentifiableElement, EnumFacet, Type {
 	/*
 	 * The type which this type extends.
 	 */
