@@ -35,15 +35,22 @@ public class TypeExpressionParserTest implements TypeExpressionFixtures {
     public void multiDimArrayType() {
         final TypeExpressionParser.Type_exprContext myType = parse("MultiDim[][]");
 
-        assertThat(myType.children).hasSize(3);
-        ParseTree parseTree = myType.getChild(0);
-        assertThat(parseTree.getText()).isEqualTo("MultiDim");
+        assertThat(myType.getChildCount()).isEqualTo(2);
 
-        parseTree = myType.getChild(1);
-        assertThat(parseTree.getText()).isEqualTo("[]");
+        final ParseTree outerArrayTree = myType.getChild(1);
+        assertThat(outerArrayTree.getChildCount()).isEqualTo(0);
+        assertThat(outerArrayTree.getText()).isEqualTo("[]");
 
-        parseTree = myType.getChild(2);
-        assertThat(parseTree.getText()).isEqualTo("[]");
+        final ParseTree outerArrayTreeChild = myType.getChild(0);
+        assertThat(outerArrayTreeChild.getChildCount()).isEqualTo(2);
+        assertThat(outerArrayTreeChild.getText()).isEqualTo("MultiDim[]");
+        assertThat(outerArrayTreeChild.getChildCount()).isEqualTo(2);
+
+        final ParseTree itemsTree = outerArrayTreeChild.getChild(0);
+        assertThat(itemsTree.getText()).isEqualTo("MultiDim");
+
+        final ParseTree innerArrayTree = outerArrayTreeChild.getChild(1);
+        assertThat(innerArrayTree.getText()).isEqualTo("[]");
     }
 
     @Test

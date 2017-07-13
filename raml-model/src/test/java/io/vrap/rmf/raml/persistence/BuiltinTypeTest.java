@@ -1,8 +1,8 @@
 package io.vrap.rmf.raml.persistence;
 
-import io.vrap.rmf.raml.model.types.BuiltinType;
 import io.vrap.rmf.raml.model.types.AnyAnnotationType;
 import io.vrap.rmf.raml.model.types.AnyType;
+import io.vrap.rmf.raml.model.types.BuiltinType;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.junit.Test;
@@ -11,7 +11,7 @@ import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class BuiltinTypeTest implements ResourceFixtures{
+public class BuiltinTypeTest implements ResourceFixtures {
     @Test
     public void load() throws IOException {
         final Resource builtinTypesResource = fromUri(BuiltinType.RESOURCE_URI);
