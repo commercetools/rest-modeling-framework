@@ -12,7 +12,7 @@ public class RAMLParserTest implements RAMLParserFixtures {
 
     @Test
     public void simpleApi() throws IOException {
-        final ApiContext api = fromClasspath("/api/simple-api.raml").api();
+        final ApiContext api = parseFromClasspath("/api/simple-api.raml").api();
 
         assertThat(api.getChildCount()).isEqualTo(7);
         final List<Simple_api_facetContext> simpleApiFacets = api.simple_api_facet();
@@ -45,7 +45,7 @@ public class RAMLParserTest implements RAMLParserFixtures {
 
     @Test
     public void localeLibrary() throws IOException {
-        final LibraryContext library = fromClasspath("/locale.raml").library();
+        final LibraryContext library = parseFromClasspath("/locale.raml").library();
         System.out.println();
     }
 }

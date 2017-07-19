@@ -20,7 +20,7 @@ public interface RAMLParserFixtures {
      * @return the parser
      * @throws IOException
      */
-    default RAMLParser fromClasspath(final String name) throws IOException {
+    default RAMLParser parseFromClasspath(final String name) throws IOException {
         final InputStream inputStream = RamlResourceTest.class.getResourceAsStream(name);
         final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
         final RAMLCustomLexer yamlLexer = new RAMLCustomLexer(inputStreamReader);

@@ -26,7 +26,10 @@ list_api_facet:
 
 library:
     MAP_START
-    ( simple_library_facet | type_declarations )*
+    (
+            simple_library_facet
+        |   type_declarations
+    )*
     MAP_END
     ;
 
@@ -43,13 +46,23 @@ type_declarations:
 
 type_declaration:
     name=SCALAR
+    (
         MAP_START
-        ( type_declaration_facet | properties_facet )*
+        ( type_declaration_facet | properties_facet | typeFacet | enumFacet )*
         MAP_END
+    )?
     ;
 
 type_declaration_facet:
-    facet=('type' | 'displayName' | 'description' | 'default' | 'pattern') value=SCALAR
+    facet=('displayName' | 'description' | 'default' | 'pattern' | 'minLength') value=SCALAR
+    ;
+
+typeFacet:
+    facet='type' typeExpression=SCALAR
+    ;
+
+enumFacet:
+    facet='enum' LIST_START literals+=SCALAR* LIST_END
     ;
 
 properties_facet:
@@ -61,9 +74,11 @@ properties_facet:
 
 property:
     name=SCALAR
+    (
         MAP_START
-        ( simple_property_facet | type_declaration_facet)*
+        ( simple_property_facet | type_declaration_facet | typeFacet | enumFacet )*
         MAP_END
+    )?
     ;
 
 simple_property_facet:

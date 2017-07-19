@@ -24,15 +24,18 @@ import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.ARRAY_TYPE;
 public class TypeExpressionsParser {
 
     public EObject parse(final String typeExpression, final Scope scope) {
+        final EClass scopeType = (EClass) scope.eFeature().getEType();
+
         final CharStream charStream = CharStreams.fromString(typeExpression);
         final TypeExpressionLexer lexer = new TypeExpressionLexer(charStream);
         final TokenStream tokenStream = new CommonTokenStream(lexer);
         final TypeExpressionParser typeExpressionParser = new TypeExpressionParser(tokenStream);
         final TypeExpressionParser.Type_exprContext typeExpr = typeExpressionParser.type_expr();
-        final EClass scopeType = (EClass) scope.eFeature().getEType();
+
         final EClass arrayType = ANY_ANNOTATION_TYPE.isSuperTypeOf(scopeType) ?
                 ARRAY_ANNOTATION_TYPE :
                 ARRAY_TYPE;
+
         final EObject anyType = new TypeExpressionBuilder(scope, arrayType).visit(typeExpr);
 
         return anyType;
