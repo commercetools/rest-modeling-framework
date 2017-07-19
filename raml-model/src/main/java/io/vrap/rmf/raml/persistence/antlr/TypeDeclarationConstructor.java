@@ -9,7 +9,7 @@ import static io.vrap.rmf.raml.model.elements.ElementsPackage.Literals.IDENTIFIA
 import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.ANY_TYPE__TYPE;
 
 /**
- * Constructs a type from a type declaration {@link RAMLParser.Type_declarationContext}.
+ * Constructs a type from a type declaration {@link RAMLParser.TypeDeclarationContext}.
  */
 public class TypeDeclarationConstructor extends AbstractConstructor {
     protected TypeDeclarationConstructor(final Scope scope) {
@@ -17,7 +17,7 @@ public class TypeDeclarationConstructor extends AbstractConstructor {
     }
 
     @Override
-    public Object visitType_declaration(final RAMLParser.Type_declarationContext ctx) {
+    public Object visitTypeDeclaration(final RAMLParser.TypeDeclarationContext ctx) {
         final BuiltinType baseType;
         final EObject superType;
 
@@ -38,11 +38,11 @@ public class TypeDeclarationConstructor extends AbstractConstructor {
         final String name = ctx.name.getText();
         declaredType.eSet(IDENTIFIABLE_ELEMENT__NAME, name);
 
-        for (RAMLParser.Type_declaration_facetContext typeDeclarationFacet : ctx.type_declaration_facet()) {
-            if (typeDeclarationFacet.facet_value().value != null) {
-                constructAttribute(declaredType, typeDeclarationFacet.facet, typeDeclarationFacet.facet_value().value);
+        for (RAMLParser.TypeDeclarationFacetContext typeDeclarationFacet : ctx.typeDeclarationFacet()) {
+            if (typeDeclarationFacet.facetValue().value != null) {
+                constructAttribute(declaredType, typeDeclarationFacet.facet, typeDeclarationFacet.facetValue().value);
             } else {
-                constructAttribute(declaredType, typeDeclarationFacet.facet, typeDeclarationFacet.facet_value().values);
+                constructAttribute(declaredType, typeDeclarationFacet.facet, typeDeclarationFacet.facetValue().values);
             }
         }
 

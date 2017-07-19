@@ -12,14 +12,14 @@ tokens {
 
 api:
     MAP_START
-    ( api_facet )*
+    ( apiFacet )*
     MAP_END;
 
-api_facet:
-    facet=('title' | 'description' | 'version' | 'baseUri' |'protocols' | 'mediaType') value=facet_value
+apiFacet:
+    facet=('title' | 'description' | 'version' | 'baseUri' |'protocols' | 'mediaType') value=facetValue
     ;
 
-facet_value:
+facetValue:
         value=SCALAR
     |   (LIST_START values+=SCALAR* LIST_END)
     ;
@@ -27,41 +27,50 @@ facet_value:
 library:
     MAP_START
     (
-            library_facet
-        |   type_declarations
+            libraryFacet
+        |   typeDeclarations
     )*
     MAP_END
     ;
 
-library_facet:
+libraryFacet:
     facet='usage' value=SCALAR
     ;
 
-type_declarations:
+typeDeclarations:
     facet='types'
         MAP_START
-        ( types+=type_declaration )*
+        ( types+=typeDeclaration )*
         MAP_END
     ;
 
-type_declaration:
+typeDeclaration:
     name=SCALAR
     (
         MAP_START
-        ( type_declaration_facet | properties_facet | typeFacet )*
+        ( typeDeclarationFacet | propertiesFacet | typeFacet )*
         MAP_END
     )?
     ;
 
-type_declaration_facet:
-    facet=('displayName' | 'description' | 'default' | 'pattern' | 'minLength' | 'enum') value=facet_value
+typeDeclarationFacet:
+    facet=(
+            'displayName' | 'description' | 'default' | 'enum' |
+            'pattern' |
+            'minLength' | 'maxLength'  |
+            'fileTypes' |
+            'minimum' | 'maximum' | 'format' | 'multipleOf' |
+            'minProperties' | 'maxProperties' | 'additionalProperties' | 'discriminator' | 'discriminatorValue' |
+            'uniqueItems' | 'minItems' | 'maxItems'
+          )
+    value=facetValue
     ;
 
 typeFacet:
-    facet='type' typeExpression=SCALAR
+    facet=( 'type' | 'items') typeExpression=SCALAR
     ;
 
-properties_facet:
+propertiesFacet:
     facet='properties'
         MAP_START
         ( properties+=property )*
@@ -72,11 +81,11 @@ property:
     name=SCALAR
     (
         MAP_START
-        ( simple_property_facet | type_declaration_facet | typeFacet )*
+        ( propertyFacet | typeDeclarationFacet | typeFacet )*
         MAP_END
     )?
     ;
 
-simple_property_facet:
+propertyFacet:
     facet='required' value=SCALAR
     ;

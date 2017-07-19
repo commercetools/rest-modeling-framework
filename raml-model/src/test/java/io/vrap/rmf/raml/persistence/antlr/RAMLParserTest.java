@@ -15,28 +15,28 @@ public class RAMLParserTest implements RAMLParserFixtures {
         final ApiContext api = parseFromClasspath("/api/simple-api.raml").api();
 
         assertThat(api.getChildCount()).isEqualTo(7);
-        final List<Api_facetContext> apiFacets = api.api_facet();
+        final List<ApiFacetContext> apiFacets = api.apiFacet();
         assertThat(apiFacets).hasSize(5);
 
         assertThat(apiFacets.get(0).getChildCount()).isEqualTo(2);
         assertThat(apiFacets.get(0).facet.getText()).isEqualTo("title");
-        assertThat(apiFacets.get(0).facet_value().value.getText()).isEqualTo("Simple API");
+        assertThat(apiFacets.get(0).facetValue().value.getText()).isEqualTo("Simple API");
 
         assertThat(apiFacets.get(1).getChildCount()).isEqualTo(2);
         assertThat(apiFacets.get(1).facet.getText()).isEqualTo("version");
-        assertThat(apiFacets.get(1).facet_value().value.getText()).isEqualTo("v1");
+        assertThat(apiFacets.get(1).facetValue().value.getText()).isEqualTo("v1");
 
         assertThat(apiFacets.get(2).getChildCount()).isEqualTo(2);
         assertThat(apiFacets.get(2).facet.getText()).isEqualTo("baseUri");
-        assertThat(apiFacets.get(2).facet_value().value.getText()).isEqualTo("https://api.simple.com");
+        assertThat(apiFacets.get(2).facetValue().value.getText()).isEqualTo("https://api.simple.com");
 
         assertThat(apiFacets.get(3).facet.getText()).isEqualTo("protocols");
-        assertThat(apiFacets.get(3).facet_value().values).hasSize(2);
-        assertThat(apiFacets.get(3).facet_value().values.get(0).getText()).isEqualTo("http");
-        assertThat(apiFacets.get(3).facet_value().values.get(1).getText()).isEqualTo("https");
+        assertThat(apiFacets.get(3).facetValue().values).hasSize(2);
+        assertThat(apiFacets.get(3).facetValue().values.get(0).getText()).isEqualTo("http");
+        assertThat(apiFacets.get(3).facetValue().values.get(1).getText()).isEqualTo("https");
 
         assertThat(apiFacets.get(4).facet.getText()).isEqualTo("mediaType");
-        assertThat(apiFacets.get(4).facet_value().value.getText()).isEqualTo("application/json");
+        assertThat(apiFacets.get(4).facetValue().value.getText()).isEqualTo("application/json");
     }
 
     @Test

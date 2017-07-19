@@ -26,16 +26,16 @@ public class LibraryConstructor extends AbstractConstructor {
         scope.getResource().getContents().add(library);
 
         final Scope libraryScope = scope.with(library);
-        for (final RAMLParser.Library_facetContext libraryFacet : ctx.library_facet()) {
+        for (final RAMLParser.LibraryFacetContext libraryFacet : ctx.libraryFacet()) {
             constructAttribute(library, libraryFacet.facet, libraryFacet.value);
         }
 
         final Scope typesScope = libraryScope.with(TYPE_CONTAINER__TYPES);
         final TypeDeclarationConstructor typeDeclarationConstructor = TypeDeclarationConstructor.of(typesScope);
 
-        for (final RAMLParser.Type_declarationsContext typeDeclarations : ctx.type_declarations()) {
+        for (final RAMLParser.TypeDeclarationsContext typeDeclarations : ctx.typeDeclarations()) {
             final List<Object> types = typeDeclarations.types.stream()
-                    .map(typeDeclarationConstructor::visitType_declaration)
+                    .map(typeDeclarationConstructor::visitTypeDeclaration)
                     .collect(Collectors.toList());
             typesScope.setValue(ECollections.asEList(types));
         }
