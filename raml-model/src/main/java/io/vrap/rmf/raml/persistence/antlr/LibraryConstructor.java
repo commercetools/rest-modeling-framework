@@ -26,8 +26,8 @@ public class LibraryConstructor extends AbstractConstructor {
         scope.getResource().getContents().add(library);
 
         final Scope libraryScope = scope.with(library);
-        for (final RAMLParser.Simple_library_facetContext simpleLibraryFacet : ctx.simple_library_facet()) {
-            constructAttribute(library, simpleLibraryFacet.facet, simpleLibraryFacet.value);
+        for (final RAMLParser.Library_facetContext libraryFacet : ctx.library_facet()) {
+            constructAttribute(library, libraryFacet.facet, libraryFacet.value);
         }
 
         final Scope typesScope = libraryScope.with(TYPE_CONTAINER__TYPES);

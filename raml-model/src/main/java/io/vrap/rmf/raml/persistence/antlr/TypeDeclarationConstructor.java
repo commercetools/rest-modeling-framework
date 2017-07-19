@@ -39,11 +39,11 @@ public class TypeDeclarationConstructor extends AbstractConstructor {
         declaredType.eSet(IDENTIFIABLE_ELEMENT__NAME, name);
 
         for (RAMLParser.Type_declaration_facetContext typeDeclarationFacet : ctx.type_declaration_facet()) {
-            constructAttribute(declaredType, typeDeclarationFacet.facet, typeDeclarationFacet.value);
-        }
-
-        for (RAMLParser.EnumFacetContext enumFacet : ctx.enumFacet()) {
-            constructAttribute(declaredType, enumFacet.facet, enumFacet.literals);
+            if (typeDeclarationFacet.facet_value().value != null) {
+                constructAttribute(declaredType, typeDeclarationFacet.facet, typeDeclarationFacet.facet_value().value);
+            } else {
+                constructAttribute(declaredType, typeDeclarationFacet.facet, typeDeclarationFacet.facet_value().values);
+            }
         }
 
         return declaredType;
