@@ -1,6 +1,5 @@
 package io.vrap.rmf.raml.persistence.antlr;
 
-import org.antlr.v4.runtime.tree.ParseTree;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -15,38 +14,33 @@ public class RAMLParserTest implements RAMLParserFixtures {
     public void simpleApi() throws IOException {
         final ApiContext api = fromClasspath("/api/simple-api.raml").api();
 
-        final List<Api_facetContext> apiFacets = api.api_facet();
-        assertThat(apiFacets).hasSize(5);
+        assertThat(api.getChildCount()).isEqualTo(7);
+        final List<Simple_api_facetContext> simpleApiFacets = api.simple_api_facet();
+        assertThat(simpleApiFacets).hasSize(3);
 
-        final Api_facetContext titleFacet = apiFacets.get(0);
-        assertThat(titleFacet.getChildCount()).isEqualTo(2);
-        assertThat(titleFacet.getChild(0).getText()).isEqualTo("title");
-        assertThat(titleFacet.getChild(1).getText()).isEqualTo("Simple API");
+        assertThat(simpleApiFacets.get(0).getChildCount()).isEqualTo(2);
+        assertThat(simpleApiFacets.get(0).facet.getText()).isEqualTo("title");
+        assertThat(simpleApiFacets.get(0).value.getText()).isEqualTo("Simple API");
 
-        final Api_facetContext versionFacet = apiFacets.get(1);
-        assertThat(versionFacet.getChildCount()).isEqualTo(2);
-        assertThat(versionFacet.getChild(0).getText()).isEqualTo("version");
-        assertThat(versionFacet.getChild(1).getText()).isEqualTo("v1");
+        assertThat(simpleApiFacets.get(1).getChildCount()).isEqualTo(2);
+        assertThat(simpleApiFacets.get(1).facet.getText()).isEqualTo("version");
+        assertThat(simpleApiFacets.get(1).value.getText()).isEqualTo("v1");
 
-        final Api_facetContext baseUriFacet = apiFacets.get(2);
-        assertThat(baseUriFacet.getChildCount()).isEqualTo(2);
-        assertThat(baseUriFacet.getChild(0).getText()).isEqualTo("baseUri");
-        assertThat(baseUriFacet.getChild(1).getText()).isEqualTo("https://api.simple.com");
+        assertThat(simpleApiFacets.get(2).getChildCount()).isEqualTo(2);
+        assertThat(simpleApiFacets.get(2).facet.getText()).isEqualTo("baseUri");
+        assertThat(simpleApiFacets.get(2).value.getText()).isEqualTo("https://api.simple.com");
 
-        final Api_facetContext protocolsFacet = apiFacets.get(3);
-        assertThat(protocolsFacet.getChildCount()).isEqualTo(2);
-        assertThat(protocolsFacet.getChild(0).getText()).isEqualTo("protocols");
+        final List<List_api_facetContext> listApiFacets = api.list_api_facet();
+        assertThat(listApiFacets).hasSize(2);
 
-        final ParseTree protocolsFacetChild = protocolsFacet.getChild(1);
-        assertThat(protocolsFacetChild.getChildCount()).isEqualTo(4);
-        assertThat(protocolsFacetChild.getChild(1).getText()).isEqualTo("http");
-        assertThat(protocolsFacetChild.getChild(2).getText()).isEqualTo("https");
+        assertThat(listApiFacets.get(0).facet.getText()).isEqualTo("protocols");
+        assertThat(listApiFacets.get(0).values).hasSize(2);
+        assertThat(listApiFacets.get(0).values.get(0).getText()).isEqualTo("http");
+        assertThat(listApiFacets.get(0).values.get(1).getText()).isEqualTo("https");
 
-        final Api_facetContext mediaTypeFacet = apiFacets.get(4);
-        assertThat(mediaTypeFacet.getChildCount()).isEqualTo(2);
-        assertThat(mediaTypeFacet.getChild(0).getText()).isEqualTo("mediaType");
-        assertThat(mediaTypeFacet.getChild(1).getChildCount()).isEqualTo(1);
-        assertThat(mediaTypeFacet.getChild(1).getChild(0).getText()).isEqualTo("application/json");
+        assertThat(listApiFacets.get(1).facet.getText()).isEqualTo("mediaType");
+        assertThat(listApiFacets.get(1).values).hasSize(1);
+        assertThat(listApiFacets.get(1).values.get(0).getText()).isEqualTo("application/json");
     }
 
     @Test

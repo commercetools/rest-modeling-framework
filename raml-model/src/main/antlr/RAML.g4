@@ -1,8 +1,10 @@
 grammar RAML;
 
+
 @header {
 package io.vrap.rmf.raml.persistence.antlr;
 }
+
 
 tokens {
     MAP_START, MAP_END, LIST_START, LIST_END, SCALAR
@@ -10,74 +12,60 @@ tokens {
 
 api:
     MAP_START
-        api_facet+
+    ( simple_api_facet | list_api_facet )*
     MAP_END;
 
-api_facet:
-      'title' SCALAR
-    | 'description' SCALAR
-    | 'version' SCALAR
-    | 'baseUri' SCALAR
-    | 'protocols' protocols
-    | 'mediaType' mediaType
+simple_api_facet:
+    facet=('title' | 'description' | 'version' | 'baseUri') value=SCALAR
     ;
 
-protocols:
-    LIST_START
-        SCALAR+
-    LIST_END;
-
-mediaType:
-      SCALAR
-    | LIST_START
-        SCALAR+
-      LIST_END;
+list_api_facet:
+    facet=('protocols' | 'mediaType')
+    ( values+=SCALAR | (LIST_START values+=SCALAR* LIST_END) )
+    ;
 
 library:
     MAP_START
-    (
-        'usage' SCALAR |
-        type_declarations
-    )+
+    ( simple_library_facet | type_declarations )*
     MAP_END
     ;
 
+simple_library_facet:
+    facet='usage' value=SCALAR
+    ;
+
 type_declarations:
-    'types'
+    facet='types'
         MAP_START
-        (
-            type_declaration
-        )+
+        ( types+=type_declaration )*
         MAP_END
     ;
 
 type_declaration:
-    SCALAR
+    name=SCALAR
         MAP_START
-        (
-           'type' SCALAR |
-           'displayName' SCALAR |
-           'description' SCALAR |
-           'default' SCALAR |
-           'pattern' SCALAR |
-           'properties'
-                MAP_START
-                (
-                    property
-                )+
-                MAP_END
-        )+
+        ( type_declaration_facet | properties_facet )*
+        MAP_END
+    ;
+
+type_declaration_facet:
+    facet=('type' | 'displayName' | 'description' | 'default' | 'pattern') value=SCALAR
+    ;
+
+properties_facet:
+    facet='properties'
+        MAP_START
+        ( properties+=property )*
         MAP_END
     ;
 
 property:
-    SCALAR
+    name=SCALAR
         MAP_START
-        (
-            'type' SCALAR |
-            'displayName' SCALAR |
-            'description' SCALAR |
-            'default' SCALAR
-        )+
+        ( simple_property_facet | type_declaration_facet)*
         MAP_END
+    ;
+
+simple_property_facet:
+    facet='required' value=SCALAR
     ;
