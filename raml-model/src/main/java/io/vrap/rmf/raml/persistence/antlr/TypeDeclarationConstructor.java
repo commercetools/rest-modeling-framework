@@ -38,12 +38,8 @@ public class TypeDeclarationConstructor extends AbstractConstructor {
         final String name = ctx.name.getText();
         declaredType.eSet(IDENTIFIABLE_ELEMENT__NAME, name);
 
-        for (RAMLParser.TypeDeclarationFacetContext typeDeclarationFacet : ctx.typeDeclarationFacet()) {
-            if (typeDeclarationFacet.facetValue().value != null) {
-                constructAttribute(declaredType, typeDeclarationFacet.facet, typeDeclarationFacet.facetValue().value);
-            } else {
-                constructAttribute(declaredType, typeDeclarationFacet.facet, typeDeclarationFacet.facetValue().values);
-            }
+        for (RAMLParser.AttributeFacetContext attributeFacet : ctx.attributeFacet()) {
+            setAttribute(attributeFacet, declaredType);
         }
 
         return declaredType;

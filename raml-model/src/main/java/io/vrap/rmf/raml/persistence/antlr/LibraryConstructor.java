@@ -1,6 +1,7 @@
 package io.vrap.rmf.raml.persistence.antlr;
 
 import io.vrap.rmf.raml.model.modules.Library;
+import io.vrap.rmf.raml.model.modules.ModulesFactory;
 import io.vrap.rmf.raml.persistence.RamlResourceSet;
 import io.vrap.rmf.raml.persistence.constructor.Scope;
 import org.eclipse.emf.common.util.ECollections;
@@ -16,6 +17,8 @@ import static io.vrap.rmf.raml.model.modules.ModulesPackage.Literals.TYPE_CONTAI
  * Constructs a library from a {@link RAMLParser.LibraryContext}.
  */
 public class LibraryConstructor extends AbstractConstructor {
+    protected final static ModulesFactory FACTORY = ModulesFactory.eINSTANCE;
+
     protected LibraryConstructor(final Scope scope) {
         super(scope);
     }
@@ -25,11 +28,11 @@ public class LibraryConstructor extends AbstractConstructor {
         final Library library = FACTORY.createLibrary();
         scope.getResource().getContents().add(library);
 
-        final Scope libraryScope = scope.with(library);
-        for (final RAMLParser.LibraryFacetContext libraryFacet : ctx.libraryFacet()) {
-            constructAttribute(library, libraryFacet.facet, libraryFacet.value);
+        for (final RAMLParser.AttributeFacetContext attributeFacet : ctx.attributeFacet()) {
+            setAttribute(attributeFacet, library);
         }
 
+        final Scope libraryScope = scope.with(library);
         final Scope typesScope = libraryScope.with(TYPE_CONTAINER__TYPES);
         final TypeDeclarationConstructor typeDeclarationConstructor = TypeDeclarationConstructor.of(typesScope);
 

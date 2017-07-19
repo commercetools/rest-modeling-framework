@@ -15,7 +15,7 @@ public class RAMLParserTest implements RAMLParserFixtures {
         final ApiContext api = parseFromClasspath("/api/simple-api.raml").api();
 
         assertThat(api.getChildCount()).isEqualTo(7);
-        final List<ApiFacetContext> apiFacets = api.apiFacet();
+        final List<AttributeFacetContext> apiFacets = api.attributeFacet();
         assertThat(apiFacets).hasSize(5);
 
         assertThat(apiFacets.get(0).getChildCount()).isEqualTo(2);

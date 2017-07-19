@@ -12,12 +12,11 @@ tokens {
 
 api:
     MAP_START
-    ( apiFacet )*
+    ( attributeFacet | typeDeclarations )*
     MAP_END;
 
-apiFacet:
-    facet=('title' | 'description' | 'version' | 'baseUri' |'protocols' | 'mediaType') value=facetValue
-    ;
+attributeFacet:
+    facet=SCALAR value=facetValue;
 
 facetValue:
         value=SCALAR
@@ -26,15 +25,8 @@ facetValue:
 
 library:
     MAP_START
-    (
-            libraryFacet
-        |   typeDeclarations
-    )*
+    ( attributeFacet | typeDeclarations )*
     MAP_END
-    ;
-
-libraryFacet:
-    facet='usage' value=SCALAR
     ;
 
 typeDeclarations:
@@ -48,22 +40,9 @@ typeDeclaration:
     name=SCALAR
     (
         MAP_START
-        ( typeDeclarationFacet | propertiesFacet | typeFacet )*
+        ( attributeFacet | propertiesFacet | typeFacet )*
         MAP_END
     )?
-    ;
-
-typeDeclarationFacet:
-    facet=(
-            'displayName' | 'description' | 'default' | 'enum' |
-            'pattern' |
-            'minLength' | 'maxLength'  |
-            'fileTypes' |
-            'minimum' | 'maximum' | 'format' | 'multipleOf' |
-            'minProperties' | 'maxProperties' | 'additionalProperties' | 'discriminator' | 'discriminatorValue' |
-            'uniqueItems' | 'minItems' | 'maxItems'
-          )
-    value=facetValue
     ;
 
 typeFacet:
@@ -81,11 +60,7 @@ property:
     name=SCALAR
     (
         MAP_START
-        ( propertyFacet | typeDeclarationFacet | typeFacet )*
+        ( attributeFacet | typeFacet )*
         MAP_END
     )?
-    ;
-
-propertyFacet:
-    facet='required' value=SCALAR
     ;
