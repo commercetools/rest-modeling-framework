@@ -23,9 +23,13 @@ public interface ResourceFixtures {
      * @throws IOException
      */
     default Resource fromClasspath(final String name) throws IOException {
-        final URL url = RamlResourceTest.class.getResource(name);
-        final URI uri = URI.createURI(url.toString());
+        final URI uri = uriFromClasspath(name);
         return fromUri(uri);
+    }
+
+    default URI uriFromClasspath(final String name) {
+        final URL url = RamlResourceTest.class.getResource(name);
+        return URI.createURI(url.toString());
     }
 
     /**

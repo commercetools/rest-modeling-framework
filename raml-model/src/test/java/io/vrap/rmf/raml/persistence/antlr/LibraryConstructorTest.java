@@ -2,10 +2,9 @@ package io.vrap.rmf.raml.persistence.antlr;
 
 import io.vrap.rmf.raml.model.modules.Library;
 import io.vrap.rmf.raml.model.types.AnyType;
-import io.vrap.rmf.raml.model.types.BuiltinType;
+import io.vrap.rmf.raml.model.types.ObjectType;
 import io.vrap.rmf.raml.model.types.StringType;
 import io.vrap.rmf.raml.persistence.ResourceFixtures;
-import io.vrap.rmf.raml.persistence.constructor.Scope;
 import org.eclipse.emf.common.util.EList;
 import org.junit.Test;
 
@@ -21,8 +20,7 @@ public class LibraryConstructorTest implements RAMLParserFixtures, ResourceFixtu
     @Test
     public void library() throws IOException {
         final RAMLParser.LibraryContext libraryContext = parseFromClasspath("/libraries/library.raml").library();
-        final Scope scope = Scope.of(fromUri(BuiltinType.RESOURCE_URI));
-        final Library library = (Library) new LibraryConstructor(scope)
+        final Library library = (Library) LibraryConstructor.of(uriFromClasspath("/libraries/library.raml"))
                 .visitLibrary(libraryContext);
 
         assertThat(library.getUsage()).isEqualTo("Test");
@@ -33,6 +31,15 @@ public class LibraryConstructorTest implements RAMLParserFixtures, ResourceFixtu
         assertThat(types.get(0)).isInstanceOf(StringType.class);
         final StringType stringType = (StringType) types.get(0);
         assertThat(stringType.getMinLength()).isEqualTo(10);
+
+        assertThat(types.get(4).getName()).isEqualTo("SuperType");
+        assertThat(types.get(4)).isInstanceOf(ObjectType.class);
+        final ObjectType superType = (ObjectType) types.get(4);
+
+        assertThat(types.get(6).getName()).isEqualTo("SubType");
+        assertThat(types.get(6)).isInstanceOf(ObjectType.class);
+        final ObjectType subType = (ObjectType) types.get(6);
+        assertThat(subType.getType()).isEqualTo(superType);
 
         assertThat(types.get(7).getName()).isEqualTo("Enum");
         assertThat(types.get(7)).isInstanceOf(StringType.class);

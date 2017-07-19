@@ -1,14 +1,20 @@
 package io.vrap.rmf.raml.persistence.antlr;
 
 import io.vrap.rmf.raml.model.modules.Library;
+import io.vrap.rmf.raml.persistence.RamlResourceSet;
 import io.vrap.rmf.raml.persistence.constructor.Scope;
 import org.eclipse.emf.common.util.ECollections;
+import org.eclipse.emf.common.util.URI;
+import org.eclipse.emf.ecore.resource.Resource;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static io.vrap.rmf.raml.model.modules.ModulesPackage.Literals.TYPE_CONTAINER__TYPES;
 
+/**
+ * Constructs a library from a {@link RAMLParser.LibraryContext}.
+ */
 public class LibraryConstructor extends AbstractConstructor {
     protected LibraryConstructor(final Scope scope) {
         super(scope);
@@ -17,12 +23,16 @@ public class LibraryConstructor extends AbstractConstructor {
     @Override
     public Object visitLibrary(final RAMLParser.LibraryContext ctx) {
         final Library library = FACTORY.createLibrary();
+        scope.getResource().getContents().add(library);
+
         final Scope libraryScope = scope.with(library);
         for (final RAMLParser.Simple_library_facetContext simpleLibraryFacet : ctx.simple_library_facet()) {
             constructAttribute(library, simpleLibraryFacet.facet, simpleLibraryFacet.value);
         }
+
         final Scope typesScope = libraryScope.with(TYPE_CONTAINER__TYPES);
-        final TypeDeclarationConstructor typeDeclarationConstructor = new TypeDeclarationConstructor(typesScope);
+        final TypeDeclarationConstructor typeDeclarationConstructor = TypeDeclarationConstructor.of(typesScope);
+
         for (final RAMLParser.Type_declarationsContext typeDeclarations : ctx.type_declarations()) {
             final List<Object> types = typeDeclarations.types.stream()
                     .map(typeDeclarationConstructor::visitType_declaration)
@@ -33,8 +43,10 @@ public class LibraryConstructor extends AbstractConstructor {
         return library;
     }
 
+    public static LibraryConstructor of(final URI uri) {
+        final Resource resource = new RamlResourceSet().createResource(uri);
+        final Scope rootScope = Scope.of(resource);
 
-    public static LibraryConstructor of(final Scope scope) {
-        return new LibraryConstructor(scope);
+        return new LibraryConstructor(rootScope);
     }
 }

@@ -1,39 +1,39 @@
 package io.vrap.rmf.raml.persistence.antlr;
 
 import io.vrap.rmf.raml.model.types.BuiltinType;
-import io.vrap.rmf.raml.model.types.TypesFactory;
 import io.vrap.rmf.raml.persistence.constructor.Scope;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
-import java.util.List;
-
 import static io.vrap.rmf.raml.model.elements.ElementsPackage.Literals.IDENTIFIABLE_ELEMENT__NAME;
+import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.ANY_TYPE__TYPE;
 
 /**
- * Constructs types from type declarations {@link RAMLParser.Type_declarationContext}.
+ * Constructs a type from a type declaration {@link RAMLParser.Type_declarationContext}.
  */
 public class TypeDeclarationConstructor extends AbstractConstructor {
-    private static final TypesFactory TYPES_FACTORY = TypesFactory.eINSTANCE;
-
     protected TypeDeclarationConstructor(final Scope scope) {
         super(scope);
     }
 
     @Override
     public Object visitType_declaration(final RAMLParser.Type_declarationContext ctx) {
-        final List<RAMLParser.TypeFacetContext> typeFacets = ctx.typeFacet();
         final BuiltinType baseType;
-        if (typeFacets.size() > 0) {
-            final RAMLParser.TypeFacetContext typeFacet = typeFacets.get(0);
-            final EObject typeExpressionType = (EObject) TypeExpressionConstructor.of(scope).visitTypeFacet(typeFacet);
-            final String typeName = (String) typeExpressionType.eGet(IDENTIFIABLE_ELEMENT__NAME); // TODO handle arrays
+        final EObject superType;
+
+        if (ctx.typeFacet().size() > 0) {
+            final RAMLParser.TypeFacetContext typeFacet = ctx.typeFacet().get(0);
+            superType = (EObject) TypeExpressionConstructor.of(scope).visitTypeFacet(typeFacet);
+            final String typeName = (String) superType.eGet(IDENTIFIABLE_ELEMENT__NAME); // TODO handle arrays
             baseType = BuiltinType.of(typeName)
                     .orElse(BuiltinType.OBJECT);
         } else {
             baseType = BuiltinType.OBJECT;
+            superType = scope.getImportedTypeById(baseType.getName());
         }
+
         final EObject declaredType = EcoreUtil.create(baseType.getTypeDeclarationType());
+        declaredType.eSet(ANY_TYPE__TYPE, superType);
 
         final String name = ctx.name.getText();
         declaredType.eSet(IDENTIFIABLE_ELEMENT__NAME, name);
@@ -49,7 +49,7 @@ public class TypeDeclarationConstructor extends AbstractConstructor {
         return declaredType;
     }
 
-    public static TypeExpressionConstructor of(final Scope scope) {
-        return new TypeExpressionConstructor(scope);
+    public static TypeDeclarationConstructor of(final Scope scope) {
+        return new TypeDeclarationConstructor(scope);
     }
 }
