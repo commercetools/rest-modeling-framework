@@ -12,16 +12,16 @@ tokens {
 
 api:
     MAP_START
-    ( simple_api_facet | list_api_facet )*
+    ( api_facet )*
     MAP_END;
 
-simple_api_facet:
-    facet=('title' | 'description' | 'version' | 'baseUri') value=SCALAR
+api_facet:
+    facet=('title' | 'description' | 'version' | 'baseUri' |'protocols' | 'mediaType') value=facet_value
     ;
 
-list_api_facet:
-    facet=('protocols' | 'mediaType')
-    ( values+=SCALAR | (LIST_START values+=SCALAR* LIST_END) )
+facet_value:
+        value=SCALAR
+    |   (LIST_START values+=SCALAR* LIST_END)
     ;
 
 library:

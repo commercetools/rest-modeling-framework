@@ -8,6 +8,7 @@ import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -37,7 +38,13 @@ public abstract class AbstractConstructor extends RAMLBaseVisitor<Object> {
         final EClass eClass = eObject.eClass();
         final String featureName = facetToken.getText();
         final EAttribute eAttribute = (EAttribute) eClass.getEStructuralFeature(featureName);
+
         final Object value = EcoreUtil.createFromString(eAttribute.getEAttributeType(), valueToken.getText());
-        eObject.eSet(eAttribute, value);
+
+        if (eAttribute.isMany()) {
+            eObject.eSet(eAttribute, Collections.singletonList(value));
+        } else {
+            eObject.eSet(eAttribute, value);
+        }
     }
 }

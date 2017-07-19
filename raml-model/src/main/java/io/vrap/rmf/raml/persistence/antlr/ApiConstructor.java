@@ -11,11 +11,12 @@ public class ApiConstructor extends AbstractConstructor {
     @Override
     public Object visitApi(final RAMLParser.ApiContext ctx) {
         final Api api = FACTORY.createApi();
-        for (final RAMLParser.Simple_api_facetContext simpleApiFacet : ctx.simple_api_facet()) {
-            constructAttribute(api, simpleApiFacet.facet, simpleApiFacet.value);
-        }
-        for (final RAMLParser.List_api_facetContext listApiFacet : ctx.list_api_facet()) {
-            constructAttribute(api, listApiFacet.facet, listApiFacet.values);
+        for (final RAMLParser.Api_facetContext apiFacet : ctx.api_facet()) {
+            if (apiFacet.facet_value().value != null) {
+                constructAttribute(api, apiFacet.facet, apiFacet.facet_value().value);
+            } else {
+                constructAttribute(api, apiFacet.facet, apiFacet.facet_value().values);
+            }
         }
         return api;
     }
