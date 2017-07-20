@@ -6,12 +6,11 @@ import io.vrap.rmf.raml.persistence.RamlResourceSet;
 import io.vrap.rmf.raml.persistence.constructor.Scope;
 import org.eclipse.emf.common.util.ECollections;
 import org.eclipse.emf.common.util.URI;
+import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.resource.Resource;
 
 import java.util.List;
 import java.util.stream.Collectors;
-
-import static io.vrap.rmf.raml.model.modules.ModulesPackage.Literals.TYPE_CONTAINER__TYPES;
 
 /**
  * Constructs a library from a {@link RAMLParser.LibraryContext}.
@@ -33,13 +32,18 @@ public class LibraryConstructor extends AbstractConstructor {
         }
 
         final Scope libraryScope = scope.with(library);
-        final Scope typesScope = libraryScope.with(TYPE_CONTAINER__TYPES);
-        final TypeDeclarationConstructor typeDeclarationConstructor = TypeDeclarationConstructor.of(typesScope);
 
-        for (final RAMLParser.TypeDeclarationsContext typeDeclarations : ctx.typeDeclarations()) {
-            final List<Object> types = typeDeclarations.types.stream()
+        for (final RAMLParser.TypesFacetContext typesFacet : ctx.typesFacet()) {
+            final String typesReferenceName = typesFacet.facet.getText();
+            final EStructuralFeature typesFeature = library.eClass().getEStructuralFeature(typesReferenceName);
+
+            final Scope typesScope = libraryScope.with(typesFeature);
+            final TypeDeclarationConstructor typeDeclarationConstructor = TypeDeclarationConstructor.of(typesScope);
+
+            final List<Object> types = typesFacet.types.stream()
                     .map(typeDeclarationConstructor::visitTypeDeclaration)
                     .collect(Collectors.toList());
+
             typesScope.setValue(ECollections.asEList(types));
         }
 

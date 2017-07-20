@@ -12,7 +12,7 @@ tokens {
 
 api:
     MAP_START
-    ( attributeFacet | typeDeclarations )*
+    ( attributeFacet | typesFacet )*
     MAP_END;
 
 attributeFacet:
@@ -25,12 +25,12 @@ facetValue:
 
 library:
     MAP_START
-    ( attributeFacet | typeDeclarations )*
+    ( attributeFacet | typesFacet )*
     MAP_END
     ;
 
-typeDeclarations:
-    facet='types'
+typesFacet:
+    facet=( 'types' | 'annotationTypes' )
         MAP_START
         ( types+=typeDeclaration )*
         MAP_END

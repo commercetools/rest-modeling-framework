@@ -1,15 +1,19 @@
 package io.vrap.rmf.raml.persistence.antlr;
 
+import io.vrap.rmf.raml.model.annotations.AnyAnnotationType;
+import io.vrap.rmf.raml.model.types.AnyType;
 import io.vrap.rmf.raml.model.types.BuiltinType;
 import io.vrap.rmf.raml.persistence.constructor.Scope;
+import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
 import static io.vrap.rmf.raml.model.elements.ElementsPackage.Literals.IDENTIFIABLE_ELEMENT__NAME;
-import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.ANY_TYPE__TYPE;
 
 /**
- * Constructs a type from a type declaration {@link RAMLParser.TypeDeclarationContext}.
+ * Constructs a type {@link AnyType} or an annotation type {@link AnyAnnotationType}
+ * from a type declaration {@link RAMLParser.TypeDeclarationContext}.
  */
 public class TypeDeclarationConstructor extends AbstractConstructor {
     protected TypeDeclarationConstructor(final Scope scope) {
@@ -32,8 +36,10 @@ public class TypeDeclarationConstructor extends AbstractConstructor {
             superType = scope.getImportedTypeById(baseType.getName());
         }
 
-        final EObject declaredType = EcoreUtil.create(baseType.getTypeDeclarationType());
-        declaredType.eSet(ANY_TYPE__TYPE, superType);
+        final EClass scopedMetaType = baseType.getScopedMetaType(scope);
+        final EObject declaredType = EcoreUtil.create(scopedMetaType);
+        final EStructuralFeature typeReference = scopedMetaType.getEStructuralFeature("type");
+        declaredType.eSet(typeReference, superType);
 
         final String name = ctx.name.getText();
         declaredType.eSet(IDENTIFIABLE_ELEMENT__NAME, name);

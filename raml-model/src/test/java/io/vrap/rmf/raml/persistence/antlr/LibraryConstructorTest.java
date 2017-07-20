@@ -1,5 +1,8 @@
 package io.vrap.rmf.raml.persistence.antlr;
 
+import io.vrap.rmf.raml.model.annotations.AnnotationTarget;
+import io.vrap.rmf.raml.model.annotations.AnyAnnotationType;
+import io.vrap.rmf.raml.model.annotations.StringAnnotationType;
 import io.vrap.rmf.raml.model.modules.Library;
 import io.vrap.rmf.raml.model.types.AnyType;
 import io.vrap.rmf.raml.model.types.ObjectType;
@@ -45,5 +48,24 @@ public class LibraryConstructorTest implements RAMLParserFixtures, ResourceFixtu
         assertThat(types.get(7)).isInstanceOf(StringType.class);
         final StringType enumType = (StringType) types.get(7);
         assertThat(enumType.getEnum()).containsExactly("v1", "v2");
+    }
+
+    @Test
+    public void generatorAnnotations() throws IOException {
+        final RAMLParser.LibraryContext libraryContext = parseFromClasspath("/libraries/generator-annotations.raml").library();
+        final Library library = (Library) LibraryConstructor.of(uriFromClasspath("/libraries/generator-annotations.raml"))
+                .visitLibrary(libraryContext);
+
+        assertThat(library.getUsage()).isEqualTo("Defines generator annotations.");
+        final EList<AnyType> types = library.getTypes();
+        assertThat(types).hasSize(0);
+
+        final EList<AnyAnnotationType> annotationTypes = library.getAnnotationTypes();
+        assertThat(annotationTypes).hasSize(1);
+
+        assertThat(annotationTypes.get(0)).isInstanceOf(StringAnnotationType.class);
+        final StringAnnotationType stringAnnotationType = (StringAnnotationType) annotationTypes.get(0);
+        assertThat(stringAnnotationType.getName()).isEqualTo("package");
+        assertThat(stringAnnotationType.getAllowedTargets()).containsExactly(AnnotationTarget.LIBRARY);
     }
 }
