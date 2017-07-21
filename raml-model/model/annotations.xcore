@@ -8,13 +8,15 @@ package io.vrap.rmf.raml.model.annotations
 import io.vrap.rmf.raml.model.elements.DocumentableElement
 import io.vrap.rmf.raml.model.elements.IdentifiableElement
 import io.vrap.rmf.raml.model.elements.Type
+import io.vrap.rmf.raml.model.facets.AnnotationsFacet
 import io.vrap.rmf.raml.model.facets.ArrayTypeFacet
 import io.vrap.rmf.raml.model.facets.DateTimeTypeFacet
 import io.vrap.rmf.raml.model.facets.FileTypeFacet
 import io.vrap.rmf.raml.model.facets.NumberTypeFacet
 import io.vrap.rmf.raml.model.facets.ObjectTypeFacet
-import io.vrap.rmf.raml.model.facets.Property
 import io.vrap.rmf.raml.model.facets.StringTypeFacet
+import io.vrap.rmf.raml.model.types.PropertiesFacet
+import io.vrap.rmf.raml.model.types.ItemsFacet
 
 /*
  * The location within an API specification where annotations can be applied MUST be one of the target locations
@@ -94,24 +96,6 @@ enum AnnotationTarget {
 	Extension
 }
 
-
-interface AnnotatedElement {
-	/*
-	 * The annotations of this element.
-	 */
-	contains Instance<?>[] annotations
-
-	/*
-	 * Returns the annotation of the given annotation type if it exists.
-	 * Otherwise returns null.
-	 */
-	op <T extends AnyAnnotationType, A extends Instance<T>> A getAnnotation(T annotationType) {
-		var a = annotations.findFirst[it.^type == annotationType]
-
-		if (a != null) a as A else null
-	}
-}
-
 /*
  * Annotation types are declared using the OPTIONAL root-level annotationTypes node.
  * The value of the annotationsType node is a map whose keys define annotation type names,
@@ -123,7 +107,7 @@ interface AnnotatedElement {
  * The allowedTargets node restricts the kinds of locations where the annotation can be applied. Annotation types, like data types,
  * can extend other data types, but annotation types themselves can neither be extended nor used anywhere data types can be used.
  */
-class AnyAnnotationType extends DocumentableElement, IdentifiableElement, AnnotatedElement, Type {	
+class AnyAnnotationType extends DocumentableElement, IdentifiableElement, AnnotationsFacet, Type {	
 		/*
 	 * The type which this type extends.
 	 */
@@ -166,44 +150,8 @@ class NilAnnotationType extends AnyAnnotationType {
 class FileAnnotationType extends FileTypeFacet, AnyAnnotationType {	
 }
 
-class ObjectAnnotationType extends ObjectTypeFacet<AnyAnnotationType, Property<AnyAnnotationType>>, AnyAnnotationType {	
+class ObjectAnnotationType extends AnyAnnotationType, ObjectTypeFacet, PropertiesFacet  {	
 }
 
-class ArrayAnnotationType extends ArrayTypeFacet<AnyAnnotationType>, AnyAnnotationType {
+class ArrayAnnotationType extends AnyAnnotationType, ArrayTypeFacet, ItemsFacet {
 }
-
-
-class Instance<T extends AnyAnnotationType> {
-	refers T ^type
-}
-
-class StringInstance extends Instance<StringAnnotationType> {
-	String value
-}
-
-class BooleanInstance extends Instance<BooleanAnnotationType> {
-	Boolean value
-}
-
-class NumberInstance extends Instance<IntegerAnnotationType> {
-	BigDecimal value
-}
-
-class IntegerInstance extends Instance<IntegerAnnotationType> {
-	Long value
-}
-
-class ObjectInstance extends Instance<ObjectAnnotationType> {
-	contains Instance<?>[] value
-
-	/*
-	 * Returns the property of the given type if it exists.
-	 * Otherwise returns null.
-	 */
-	op <T extends AnyAnnotationType, V extends Instance<T>> V getPropertyy(T valueType) {
-		var p = value.findFirst[it.^type == valueType]
-
-		if (p != null) p as V else null
-	}
-}
-

@@ -12,8 +12,8 @@ import java.util.Optional;
 import static io.vrap.rmf.raml.model.annotations.AnnotationsPackage.Literals.ANY_ANNOTATION_TYPE;
 import static io.vrap.rmf.raml.model.annotations.AnnotationsPackage.Literals.ANY_ANNOTATION_TYPE__TYPE;
 import static io.vrap.rmf.raml.model.elements.ElementsPackage.Literals.IDENTIFIABLE_ELEMENT__NAME;
-import static io.vrap.rmf.raml.model.facets.FacetsPackage.Literals.OBJECT_TYPE_FACET__PROPERTIES;
 import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.ANY_TYPE__TYPE;
+import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.PROPERTIES_FACET__PROPERTIES;
 
 public class TypeDeclarationConstructor extends Constructor<MappingNode> {
     private final EClass eClass;
@@ -25,7 +25,7 @@ public class TypeDeclarationConstructor extends Constructor<MappingNode> {
                 .forEach(this::addConstructor);
         final EReference typeReference = ANY_ANNOTATION_TYPE.isSuperTypeOf(eClass) ? ANY_ANNOTATION_TYPE__TYPE : ANY_TYPE__TYPE;
 		addConstruct(typeReference, new TypeReferenceConstructor());
-        addConstructor(OBJECT_TYPE_FACET__PROPERTIES, new PropertiesConstructor());
+        addConstructor(PROPERTIES_FACET__PROPERTIES, new PropertiesConstructor());
         addConstructor(new AnnotationsConstructor());
     }
 

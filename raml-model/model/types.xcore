@@ -5,17 +5,17 @@
 )
 package io.vrap.rmf.raml.model.types
 
-import io.vrap.rmf.raml.model.annotations.AnnotatedElement
+
 import io.vrap.rmf.raml.model.elements.DocumentableElement
 import io.vrap.rmf.raml.model.elements.IdentifiableElement
 import io.vrap.rmf.raml.model.elements.Type
+import io.vrap.rmf.raml.model.facets.AnnotationsFacet
 import io.vrap.rmf.raml.model.facets.ArrayTypeFacet
 import io.vrap.rmf.raml.model.facets.DateTimeTypeFacet
 import io.vrap.rmf.raml.model.facets.EnumFacet
 import io.vrap.rmf.raml.model.facets.FileTypeFacet
 import io.vrap.rmf.raml.model.facets.NumberTypeFacet
 import io.vrap.rmf.raml.model.facets.ObjectTypeFacet
-import io.vrap.rmf.raml.model.facets.Property
 import io.vrap.rmf.raml.model.facets.StringTypeFacet
 
 /*
@@ -23,27 +23,59 @@ import io.vrap.rmf.raml.model.facets.StringTypeFacet
  * By definition, the any type is a type which imposes no restrictions, i.e. any instance of data is
  * valid against it.
  */
-class AnyType extends AnnotatedElement, DocumentableElement, IdentifiableElement, EnumFacet, Type {
+class AnyType extends AnnotationsFacet, DocumentableElement, IdentifiableElement, EnumFacet, Type {
 	/*
 	 * The type which this type extends.
 	 */
 	refers AnyType ^type	
 }
 
-class ObjectType extends AnyType, ObjectTypeFacet<AnyType, Property<AnyType>> {
+class Property {
+	/*
+	 * The name of this property.
+	 */
+	String name
+
+	/*
+	 * The type of this property.
+	 */
+	refers AnyType ^type
+
+	/*
+	 * Specifies that the property is required or not.
+	 */
+	Boolean required = "true"
+}
+
+interface PropertiesFacet {
+	/*
+	 * The properties that instances of this type can or must have.
+	 */
+	contains Property[] properties	
+}
+
+class ObjectType extends AnyType, ObjectTypeFacet, PropertiesFacet {
 	
-	op Property<AnyType> getProperty(String name) {
-		for (Property<AnyType> property : properties) {
+	op Property getProperty(String name) {
+		for (Property property : properties) {
 			if (name == property.name) return property
 		}
 		return null
 	}
 }
 
+interface ItemsFacet {	
+	/*
+	 * Indicates the type all items in the array are inherited from.
+	 * Can be a reference to an existing type or an inline type declaration.
+	 */
+	refers AnyType items
+}
+
 /*
  * A JSON array.
  */
-class ArrayType extends AnyType, ArrayTypeFacet<AnyType> {
+class ArrayType extends AnyType, ArrayTypeFacet, ItemsFacet {
 }
 
 /*

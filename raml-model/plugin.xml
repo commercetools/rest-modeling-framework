@@ -63,4 +63,12 @@
             genModel="model/modules.xcore"/>
    </extension>
 
+   <extension point="org.eclipse.emf.ecore.generated_package">
+      <!-- @generated instances -->
+      <package
+            uri="http://www.vrap.io/raml/instances"
+            class="io.vrap.rmf.raml.model.instances.InstancesPackage"
+            genModel="model/instances.xcore"/>
+   </extension>
+
 </plugin>

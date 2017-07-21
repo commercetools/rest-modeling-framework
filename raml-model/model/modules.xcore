@@ -5,11 +5,11 @@
 )
 package io.vrap.rmf.raml.model.modules
 
-import io.vrap.rmf.raml.model.annotations.AnnotatedElement
+import io.vrap.rmf.raml.model.facets.AnnotationsFacet
 import io.vrap.rmf.raml.model.annotations.AnyAnnotationType
 import io.vrap.rmf.raml.model.types.AnyType
 
-class Api extends AnnotatedElement, TypeContainer {
+class Api extends AnnotationsFacet, TypeContainer {
 	/*
 	 * A short, plain-text label for the API. Its value is a string.
 	 */
@@ -55,7 +55,7 @@ interface TypeContainer {
     contains AnyAnnotationType[] annotationTypes
 }
 
-class Library extends AnnotatedElement, TypeContainer {
+class Library extends AnnotationsFacet, TypeContainer {
     String usage
 }
 

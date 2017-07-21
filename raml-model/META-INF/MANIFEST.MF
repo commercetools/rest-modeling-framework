@@ -21,7 +21,10 @@ Export-Package: io.vrap.rmf.raml.model.types,
  io.vrap.rmf.raml.model.annotations.util,
  io.vrap.rmf.raml.model.modules,
  io.vrap.rmf.raml.model.modules.impl,
- io.vrap.rmf.raml.model.modules.util
+ io.vrap.rmf.raml.model.modules.util,
+ io.vrap.rmf.raml.model.instances,
+ io.vrap.rmf.raml.model.instances.impl,
+ io.vrap.rmf.raml.model.instances.util
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.emf.ecore;visibility:=reexport,
  org.eclipse.xtext.xbase.lib,

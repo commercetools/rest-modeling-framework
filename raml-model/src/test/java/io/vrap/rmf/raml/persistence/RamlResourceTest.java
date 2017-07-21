@@ -3,11 +3,11 @@ package io.vrap.rmf.raml.persistence;
 import io.vrap.rmf.raml.model.annotations.AnnotationTarget;
 import io.vrap.rmf.raml.model.annotations.AnyAnnotationType;
 import io.vrap.rmf.raml.model.annotations.StringAnnotationType;
-import io.vrap.rmf.raml.model.facets.Property;
 import io.vrap.rmf.raml.model.modules.Library;
 import io.vrap.rmf.raml.model.modules.LibraryUse;
 import io.vrap.rmf.raml.model.types.AnyType;
 import io.vrap.rmf.raml.model.types.ObjectType;
+import io.vrap.rmf.raml.model.types.Property;
 import io.vrap.rmf.raml.model.types.StringType;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.URI;
@@ -76,10 +76,10 @@ public class RamlResourceTest implements ResourceFixtures {
         assertThat(types.get(0)).isInstanceOf(ObjectType.class);
 
         final ObjectType withLocalizedNameType = (ObjectType) types.get(0);
-        final EList<Property<AnyType>> properties = withLocalizedNameType.getProperties();
+        final EList<Property> properties = withLocalizedNameType.getProperties();
         assertThat(properties).hasSize(1);
 
-        final Property<AnyType> nameProperty = properties.get(0);
+        final Property nameProperty = properties.get(0);
         assertThat(nameProperty.getName()).isEqualTo("name");
 
         final AnyType localizedStringType = usedLibrary.getTypes().get(0);
@@ -112,10 +112,10 @@ public class RamlResourceTest implements ResourceFixtures {
         final ObjectType objectType2 = (ObjectType) type3;
         assertThat(objectType2.getName()).isEqualTo("WithProperties");
 
-        final EList<Property<AnyType>> properties = objectType2.getProperties();
+        final EList<Property> properties = objectType2.getProperties();
         assertThat(properties).hasSize(2);
 
-        final Property<AnyType> optionalStringProperty = properties.get(0);
+        final Property optionalStringProperty = properties.get(0);
         assertThat(optionalStringProperty.getName()).isEqualTo("name");
         assertThat(optionalStringProperty.getRequired()).isEqualTo(false);
 

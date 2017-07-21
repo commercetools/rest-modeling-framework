@@ -152,7 +152,8 @@ public class Scope {
         final EObject container = eObject();
         final EStructuralFeature feature = eFeature();
         if (feature.isMany() && !(value instanceof List)) {
-            ((EList<T>) container.eGet(feature)).add(value);
+            final EList<T> eList = (EList<T>) container.eGet(feature);
+            eList.add(value);
         } else {
             container.eSet(feature, value);
         }

@@ -9,10 +9,10 @@ import org.yaml.snakeyaml.nodes.NodeTuple;
 import java.util.Optional;
 
 import static io.vrap.functional.utils.Classes.as;
-import static io.vrap.rmf.raml.model.facets.FacetsPackage.Literals.*;
+import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.*;
 
 /**
- * Constructs a list of properties {@link Property} from a {@link MappingNode}.
+ * Constructs a list of properties {@link io.vrap.rmf.raml.model.types.Property} from a {@link MappingNode}.
  *
  * Structure:
  * {@code <name>: <Type?>}
@@ -34,7 +34,7 @@ public class PropertiesConstructor extends AbstractIdentifiableElementsConstruct
     protected EObject create(final NodeTuple nodeTuple, final Scope container, final String name) {
         final EObject instance = EcoreUtil.create(PROPERTY);
         container.setValue(instance);
-        final Scope scope = container.with(instance, OBJECT_TYPE_FACET__PROPERTIES);
+        final Scope scope = container.with(instance, PROPERTIES_FACET__PROPERTIES);
         return constructProperty(nodeTuple, name, scope);
     }
 

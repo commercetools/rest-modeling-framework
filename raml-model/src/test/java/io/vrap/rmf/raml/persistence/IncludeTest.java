@@ -1,9 +1,9 @@
 package io.vrap.rmf.raml.persistence;
 
-import io.vrap.rmf.raml.model.facets.Property;
 import io.vrap.rmf.raml.model.modules.Library;
 import io.vrap.rmf.raml.model.types.AnyType;
 import io.vrap.rmf.raml.model.types.ObjectType;
+import io.vrap.rmf.raml.model.types.Property;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.junit.Test;
@@ -33,7 +33,7 @@ public class IncludeTest implements ResourceFixtures {
         assertThat(personType.getDisplayName()).isEqualTo("Person");
         assertThat(personType.getProperties()).hasSize(1);
 
-        final Property<AnyType> ageProperty = personType.getProperties().get(0);
+        final Property ageProperty = personType.getProperties().get(0);
 
         assertThat(ageProperty.getName()).isEqualTo("age");
         assertThat(ageProperty.getType().getName()).isEqualTo("integer");
