@@ -16,29 +16,28 @@ public class ApiConstructor extends AbstractConstructor {
     protected final static ModulesFactory FACTORY = ModulesFactory.eINSTANCE;
 
     protected ApiConstructor(final Scope scope) {
-        super(scope);
+        pushScope(scope);
     }
 
     @Override
     public Object visitApi(final RAMLParser.ApiContext ctx) {
         final Api api = FACTORY.createApi();
-        scope.getResource().getContents().add(api);
+        peekScope().getResource().getContents().add(api);
 
         for (final RAMLParser.AttributeFacetContext attributeFacet : ctx.attributeFacet()) {
             setAttribute(attributeFacet, api);
         }
 
-        final Scope apiScope = scope.with(api);
+        final Scope apiScope = peekScope().with(api);
 
         for (final RAMLParser.TypesFacetContext typesFacet : ctx.typesFacet()) {
             final String typesReferenceName = typesFacet.facet.getText();
             final EStructuralFeature typesFeature = api.eClass().getEStructuralFeature(typesReferenceName);
 
-            final Scope typesScope = apiScope.with(typesFeature);
-            final TypeDeclarationConstructor typeDeclarationConstructor = TypeDeclarationConstructor.of(typesScope);
+            final Scope typesScope = pushScope(apiScope.with(typesFeature));
 
             final List<Object> types = typesFacet.types.stream()
-                    .map(typeDeclarationConstructor::visitTypeDeclaration)
+                    .map(this::visitTypeDeclaration)
                     .collect(Collectors.toList());
 
             typesScope.setValue(ECollections.asEList(types));

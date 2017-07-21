@@ -19,29 +19,28 @@ public class LibraryConstructor extends AbstractConstructor {
     protected final static ModulesFactory FACTORY = ModulesFactory.eINSTANCE;
 
     protected LibraryConstructor(final Scope scope) {
-        super(scope);
+        pushScope(scope);
     }
 
     @Override
     public Object visitLibrary(final RAMLParser.LibraryContext ctx) {
         final Library library = FACTORY.createLibrary();
-        scope.getResource().getContents().add(library);
+        peekScope().getResource().getContents().add(library);
 
         for (final RAMLParser.AttributeFacetContext attributeFacet : ctx.attributeFacet()) {
             setAttribute(attributeFacet, library);
         }
 
-        final Scope libraryScope = scope.with(library);
+        final Scope libraryScope = peekScope().with(library);
 
         for (final RAMLParser.TypesFacetContext typesFacet : ctx.typesFacet()) {
             final String typesReferenceName = typesFacet.facet.getText();
             final EStructuralFeature typesFeature = library.eClass().getEStructuralFeature(typesReferenceName);
 
-            final Scope typesScope = libraryScope.with(typesFeature);
-            final TypeDeclarationConstructor typeDeclarationConstructor = TypeDeclarationConstructor.of(typesScope);
+            final Scope typesScope = pushScope(libraryScope.with(typesFeature));
 
             final List<Object> types = typesFacet.types.stream()
-                    .map(typeDeclarationConstructor::visitTypeDeclaration)
+                    .map(this::visitTypeDeclaration)
                     .collect(Collectors.toList());
 
             typesScope.setValue(ECollections.asEList(types));
