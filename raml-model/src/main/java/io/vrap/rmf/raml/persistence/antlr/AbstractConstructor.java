@@ -28,6 +28,12 @@ public abstract class AbstractConstructor extends RAMLBaseVisitor<Object> {
     private final Stack<Scope> scope = new Stack<>();
     private final TypeExpressionsParser typeExpressionsParser = new TypeExpressionsParser();
 
+    /**
+     * Constructor types or annotation types from the given {@link RAMLParser.TypesFacetContext}.
+     *
+     * @param typesFacet the types/annotation types facet
+     * @return list of types/annotation types
+     */
     @Override
     public Object visitTypesFacet(final RAMLParser.TypesFacetContext typesFacet) {
         final String typesReferenceName = typesFacet.facet.getText();
@@ -123,15 +129,22 @@ public abstract class AbstractConstructor extends RAMLBaseVisitor<Object> {
         final EAttribute eAttribute = eClass.getEAllAttributes().stream()
                 .filter(a -> a.getName().equals(attributeName))
                 .findFirst()
-                .orElse(null); // TODO: handle unknown attribute
+                .orElse(null);
 
-        final Object value = attributeFacet.facetValue().value == null ?
-                attributeFacet.facetValue().values :
-                attributeFacet.facetValue().value;
-        if (attributeFacet.facetValue().value != null) {
-            setAttribute(eObject, eAttribute, attributeFacet.facetValue().value);
+        final Object value;
+        if (eAttribute == null) {
+            peekScope().addError("Unknown attribute {0}", attributeName);
+            value = null;
         } else {
-            setAttribute(eObject, eAttribute, attributeFacet.facetValue().values);
+            value = attributeFacet.facetValue().value == null ?
+                    attributeFacet.facetValue().values :
+                    attributeFacet.facetValue().value;
+
+            if (attributeFacet.facetValue().value != null) {
+                setAttribute(eObject, eAttribute, attributeFacet.facetValue().value);
+            } else {
+                setAttribute(eObject, eAttribute, attributeFacet.facetValue().values);
+            }
         }
         return value;
     }
