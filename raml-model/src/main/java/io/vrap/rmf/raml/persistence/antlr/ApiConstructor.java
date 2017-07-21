@@ -15,10 +15,6 @@ import java.util.stream.Collectors;
 public class ApiConstructor extends AbstractConstructor {
     protected final static ModulesFactory FACTORY = ModulesFactory.eINSTANCE;
 
-    protected ApiConstructor(final Scope scope) {
-        pushScope(scope);
-    }
-
     @Override
     public Object visitApi(final RAMLParser.ApiContext ctx) {
         final Api api = FACTORY.createApi();
@@ -48,8 +44,10 @@ public class ApiConstructor extends AbstractConstructor {
 
     public static ApiConstructor of(final URI uri) {
         final Resource resource = new RamlResourceSet().createResource(uri);
-        final Scope rootScope = Scope.of(resource);
 
-        return new ApiConstructor(rootScope);
+        final ApiConstructor constructor = new ApiConstructor();
+        constructor.pushScope(Scope.of(resource));
+
+        return constructor;
     }
 }

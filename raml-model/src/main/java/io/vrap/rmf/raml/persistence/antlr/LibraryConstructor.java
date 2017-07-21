@@ -18,10 +18,6 @@ import java.util.stream.Collectors;
 public class LibraryConstructor extends AbstractConstructor {
     protected final static ModulesFactory FACTORY = ModulesFactory.eINSTANCE;
 
-    protected LibraryConstructor(final Scope scope) {
-        pushScope(scope);
-    }
-
     @Override
     public Object visitLibrary(final RAMLParser.LibraryContext ctx) {
         final Library library = FACTORY.createLibrary();
@@ -51,8 +47,10 @@ public class LibraryConstructor extends AbstractConstructor {
 
     public static LibraryConstructor of(final URI uri) {
         final Resource resource = new RamlResourceSet().createResource(uri);
-        final Scope rootScope = Scope.of(resource);
 
-        return new LibraryConstructor(rootScope);
+        final LibraryConstructor constructor = new LibraryConstructor();
+        constructor.pushScope(Scope.of(resource));
+
+        return constructor;
     }
 }
