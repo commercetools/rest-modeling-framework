@@ -4,13 +4,8 @@ import io.vrap.rmf.raml.model.modules.Api;
 import io.vrap.rmf.raml.model.modules.ModulesFactory;
 import io.vrap.rmf.raml.persistence.RamlResourceSet;
 import io.vrap.rmf.raml.persistence.constructor.Scope;
-import org.eclipse.emf.common.util.ECollections;
 import org.eclipse.emf.common.util.URI;
-import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.resource.Resource;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 public class ApiConstructor extends AbstractConstructor {
     protected final static ModulesFactory FACTORY = ModulesFactory.eINSTANCE;
@@ -20,24 +15,12 @@ public class ApiConstructor extends AbstractConstructor {
         final Api api = FACTORY.createApi();
         peekScope().getResource().getContents().add(api);
 
-        for (final RAMLParser.AttributeFacetContext attributeFacet : ctx.attributeFacet()) {
-            setAttribute(attributeFacet, api);
-        }
+        pushScope(peekScope().with(api));
 
-        final Scope apiScope = peekScope().with(api);
+        ctx.attributeFacet().forEach(this::visitAttributeFacet);
+        ctx.typesFacet().forEach(this::visitTypesFacet);
 
-        for (final RAMLParser.TypesFacetContext typesFacet : ctx.typesFacet()) {
-            final String typesReferenceName = typesFacet.facet.getText();
-            final EStructuralFeature typesFeature = api.eClass().getEStructuralFeature(typesReferenceName);
-
-            final Scope typesScope = pushScope(apiScope.with(typesFeature));
-
-            final List<Object> types = typesFacet.types.stream()
-                    .map(this::visitTypeDeclaration)
-                    .collect(Collectors.toList());
-
-            typesScope.setValue(ECollections.asEList(types));
-        }
+        popScope();
 
         return api;
     }

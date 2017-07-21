@@ -6,6 +6,8 @@ import io.vrap.rmf.raml.model.types.BuiltinType;
 import io.vrap.rmf.raml.persistence.constructor.Scope;
 import io.vrap.rmf.raml.persistence.typeexpressions.TypeExpressionsParser;
 import org.antlr.v4.runtime.Token;
+import org.eclipse.emf.common.util.ECollections;
+import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
@@ -25,6 +27,26 @@ import static io.vrap.rmf.raml.model.elements.ElementsPackage.Literals.IDENTIFIA
 public abstract class AbstractConstructor extends RAMLBaseVisitor<Object> {
     private final Stack<Scope> scope = new Stack<>();
     private final TypeExpressionsParser typeExpressionsParser = new TypeExpressionsParser();
+
+    @Override
+    public Object visitTypesFacet(final RAMLParser.TypesFacetContext typesFacet) {
+        final String typesReferenceName = typesFacet.facet.getText();
+        final EClass eClass = peekScope().eObject().eClass();
+        final EStructuralFeature typesFeature = eClass.getEStructuralFeature(typesReferenceName);
+
+        final Scope typesScope = pushScope(peekScope().with(typesFeature));
+
+        final List<Object> types = typesFacet.types.stream()
+                .map(this::visitTypeDeclaration)
+                .collect(Collectors.toList());
+
+        final EList<Object> value = ECollections.asEList(types);
+        typesScope.setValue(value);
+
+        popScope();
+
+        return value;
+    }
 
     /**
      * Constructs a type expression from a {@link RAMLParser.TypeFacetContext}.
@@ -83,13 +105,19 @@ public abstract class AbstractConstructor extends RAMLBaseVisitor<Object> {
         return scope.peek();
     }
 
+    @Override
+    public Object visitAttributeFacet(final RAMLParser.AttributeFacetContext attributeFacet) {
+        final Object value = setAttribute(attributeFacet, peekScope().eObject());
+        return value;
+    }
+
     /**
      * Sets an attribute given by the attribute facet on the given eobject.
      *
      * @param attributeFacet the attribute facet
      * @param eObject        the object to set the attribute
      */
-    protected void setAttribute(final RAMLParser.AttributeFacetContext attributeFacet, final EObject eObject) {
+    protected Object setAttribute(final RAMLParser.AttributeFacetContext attributeFacet, final EObject eObject) {
         final EClass eClass = eObject.eClass();
         final String attributeName = attributeFacet.facet.getText();
         final EAttribute eAttribute = eClass.getEAllAttributes().stream()
@@ -97,11 +125,15 @@ public abstract class AbstractConstructor extends RAMLBaseVisitor<Object> {
                 .findFirst()
                 .orElse(null); // TODO: handle unknown attribute
 
+        final Object value = attributeFacet.facetValue().value == null ?
+                attributeFacet.facetValue().values :
+                attributeFacet.facetValue().value;
         if (attributeFacet.facetValue().value != null) {
             setAttribute(eObject, eAttribute, attributeFacet.facetValue().value);
         } else {
             setAttribute(eObject, eAttribute, attributeFacet.facetValue().values);
         }
+        return value;
     }
 
     private void setAttribute(final EObject eObject, final EAttribute eAttribute, final List<Token> valueTokens) {
