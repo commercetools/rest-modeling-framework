@@ -16,9 +16,9 @@ public class LibraryConstructor extends AbstractConstructor {
     @Override
     public Object visitLibrary(final RAMLParser.LibraryContext ctx) {
         final Library library = FACTORY.createLibrary();
-        peekScope().getResource().getContents().add(library);
+        scope.getResource().getContents().add(library);
 
-        pushScope(peekScope().with(library));
+        pushScope(scope.with(library));
 
         ctx.annotationFacet().forEach(this::visitAnnotationFacet);
         ctx.attributeFacet().forEach(this::visitAttributeFacet);

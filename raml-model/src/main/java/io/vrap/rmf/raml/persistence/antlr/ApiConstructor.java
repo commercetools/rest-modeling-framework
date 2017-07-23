@@ -13,9 +13,9 @@ public class ApiConstructor extends AbstractConstructor {
     @Override
     public Object visitApi(final RAMLParser.ApiContext ctx) {
         final Api api = FACTORY.createApi();
-        peekScope().getResource().getContents().add(api);
+        scope.getResource().getContents().add(api);
 
-        pushScope(peekScope().with(api));
+        pushScope(scope.with(api));
 
         ctx.annotationFacet().forEach(this::visitAnnotationFacet);
         ctx.attributeFacet().forEach(this::visitAttributeFacet);

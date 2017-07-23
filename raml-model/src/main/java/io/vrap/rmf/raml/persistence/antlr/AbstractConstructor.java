@@ -15,7 +15,6 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Stack;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -28,13 +27,13 @@ import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.*;
 public abstract class AbstractConstructor extends RAMLBaseVisitor<Object> {
     private static final FacetsFactory FACETS_FACTORY = FacetsFactory.eINSTANCE;
     private static final TypesFactory TYPES_FACTORY = TypesFactory.eINSTANCE;
-    private final Stack<Scope> scope = new Stack<>();
     private final TypeExpressionsParser typeExpressionsParser = new TypeExpressionsParser();
+    protected Scope scope;
 
     @Override
     public Object visitAnnotationFacet(final RAMLParser.AnnotationFacetContext annotationFacet) {
         final RAMLParser.AnnotationTupleContext annotationTuple = annotationFacet.annotationTuple();
-        return withinScope(peekScope().with(ANNOTATIONS_FACET__ANNOTATIONS), annotationsScope -> {
+        return withinScope(scope.with(ANNOTATIONS_FACET__ANNOTATIONS), annotationsScope -> {
             final Annotation annotation;
             if (annotationTuple != null) {
                 annotation = TYPES_FACTORY.createAnnotation();
@@ -53,7 +52,7 @@ public abstract class AbstractConstructor extends RAMLBaseVisitor<Object> {
             } else {
                 annotation = null;
             }
-            annotationsScope.setValue(annotation);
+            annotationsScope.setValue(ANNOTATIONS_FACET__ANNOTATIONS, annotation);
 
             return annotation;
 
@@ -69,10 +68,10 @@ public abstract class AbstractConstructor extends RAMLBaseVisitor<Object> {
     @Override
     public Object visitTypesFacet(final RAMLParser.TypesFacetContext typesFacet) {
         final String typesReferenceName = typesFacet.facet.getText();
-        final EClass eClass = peekScope().eObject().eClass();
+        final EClass eClass = scope.eObject().eClass();
         final EStructuralFeature typesFeature = eClass.getEStructuralFeature(typesReferenceName);
 
-        return withinScope(peekScope().with(typesFeature), typesScope -> {
+        return withinScope(scope.with(typesFeature), typesScope -> {
             final List<Object> types = typesScope.setValue(typesFacet.types.stream()
                     .map(this::visitTypeDeclaration)
                     .collect(Collectors.toList()));
@@ -88,7 +87,7 @@ public abstract class AbstractConstructor extends RAMLBaseVisitor<Object> {
     public Object visitTypeFacet(final RAMLParser.TypeFacetContext ctx) {
         final String typeExpression = ctx.SCALAR().getText();
 
-        return typeExpressionsParser.parse(typeExpression, peekScope());
+        return typeExpressionsParser.parse(typeExpression, scope);
     }
 
     /**
@@ -108,17 +107,17 @@ public abstract class AbstractConstructor extends RAMLBaseVisitor<Object> {
                     .orElse(BuiltinType.OBJECT);
         } else {
             baseType = BuiltinType.OBJECT;
-            superType = peekScope().getImportedTypeById(baseType.getName());
+            superType = scope.getImportedTypeById(baseType.getName());
         }
 
-        final EClass scopedMetaType = baseType.getScopedMetaType(peekScope());
+        final EClass scopedMetaType = baseType.getScopedMetaType(scope);
         final EObject declaredType = EcoreUtil.create(scopedMetaType);
-        withinScope(peekScope().with(declaredType), typeScope -> {
+        withinScope(scope.with(declaredType), typeScope -> {
             final EStructuralFeature typeReference = scopedMetaType.getEStructuralFeature("type");
-            typeScope.with(typeReference).setValue(superType);
+            typeScope.setValue(typeReference, superType);
 
             final String name = typeDeclaration.name.getText();
-            typeScope.with(IDENTIFIABLE_ELEMENT__NAME).setValue(name);
+            typeScope.setValue(IDENTIFIABLE_ELEMENT__NAME, name);
 
 
             typeDeclaration.annotationFacet().forEach(this::visitAnnotationFacet);
@@ -139,7 +138,7 @@ public abstract class AbstractConstructor extends RAMLBaseVisitor<Object> {
      */
     @Override
     public Object visitPropertiesFacet(final RAMLParser.PropertiesFacetContext propertiesFacet) {
-        return withinScope(peekScope().with(PROPERTIES_FACET__PROPERTIES), propertiesScope -> {
+        return withinScope(scope.with(PROPERTIES_FACET__PROPERTIES), propertiesScope -> {
             final List<Object> properties = propertiesFacet.propertyFacets.stream()
                     .map(this::visitPropertyFacet)
                     .collect(Collectors.toList());
@@ -151,15 +150,15 @@ public abstract class AbstractConstructor extends RAMLBaseVisitor<Object> {
     @Override
     public Object visitPropertyFacet(final RAMLParser.PropertyFacetContext propertyFacet) {
         final Property property = TYPES_FACTORY.createProperty();
-        peekScope().setValue(property);
+        scope.setValue(property);
 
-        return withinScope(peekScope().with(property), propertyScope -> {
+        return withinScope(scope.with(property), propertyScope -> {
             EObject propertyType;
             if (propertyFacet.propertyTuple() != null) {
                 final Token type = propertyFacet.propertyTuple().type;
                 propertyType = type == null ?
-                        peekScope().getImportedTypeById(BuiltinType.STRING.getName()) :
-                        peekScope().getImportedTypeById(type.getText());
+                        scope.getImportedTypeById(BuiltinType.STRING.getName()) :
+                        scope.getImportedTypeById(type.getText());
             } else {
                 final RAMLParser.PropertyMapContext propertyMap = propertyFacet.propertyMap();
 
@@ -171,23 +170,23 @@ public abstract class AbstractConstructor extends RAMLBaseVisitor<Object> {
                 final String parsedName;
                 if (requiredValue == null) {
                     final boolean isRequired = !name.endsWith("?");
-                    propertyScope.with(PROPERTY__REQUIRED).setValue(isRequired);
+                    propertyScope.setValue(PROPERTY__REQUIRED, isRequired);
                     parsedName = isRequired ? name : name.substring(0, name.length() - 1);
                 } else {
                     parsedName = name;
-                    propertyScope.with(PROPERTY__REQUIRED).setValue(requiredValue);
+                    propertyScope.setValue(PROPERTY__REQUIRED, requiredValue);
                 }
 
-                propertyScope.with(PROPERTY__NAME).setValue(parsedName);
+                propertyScope.setValue(PROPERTY__NAME, parsedName);
 
                 if (propertyMap.typeFacet().size() > 0) {
                     final RAMLParser.TypeFacetContext typeFacet = propertyMap.typeFacet().get(0);
-                    propertyType = (EObject) withinScope(peekScope().with(PROPERTY__TYPE),
+                    propertyType = (EObject) withinScope(scope.with(PROPERTY__TYPE),
                             propertyTypeScope -> visitTypeFacet(typeFacet));
                 } else if (propertyMap.propertiesFacet().size() == 1) {
-                    propertyType = peekScope().getImportedTypeById(BuiltinType.OBJECT.getName());
+                    propertyType = scope.getImportedTypeById(BuiltinType.OBJECT.getName());
                 } else {
-                    propertyType = peekScope().getImportedTypeById(BuiltinType.STRING.getName());
+                    propertyType = scope.getImportedTypeById(BuiltinType.STRING.getName());
                 }
 
                 // inline type declaration
@@ -202,7 +201,7 @@ public abstract class AbstractConstructor extends RAMLBaseVisitor<Object> {
 
                 propertyMap.annotationFacet().forEach(this::visitAnnotationFacet);
             }
-            propertyScope.with(PROPERTY__TYPE).setValue(propertyType);
+            propertyScope.setValue(PROPERTY__TYPE, propertyType);
 
             return property;
         });
@@ -219,20 +218,16 @@ public abstract class AbstractConstructor extends RAMLBaseVisitor<Object> {
     }
 
     protected Scope pushScope(final Scope scope) {
-        return this.scope.push(scope);
+        return this.scope = scope;
     }
 
     protected Scope popScope() {
-        return this.scope.pop();
-    }
-
-    protected Scope peekScope() {
-        return scope.peek();
+        return this.scope = scope.getParent();
     }
 
     @Override
     public Object visitAttributeFacet(final RAMLParser.AttributeFacetContext attributeFacet) {
-        final Object value = setAttribute(attributeFacet, peekScope().eObject());
+        final Object value = setAttribute(attributeFacet, scope.eObject());
         return value;
     }
 
@@ -252,7 +247,7 @@ public abstract class AbstractConstructor extends RAMLBaseVisitor<Object> {
 
         final Object value;
         if (eAttribute == null) {
-            peekScope().addError("Unknown attribute {0}", attributeName);
+            scope.addError("Unknown attribute {0}", attributeName);
             value = null;
         } else {
             value = attributeFacet.facetValue().value == null ?
