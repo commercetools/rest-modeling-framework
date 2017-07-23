@@ -1,13 +1,14 @@
 package io.vrap.rmf.raml.persistence.antlr;
 
-import io.vrap.rmf.raml.persistence.RamlResourceTest;
+import io.vrap.rmf.raml.persistence.RamlResourceSet;
 import org.antlr.v4.runtime.CommonTokenFactory;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.TokenStream;
+import org.eclipse.emf.common.util.URI;
+import org.eclipse.emf.ecore.resource.URIConverter;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.net.URL;
 
 /**
  * Test fixtures for {@link RAMLParser}.
@@ -21,9 +22,10 @@ public interface RAMLParserFixtures {
      * @throws IOException
      */
     default RAMLParser parseFromClasspath(final String name) throws IOException {
-        final InputStream inputStream = RamlResourceTest.class.getResourceAsStream(name);
-        final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-        final RAMLCustomLexer yamlLexer = new RAMLCustomLexer(inputStreamReader);
+        final URL url = getClass().getResource(name);
+        final URIConverter uriConverter = new RamlResourceSet().getURIConverter();
+        final RAMLCustomLexer yamlLexer = new RAMLCustomLexer(URI.createURI(url.toString()), uriConverter);
+
         yamlLexer.setTokenFactory(CommonTokenFactory.DEFAULT);
         final TokenStream tokenStream = new CommonTokenStream(yamlLexer);
         return new RAMLParser(tokenStream);

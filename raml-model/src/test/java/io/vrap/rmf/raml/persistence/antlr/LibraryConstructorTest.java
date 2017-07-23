@@ -119,4 +119,28 @@ public class LibraryConstructorTest implements RAMLParserFixtures, ResourceFixtu
         assertThat(inlineStringType.getName()).isNull();
         assertThat(inlineStringType.getMinLength()).isEqualTo(10);
     }
+
+    @Test
+    public void dataTypeInclude() throws IOException {
+        final RAMLParser.LibraryContext libraryContext = parseFromClasspath("/data-type-include.raml").library();
+        final Library library = (Library) LibraryConstructor.of(uriFromClasspath("/data-type-include.raml"))
+                .visitLibrary(libraryContext);
+
+        final EList<AnyType> types = library.getTypes();
+
+        assertThat(types).hasSize(1);
+        assertThat(types.get(0)).isInstanceOf(ObjectType.class);
+
+        final ObjectType personType = (ObjectType) types.get(0);
+
+        assertThat(personType.getName()).isEqualTo("Person");
+        assertThat(personType.getDisplayName()).isEqualTo("Person");
+        assertThat(personType.getProperties()).hasSize(1);
+
+        final Property ageProperty = personType.getProperties().get(0);
+
+        assertThat(ageProperty.getName()).isEqualTo("age");
+        assertThat(ageProperty.getType().getName()).isEqualTo("integer");
+    }
+
 }

@@ -159,6 +159,7 @@ public abstract class AbstractConstructor extends RAMLBaseVisitor<Object> {
                 propertyType = type == null ?
                         scope.getImportedTypeById(BuiltinType.STRING.getName()) :
                         scope.getImportedTypeById(type.getText());
+                propertyScope.setValue(PROPERTY__NAME, propertyFacet.propertyTuple().name.getText());
             } else {
                 final RAMLParser.PropertyMapContext propertyMap = propertyFacet.propertyMap();
 
