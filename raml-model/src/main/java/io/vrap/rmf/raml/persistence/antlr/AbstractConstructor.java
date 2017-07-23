@@ -30,6 +30,8 @@ public abstract class AbstractConstructor extends RAMLBaseVisitor<Object> {
     private final TypeExpressionsParser typeExpressionsParser = new TypeExpressionsParser();
     protected Scope scope;
 
+    public abstract EObject construct(final RAMLParser parser, final Scope scope);
+
     @Override
     public Object visitAnnotationFacet(final RAMLParser.AnnotationFacetContext annotationFacet) {
         final RAMLParser.AnnotationTupleContext annotationTuple = annotationFacet.annotationTuple();
@@ -73,7 +75,7 @@ public abstract class AbstractConstructor extends RAMLBaseVisitor<Object> {
 
         return withinScope(scope.with(typesFeature), typesScope -> {
             final List<Object> types = typesScope.setValue(typesFacet.types.stream()
-                    .map(this::visitTypeDeclaration)
+                    .map(this::visitTypeDeclarationFacet)
                     .collect(Collectors.toList()));
 
             return ECollections.asEList(types);
@@ -90,39 +92,70 @@ public abstract class AbstractConstructor extends RAMLBaseVisitor<Object> {
         return typeExpressionsParser.parse(typeExpression, scope);
     }
 
+    @Override
+    public Object visitTypeDeclarationFacet(final RAMLParser.TypeDeclarationFacetContext typeDeclarationFacet) {
+        final Object typeDeclaration;
+        if (typeDeclarationFacet.typeDeclarationTuple() != null) {
+            typeDeclaration = visitTypeDeclarationTuple(typeDeclarationFacet.typeDeclarationTuple());
+        } else {
+            typeDeclaration = visitTypeDeclarationMap(typeDeclarationFacet.typeDeclarationMap());
+        }
+        return typeDeclaration;
+    }
+
+    @Override
+    public Object visitTypeDeclarationTuple(final RAMLParser.TypeDeclarationTupleContext typeDeclarationTuple) {
+        final EObject superType;
+        if (typeDeclarationTuple.typeExpression != null && !typeDeclarationTuple.typeExpression.getText().isEmpty()) {
+            final String typeExpression = typeDeclarationTuple.typeExpression.getText();
+            superType = typeExpressionsParser.parse(typeExpression, scope);
+        } else {
+            superType = scope.getImportedTypeById(BuiltinType.STRING.getName());
+        }
+        final EObject declaredType = EcoreUtil.create(superType.eClass());
+        final Scope typeScope = scope.with(declaredType);
+        final EStructuralFeature typeReference = superType.eClass().getEStructuralFeature("type");
+
+        typeScope.setValue(typeReference, superType);
+        typeScope.setValue(IDENTIFIABLE_ELEMENT__NAME, typeDeclarationTuple.name.getText());
+
+        scope.setValue(declaredType);
+
+        return declaredType;
+    }
+
     /**
      * Constructs a type {@link AnyType} or an annotation type {@link AnyAnnotationType}
-     * from a type declaration {@link RAMLParser.TypeDeclarationContext}.
+     * from a type declaration {@link RAMLParser.TypeDeclarationMapContext}.
      */
     @Override
-    public Object visitTypeDeclaration(final RAMLParser.TypeDeclarationContext typeDeclaration) {
-        final BuiltinType baseType;
+    public Object visitTypeDeclarationMap(final RAMLParser.TypeDeclarationMapContext typeDeclarationMap) {
         final EObject superType;
 
-        if (typeDeclaration.typeFacet().size() > 0) {
-            final RAMLParser.TypeFacetContext typeFacet = typeDeclaration.typeFacet().get(0);
+        if (typeDeclarationMap.typeFacet().size() > 0) {
+            final RAMLParser.TypeFacetContext typeFacet = typeDeclarationMap.typeFacet().get(0);
             superType = (EObject) visitTypeFacet(typeFacet);
-            final String typeName = (String) superType.eGet(IDENTIFIABLE_ELEMENT__NAME); // TODO handle arrays
-            baseType = BuiltinType.of(typeName)
-                    .orElse(BuiltinType.OBJECT);
         } else {
-            baseType = BuiltinType.OBJECT;
-            superType = scope.getImportedTypeById(baseType.getName());
+            superType = scope.getImportedTypeById(BuiltinType.OBJECT.getName());
         }
 
-        final EClass scopedMetaType = baseType.getScopedMetaType(scope);
-        final EObject declaredType = EcoreUtil.create(scopedMetaType);
+        final EClass typeDeclarationType = BuiltinType.of(typeDeclarationMap.name.getText())
+                .map(builtinType -> builtinType.getScopedMetaType(scope))
+                .orElse(superType.eClass());
+
+        final EObject declaredType = EcoreUtil.create(typeDeclarationType);
+        scope.setValue(declaredType);
         withinScope(scope.with(declaredType), typeScope -> {
-            final EStructuralFeature typeReference = scopedMetaType.getEStructuralFeature("type");
+            final EStructuralFeature typeReference = superType.eClass().getEStructuralFeature("type");
             typeScope.setValue(typeReference, superType);
 
-            final String name = typeDeclaration.name.getText();
+            final String name = typeDeclarationMap.name.getText();
             typeScope.setValue(IDENTIFIABLE_ELEMENT__NAME, name);
 
 
-            typeDeclaration.annotationFacet().forEach(this::visitAnnotationFacet);
-            typeDeclaration.attributeFacet().forEach(this::visitAttributeFacet);
-            typeDeclaration.propertiesFacet().forEach(this::visitPropertiesFacet);
+            typeDeclarationMap.annotationFacet().forEach(this::visitAnnotationFacet);
+            typeDeclarationMap.attributeFacet().forEach(this::visitAttributeFacet);
+            typeDeclarationMap.propertiesFacet().forEach(this::visitPropertiesFacet);
 
             return declaredType;
         });
@@ -156,16 +189,22 @@ public abstract class AbstractConstructor extends RAMLBaseVisitor<Object> {
             EObject propertyType;
             if (propertyFacet.propertyTuple() != null) {
                 final Token type = propertyFacet.propertyTuple().type;
+                final String name = propertyFacet.propertyTuple().name.getText();
+
                 propertyType = type == null ?
                         scope.getImportedTypeById(BuiltinType.STRING.getName()) :
                         scope.getImportedTypeById(type.getText());
-                propertyScope.setValue(PROPERTY__NAME, propertyFacet.propertyTuple().name.getText());
+                final boolean isRequired = !name.endsWith("?");
+                propertyScope.setValue(PROPERTY__REQUIRED, isRequired);
+                final String parsedName = isRequired ? name : name.substring(0, name.length() - 1);
+
+                propertyScope.setValue(PROPERTY__NAME, parsedName);
             } else {
                 final RAMLParser.PropertyMapContext propertyMap = propertyFacet.propertyMap();
 
                 final String name = propertyMap.name.getText();
                 final Boolean requiredValue = propertyMap.requiredFacet().size() == 1 ?
-                        Boolean.valueOf(propertyMap.requiredFacet().get(0).getText()) : // TODO handle exception
+                        Boolean.parseBoolean(propertyMap.requiredFacet().get(0).required.getText()) : // TODO handle exception
                         null;
 
                 final String parsedName;

@@ -5,6 +5,7 @@ import io.vrap.rmf.raml.model.modules.Library;
 import io.vrap.rmf.raml.model.types.*;
 import io.vrap.rmf.raml.persistence.ResourceFixtures;
 import org.eclipse.emf.common.util.EList;
+import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -21,35 +22,36 @@ public class LibraryConstructorTest implements RAMLParserFixtures, ResourceFixtu
         final RAMLParser.LibraryContext libraryContext = parseFromClasspath("/libraries/library.raml").library();
         final Library library = (Library) LibraryConstructor.of(uriFromClasspath("/libraries/library.raml"))
                 .visitLibrary(libraryContext);
+        EcoreUtil.resolve(library, library.eResource());
 
         assertThat(library.getUsage()).isEqualTo("Test");
         final EList<AnyType> types = library.getTypes();
-        assertThat(types).hasSize(8);
+        assertThat(types).hasSize(6);
 
         assertThat(types.get(0).getName()).isEqualTo("StringType");
         assertThat(types.get(0)).isInstanceOf(StringType.class);
         final StringType stringType = (StringType) types.get(0);
         assertThat(stringType.getMinLength()).isEqualTo(10);
 
-        assertThat(types.get(4).getName()).isEqualTo("SuperType");
-        assertThat(types.get(4)).isInstanceOf(ObjectType.class);
-        final ObjectType superType = (ObjectType) types.get(4);
-
-        assertThat(types.get(3).getName()).isEqualTo("WithProperties");
+        assertThat(types.get(3).getName()).isEqualTo("SuperType");
         assertThat(types.get(3)).isInstanceOf(ObjectType.class);
-        final ObjectType objectType = (ObjectType) types.get(3);
+        final ObjectType superType = (ObjectType) types.get(3);
+
+        assertThat(types.get(2).getName()).isEqualTo("WithProperties");
+        assertThat(types.get(2)).isInstanceOf(ObjectType.class);
+        final ObjectType objectType = (ObjectType) types.get(2);
         assertThat(objectType.getProperties()).hasSize(2);
         assertThat(objectType.getProperty("super")).isNotNull();
         assertThat(objectType.getProperty("super").getType()).isEqualTo(superType);
 
-        assertThat(types.get(6).getName()).isEqualTo("SubType");
-        assertThat(types.get(6)).isInstanceOf(ObjectType.class);
-        final ObjectType subType = (ObjectType) types.get(6);
+        assertThat(types.get(4).getName()).isEqualTo("SubType");
+        assertThat(types.get(4)).isInstanceOf(ObjectType.class);
+        final ObjectType subType = (ObjectType) types.get(4);
         assertThat(subType.getType()).isEqualTo(superType);
 
-        assertThat(types.get(7).getName()).isEqualTo("Enum");
-        assertThat(types.get(7)).isInstanceOf(StringType.class);
-        final StringType enumType = (StringType) types.get(7);
+        assertThat(types.get(5).getName()).isEqualTo("Enum");
+        assertThat(types.get(5)).isInstanceOf(StringType.class);
+        final StringType enumType = (StringType) types.get(5);
         assertThat(enumType.getEnum()).containsExactly("v1", "v2");
     }
 

@@ -33,17 +33,28 @@ library:
 typesFacet:
     facet=( 'types' | 'annotationTypes' )
         MAP_START
-        ( types+=typeDeclaration )*
+        ( types+=typeDeclarationFacet )*
         MAP_END
     ;
 
-typeDeclaration:
+typeDeclarationFacet:
+    typeDeclarationTuple | typeDeclarationMap
+    ;
+
+typeDeclarationTuple:
+    name=SCALAR typeExpression=SCALAR;
+
+typeDeclarationMap:
     name=SCALAR
-    (
         MAP_START
         ( attributeFacet | propertiesFacet | typeFacet | annotationFacet )*
         MAP_END
-    )?
+    ;
+
+typeDeclarationFragment:
+    MAP_START
+    ( attributeFacet | propertiesFacet | typeFacet | annotationFacet )*
+    MAP_END
     ;
 
 typeFacet:
@@ -62,14 +73,19 @@ propertyFacet:
     ;
 
 propertyTuple:
-    name=SCALAR type=SCALAR
+    name=id type=SCALAR
     ;
 
 propertyMap:
-    name=SCALAR
+    name=id
         MAP_START
         ( attributeFacet | propertiesFacet | requiredFacet | typeFacet | annotationFacet )*
         MAP_END
+    ;
+
+id:
+        'required'
+    |   SCALAR
     ;
 
 requiredFacet:

@@ -97,9 +97,8 @@ public class RamlResourceTest implements ResourceFixtures {
         assertThat(stringType.getMinLength()).isEqualTo(10);
 
         final AnyType type2 = types.get(1);
-        assertThat(type2).isInstanceOf(ObjectType.class);
-        final ObjectType objectType1 = (ObjectType) type2;
-        assertThat(objectType1.getName()).isEqualTo("EmptyObject");
+        assertThat(type2).isInstanceOf(StringType.class);
+        assertThat(type2.getName()).isEqualTo("EmptyObject");
 
         final AnyType type3 = types.get(2);
         assertThat(type3).isInstanceOf(ObjectType.class);
@@ -114,7 +113,7 @@ public class RamlResourceTest implements ResourceFixtures {
         assertThat(optionalStringProperty.getRequired()).isEqualTo(false);
 
         final AnyType type4 = types.get(3);
-        assertThat(type3).isInstanceOf(ObjectType.class);
+        assertThat(type4).isInstanceOf(ObjectType.class);
         final ObjectType superType = (ObjectType) type4;
         assertThat(superType.getName()).isEqualTo("SuperType");
 

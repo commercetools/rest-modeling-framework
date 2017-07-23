@@ -44,4 +44,18 @@ public class RAMLParserTest implements RAMLParserFixtures {
         final LibraryContext library = parseFromClasspath("/locale.raml").library();
         System.out.println();
     }
+
+    @Test
+    public void requiredProperties() throws IOException {
+        final LibraryContext library = parseFromClasspath("/properties/required-properties.raml").library();
+
+        final TypeDeclarationFacetContext typeDeclaration = library.typesFacet(0)
+                .typeDeclarationFacet(0);
+        final PropertiesFacetContext propertiesFacet = typeDeclaration
+                .typeDeclarationMap().propertiesFacet(0);
+        final String requiredPropertyName = propertiesFacet
+                .propertyFacet(2)
+                .propertyMap().name.getText();
+        assertThat(requiredPropertyName).isEqualTo("required");
+    }
 }

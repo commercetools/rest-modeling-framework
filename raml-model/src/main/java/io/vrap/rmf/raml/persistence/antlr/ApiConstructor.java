@@ -5,10 +5,19 @@ import io.vrap.rmf.raml.model.modules.ModulesFactory;
 import io.vrap.rmf.raml.persistence.RamlResourceSet;
 import io.vrap.rmf.raml.persistence.constructor.Scope;
 import org.eclipse.emf.common.util.URI;
+import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 
 public class ApiConstructor extends AbstractConstructor {
     protected final static ModulesFactory FACTORY = ModulesFactory.eINSTANCE;
+
+    @Override
+    public EObject construct(final RAMLParser parser, final Scope scope) {
+        final Api api = (Api) withinScope(scope,
+                s -> visitApi(parser.api()));
+
+        return api;
+    }
 
     @Override
     public Object visitApi(final RAMLParser.ApiContext ctx) {

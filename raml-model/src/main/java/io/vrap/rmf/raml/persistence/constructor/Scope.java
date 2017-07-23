@@ -120,10 +120,14 @@ public class Scope {
         final EObject resolvedType;
         final String[] segments = id.split("\\.");
         if (segments.length == 1) {
-            final InternalEObject internalEObject;
-            internalEObject = (InternalEObject) EcoreUtil.create(type);
-            internalEObject.eSetProxyURI(resource.getURI().appendFragment(uriFragment));
-            resolvedType = internalEObject;
+            final EObject eObject = resource.getEObject(uriFragment);
+            if (eObject != null) {
+                resolvedType = eObject;
+            } else {
+                final InternalEObject internalEObject = (InternalEObject) EcoreUtil.create(type);
+                internalEObject.eSetProxyURI(resource.getURI().appendFragment(uriFragment));
+                resolvedType = internalEObject;
+            }
         } else if (segments.length == 2) {
             final String libraryName = segments[0];
             final Library usedLibrary = getUsedLibrary(libraryName);
