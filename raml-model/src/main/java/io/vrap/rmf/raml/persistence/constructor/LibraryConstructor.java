@@ -1,56 +1,49 @@
 package io.vrap.rmf.raml.persistence.constructor;
 
+import io.vrap.rmf.raml.model.modules.Library;
+import io.vrap.rmf.raml.model.modules.ModulesFactory;
+import io.vrap.rmf.raml.persistence.RamlResourceSet;
+import io.vrap.rmf.raml.persistence.antlr.RAMLParser;
+import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
-import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.resource.Resource;
-import org.eclipse.emf.ecore.util.EcoreUtil;
-import org.yaml.snakeyaml.nodes.MappingNode;
-import org.yaml.snakeyaml.nodes.NodeTuple;
-
-import java.util.List;
-import java.util.Optional;
-
-import static io.vrap.rmf.raml.model.modules.ModulesPackage.Literals.*;
 
 /**
- * Constructs a library instance.
+ * Constructs a library from a {@link RAMLParser.LibraryContext}.
  */
-public class LibraryConstructor extends Constructor<MappingNode> {
+public class LibraryConstructor extends AbstractConstructor {
+    protected final static ModulesFactory FACTORY = ModulesFactory.eINSTANCE;
 
-    public LibraryConstructor() {
-        LIBRARY.getEAllAttributes().forEach(this::addConstructor);
-        addConstructor(TYPE_CONTAINER__USES, new LibraryUsesConstructor());
-        addConstructor(TYPE_CONTAINER__TYPES,
-                new TypeDeclarationsConstructor());
-        addConstructor(TYPE_CONTAINER__ANNOTATION_TYPES,
-                new TypeDeclarationsConstructor());
+    @Override
+    public EObject construct(final RAMLParser parser, final Scope scope) {
+        final Library library = (Library) withinScope(scope,
+                s -> visitLibrary(parser.library()));
+        return library;
     }
 
     @Override
-    public Object apply(final MappingNode node, final Scope resourceScope) {
-        final EObject rootObject = EcoreUtil.create(LIBRARY);
-        final Resource resource = resourceScope.getResource();
-        resource.getContents().add(rootObject);
+    public Object visitLibrary(final RAMLParser.LibraryContext ctx) {
+        final Library library = FACTORY.createLibrary();
+        scope.getResource().getContents().add(library);
 
-        final Scope rootScope = resourceScope.with(rootObject);
+        pushScope(scope.with(library));
+        ctx.usesFacet().forEach(this::visitUsesFacet);
 
-        final List<NodeTuple> nodeTuples = node.getValue();
-        nodeTuples.stream()
-                .forEach(nodeTuple -> constructFeature(nodeTuple, rootScope));
+        ctx.annotationFacet().forEach(this::visitAnnotationFacet);
+        ctx.attributeFacet().forEach(this::visitAttributeFacet);
+        ctx.typesFacet().forEach(this::visitTypesFacet);
 
-        return rootObject;
+        popScope();
+
+        return library;
     }
 
-    protected void constructFeature(final NodeTuple featureNodeTuple, final Scope libraryScope) {
-        final Optional<Constructor<NodeTuple>> constructor = constructor(LIBRARY, featureNodeTuple);
+    public static LibraryConstructor of(final URI uri) {
+        final Resource resource = new RamlResourceSet().createResource(uri);
 
-        if (constructor.isPresent()) {
-            final Optional<EStructuralFeature> feature = feature(LIBRARY, featureNodeTuple);
-            final Scope featureScope = libraryScope.with(feature.get());
+        final LibraryConstructor constructor = new LibraryConstructor();
+        constructor.pushScope(Scope.of(resource));
 
-            constructor.get().apply(featureNodeTuple, featureScope);
-        } else {
-            libraryScope.addError("No constructor for {0} found", featureNodeTuple.getKeyNode());
-        }
+        return constructor;
     }
 }

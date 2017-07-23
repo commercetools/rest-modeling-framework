@@ -11,7 +11,6 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static io.vrap.functional.utils.Classes.as;
-import static io.vrap.rmf.raml.model.annotations.AnnotationsPackage.Literals.*;
 import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.*;
 
 /**
@@ -64,7 +63,7 @@ public enum BuiltinType {
     /**
      * Returns the type for the given type declaration type.
      *
-     * If the type declaration type is a subtype of {@link AnnotationType},
+     * If the type declaration type is a subtype of {@link AnyAnnotationType},
      * the {@link #getAnnotationTypeDeclarationType()} will be returned.
      *
      * Otherwise {@link #getTypeDeclarationType()} will be returned

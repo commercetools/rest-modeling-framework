@@ -14,8 +14,6 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
-import static io.vrap.rmf.raml.model.annotations.AnnotationsPackage.Literals.ANY_ANNOTATION_TYPE;
-import static io.vrap.rmf.raml.model.annotations.AnnotationsPackage.Literals.ARRAY_ANNOTATION_TYPE;
 import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.ARRAY_TYPE;
 
 /**
@@ -29,14 +27,12 @@ public class TypeExpressionsParser {
         final TokenStream tokenStream = new CommonTokenStream(lexer);
         final TypeExpressionParser typeExpressionParser = new TypeExpressionParser(tokenStream);
         final TypeExpressionParser.Type_exprContext typeExpr = typeExpressionParser.type_expr();
-        final EClass scopeType = (EClass) scope.eFeature().getEType();
-        final EClass arrayType = ANY_ANNOTATION_TYPE.isSuperTypeOf(scopeType) ?
-                ARRAY_ANNOTATION_TYPE :
-                ARRAY_TYPE;
-        final EObject anyType = new TypeExpressionBuilder(scope, arrayType).visit(typeExpr);
+
+        final EObject anyType = new TypeExpressionBuilder(scope, ARRAY_TYPE).visit(typeExpr);
 
         return anyType;
     }
+
 
     private final static class TypeExpressionBuilder extends TypeExpressionBaseVisitor<EObject> {
         private final Scope scope;

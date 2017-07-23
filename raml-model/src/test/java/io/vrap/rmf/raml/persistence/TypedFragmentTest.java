@@ -1,9 +1,8 @@
 package io.vrap.rmf.raml.persistence;
 
-import io.vrap.rmf.raml.model.annotations.StringAnnotationType;
-import io.vrap.rmf.raml.model.facets.Property;
-import io.vrap.rmf.raml.model.types.AnyType;
 import io.vrap.rmf.raml.model.types.ObjectType;
+import io.vrap.rmf.raml.model.types.Property;
+import io.vrap.rmf.raml.model.types.StringAnnotationType;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.junit.Test;
@@ -19,7 +18,7 @@ public class TypedFragmentTest implements ResourceFixtures {
 
     @Test
     public void dataType() throws IOException {
-        final Resource resource = fromClasspath("/data-type-fragment.raml");
+        final Resource resource = fromClasspath("/includes/data-type-fragment.raml");
         final ObjectType objectType = getRootObject(resource);
 
         assertThat(objectType.getName())
@@ -28,11 +27,11 @@ public class TypedFragmentTest implements ResourceFixtures {
 
         assertThat(objectType.getDisplayName()).isEqualTo("Person");
 
-        final EList<Property<AnyType>> properties = objectType.getProperties();
+        final EList<Property> properties = objectType.getProperties();
         assertThat(properties)
                 .hasSize(1);
 
-        final Property<AnyType> nameProperty = properties.get(0);
+        final Property nameProperty = properties.get(0);
         assertThat(nameProperty.getName())
                 .isEqualTo("age");
         assertThat(nameProperty.getType().getName())

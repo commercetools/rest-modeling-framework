@@ -1,13 +1,20 @@
 #%RAML 1.0 Library
 
 usage: Type with an annotation
+(PackageName): package
 
 annotationTypes:
     PackageName:
+        type: string
+    Java-Name:
         type: string
 
 types:
     AnnotatedType:
         (PackageName): package
         type: object
+        properties:
+            default:
+                type: string
+                (Java-Name): _default
 

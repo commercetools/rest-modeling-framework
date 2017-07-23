@@ -48,19 +48,19 @@
    </extension>
 
    <extension point="org.eclipse.emf.ecore.generated_package">
-      <!-- @generated annotations -->
-      <package
-            uri="http://www.vrap.io/raml/annotations"
-            class="io.vrap.rmf.raml.model.annotations.AnnotationsPackage"
-            genModel="model/annotations.xcore"/>
-   </extension>
-
-   <extension point="org.eclipse.emf.ecore.generated_package">
       <!-- @generated modules -->
       <package
             uri="http://www.vrap.io/raml/modules"
             class="io.vrap.rmf.raml.model.modules.ModulesPackage"
             genModel="model/modules.xcore"/>
+   </extension>
+
+   <extension point="org.eclipse.emf.ecore.generated_package">
+      <!-- @generated instances -->
+      <package
+            uri="http://www.vrap.io/raml/instances"
+            class="io.vrap.rmf.raml.model.instances.InstancesPackage"
+            genModel="model/instances.xcore"/>
    </extension>
 
 </plugin>

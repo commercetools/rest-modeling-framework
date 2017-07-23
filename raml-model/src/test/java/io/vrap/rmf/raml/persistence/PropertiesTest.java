@@ -5,7 +5,6 @@ import io.vrap.rmf.raml.model.types.ObjectType;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -14,7 +13,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class PropertiesTest implements ResourceFixtures {
 
-    @Ignore
     @Test
     public void inlineTypeDeclaration() throws IOException {
         final Resource resource = fromClasspath("/properties/inline-type-declaration.raml");

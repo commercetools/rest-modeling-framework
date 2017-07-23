@@ -23,14 +23,15 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static io.vrap.rmf.raml.model.annotations.AnnotationsPackage.Literals.ANY_ANNOTATION_TYPE;
 import static io.vrap.rmf.raml.model.modules.ModulesPackage.Literals.TYPE_CONTAINER__ANNOTATION_TYPES;
 import static io.vrap.rmf.raml.model.modules.ModulesPackage.Literals.TYPE_CONTAINER__TYPES;
+import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.ANY_ANNOTATION_TYPE;
 
 /**
  * Represents the current scope during the construction phase.
  */
 public class Scope {
+    private final Scope parent;
     private final Resource resource;
     private final URI uri;
     private final ResourceSet resourceSet;
@@ -39,8 +40,9 @@ public class Scope {
     private final Yaml yaml;
     private final Node valueNode;
 
-    private Scope(final Resource resource, final URI uri, final Yaml yaml,
+    private Scope(final Scope parent, final Resource resource, final URI uri, final Yaml yaml,
                   final EObject eObject, final EStructuralFeature feature, final Node valueNode) {
+        this.parent = parent;
         this.resource = resource;
         this.uri = uri;
         this.yaml = yaml;
@@ -118,10 +120,14 @@ public class Scope {
         final EObject resolvedType;
         final String[] segments = id.split("\\.");
         if (segments.length == 1) {
-            final InternalEObject internalEObject;
-            internalEObject = (InternalEObject) EcoreUtil.create(type);
-            internalEObject.eSetProxyURI(resource.getURI().appendFragment(uriFragment));
-            resolvedType = internalEObject;
+            final EObject eObject = resource.getEObject(uriFragment);
+            if (eObject != null) {
+                resolvedType = eObject;
+            } else {
+                final InternalEObject internalEObject = (InternalEObject) EcoreUtil.create(type);
+                internalEObject.eSetProxyURI(resource.getURI().appendFragment(uriFragment));
+                resolvedType = internalEObject;
+            }
         } else if (segments.length == 2) {
             final String libraryName = segments[0];
             final Library usedLibrary = getUsedLibrary(libraryName);
@@ -149,10 +155,23 @@ public class Scope {
      */
     @SuppressWarnings("unchecked")
     public <T> T setValue(final T value) {
-        final EObject container = eObject();
         final EStructuralFeature feature = eFeature();
+        return setValue(feature, value);
+    }
+
+    /**
+     * Sets the given value for the given feature on this scope.
+     *
+     * @param feature the feature to set
+     * @param value   the value, either a wrapper primitive wrapper object {@link Object},
+     *                a {@link EObject} or a {@link List} of these types.
+     * @return the value
+     */
+    public <T> T setValue(final EStructuralFeature feature, final T value) {
+        final EObject container = eObject();
         if (feature.isMany() && !(value instanceof List)) {
-            ((EList<T>) container.eGet(feature)).add(value);
+            final EList<T> eList = (EList<T>) container.eGet(feature);
+            eList.add(value);
         } else {
             container.eSet(feature, value);
         }
@@ -207,16 +226,25 @@ public class Scope {
                 .add(new RamlDiagnostic(message, location, line, column));
     }
 
+    /**
+     * Returns the parent scope.
+     *
+     * @return returns the parent scope
+     */
+    public Scope getParent() {
+        return parent;
+    }
+
     public Scope with(final EObject eObject) {
-        return new Scope(resource, uri, yaml, eObject, feature, valueNode);
+        return new Scope(this, resource, uri, yaml, eObject, feature, valueNode);
     }
 
     public Scope with(final EObject eObject, final EStructuralFeature feature) {
-        return new Scope(resource, uri, yaml, eObject, feature, null);
+        return new Scope(this, resource, uri, yaml, eObject, feature, null);
     }
 
     public Scope with(final Node node, final URI uri) {
-        return new Scope(resource, uri, yaml, eObject, feature, node);
+        return new Scope(this, resource, uri, yaml, eObject, feature, node);
     }
 
     public Scope with(final Node node) {
@@ -228,11 +256,11 @@ public class Scope {
     }
 
     public Scope with(final Resource resource) {
-        return new Scope(resource, uri, yaml, eObject, feature, valueNode);
+        return new Scope(this, resource, uri, yaml, eObject, feature, valueNode);
     }
 
     public static Scope of(final Resource resource) {
-        return new Scope(resource, resource.getURI(), new Yaml(), null, null, null);
+        return new Scope(null, resource, resource.getURI(), new Yaml(), null, null, null);
     }
 
     private static class RamlDiagnostic implements Resource.Diagnostic {
