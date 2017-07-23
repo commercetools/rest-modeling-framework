@@ -6,9 +6,15 @@ usage: Type with an annotation
 annotationTypes:
     PackageName:
         type: string
+    Java-Name:
+        type: string
 
 types:
     AnnotatedType:
         (PackageName): package
         type: object
+        properties:
+            default:
+                type: string
+                (Java-Name): _default
 

@@ -187,6 +187,8 @@ public abstract class AbstractConstructor extends RAMLBaseVisitor<Object> {
                 } else {
                     propertyType = peekScope().getImportedTypeById(BuiltinType.STRING.getName());
                 }
+
+                propertyMap.annotationFacet().forEach(this::visitAnnotationFacet);
             }
             propertyScope.with(PROPERTY__TYPE).setValue(propertyType);
 

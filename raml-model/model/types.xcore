@@ -30,7 +30,7 @@ class AnyType extends AnnotationsFacet, DocumentableElement, IdentifiableElement
 	refers AnyType ^type	
 }
 
-class Property {
+class Property extends AnnotationsFacet {
 	/*
 	 * The name of this property.
 	 */
