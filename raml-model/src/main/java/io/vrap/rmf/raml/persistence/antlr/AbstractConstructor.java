@@ -3,11 +3,12 @@ package io.vrap.rmf.raml.persistence.antlr;
 import io.vrap.rmf.raml.model.annotations.AnyAnnotationType;
 import io.vrap.rmf.raml.model.types.AnyType;
 import io.vrap.rmf.raml.model.types.BuiltinType;
+import io.vrap.rmf.raml.model.types.Property;
+import io.vrap.rmf.raml.model.types.TypesFactory;
 import io.vrap.rmf.raml.persistence.constructor.Scope;
 import io.vrap.rmf.raml.persistence.typeexpressions.TypeExpressionsParser;
 import org.antlr.v4.runtime.Token;
 import org.eclipse.emf.common.util.ECollections;
-import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
@@ -17,14 +18,17 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 import java.util.Collections;
 import java.util.List;
 import java.util.Stack;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static io.vrap.rmf.raml.model.elements.ElementsPackage.Literals.IDENTIFIABLE_ELEMENT__NAME;
+import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.*;
 
 /**
  * Abstract base class for antlr based constructors.
  */
 public abstract class AbstractConstructor extends RAMLBaseVisitor<Object> {
+    private static final TypesFactory TYPES_FACTORY = TypesFactory.eINSTANCE;
     private final Stack<Scope> scope = new Stack<>();
     private final TypeExpressionsParser typeExpressionsParser = new TypeExpressionsParser();
 
@@ -40,18 +44,13 @@ public abstract class AbstractConstructor extends RAMLBaseVisitor<Object> {
         final EClass eClass = peekScope().eObject().eClass();
         final EStructuralFeature typesFeature = eClass.getEStructuralFeature(typesReferenceName);
 
-        final Scope typesScope = pushScope(peekScope().with(typesFeature));
+        return withinScope(peekScope().with(typesFeature), (typesScope) -> {
+            final List<Object> types = typesScope.setValue(typesFacet.types.stream()
+                    .map(this::visitTypeDeclaration)
+                    .collect(Collectors.toList()));
 
-        final List<Object> types = typesFacet.types.stream()
-                .map(this::visitTypeDeclaration)
-                .collect(Collectors.toList());
-
-        final EList<Object> value = ECollections.asEList(types);
-        typesScope.setValue(value);
-
-        popScope();
-
-        return value;
+            return ECollections.asEList(types);
+        });
     }
 
     /**
@@ -86,17 +85,93 @@ public abstract class AbstractConstructor extends RAMLBaseVisitor<Object> {
 
         final EClass scopedMetaType = baseType.getScopedMetaType(peekScope());
         final EObject declaredType = EcoreUtil.create(scopedMetaType);
-        final EStructuralFeature typeReference = scopedMetaType.getEStructuralFeature("type");
-        declaredType.eSet(typeReference, superType);
+        withinScope(peekScope().with(declaredType), (typeScope) -> {
+            final EStructuralFeature typeReference = scopedMetaType.getEStructuralFeature("type");
+            typeScope.with(typeReference).setValue(superType);
 
-        final String name = ctx.name.getText();
-        declaredType.eSet(IDENTIFIABLE_ELEMENT__NAME, name);
+            final String name = ctx.name.getText();
+            typeScope.with(IDENTIFIABLE_ELEMENT__NAME).setValue(name);
 
-        for (RAMLParser.AttributeFacetContext attributeFacet : ctx.attributeFacet()) {
-            setAttribute(attributeFacet, declaredType);
-        }
+            ctx.attributeFacet().forEach(this::visitAttributeFacet);
+            ctx.propertiesFacet().forEach(this::visitPropertiesFacet);
+
+            return declaredType;
+        });
 
         return declaredType;
+    }
+
+    /**
+     * Constructs properties for the given properties facet.
+     *
+     * @param propertiesFacet the properties facet
+     * @return list of properties
+     */
+    @Override
+    public Object visitPropertiesFacet(final RAMLParser.PropertiesFacetContext propertiesFacet) {
+        return withinScope(peekScope().with(PROPERTIES_FACET__PROPERTIES), (s) -> {
+            final List<Object> properties = propertiesFacet.propertyFacets.stream()
+                    .map(this::visitPropertyFacet)
+                    .collect(Collectors.toList());
+
+            return properties;
+        });
+    }
+
+    @Override
+    public Object visitPropertyFacet(final RAMLParser.PropertyFacetContext propertyFacet) {
+        final Property property = TYPES_FACTORY.createProperty();
+        peekScope().setValue(property);
+
+        return withinScope(peekScope().with(property), (propertyScope) -> {
+            final EObject propertyType;
+            if (propertyFacet.propertyTuple() != null) {
+                final Token type = propertyFacet.propertyTuple().type;
+                propertyType = type == null ?
+                        peekScope().getImportedTypeById(BuiltinType.STRING.getName()) :
+                        peekScope().getImportedTypeById(type.getText());
+            } else {
+                final RAMLParser.PropertyMapContext propertyMap = propertyFacet.propertyMap();
+
+                final String name = propertyMap.name.getText();
+                final Boolean requiredValue = propertyMap.requiredFacet().size() == 1 ?
+                        Boolean.valueOf(propertyMap.requiredFacet().get(0).getText()) : // TODO handle exception
+                        null;
+
+                final String parsedName;
+                if (requiredValue == null) {
+                    final boolean isRequired = !name.endsWith("?");
+                    propertyScope.with(PROPERTY__REQUIRED).setValue(isRequired);
+                    parsedName = isRequired ? name : name.substring(0, name.length() - 1);
+                } else {
+                    parsedName = name;
+                    propertyScope.with(PROPERTY__REQUIRED).setValue(requiredValue);
+                }
+
+                propertyScope.with(PROPERTY__NAME).setValue(parsedName);
+
+                if (propertyMap.typeFacet().size() > 0) {
+                    final RAMLParser.TypeFacetContext typeFacet = propertyMap.typeFacet().get(0);
+                    propertyType = (EObject) withinScope(peekScope().with(PROPERTY__TYPE),
+                            (s) -> visitTypeFacet(typeFacet));
+                } else {
+                    propertyType = peekScope().getImportedTypeById(BuiltinType.STRING.getName());
+                }
+            }
+            propertyScope.with(PROPERTY__TYPE).setValue(propertyType);
+
+            return property;
+        });
+    }
+
+    protected <T> T withinScope(final Scope scope, final Function<Scope, T> within) {
+        pushScope(scope);
+
+        T value = within.apply(scope);
+
+        popScope();
+
+        return value;
     }
 
     protected Scope pushScope(final Scope scope) {

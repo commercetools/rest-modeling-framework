@@ -52,15 +52,25 @@ typeFacet:
 propertiesFacet:
     facet='properties'
         MAP_START
-        ( properties+=property )*
+        ( propertyFacets+=propertyFacet )*
         MAP_END
     ;
 
-property:
+propertyFacet:
+    propertyTuple | propertyMap
+    ;
+
+propertyTuple:
+    name=SCALAR type=SCALAR
+    ;
+
+propertyMap:
     name=SCALAR
-    (
         MAP_START
-        ( attributeFacet | typeFacet )*
+        ( requiredFacet | typeFacet )*
         MAP_END
-    )?
+    ;
+
+requiredFacet:
+    'required' required=SCALAR
     ;

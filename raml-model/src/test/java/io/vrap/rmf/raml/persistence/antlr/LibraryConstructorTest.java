@@ -39,6 +39,13 @@ public class LibraryConstructorTest implements RAMLParserFixtures, ResourceFixtu
         assertThat(types.get(4)).isInstanceOf(ObjectType.class);
         final ObjectType superType = (ObjectType) types.get(4);
 
+        assertThat(types.get(3).getName()).isEqualTo("WithProperties");
+        assertThat(types.get(3)).isInstanceOf(ObjectType.class);
+        final ObjectType objectType = (ObjectType) types.get(3);
+        assertThat(objectType.getProperties()).hasSize(2);
+        assertThat(objectType.getProperty("super")).isNotNull();
+        assertThat(objectType.getProperty("super").getType()).isEqualTo(superType);
+
         assertThat(types.get(6).getName()).isEqualTo("SubType");
         assertThat(types.get(6)).isInstanceOf(ObjectType.class);
         final ObjectType subType = (ObjectType) types.get(6);
