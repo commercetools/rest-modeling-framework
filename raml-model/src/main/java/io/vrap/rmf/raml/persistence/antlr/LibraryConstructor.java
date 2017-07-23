@@ -20,6 +20,7 @@ public class LibraryConstructor extends AbstractConstructor {
 
         pushScope(peekScope().with(library));
 
+        ctx.annotationFacet().forEach(this::visitAnnotationFacet);
         ctx.attributeFacet().forEach(this::visitAttributeFacet);
         ctx.typesFacet().forEach(this::visitTypesFacet);
 

@@ -17,6 +17,7 @@ public class ApiConstructor extends AbstractConstructor {
 
         pushScope(peekScope().with(api));
 
+        ctx.annotationFacet().forEach(this::visitAnnotationFacet);
         ctx.attributeFacet().forEach(this::visitAttributeFacet);
         ctx.typesFacet().forEach(this::visitTypesFacet);
 

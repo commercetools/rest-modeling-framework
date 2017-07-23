@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * An antlr lexer that uses snakeyaml events {@link Event} to
@@ -20,6 +22,9 @@ public class RAMLCustomLexer implements TokenSource {
     private static final String LIST_START = "LIST_START";
     private static final String LIST_END = "LIST_END";
     private static final String SCALAR = "SCALAR";
+    private static final String ANNOTATION_TYPE_REF = "ANNOTATION_TYPE_REF";
+
+    private static final Pattern ANNOTATION_TYPE_REF_PATTERN = Pattern.compile("\\(([^\\)]*)\\)");
 
     private final Yaml yaml = new Yaml();
     private final Iterator<Event> eventIterator;
@@ -35,6 +40,7 @@ public class RAMLCustomLexer implements TokenSource {
     private final int listStart;
     private final int listEnd;
     private final int scalar;
+    private final int annotationTypeRef;
 
     public RAMLCustomLexer(final Reader reader) {
         initTokens();
@@ -43,6 +49,7 @@ public class RAMLCustomLexer implements TokenSource {
         listStart = symbolTokenTypes.get(LIST_START);
         listEnd = symbolTokenTypes.get(LIST_END);
         scalar = symbolTokenTypes.get(SCALAR);
+        annotationTypeRef = symbolTokenTypes.get(ANNOTATION_TYPE_REF);
 
         this.eventIterator = yaml.parse(reader).iterator();
         eventSwitch = new TypeSwitch<Event, Token>()
@@ -95,11 +102,18 @@ public class RAMLCustomLexer implements TokenSource {
     }
 
     private Token scalar(final ScalarEvent scalarEvent) {
-        final String value = scalarEvent.getValue();
-        final int type = literalTokenTypes.containsKey(value) ?
-                literalTokenTypes.get(value) :
-                scalar;
-        return factory.create(type, value);
+        final String scalarValue = scalarEvent.getValue();
+        final Matcher matcher = ANNOTATION_TYPE_REF_PATTERN.matcher(scalarValue);
+        final int type = literalTokenTypes.containsKey(scalarValue) ?
+                literalTokenTypes.get(scalarValue) :
+                matcher.matches() ?
+                        annotationTypeRef :
+                        scalar;
+        final String text = matcher.matches() ?
+                matcher.group(1) :
+                scalarValue;
+
+        return factory.create(type, text);
     }
 
     @Override

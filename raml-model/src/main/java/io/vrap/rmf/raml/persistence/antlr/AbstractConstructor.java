@@ -1,9 +1,8 @@
 package io.vrap.rmf.raml.persistence.antlr;
 
-import io.vrap.rmf.raml.model.types.AnyType;
-import io.vrap.rmf.raml.model.types.BuiltinType;
-import io.vrap.rmf.raml.model.types.Property;
-import io.vrap.rmf.raml.model.types.TypesFactory;
+import io.vrap.rmf.raml.model.facets.FacetsFactory;
+import io.vrap.rmf.raml.model.facets.StringInstance;
+import io.vrap.rmf.raml.model.types.*;
 import io.vrap.rmf.raml.persistence.constructor.Scope;
 import io.vrap.rmf.raml.persistence.typeexpressions.TypeExpressionsParser;
 import org.antlr.v4.runtime.Token;
@@ -27,9 +26,39 @@ import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.*;
  * Abstract base class for antlr based constructors.
  */
 public abstract class AbstractConstructor extends RAMLBaseVisitor<Object> {
+    private static final FacetsFactory FACETS_FACTORY = FacetsFactory.eINSTANCE;
     private static final TypesFactory TYPES_FACTORY = TypesFactory.eINSTANCE;
     private final Stack<Scope> scope = new Stack<>();
     private final TypeExpressionsParser typeExpressionsParser = new TypeExpressionsParser();
+
+    @Override
+    public Object visitAnnotationFacet(final RAMLParser.AnnotationFacetContext annotationFacet) {
+        final RAMLParser.AnnotationTupleContext annotationTuple = annotationFacet.annotationTuple();
+        return withinScope(peekScope().with(ANNOTATIONS_FACET__ANNOTATIONS), (annotationsScope) -> {
+            final Annotation annotation;
+            if (annotationTuple != null) {
+                annotation = TYPES_FACTORY.createAnnotation();
+
+                final String annotationTypeRef = annotationTuple.ANNOTATION_TYPE_REF().getText();
+                final Scope annotationTypeScope = annotationsScope.with(ANNOTATION__TYPE);
+                final AnyAnnotationType annotationType = (AnyAnnotationType)
+                        annotationTypeScope.getImportedTypeById(annotationTypeRef);
+
+                final StringInstance value = FACETS_FACTORY.createStringInstance();
+                value.setValue(annotationTuple.value.getText());
+
+                annotation.setType(annotationType);
+                annotation.setValue(value);
+
+            } else {
+                annotation = null;
+            }
+            annotationsScope.setValue(annotation);
+
+            return annotation;
+
+        });
+    }
 
     /**
      * Constructor types or annotation types from the given {@link RAMLParser.TypesFacetContext}.
@@ -67,12 +96,12 @@ public abstract class AbstractConstructor extends RAMLBaseVisitor<Object> {
      * from a type declaration {@link RAMLParser.TypeDeclarationContext}.
      */
     @Override
-    public Object visitTypeDeclaration(final RAMLParser.TypeDeclarationContext ctx) {
+    public Object visitTypeDeclaration(final RAMLParser.TypeDeclarationContext typeDeclaration) {
         final BuiltinType baseType;
         final EObject superType;
 
-        if (ctx.typeFacet().size() > 0) {
-            final RAMLParser.TypeFacetContext typeFacet = ctx.typeFacet().get(0);
+        if (typeDeclaration.typeFacet().size() > 0) {
+            final RAMLParser.TypeFacetContext typeFacet = typeDeclaration.typeFacet().get(0);
             superType = (EObject) visitTypeFacet(typeFacet);
             final String typeName = (String) superType.eGet(IDENTIFIABLE_ELEMENT__NAME); // TODO handle arrays
             baseType = BuiltinType.of(typeName)
@@ -88,11 +117,13 @@ public abstract class AbstractConstructor extends RAMLBaseVisitor<Object> {
             final EStructuralFeature typeReference = scopedMetaType.getEStructuralFeature("type");
             typeScope.with(typeReference).setValue(superType);
 
-            final String name = ctx.name.getText();
+            final String name = typeDeclaration.name.getText();
             typeScope.with(IDENTIFIABLE_ELEMENT__NAME).setValue(name);
 
-            ctx.attributeFacet().forEach(this::visitAttributeFacet);
-            ctx.propertiesFacet().forEach(this::visitPropertiesFacet);
+
+            typeDeclaration.annotationFacet().forEach(this::visitAnnotationFacet);
+            typeDeclaration.attributeFacet().forEach(this::visitAttributeFacet);
+            typeDeclaration.propertiesFacet().forEach(this::visitPropertiesFacet);
 
             return declaredType;
         });
