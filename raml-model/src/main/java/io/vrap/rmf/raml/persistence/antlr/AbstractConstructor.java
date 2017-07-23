@@ -34,7 +34,7 @@ public abstract class AbstractConstructor extends RAMLBaseVisitor<Object> {
     @Override
     public Object visitAnnotationFacet(final RAMLParser.AnnotationFacetContext annotationFacet) {
         final RAMLParser.AnnotationTupleContext annotationTuple = annotationFacet.annotationTuple();
-        return withinScope(peekScope().with(ANNOTATIONS_FACET__ANNOTATIONS), (annotationsScope) -> {
+        return withinScope(peekScope().with(ANNOTATIONS_FACET__ANNOTATIONS), annotationsScope -> {
             final Annotation annotation;
             if (annotationTuple != null) {
                 annotation = TYPES_FACTORY.createAnnotation();
@@ -72,7 +72,7 @@ public abstract class AbstractConstructor extends RAMLBaseVisitor<Object> {
         final EClass eClass = peekScope().eObject().eClass();
         final EStructuralFeature typesFeature = eClass.getEStructuralFeature(typesReferenceName);
 
-        return withinScope(peekScope().with(typesFeature), (typesScope) -> {
+        return withinScope(peekScope().with(typesFeature), typesScope -> {
             final List<Object> types = typesScope.setValue(typesFacet.types.stream()
                     .map(this::visitTypeDeclaration)
                     .collect(Collectors.toList()));
@@ -113,7 +113,7 @@ public abstract class AbstractConstructor extends RAMLBaseVisitor<Object> {
 
         final EClass scopedMetaType = baseType.getScopedMetaType(peekScope());
         final EObject declaredType = EcoreUtil.create(scopedMetaType);
-        withinScope(peekScope().with(declaredType), (typeScope) -> {
+        withinScope(peekScope().with(declaredType), typeScope -> {
             final EStructuralFeature typeReference = scopedMetaType.getEStructuralFeature("type");
             typeScope.with(typeReference).setValue(superType);
 
@@ -139,7 +139,7 @@ public abstract class AbstractConstructor extends RAMLBaseVisitor<Object> {
      */
     @Override
     public Object visitPropertiesFacet(final RAMLParser.PropertiesFacetContext propertiesFacet) {
-        return withinScope(peekScope().with(PROPERTIES_FACET__PROPERTIES), (s) -> {
+        return withinScope(peekScope().with(PROPERTIES_FACET__PROPERTIES), propertiesScope -> {
             final List<Object> properties = propertiesFacet.propertyFacets.stream()
                     .map(this::visitPropertyFacet)
                     .collect(Collectors.toList());
@@ -153,8 +153,8 @@ public abstract class AbstractConstructor extends RAMLBaseVisitor<Object> {
         final Property property = TYPES_FACTORY.createProperty();
         peekScope().setValue(property);
 
-        return withinScope(peekScope().with(property), (propertyScope) -> {
-            final EObject propertyType;
+        return withinScope(peekScope().with(property), propertyScope -> {
+            EObject propertyType;
             if (propertyFacet.propertyTuple() != null) {
                 final Token type = propertyFacet.propertyTuple().type;
                 propertyType = type == null ?
@@ -183,9 +183,21 @@ public abstract class AbstractConstructor extends RAMLBaseVisitor<Object> {
                 if (propertyMap.typeFacet().size() > 0) {
                     final RAMLParser.TypeFacetContext typeFacet = propertyMap.typeFacet().get(0);
                     propertyType = (EObject) withinScope(peekScope().with(PROPERTY__TYPE),
-                            (s) -> visitTypeFacet(typeFacet));
+                            propertyTypeScope -> visitTypeFacet(typeFacet));
+                } else if (propertyMap.propertiesFacet().size() == 1) {
+                    propertyType = peekScope().getImportedTypeById(BuiltinType.OBJECT.getName());
                 } else {
                     propertyType = peekScope().getImportedTypeById(BuiltinType.STRING.getName());
+                }
+
+                // inline type declaration
+                if (propertyMap.attributeFacet().size() > 0) {
+                    propertyType = EcoreUtil.create(propertyType.eClass());
+                    withinScope(propertyScope.with(propertyType),
+                            inlineTypeDeclarationScope ->
+                                    propertyMap.attributeFacet().stream()
+                                            .map(this::visitAttributeFacet)
+                                            .collect(Collectors.toList()));
                 }
 
                 propertyMap.annotationFacet().forEach(this::visitAnnotationFacet);

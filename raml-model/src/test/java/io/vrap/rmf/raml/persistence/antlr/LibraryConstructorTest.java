@@ -100,4 +100,23 @@ public class LibraryConstructorTest implements RAMLParserFixtures, ResourceFixtu
         assertThat(defaultProperty).isNotNull();
         assertThat(defaultProperty.getAnnotations()).hasSize(1);
     }
+
+    @Test
+    public void propertiesInlineTypeDeclaration() throws IOException {
+        final RAMLParser.LibraryContext libraryContext = parseFromClasspath("/properties/inline-type-declaration.raml").library();
+        final Library library = (Library) LibraryConstructor.of(uriFromClasspath("/properties/inline-type-declaration.raml"))
+                .visitLibrary(libraryContext);
+
+        final EList<AnyType> types = library.getTypes();
+        assertThat(types).hasSize(1);
+        assertThat(types.get(0)).isInstanceOf(ObjectType.class);
+        final ObjectType objectType = (ObjectType) types.get(0);
+
+        final Property nameProperty = objectType.getProperty("name");
+        assertThat(nameProperty).isNotNull();
+        assertThat(nameProperty.getType()).isInstanceOf(StringType.class);
+        final StringType inlineStringType = (StringType) nameProperty.getType();
+        assertThat(inlineStringType.getName()).isNull();
+        assertThat(inlineStringType.getMinLength()).isEqualTo(10);
+    }
 }

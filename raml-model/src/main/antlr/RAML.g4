@@ -68,7 +68,7 @@ propertyTuple:
 propertyMap:
     name=SCALAR
         MAP_START
-        ( requiredFacet | typeFacet | annotationFacet )*
+        ( attributeFacet | propertiesFacet | requiredFacet | typeFacet | annotationFacet )*
         MAP_END
     ;
 
