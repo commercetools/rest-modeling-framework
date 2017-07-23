@@ -13,8 +13,29 @@ tokens {
 
 api:
     MAP_START
-    ( attributeFacet | typesFacet | annotationFacet )*
+    ( securitySchemesFacet | securedByFacet | resourceTypesFacet | attributeFacet | typesFacet | annotationFacet )*
     MAP_END;
+
+securitySchemesFacet:
+    'securitySchemes'
+        MAP_START
+            SCALAR*
+        MAP_END
+    ;
+
+securedByFacet:
+    'securedBy'
+        LIST_START
+            SCALAR*
+        LIST_END
+    ;
+
+resourceTypesFacet:
+    'resourceTypes'
+        MAP_START
+            SCALAR*
+        MAP_END
+    ;
 
 attributeFacet:
     facet=SCALAR value=facetValue;
@@ -26,8 +47,19 @@ facetValue:
 
 library:
     MAP_START
-    ( attributeFacet | typesFacet | annotationFacet )*
+    ( usesFacet | attributeFacet | typesFacet | annotationFacet )*
     MAP_END
+    ;
+
+usesFacet:
+    'uses'
+        MAP_START
+            ( libraryUse )*
+        MAP_END
+    ;
+
+libraryUse:
+    name=SCALAR libraryUri=SCALAR
     ;
 
 typesFacet:

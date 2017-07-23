@@ -2,15 +2,20 @@ package io.vrap.rmf.raml.persistence.antlr;
 
 import io.vrap.rmf.raml.model.facets.FacetsFactory;
 import io.vrap.rmf.raml.model.facets.StringInstance;
+import io.vrap.rmf.raml.model.modules.Library;
+import io.vrap.rmf.raml.model.modules.LibraryUse;
+import io.vrap.rmf.raml.model.modules.ModulesFactory;
 import io.vrap.rmf.raml.model.types.*;
 import io.vrap.rmf.raml.persistence.constructor.Scope;
 import io.vrap.rmf.raml.persistence.typeexpressions.TypeExpressionsParser;
 import org.antlr.v4.runtime.Token;
 import org.eclipse.emf.common.util.ECollections;
+import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EStructuralFeature;
+import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
 import java.util.Collections;
@@ -19,18 +24,44 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static io.vrap.rmf.raml.model.elements.ElementsPackage.Literals.IDENTIFIABLE_ELEMENT__NAME;
+import static io.vrap.rmf.raml.model.modules.ModulesPackage.Literals.TYPE_CONTAINER__USES;
 import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.*;
 
 /**
  * Abstract base class for antlr based constructors.
  */
 public abstract class AbstractConstructor extends RAMLBaseVisitor<Object> {
+    private final static ModulesFactory MODULES_FACTORY = ModulesFactory.eINSTANCE;
     private static final FacetsFactory FACETS_FACTORY = FacetsFactory.eINSTANCE;
     private static final TypesFactory TYPES_FACTORY = TypesFactory.eINSTANCE;
     private final TypeExpressionsParser typeExpressionsParser = new TypeExpressionsParser();
     protected Scope scope;
 
     public abstract EObject construct(final RAMLParser parser, final Scope scope);
+
+    @Override
+    public Object visitUsesFacet(final RAMLParser.UsesFacetContext usesFacet) {
+        final List<Object> libraryUses = withinScope(scope.with(TYPE_CONTAINER__USES),
+                usesScope -> usesFacet.libraryUse().stream()
+                    .map(this::visitLibraryUse)
+                    .collect(Collectors.toList()));
+
+        return libraryUses;
+    }
+
+    @Override
+    public Object visitLibraryUse(final RAMLParser.LibraryUseContext libraryUseFacet) {
+        final Resource libraryResource = scope.getResource(libraryUseFacet.libraryUri.getText());
+        final EList<EObject> contents = libraryResource.getContents();
+        final LibraryUse libraryUse = MODULES_FACTORY.createLibraryUse();
+
+        libraryUse.setName(libraryUseFacet.name.getText());
+        libraryUse.setLibrary((Library) contents.get(0));
+
+        scope.setValue(libraryUse);
+
+        return libraryUse;
+    }
 
     @Override
     public Object visitAnnotationFacet(final RAMLParser.AnnotationFacetContext annotationFacet) {

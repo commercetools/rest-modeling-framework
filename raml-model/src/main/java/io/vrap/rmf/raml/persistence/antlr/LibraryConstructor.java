@@ -27,6 +27,7 @@ public class LibraryConstructor extends AbstractConstructor {
         scope.getResource().getContents().add(library);
 
         pushScope(scope.with(library));
+        ctx.usesFacet().forEach(this::visitUsesFacet);
 
         ctx.annotationFacet().forEach(this::visitAnnotationFacet);
         ctx.attributeFacet().forEach(this::visitAttributeFacet);
