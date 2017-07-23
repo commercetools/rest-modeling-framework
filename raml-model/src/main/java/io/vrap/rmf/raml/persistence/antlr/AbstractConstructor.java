@@ -1,6 +1,5 @@
 package io.vrap.rmf.raml.persistence.antlr;
 
-import io.vrap.rmf.raml.model.annotations.AnyAnnotationType;
 import io.vrap.rmf.raml.model.types.AnyType;
 import io.vrap.rmf.raml.model.types.BuiltinType;
 import io.vrap.rmf.raml.model.types.Property;

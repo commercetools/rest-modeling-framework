@@ -5,8 +5,8 @@
 )
 package io.vrap.rmf.raml.model.modules
 
-import io.vrap.rmf.raml.model.facets.AnnotationsFacet
-import io.vrap.rmf.raml.model.annotations.AnyAnnotationType
+import io.vrap.rmf.raml.model.types.AnnotationsFacet
+import io.vrap.rmf.raml.model.types.AnyAnnotationType
 import io.vrap.rmf.raml.model.types.AnyType
 
 class Api extends AnnotationsFacet, TypeContainer {

@@ -179,10 +179,3 @@ class PropertyValue {
 	String name
 	contains Instance value
 }
-
-interface AnnotationsFacet {
-	/*
-	 * The annotations of this element.
-	 */
-	contains Instance[] annotations
-}

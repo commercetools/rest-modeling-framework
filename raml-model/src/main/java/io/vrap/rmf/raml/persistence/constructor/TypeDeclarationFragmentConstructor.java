@@ -16,9 +16,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static io.vrap.functional.utils.Classes.asOptional;
-import static io.vrap.rmf.raml.model.annotations.AnnotationsPackage.Literals.ANY_ANNOTATION_TYPE;
-import static io.vrap.rmf.raml.model.annotations.AnnotationsPackage.Literals.ANY_ANNOTATION_TYPE__TYPE;
-import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.ANY_TYPE__TYPE;
+import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.*;
 
 /**
  * Constructs a type declaration for a type fragment of either {@link RamlFragmentKind#DATA_TYPE}

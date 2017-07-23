@@ -1,6 +1,6 @@
 package io.vrap.rmf.raml.persistence;
 
-import io.vrap.rmf.raml.model.annotations.AnyAnnotationType;
+import io.vrap.rmf.raml.model.types.AnyAnnotationType;
 import io.vrap.rmf.raml.model.types.AnyType;
 import io.vrap.rmf.raml.model.types.BuiltinType;
 import org.eclipse.emf.ecore.EObject;

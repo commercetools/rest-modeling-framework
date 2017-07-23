@@ -48,14 +48,6 @@
    </extension>
 
    <extension point="org.eclipse.emf.ecore.generated_package">
-      <!-- @generated annotations -->
-      <package
-            uri="http://www.vrap.io/raml/annotations"
-            class="io.vrap.rmf.raml.model.annotations.AnnotationsPackage"
-            genModel="model/annotations.xcore"/>
-   </extension>
-
-   <extension point="org.eclipse.emf.ecore.generated_package">
       <!-- @generated modules -->
       <package
             uri="http://www.vrap.io/raml/modules"

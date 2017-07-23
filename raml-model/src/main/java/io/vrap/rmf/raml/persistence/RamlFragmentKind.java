@@ -7,8 +7,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-import static io.vrap.rmf.raml.model.annotations.AnnotationsPackage.Literals.ANY_ANNOTATION_TYPE;
 import static io.vrap.rmf.raml.model.modules.ModulesPackage.Literals;
+import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.ANY_ANNOTATION_TYPE;
 import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.ANY_TYPE;
 
 /**
