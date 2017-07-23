@@ -126,18 +126,22 @@ public class RAMLCustomLexer implements TokenSource {
 
 
     private void loadEvents(final URI uri) {
-        this.uri.push(uri);
-        final Iterator<Event> eventIterator;
-        try (final InputStreamReader reader = new InputStreamReader(uriConverter.createInputStream(uri))) {
-            final Iterable<Event> eventIterable = yaml.parse(reader);
+        if (this.uri.contains(uri)) {
+            // TODO add circular include error
+        } else {
+            this.uri.push(uri);
+            final Iterator<Event> eventIterator;
+            try (final InputStreamReader reader = new InputStreamReader(uriConverter.createInputStream(uri))) {
+                final Iterable<Event> eventIterable = yaml.parse(reader);
 
-            final List<Event> eagerLoadedEvents = new ArrayList<>();
-            eventIterable.forEach(eagerLoadedEvents::add);
-            eventIterator = eagerLoadedEvents.iterator();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+                final List<Event> eagerLoadedEvents = new ArrayList<>();
+                eventIterable.forEach(eagerLoadedEvents::add);
+                eventIterator = eagerLoadedEvents.iterator();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            this.eventIteratorStack.push(eventIterator);
         }
-        this.eventIteratorStack.push(eventIterator);
     }
 
     private Token scalar(final ScalarEvent scalarEvent) {

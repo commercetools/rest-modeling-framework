@@ -23,11 +23,17 @@ public interface RAMLParserFixtures {
      */
     default RAMLParser parseFromClasspath(final String name) throws IOException {
         final URL url = getClass().getResource(name);
-        final URIConverter uriConverter = new RamlResourceSet().getURIConverter();
-        final RAMLCustomLexer yamlLexer = new RAMLCustomLexer(URI.createURI(url.toString()), uriConverter);
-
-        yamlLexer.setTokenFactory(CommonTokenFactory.DEFAULT);
+        final RAMLCustomLexer yamlLexer = lexer(url);
         final TokenStream tokenStream = new CommonTokenStream(yamlLexer);
+
         return new RAMLParser(tokenStream);
+    }
+
+    default RAMLCustomLexer lexer(final URL url) {
+        final URIConverter uriConverter = new RamlResourceSet().getURIConverter();
+        final RAMLCustomLexer lexer = new RAMLCustomLexer(URI.createURI(url.toString()), uriConverter);
+        lexer.setTokenFactory(CommonTokenFactory.DEFAULT);
+
+        return lexer;
     }
 }

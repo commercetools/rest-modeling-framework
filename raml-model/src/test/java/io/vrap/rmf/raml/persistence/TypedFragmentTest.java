@@ -18,7 +18,7 @@ public class TypedFragmentTest implements ResourceFixtures {
 
     @Test
     public void dataType() throws IOException {
-        final Resource resource = fromClasspath("/data-type-fragment.raml");
+        final Resource resource = fromClasspath("/includes/data-type-fragment.raml");
         final ObjectType objectType = getRootObject(resource);
 
         assertThat(objectType.getName())
