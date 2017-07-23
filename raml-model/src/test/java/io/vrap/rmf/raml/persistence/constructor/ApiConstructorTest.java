@@ -1,7 +1,9 @@
-package io.vrap.rmf.raml.persistence.antlr;
+package io.vrap.rmf.raml.persistence.constructor;
 
 import io.vrap.rmf.raml.model.modules.Api;
 import io.vrap.rmf.raml.persistence.ResourceFixtures;
+import io.vrap.rmf.raml.persistence.antlr.RAMLParser;
+import io.vrap.rmf.raml.persistence.antlr.RAMLParserFixtures;
 import org.junit.Test;
 
 import java.io.IOException;

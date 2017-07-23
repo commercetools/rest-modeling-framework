@@ -1,7 +1,8 @@
 package io.vrap.rmf.raml.persistence;
 
-import io.vrap.rmf.raml.persistence.antlr.*;
-import io.vrap.rmf.raml.persistence.constructor.Scope;
+import io.vrap.rmf.raml.persistence.antlr.RAMLCustomLexer;
+import io.vrap.rmf.raml.persistence.antlr.RAMLParser;
+import io.vrap.rmf.raml.persistence.constructor.*;
 import org.antlr.v4.runtime.CommonTokenFactory;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.TokenStream;

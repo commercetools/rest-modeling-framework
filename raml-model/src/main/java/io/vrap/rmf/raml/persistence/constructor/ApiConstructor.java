@@ -1,57 +1,46 @@
 package io.vrap.rmf.raml.persistence.constructor;
 
 import io.vrap.rmf.raml.model.modules.Api;
+import io.vrap.rmf.raml.model.modules.ModulesFactory;
+import io.vrap.rmf.raml.persistence.RamlResourceSet;
+import io.vrap.rmf.raml.persistence.antlr.RAMLParser;
+import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
-import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.resource.Resource;
-import org.eclipse.emf.ecore.util.EcoreUtil;
-import org.yaml.snakeyaml.nodes.MappingNode;
-import org.yaml.snakeyaml.nodes.NodeTuple;
 
-import java.util.List;
-import java.util.Optional;
+public class ApiConstructor extends AbstractConstructor {
+    protected final static ModulesFactory FACTORY = ModulesFactory.eINSTANCE;
 
-import static io.vrap.rmf.raml.model.modules.ModulesPackage.Literals.*;
+    @Override
+    public EObject construct(final RAMLParser parser, final Scope scope) {
+        final Api api = (Api) withinScope(scope,
+                s -> visitApi(parser.api()));
 
-/**
- * Constructs an api {@link Api} instance.
- */
-public class ApiConstructor extends Constructor<MappingNode> {
-
-    public ApiConstructor() {
-        API.getEAllAttributes().forEach(this::addConstructor);
-        addConstructor(TYPE_CONTAINER__USES, new LibraryUsesConstructor());
-        addConstructor(TYPE_CONTAINER__TYPES,
-                new TypeDeclarationsConstructor());
-        addConstructor(TYPE_CONTAINER__ANNOTATION_TYPES,
-                new TypeDeclarationsConstructor());
+        return api;
     }
 
     @Override
-    public Object apply(final MappingNode node, final Scope resourceScope) {
-        final EObject rootObject = EcoreUtil.create(API);
-        final Resource resource = resourceScope.getResource();
-        resource.getContents().add(rootObject);
+    public Object visitApi(final RAMLParser.ApiContext ctx) {
+        final Api api = FACTORY.createApi();
+        scope.getResource().getContents().add(api);
 
-        final Scope rootScope = resourceScope.with(rootObject);
+        pushScope(scope.with(api));
 
-        final List<NodeTuple> nodeTuples = node.getValue();
-        nodeTuples.stream()
-                .forEach(nodeTuple -> constructFeature(nodeTuple, rootScope));
+        ctx.annotationFacet().forEach(this::visitAnnotationFacet);
+        ctx.attributeFacet().forEach(this::visitAttributeFacet);
+        ctx.typesFacet().forEach(this::visitTypesFacet);
 
-        return rootObject;
+        popScope();
+
+        return api;
     }
 
-    protected void constructFeature(final NodeTuple featureNodeTuple, final Scope libraryScope) {
-        final Optional<Constructor<NodeTuple>> constructor = constructor(API, featureNodeTuple);
+    public static ApiConstructor of(final URI uri) {
+        final Resource resource = new RamlResourceSet().createResource(uri);
 
-        if (constructor.isPresent()) {
-            final Optional<EStructuralFeature> feature = feature(API, featureNodeTuple);
-            final Scope featureScope = libraryScope.with(feature.get());
+        final ApiConstructor constructor = new ApiConstructor();
+        constructor.pushScope(Scope.of(resource));
 
-            constructor.get().apply(featureNodeTuple, featureScope);
-        } else {
-            libraryScope.addError("No constructor for {0} found", featureNodeTuple.getKeyNode());
-        }
+        return constructor;
     }
 }

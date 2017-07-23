@@ -1,4 +1,4 @@
-package io.vrap.rmf.raml.persistence.antlr;
+package io.vrap.rmf.raml.persistence.constructor;
 
 import io.vrap.rmf.raml.model.facets.FacetsFactory;
 import io.vrap.rmf.raml.model.facets.StringInstance;
@@ -6,7 +6,8 @@ import io.vrap.rmf.raml.model.modules.Library;
 import io.vrap.rmf.raml.model.modules.LibraryUse;
 import io.vrap.rmf.raml.model.modules.ModulesFactory;
 import io.vrap.rmf.raml.model.types.*;
-import io.vrap.rmf.raml.persistence.constructor.Scope;
+import io.vrap.rmf.raml.persistence.antlr.RAMLBaseVisitor;
+import io.vrap.rmf.raml.persistence.antlr.RAMLParser;
 import io.vrap.rmf.raml.persistence.typeexpressions.TypeExpressionsParser;
 import org.antlr.v4.runtime.Token;
 import org.eclipse.emf.common.util.ECollections;

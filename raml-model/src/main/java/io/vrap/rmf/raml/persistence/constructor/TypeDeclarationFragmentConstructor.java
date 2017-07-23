@@ -1,63 +1,52 @@
 package io.vrap.rmf.raml.persistence.constructor;
 
 import io.vrap.rmf.raml.model.types.BuiltinType;
-import io.vrap.rmf.raml.persistence.RamlFragmentKind;
-import org.eclipse.emf.ecore.EClass;
+import io.vrap.rmf.raml.persistence.antlr.RAMLParser;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EReference;
+import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.util.EcoreUtil;
-import org.yaml.snakeyaml.nodes.MappingNode;
-import org.yaml.snakeyaml.nodes.Node;
-import org.yaml.snakeyaml.nodes.NodeTuple;
-import org.yaml.snakeyaml.nodes.ScalarNode;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+public class TypeDeclarationFragmentConstructor extends AbstractConstructor {
+    private final EReference typeContainer;
 
-import static io.vrap.functional.utils.Classes.asOptional;
-import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.*;
-
-/**
- * Constructs a type declaration for a type fragment of either {@link RamlFragmentKind#DATA_TYPE}
- * or {@link RamlFragmentKind#ANNOTATION_TYPE_DECLARATION}
- */
-public class TypeDeclarationFragmentConstructor extends Constructor<MappingNode> {
-    private final Map<EClass, Constructor<MappingNode>> metaTypeConstructors = new HashMap<>();
-    private final EClass typeDeclarationType;
-    private final EReference typeReference;
-    
-    public TypeDeclarationFragmentConstructor(final RamlFragmentKind fragmentKind) {
-        this.typeDeclarationType = fragmentKind.getType();
-        this.typeReference = ANY_ANNOTATION_TYPE.isSuperTypeOf(typeDeclarationType) ?
-        		ANY_ANNOTATION_TYPE__TYPE :
-        		ANY_TYPE__TYPE;
-        for (final BuiltinType metaType : BuiltinType.values()) {
-            metaTypeConstructors.put(metaType.getTypeDeclarationType(),
-                    new TypeDeclarationConstructor(metaType.getTypeDeclarationType()));
-            metaTypeConstructors.put(metaType.getAnnotationTypeDeclarationType(),
-                    new TypeDeclarationConstructor(metaType.getAnnotationTypeDeclarationType()));
-        }
+    public TypeDeclarationFragmentConstructor(final EReference typeContainer) {
+        this.typeContainer = typeContainer;
     }
 
     @Override
-    public Object apply(final MappingNode mappingNode, final Scope rootScope) {
-        final Optional<Node> value = getNodeTuple(mappingNode, typeReference)
-                .map(NodeTuple::getValueNode);
-        final BuiltinType builtinType = asOptional(ScalarNode.class, value)
-                .map(ScalarNode::getValue)
-                .flatMap(BuiltinType::of)
-                .orElse(BuiltinType.OBJECT);
-        final EObject typeDeclaration = EcoreUtil.create(builtinType.typeFor(typeDeclarationType));
-        rootScope.getResource().getContents().add(typeDeclaration);
-        constructTypeDeclaration(mappingNode, rootScope.with(typeDeclaration));
+    public EObject construct(final RAMLParser parser, final Scope scope) {
 
-        return typeDeclaration;
+        return (EObject) withinScope(scope.with(typeContainer),
+                typeScope -> visitTypeDeclarationFragment(parser.typeDeclarationFragment()));
     }
 
-    private Object constructTypeDeclaration(final MappingNode mappingNode, final Scope typeDeclarationScope) {
-        final EClass eClass = typeDeclarationScope.eObject().eClass();
-        final Constructor<MappingNode> typeDeclarationConstructor = metaTypeConstructors.get(eClass);
-        return typeDeclarationConstructor.apply(mappingNode, typeDeclarationScope);
+    @Override
+    public Object visitTypeDeclarationFragment(final RAMLParser.TypeDeclarationFragmentContext typeDeclarationFragment) {
+        final EObject superType;
+
+        if (typeDeclarationFragment.typeFacet().size() > 0) {
+            final RAMLParser.TypeFacetContext typeFacet = typeDeclarationFragment.typeFacet().get(0);
+            superType = (EObject) visitTypeFacet(typeFacet);
+        } else {
+            superType = scope.getImportedTypeById(BuiltinType.OBJECT.getName());
+        }
+
+        final EObject declaredType = EcoreUtil.create(superType.eClass());
+        scope.getResource().getContents().add(declaredType);
+
+        withinScope(scope.with(declaredType), typeScope -> {
+            final EStructuralFeature typeReference = superType.eClass().getEStructuralFeature("type");
+            typeScope.setValue(typeReference, superType);
+
+
+            typeDeclarationFragment.annotationFacet().forEach(this::visitAnnotationFacet);
+            typeDeclarationFragment.attributeFacet().forEach(this::visitAttributeFacet);
+            typeDeclarationFragment.propertiesFacet().forEach(this::visitPropertiesFacet);
+
+            return declaredType;
+        });
+
+        return declaredType;
     }
 }
