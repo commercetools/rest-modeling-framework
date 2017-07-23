@@ -26,29 +26,3 @@ interface DocumentableElement {
 	 */
 	String displayName
 }
-
-interface Type {
-	
-}
-
-interface TypedElement<T> {
-	/*
-	 * The type this element references.
-	 */
-	refers T typeReference
-
-	/*
-	 * A typed element can have an anonymous inline
-	 * type declaration.
-	 */
-	contains T typeDeclaration
-
-	/*
-	 * The type of a typed element is the type that it declares
-	 * or the type that it references.
-	 */
-	refers derived T ^type get {
-		if (typeDeclaration != null) typeDeclaration else typeReference
-	}
-}
-
