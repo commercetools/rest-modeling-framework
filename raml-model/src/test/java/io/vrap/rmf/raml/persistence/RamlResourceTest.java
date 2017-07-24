@@ -132,7 +132,7 @@ public class RamlResourceTest implements ResourceFixtures {
         assertThat(type).isEqualTo(superType);
     }
 
-    @Ignore
+   // @Ignore
     @Test
     public void api() {
         final File apiFile = new File("/Users/mkoester/Development/commercetools-api-reference/api.raml");

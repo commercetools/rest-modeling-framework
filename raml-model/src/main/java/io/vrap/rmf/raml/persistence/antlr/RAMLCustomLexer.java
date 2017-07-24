@@ -2,6 +2,7 @@ package io.vrap.rmf.raml.persistence.antlr;
 
 import io.vrap.functional.utils.TypeSwitch;
 import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.misc.Pair;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.URIConverter;
 import org.yaml.snakeyaml.Yaml;
@@ -68,7 +69,6 @@ public class RAMLCustomLexer implements TokenSource {
         loadEvents(uri);
     }
 
-
     private void initTokens() {
         final Properties tokens = loadTokens();
         final Set<String> stringPropertyNames = tokens.stringPropertyNames();
@@ -93,37 +93,6 @@ public class RAMLCustomLexer implements TokenSource {
         return tokens;
     }
 
-    private Token mapStart(final MappingStartEvent event) {
-        return factory.create(mapStart, null);
-    }
-
-    private Token mapEnd(final MappingEndEvent event) {
-        return factory.create(mapEnd, null);
-    }
-
-    private Token listStart(final SequenceStartEvent event) {
-        return factory.create(listStart, null);
-    }
-
-    private Token listEnd(final SequenceEndEvent event) {
-        return factory.create(listEnd, null);
-    }
-
-    private void loadEvents(final URI uri, final InputStream inputStream) {
-        this.uri.push(uri);
-        final Iterator<Event> eventIterator;
-        try (final InputStreamReader reader = new InputStreamReader(inputStream)) {
-            final Iterable<Event> eventIterable = yaml.parse(reader);
-
-            final List<Event> eagerLoadedEvents = new ArrayList<>();
-            eventIterable.forEach(eagerLoadedEvents::add);
-            eventIterator = eagerLoadedEvents.iterator();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        this.eventIteratorStack.push(eventIterator);
-    }
-
 
     private void loadEvents(final URI uri) {
         if (this.uri.contains(uri)) {
@@ -144,6 +113,22 @@ public class RAMLCustomLexer implements TokenSource {
         }
     }
 
+    private Token mapStart(final MappingStartEvent event) {
+        return createToken(mapStart, null);
+    }
+
+    private Token mapEnd(final MappingEndEvent event) {
+        return createToken(mapEnd, null);
+    }
+
+    private Token listStart(final SequenceStartEvent event) {
+        return createToken(listStart, null);
+    }
+
+    private Token listEnd(final SequenceEndEvent event) {
+        return createToken(listEnd, null);
+    }
+
     private Token scalar(final ScalarEvent scalarEvent) {
         final String scalarValue = scalarEvent.getValue();
         final Matcher matcher = ANNOTATION_TYPE_REF_PATTERN.matcher(scalarValue);
@@ -156,11 +141,10 @@ public class RAMLCustomLexer implements TokenSource {
                 matcher.group(1) :
                 scalarValue;
 
-        return factory.create(type, text);
+        return createToken(type, text);
     }
 
-
-    public URI resolve(final String relativePath) {
+    private URI resolve(final String relativePath) {
         final String[] segments = URI.createURI(relativePath).segments();
         return getBaseUri().appendSegments(segments);
     }
@@ -232,5 +216,13 @@ public class RAMLCustomLexer implements TokenSource {
     @Override
     public TokenFactory<?> getTokenFactory() {
         return factory;
+    }
+
+    private Token createToken(final int type, final String text) {
+        final Pair<TokenSource, CharStream> source = new Pair<>(this, null);
+
+        return factory.create(source, type, text, Token.DEFAULT_CHANNEL,
+                0, 0,
+                getLine(), getCharPositionInLine());
     }
 }

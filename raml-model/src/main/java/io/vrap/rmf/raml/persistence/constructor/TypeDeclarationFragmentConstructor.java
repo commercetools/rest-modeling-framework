@@ -37,7 +37,7 @@ public class TypeDeclarationFragmentConstructor extends AbstractConstructor {
 
         withinScope(scope.with(declaredType), typeScope -> {
             final EStructuralFeature typeReference = superType.eClass().getEStructuralFeature("type");
-            typeScope.setValue(typeReference, superType);
+            typeScope.setValue(typeReference, superType, typeDeclarationFragment.getStart());
 
 
             typeDeclarationFragment.annotationFacet().forEach(this::visitAnnotationFacet);
