@@ -14,8 +14,6 @@ import org.eclipse.emf.ecore.InternalEObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.util.EcoreUtil;
-import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.nodes.Node;
 
 import java.text.MessageFormat;
 import java.util.List;
@@ -37,19 +35,15 @@ public class Scope {
     private final ResourceSet resourceSet;
     private final EObject eObject;
     private final EStructuralFeature feature;
-    private final Yaml yaml;
-    private final Node valueNode;
 
-    private Scope(final Scope parent, final Resource resource, final URI uri, final Yaml yaml,
-                  final EObject eObject, final EStructuralFeature feature, final Node valueNode) {
+    private Scope(final Scope parent, final Resource resource, final URI uri,
+                  final EObject eObject, final EStructuralFeature feature) {
         this.parent = parent;
         this.resource = resource;
         this.uri = uri;
-        this.yaml = yaml;
         this.resourceSet = resource.getResourceSet();
         this.eObject = eObject;
         this.feature = feature;
-        this.valueNode = valueNode;
     }
 
     public Library getUsedLibrary(final String name) {
@@ -86,10 +80,6 @@ public class Scope {
         return uri.trimSegments(1);
     }
 
-    public Node getValueNode() {
-        return valueNode;
-    }
-
     public Resource getResource(final String relativePath) {
         final URI uri = resolve(relativePath);
         return resourceSet.getResource(uri, true);
@@ -104,7 +94,7 @@ public class Scope {
         return resolvedType;
     }
 
-    private String getUriFragment(final String id) {
+    public String getUriFragment(final String id) {
         final EClass type = (EClass) feature.getEType();
         final String fragment = ANY_ANNOTATION_TYPE.isSuperTypeOf(type) ?
                 TYPE_CONTAINER__ANNOTATION_TYPES.getName() :
@@ -212,19 +202,11 @@ public class Scope {
     }
 
     public Scope with(final EObject eObject) {
-        return new Scope(this, resource, uri, yaml, eObject, feature, valueNode);
+        return new Scope(this, resource, uri, eObject, feature);
     }
 
     public Scope with(final EObject eObject, final EStructuralFeature feature) {
-        return new Scope(this, resource, uri, yaml, eObject, feature, null);
-    }
-
-    public Scope with(final Node node, final URI uri) {
-        return new Scope(this, resource, uri, yaml, eObject, feature, node);
-    }
-
-    public Scope with(final Node node) {
-        return with(node, uri);
+        return new Scope(this, resource, uri, eObject, feature);
     }
 
     public Scope with(final EStructuralFeature feature) {
@@ -232,11 +214,11 @@ public class Scope {
     }
 
     public Scope with(final Resource resource) {
-        return new Scope(this, resource, uri, yaml, eObject, feature, valueNode);
+        return new Scope(this, resource, uri, eObject, feature);
     }
 
     public static Scope of(final Resource resource) {
-        return new Scope(null, resource, resource.getURI(), new Yaml(), null, null, null);
+        return new Scope(null, resource, resource.getURI(), null, null);
     }
 
     private static class RamlDiagnostic implements Resource.Diagnostic {

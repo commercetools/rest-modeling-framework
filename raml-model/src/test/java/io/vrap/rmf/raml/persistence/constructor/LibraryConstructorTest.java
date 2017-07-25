@@ -3,11 +3,12 @@ package io.vrap.rmf.raml.persistence.constructor;
 import io.vrap.rmf.raml.model.facets.StringInstance;
 import io.vrap.rmf.raml.model.modules.Library;
 import io.vrap.rmf.raml.model.types.*;
+import io.vrap.rmf.raml.persistence.RamlResourceSet;
 import io.vrap.rmf.raml.persistence.ResourceFixtures;
 import io.vrap.rmf.raml.persistence.antlr.RAMLParser;
 import io.vrap.rmf.raml.persistence.antlr.RAMLParserFixtures;
 import org.eclipse.emf.common.util.EList;
-import org.eclipse.emf.ecore.util.EcoreUtil;
+import org.eclipse.emf.ecore.resource.Resource;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -21,10 +22,11 @@ public class LibraryConstructorTest implements RAMLParserFixtures, ResourceFixtu
 
     @Test
     public void library() throws IOException {
-        final RAMLParser.LibraryContext libraryContext = parseFromClasspath("/libraries/library.raml").library();
-        final Library library = (Library) LibraryConstructor.of(uriFromClasspath("/libraries/library.raml"))
-                .visitLibrary(libraryContext);
-        EcoreUtil.resolve(library, library.eResource());
+        final RAMLParser parser = parserFromClasspath("/libraries/library.raml");
+        final Resource resource = new RamlResourceSet().createResource(uriFromClasspath("/libraries/library.raml"));
+        final Scope resourceScope = Scope.of(resource);
+        final LibraryConstructor constructor = new LibraryConstructor();
+        final Library library = (Library) constructor.construct(parser, resourceScope);
 
         assertThat(library.getUsage()).isEqualTo("Test");
         final EList<AnyType> types = library.getTypes();
@@ -59,9 +61,11 @@ public class LibraryConstructorTest implements RAMLParserFixtures, ResourceFixtu
 
     @Test
     public void generatorAnnotations() throws IOException {
-        final RAMLParser.LibraryContext libraryContext = parseFromClasspath("/libraries/generator-annotations.raml").library();
-        final Library library = (Library) LibraryConstructor.of(uriFromClasspath("/libraries/generator-annotations.raml"))
-                .visitLibrary(libraryContext);
+        final RAMLParser parser = parserFromClasspath("/libraries/generator-annotations.raml");
+        final Resource resource = new RamlResourceSet().createResource(uriFromClasspath("/libraries/generator-annotations.raml"));
+        final Scope resourceScope = Scope.of(resource);
+        final LibraryConstructor constructor = new LibraryConstructor();
+        final Library library = (Library) constructor.construct(parser, resourceScope);
 
         assertThat(library.getUsage()).isEqualTo("Defines generator annotations.");
         final EList<AnyType> types = library.getTypes();
@@ -78,9 +82,11 @@ public class LibraryConstructorTest implements RAMLParserFixtures, ResourceFixtu
 
     @Test
     public void annotations() throws IOException {
-        final RAMLParser.LibraryContext libraryContext = parseFromClasspath("/annotations/annotations.raml").library();
-        final Library library = (Library) LibraryConstructor.of(uriFromClasspath("/annotations/annotations.raml"))
-                .visitLibrary(libraryContext);
+        final RAMLParser parser = parserFromClasspath("/annotations/annotations.raml");
+        final Resource resource = new RamlResourceSet().createResource(uriFromClasspath("/annotations/annotations.raml"));
+        final Scope resourceScope = Scope.of(resource);
+        final LibraryConstructor constructor = new LibraryConstructor();
+        final Library library = (Library) constructor.construct(parser, resourceScope);
 
         final EList<AnyAnnotationType> annotationTypes = library.getAnnotationTypes();
         assertThat(annotationTypes).hasSize(2);
@@ -107,9 +113,11 @@ public class LibraryConstructorTest implements RAMLParserFixtures, ResourceFixtu
 
     @Test
     public void propertiesInlineTypeDeclaration() throws IOException {
-        final RAMLParser.LibraryContext libraryContext = parseFromClasspath("/properties/inline-type-declaration.raml").library();
-        final Library library = (Library) LibraryConstructor.of(uriFromClasspath("/properties/inline-type-declaration.raml"))
-                .visitLibrary(libraryContext);
+        final RAMLParser parser = parserFromClasspath("/properties/inline-type-declaration.raml");
+        final Resource resource = new RamlResourceSet().createResource(uriFromClasspath("/properties/inline-type-declaration.raml"));
+        final Scope resourceScope = Scope.of(resource);
+        final LibraryConstructor constructor = new LibraryConstructor();
+        final Library library = (Library) constructor.construct(parser, resourceScope);
 
         final EList<AnyType> types = library.getTypes();
         assertThat(types).hasSize(1);
@@ -126,9 +134,11 @@ public class LibraryConstructorTest implements RAMLParserFixtures, ResourceFixtu
 
     @Test
     public void dataTypeInclude() throws IOException {
-        final RAMLParser.LibraryContext libraryContext = parseFromClasspath("/data-type-include.raml").library();
-        final Library library = (Library) LibraryConstructor.of(uriFromClasspath("/data-type-include.raml"))
-                .visitLibrary(libraryContext);
+        final RAMLParser parser = parserFromClasspath("/data-type-include.raml");
+        final Resource resource = new RamlResourceSet().createResource(uriFromClasspath("/data-type-include.raml"));
+        final Scope resourceScope = Scope.of(resource);
+        final LibraryConstructor constructor = new LibraryConstructor();
+        final Library library = (Library) constructor.construct(parser, resourceScope);
 
         final EList<AnyType> types = library.getTypes();
 

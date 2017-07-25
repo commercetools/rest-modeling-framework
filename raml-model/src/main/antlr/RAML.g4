@@ -13,7 +13,7 @@ tokens {
 
 api:
     MAP_START
-    ( securitySchemesFacet | securedByFacet | resourceTypesFacet | attributeFacet | typesFacet | annotationFacet )*
+    ( usesFacet | securitySchemesFacet | securedByFacet | resourceTypesFacet | attributeFacet | typesFacet | annotationFacet )*
     MAP_END;
 
 securitySchemesFacet:

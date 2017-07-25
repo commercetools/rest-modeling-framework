@@ -16,6 +16,10 @@ public class TypeDeclarationFragmentConstructor extends AbstractConstructor {
 
     @Override
     public EObject construct(final RAMLParser parser, final Scope scope) {
+        final TypeDeclarationResolver typeDeclarationResolver =
+                new TypeDeclarationResolver();
+        typeDeclarationResolver.resolve(parser.typeDeclarationFragment(), scope.with(typeContainer));
+        parser.reset();
 
         return (EObject) withinScope(scope.with(typeContainer),
                 typeScope -> visitTypeDeclarationFragment(parser.typeDeclarationFragment()));
@@ -28,8 +32,10 @@ public class TypeDeclarationFragmentConstructor extends AbstractConstructor {
         if (typeDeclarationFragment.typeFacet().size() > 0) {
             final RAMLParser.TypeFacetContext typeFacet = typeDeclarationFragment.typeFacet().get(0);
             superType = (EObject) visitTypeFacet(typeFacet);
-        } else {
+        } else if (typeDeclarationFragment.propertiesFacet().size() > 0) {
             superType = scope.getImportedTypeById(BuiltinType.OBJECT.getName());
+        } else {
+            superType = scope.getImportedTypeById(BuiltinType.STRING.getName());
         }
 
         final EObject declaredType = EcoreUtil.create(superType.eClass());

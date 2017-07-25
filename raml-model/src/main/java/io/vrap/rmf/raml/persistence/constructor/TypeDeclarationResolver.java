@@ -8,47 +8,61 @@ import io.vrap.rmf.raml.model.types.BuiltinType;
 import io.vrap.rmf.raml.persistence.antlr.RAMLBaseVisitor;
 import io.vrap.rmf.raml.persistence.antlr.RAMLParser;
 import io.vrap.rmf.raml.persistence.typeexpressions.TypeExpressionsParser;
-import org.antlr.v4.runtime.CommonToken;
+import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EStructuralFeature;
+import org.eclipse.emf.ecore.InternalEObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static io.vrap.rmf.raml.model.modules.ModulesPackage.Literals.TYPE_CONTAINER__TYPES;
+import static io.vrap.rmf.raml.model.modules.ModulesPackage.Literals.TYPE_CONTAINER__USES;
 
+/**
+ * Resolves all types and annotation types so that they all have a resolved type.
+ * This is necessary because the type defines which facets a type declration can have.
+ */
 public class TypeDeclarationResolver extends RAMLBaseVisitor<Object> {
     private final TypeExpressionsParser typeExpressionsParser = new TypeExpressionsParser();
     private Scope scope;
-    private final Set<RAMLParser.TypeDeclarationFacetContext> unresolvedTypeDeclarations = new HashSet<>();
+    private final Map<RAMLParser.TypeDeclarationFacetContext, EObject> unresolvedTypeDeclarations = new HashMap<>();
     private final List<EObject> resolvedTypes = new ArrayList<>();
 
-
-    public int resolve(final RAMLParser.ApiContext apiContext, final Scope scope) {
+    public int resolve(final ParserRuleContext ruleContext, final Scope scope) {
         return withinScope(scope, s -> {
-            final Api api = (Api) visitApi(apiContext);
+            EObject rootObject = (EObject) visit(ruleContext);
+
             int count = 0;
             while (unresolvedTypeDeclarations.size() > 0) {
                 count++;
-                final List<RAMLParser.TypeDeclarationFacetContext> typeDeclarationsToResolve =
-                        new ArrayList<>(unresolvedTypeDeclarations);
-                for (final RAMLParser.TypeDeclarationFacetContext typeDeclarationFacet : typeDeclarationsToResolve) {
-                    withinScope(scope.with(api, TYPE_CONTAINER__TYPES),
+                final Map<RAMLParser.TypeDeclarationFacetContext, EObject> typeDeclarationsToResolve =
+                        new HashMap<>(unresolvedTypeDeclarations);
+                for (final RAMLParser.TypeDeclarationFacetContext typeDeclarationFacet : typeDeclarationsToResolve.keySet()) {
+                    withinScope(scope.with(rootObject, TYPE_CONTAINER__TYPES),
                             apiScope -> visitTypeDeclarationFacet(typeDeclarationFacet));
                 }
             }
 
             return count;
         });
+    }
+
+    @Override
+    public Object visitLibrary(final RAMLParser.LibraryContext ctx) {
+        final Library library = ModulesFactory.eINSTANCE.createLibrary();
+        scope.getResource().getContents().add(library);
+
+        withinScope(scope.with(library), libraryScope ->
+            super.visitLibrary(ctx));
+
+        return library;
     }
 
     @Override
@@ -71,7 +85,7 @@ public class TypeDeclarationResolver extends RAMLBaseVisitor<Object> {
         libraryUse.setName(libraryUseFacet.name.getText());
         libraryUse.setLibrary((Library) contents.get(0));
 
-        scope.setValue(libraryUse, (CommonToken) libraryUseFacet.name);
+        scope.with(TYPE_CONTAINER__USES).setValue(libraryUse, libraryUseFacet.name);
 
         return libraryUse;
     }
@@ -79,26 +93,23 @@ public class TypeDeclarationResolver extends RAMLBaseVisitor<Object> {
     @Override
     public Object visitTypesFacet(final RAMLParser.TypesFacetContext typesFacet) {
         final String typesReferenceName = typesFacet.facet.getText();
-        if ("types".equals(typesReferenceName)) {
-            final EClass eClass = scope.eObject().eClass();
-            final EStructuralFeature typesFeature = eClass.getEStructuralFeature(typesReferenceName);
+        final EClass eClass = scope.eObject().eClass();
+        final EStructuralFeature typesFeature = eClass.getEStructuralFeature(typesReferenceName);
 
-            return withinScope(scope.with(typesFeature), typesScope -> {
-                final List<Object> types = typesFacet.types.stream()
-                        .map(this::visitTypeDeclarationFacet)
-                        .collect(Collectors.toList());
+        return withinScope(scope.with(typesFeature), typesScope -> {
+            final List<Object> types = typesFacet.types.stream()
+                    .map(this::visitTypeDeclarationFacet)
+                    .collect(Collectors.toList());
 
-                return types;
-            });
-        }
-        return null;
+            return types;
+        });
     }
 
     @Override
     public Object visitTypeDeclarationFacet(final RAMLParser.TypeDeclarationFacetContext typeDeclarationFacet) {
-        final Object eObject = super.visitTypeDeclarationFacet(typeDeclarationFacet);
-        if (eObject == null) {
-            unresolvedTypeDeclarations.add(typeDeclarationFacet);
+        final EObject eObject = (EObject) super.visitTypeDeclarationFacet(typeDeclarationFacet);
+        if (eObject == null || eObject.eIsProxy()) {
+            unresolvedTypeDeclarations.put(typeDeclarationFacet, eObject);
         } else {
             unresolvedTypeDeclarations.remove(typeDeclarationFacet);
         }
@@ -170,10 +181,13 @@ public class TypeDeclarationResolver extends RAMLBaseVisitor<Object> {
 
 
     private EObject processType(final Token nameToken, final EObject superType) {
-        if (superType.eIsProxy()) {
-            return null;
-        } else {
-            final EObject declaredType = EcoreUtil.create(superType.eClass());
+        final EObject declaredType;
+        final Optional<BuiltinType> optionalBuiltinType = BuiltinType.of(nameToken.getText());
+        if (optionalBuiltinType.isPresent() || !superType.eIsProxy()) {
+            final EClass eClass = optionalBuiltinType
+                    .map(builtinType -> builtinType.getScopedMetaType(scope))
+                    .orElse(superType.eClass());
+            declaredType = EcoreUtil.create(eClass);
             final Scope typeScope = scope.with(declaredType);
 
             final String name = nameToken.getText();
@@ -183,9 +197,13 @@ public class TypeDeclarationResolver extends RAMLBaseVisitor<Object> {
                     .setValue(superType, nameToken);
 
             resolvedTypes.add(declaredType);
-            scope.setValue(declaredType, nameToken);
-
-            return declaredType;
+        } else {
+            final InternalEObject proxy = (InternalEObject) EcoreUtil.create(superType.eClass());
+            final String uriFragment = scope.getUriFragment(nameToken.getText());
+            proxy.eSetProxyURI(scope.getResource().getURI().appendFragment(uriFragment));
+            declaredType = proxy;
         }
+        scope.setValue(declaredType, nameToken);
+        return declaredType;
     }
 }

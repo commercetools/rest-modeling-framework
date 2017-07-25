@@ -33,7 +33,7 @@ public class TypeDeclarationResolverTest implements RAMLParserFixtures, Resource
         final Resource resource = new RamlResourceSet().createResource(apiUri);
         final Scope scope = Scope.of(resource);
         final TypeDeclarationResolver resolver = new TypeDeclarationResolver();
-        final int count = resolver.resolve(api, scope);
+        final int count = resolver.resolve(parser.api(), scope);
 
         assertThat(resolver).isNotNull();
     }

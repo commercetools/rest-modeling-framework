@@ -16,7 +16,6 @@ import org.eclipse.emf.ecore.resource.impl.ResourceImpl;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
@@ -24,31 +23,13 @@ import java.util.stream.Collectors;
 
 import static io.vrap.rmf.raml.model.modules.ModulesPackage.Literals.TYPE_CONTAINER__ANNOTATION_TYPES;
 import static io.vrap.rmf.raml.model.modules.ModulesPackage.Literals.TYPE_CONTAINER__TYPES;
-import static io.vrap.rmf.raml.persistence.RamlFragmentKind.ANNOTATION_TYPE_DECLARATION;
-import static io.vrap.rmf.raml.persistence.RamlFragmentKind.DATA_TYPE;
 
 public class RamlResource extends ResourceImpl {
-    private final static Map<RamlFragmentKind, AbstractConstructor> ROOT_CONSTRUCTORS = new HashMap<>();
-
-    {
-        addRootConstructor(RamlFragmentKind.API,
-                new ApiConstructor());
-        addRootConstructor(RamlFragmentKind.LIBRARY,
-                new LibraryConstructor());
-
-        addRootConstructor(DATA_TYPE, new TypeDeclarationFragmentConstructor(TYPE_CONTAINER__TYPES));
-        addRootConstructor(ANNOTATION_TYPE_DECLARATION, new TypeDeclarationFragmentConstructor(TYPE_CONTAINER__ANNOTATION_TYPES));
-    }
-
     private final Scope resourceScope;
 
     public RamlResource(final URI uri) {
         super(uri);
         resourceScope = Scope.of(this);
-    }
-
-    private static void addRootConstructor(final RamlFragmentKind fragmentKind, final AbstractConstructor constructor) {
-        ROOT_CONSTRUCTORS.put(fragmentKind, constructor);
     }
 
     @Override
@@ -61,8 +42,7 @@ public class RamlResource extends ResourceImpl {
         final TokenStream tokenStream = new CommonTokenStream(lexer);
         final RAMLParser parser = new RAMLParser(tokenStream);
 
-        final EObject rootObject = rootConstructor.construct(parser, resourceScope);
-        getContents().add(rootObject);
+        rootConstructor.construct(parser, resourceScope);
     }
 
     @Override
@@ -89,6 +69,13 @@ public class RamlResource extends ResourceImpl {
         @SuppressWarnings("resource")        final String header = new Scanner(inputStream).useDelimiter("\\n").next();
         inputStream.reset();
         final RamlFragmentKind fragmentKind = RamlFragmentKind.fromHeader(header).orElse(null);
-        return ROOT_CONSTRUCTORS.get(fragmentKind);
+        switch (fragmentKind) {
+            case API: return new ApiConstructor();
+            case LIBRARY: return new LibraryConstructor();
+            case DATA_TYPE: return new TypeDeclarationFragmentConstructor(TYPE_CONTAINER__TYPES);
+            case ANNOTATION_TYPE_DECLARATION: return new TypeDeclarationFragmentConstructor(TYPE_CONTAINER__ANNOTATION_TYPES);
+            default:
+                throw new IllegalStateException("Unknown fragment kind:" + fragmentKind);
+        }
     }
 }
