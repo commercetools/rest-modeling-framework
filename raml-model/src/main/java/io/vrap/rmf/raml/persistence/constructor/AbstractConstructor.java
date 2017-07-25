@@ -104,15 +104,14 @@ public abstract class AbstractConstructor extends RAMLBaseVisitor<Object> {
     @Override
     public Object visitTypeDeclarationMap(final RAMLParser.TypeDeclarationMapContext typeDeclarationMap) {
         final EObject declaredType = scope.getImportedTypeById(typeDeclarationMap.name.getText());
-        withinScope(scope.with(declaredType), typeScope -> {
+
+        return withinScope(scope.with(declaredType), typeScope -> {
             typeDeclarationMap.annotationFacet().forEach(this::visitAnnotationFacet);
             typeDeclarationMap.attributeFacet().forEach(this::visitAttributeFacet);
             typeDeclarationMap.propertiesFacet().forEach(this::visitPropertiesFacet);
 
             return declaredType;
         });
-
-        return declaredType;
     }
 
     /**
@@ -137,66 +136,72 @@ public abstract class AbstractConstructor extends RAMLBaseVisitor<Object> {
         final Property property = TYPES_FACTORY.createProperty();
         scope.setValue(property, propertyFacet.getStart());
 
-        return withinScope(scope.with(property), propertyScope -> {
-            EObject propertyType;
-            if (propertyFacet.propertyTuple() != null) {
-                final Token type = propertyFacet.propertyTuple().type;
-                final String name = propertyFacet.propertyTuple().name.getText();
+        return withinScope(scope.with(property), propertyScope ->
+                super.visitPropertyFacet(propertyFacet));
+    }
 
-                propertyType = type == null ?
-                        scope.getImportedTypeById(BuiltinType.STRING.getName()) :
-                        scope.getImportedTypeById(type.getText());
-                final boolean isRequired = !name.endsWith("?");
-                propertyScope.setValue(PROPERTY__REQUIRED, isRequired, propertyFacet.getStart());
-                final String parsedName = isRequired ? name : name.substring(0, name.length() - 1);
+    @Override
+    public Object visitPropertyTuple(final RAMLParser.PropertyTupleContext propertyTuple) {
+        final Token type = propertyTuple.type;
+        final String name = propertyTuple.name.getText();
 
-                propertyScope.setValue(PROPERTY__NAME, parsedName, propertyFacet.getStart());
-            } else {
-                final RAMLParser.PropertyMapContext propertyMap = propertyFacet.propertyMap();
+        final EObject propertyType = type == null ?
+                scope.getImportedTypeById(BuiltinType.STRING.getName()) :
+                scope.getImportedTypeById(type.getText());
+        final boolean isRequired = !name.endsWith("?");
+        scope.setValue(PROPERTY__REQUIRED, isRequired, propertyTuple.getStart());
+        final String parsedName = isRequired ? name : name.substring(0, name.length() - 1);
 
-                final String name = propertyMap.name.getText();
-                final Boolean requiredValue = propertyMap.requiredFacet().size() == 1 ?
-                        Boolean.parseBoolean(propertyMap.requiredFacet().get(0).required.getText()) : // TODO handle exception
-                        null;
+        scope.setValue(PROPERTY__NAME, parsedName, propertyTuple.getStart());
+        scope.setValue(PROPERTY__TYPE, propertyType, propertyTuple.getStart());
 
-                final String parsedName;
-                if (requiredValue == null) {
-                    final boolean isRequired = !name.endsWith("?");
-                    propertyScope.setValue(PROPERTY__REQUIRED, isRequired, propertyFacet.getStart());
-                    parsedName = isRequired ? name : name.substring(0, name.length() - 1);
-                } else {
-                    parsedName = name;
-                    propertyScope.setValue(PROPERTY__REQUIRED, requiredValue, propertyFacet.getStart());
-                }
+        return scope.eObject();
+    }
 
-                propertyScope.setValue(PROPERTY__NAME, parsedName, propertyFacet.getStart());
+    @Override
+    public Object visitPropertyMap(final RAMLParser.PropertyMapContext propertyMap) {
+        final String name = propertyMap.name.getText();
+        final Boolean requiredValue = propertyMap.requiredFacet().size() == 1 ?
+                Boolean.parseBoolean(propertyMap.requiredFacet().get(0).required.getText()) : // TODO handle exception
+                null;
 
-                if (propertyMap.typeFacet().size() > 0) {
-                    final RAMLParser.TypeFacetContext typeFacet = propertyMap.typeFacet().get(0);
-                    propertyType = (EObject) withinScope(scope.with(PROPERTY__TYPE),
-                            propertyTypeScope -> visitTypeFacet(typeFacet));
-                } else if (propertyMap.propertiesFacet().size() == 1) {
-                    propertyType = scope.getImportedTypeById(BuiltinType.OBJECT.getName());
-                } else {
-                    propertyType = scope.getImportedTypeById(BuiltinType.STRING.getName());
-                }
+        final String parsedName;
+        if (requiredValue == null) {
+            final boolean isRequired = !name.endsWith("?");
+            scope.setValue(PROPERTY__REQUIRED, isRequired, propertyMap.getStart());
+            parsedName = isRequired ? name : name.substring(0, name.length() - 1);
+        } else {
+            parsedName = name;
+            scope.setValue(PROPERTY__REQUIRED, requiredValue, propertyMap.getStart());
+        }
 
-                // inline type declaration
-                if (propertyMap.attributeFacet().size() > 0) {
-                    propertyType = EcoreUtil.create(propertyType.eClass());
-                    withinScope(propertyScope.with(propertyType),
-                            inlineTypeDeclarationScope ->
-                                    propertyMap.attributeFacet().stream()
-                                            .map(this::visitAttributeFacet)
-                                            .collect(Collectors.toList()));
-                }
+        scope.setValue(PROPERTY__NAME, parsedName, propertyMap.getStart());
 
-                propertyMap.annotationFacet().forEach(this::visitAnnotationFacet);
-            }
-            propertyScope.setValue(PROPERTY__TYPE, propertyType, propertyFacet.getStart());
+        EObject propertyType;
+        if (propertyMap.typeFacet().size() > 0) {
+            final RAMLParser.TypeFacetContext typeFacet = propertyMap.typeFacet().get(0);
+            propertyType = (EObject) withinScope(scope.with(PROPERTY__TYPE),
+                    propertyTypeScope -> visitTypeFacet(typeFacet));
+        } else if (propertyMap.propertiesFacet().size() == 1) {
+            propertyType = scope.getImportedTypeById(BuiltinType.OBJECT.getName());
+        } else {
+            propertyType = scope.getImportedTypeById(BuiltinType.STRING.getName());
+        }
 
-            return property;
-        });
+        // inline type declaration
+        if (propertyMap.attributeFacet().size() > 0) {
+            propertyType = EcoreUtil.create(propertyType.eClass());
+            withinScope(scope.with(propertyType),
+                    inlineTypeDeclarationScope ->
+                            propertyMap.attributeFacet().stream()
+                                    .map(this::visitAttributeFacet)
+                                    .collect(Collectors.toList()));
+        }
+
+        propertyMap.annotationFacet().forEach(this::visitAnnotationFacet);
+        scope.setValue(PROPERTY__TYPE, propertyType, propertyMap.getStart());
+
+        return scope.eObject();
     }
 
     protected <T> T withinScope(final Scope scope, final Function<Scope, T> within) {
