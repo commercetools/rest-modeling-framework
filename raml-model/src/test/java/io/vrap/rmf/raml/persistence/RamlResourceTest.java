@@ -1,5 +1,6 @@
 package io.vrap.rmf.raml.persistence;
 
+import io.vrap.rmf.raml.model.modules.Api;
 import io.vrap.rmf.raml.model.modules.Library;
 import io.vrap.rmf.raml.model.modules.LibraryUse;
 import io.vrap.rmf.raml.model.types.*;
@@ -140,7 +141,13 @@ public class RamlResourceTest implements ResourceFixtures {
 
         final URI fileURI = URI.createURI(apiFile.toURI().toString());
         final Resource resource = fromUri(fileURI);
-        resource.getContents();
+        EList<EObject> contents = resource.getContents();
+        Api api = (Api) contents.get(0);
+
+        EList<AnyType> types = api.getTypes();
+        for (final AnyType anyType : types) {
+            assertThat(anyType.eIsProxy()).isFalse();
+        }
         assertThat(resource).isNotNull();
     }
 

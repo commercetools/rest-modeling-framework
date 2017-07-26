@@ -18,7 +18,10 @@ import org.eclipse.emf.ecore.InternalEObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -33,7 +36,6 @@ public class TypeDeclarationResolver extends RAMLBaseVisitor<Object> {
     private final TypeExpressionsParser typeExpressionsParser = new TypeExpressionsParser();
     private Scope scope;
     private final Map<RAMLParser.TypeDeclarationFacetContext, EObject> unresolvedTypeDeclarations = new HashMap<>();
-    private final List<EObject> resolvedTypes = new ArrayList<>();
 
     public int resolve(final ParserRuleContext ruleContext, final Scope scope) {
         return withinScope(scope, s -> {
@@ -45,8 +47,37 @@ public class TypeDeclarationResolver extends RAMLBaseVisitor<Object> {
                 final Map<RAMLParser.TypeDeclarationFacetContext, EObject> typeDeclarationsToResolve =
                         new HashMap<>(unresolvedTypeDeclarations);
                 for (final RAMLParser.TypeDeclarationFacetContext typeDeclarationFacet : typeDeclarationsToResolve.keySet()) {
-                    withinScope(scope.with(rootObject, TYPE_CONTAINER__TYPES),
-                            apiScope -> visitTypeDeclarationFacet(typeDeclarationFacet));
+                    EObject unresolved = typeDeclarationsToResolve.get(typeDeclarationFacet);
+                    if (typeDeclarationFacet.typeDeclarationTuple() != null) {
+                        Token nameToken = typeDeclarationFacet.typeDeclarationTuple().name;
+                        EObject superType = typeExpressionsParser.parse(typeDeclarationFacet.typeDeclarationTuple().typeExpression.getText(), scope);
+                        if (!superType.eIsProxy()) {
+                            EObject eObject = EcoreUtil.create(superType.eClass());
+                            EcoreUtil.replace(unresolved, eObject);
+                            final String name = nameToken.getText();
+                            Scope typeScope = scope.with(eObject, TYPE_CONTAINER__TYPES);
+                            typeScope.with(unresolved.eClass().getEStructuralFeature("name"))
+                                    .setValue(name, nameToken);
+                            typeScope.with(unresolved.eClass().getEStructuralFeature("type"))
+                                    .setValue(superType, nameToken);
+                            unresolvedTypeDeclarations.remove(typeDeclarationFacet);
+                        }
+                    } else {
+                        EObject superType = (EObject) withinScope(scope.with(rootObject, TYPE_CONTAINER__TYPES), scope1 -> visitTypeFacet(typeDeclarationFacet.typeDeclarationMap().typeFacet(0)));
+                        if (!superType.eIsProxy()) {
+                            EObject eObject = EcoreUtil.create(superType.eClass());
+                            EcoreUtil.replace(unresolved, eObject);
+                            Scope typeScope = scope.with(eObject, TYPE_CONTAINER__TYPES);
+                            Token nameToken = typeDeclarationFacet.typeDeclarationMap().name;
+
+                            final String name = nameToken.getText();
+                            typeScope.with(unresolved.eClass().getEStructuralFeature("name"))
+                                    .setValue(name, nameToken);
+                            typeScope.with(unresolved.eClass().getEStructuralFeature("type"))
+                                    .setValue(superType, nameToken);
+                            unresolvedTypeDeclarations.remove(typeDeclarationFacet);
+                        }
+                    }
                 }
             }
 
@@ -195,8 +226,6 @@ public class TypeDeclarationResolver extends RAMLBaseVisitor<Object> {
                     .setValue(name, nameToken);
             typeScope.with(declaredType.eClass().getEStructuralFeature("type"))
                     .setValue(superType, nameToken);
-
-            resolvedTypes.add(declaredType);
         } else {
             final InternalEObject proxy = (InternalEObject) EcoreUtil.create(superType.eClass());
             final String uriFragment = scope.getUriFragment(nameToken.getText());

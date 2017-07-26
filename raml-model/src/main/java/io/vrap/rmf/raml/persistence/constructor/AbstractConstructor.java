@@ -147,7 +147,7 @@ public abstract class AbstractConstructor extends RAMLBaseVisitor<Object> {
 
         final EObject propertyType = type == null ?
                 scope.getImportedTypeById(BuiltinType.STRING.getName()) :
-                scope.getImportedTypeById(type.getText());
+                typeExpressionsParser.parse(type.getText(), scope);
         final boolean isRequired = !name.endsWith("?");
         scope.setValue(PROPERTY__REQUIRED, isRequired, propertyTuple.getStart());
         final String parsedName = isRequired ? name : name.substring(0, name.length() - 1);
