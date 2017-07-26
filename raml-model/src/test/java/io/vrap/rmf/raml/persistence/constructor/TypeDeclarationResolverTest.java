@@ -13,13 +13,19 @@ import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.URIConverter;
 import org.junit.Test;
 
+import java.io.File;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assume.assumeTrue;
 
 public class TypeDeclarationResolverTest implements RAMLParserFixtures, ResourceFixtures {
 
     @Test
     public void api() {
-        final URI apiUri = URI.createFileURI("/Users/mkoester/Development/commercetools-api-reference/api.raml");
+        final File apiFile = new File("/Users/mkoester/Development/commercetools-api-reference/api.raml");
+        assumeTrue(apiFile.exists());
+
+        final URI apiUri = URI.createURI(apiFile.toURI().toString());
         final URIConverter uriConverter = new RamlResourceSet().getURIConverter();
         final RAMLCustomLexer lexer = new RAMLCustomLexer(apiUri, uriConverter);
         lexer.setTokenFactory(CommonTokenFactory.DEFAULT);
