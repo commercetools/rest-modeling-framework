@@ -133,7 +133,7 @@ public class RamlResourceTest implements ResourceFixtures {
         assertThat(type).isEqualTo(superType);
     }
 
-   // @Ignore
+    @Ignore
     @Test
     public void api() {
         final File apiFile = new File("/Users/mkoester/Development/commercetools-api-reference/api.raml");
@@ -141,14 +141,16 @@ public class RamlResourceTest implements ResourceFixtures {
 
         final URI fileURI = URI.createURI(apiFile.toURI().toString());
         final Resource resource = fromUri(fileURI);
-        EList<EObject> contents = resource.getContents();
-        Api api = (Api) contents.get(0);
+        assertThat(resource).isNotNull();
+        assertThat(resource.getErrors()).isEmpty();
 
-        EList<AnyType> types = api.getTypes();
+        final EList<EObject> contents = resource.getContents();
+        final Api api = (Api) contents.get(0);
+
+        final EList<AnyType> types = api.getTypes();
         for (final AnyType anyType : types) {
             assertThat(anyType.eIsProxy()).isFalse();
         }
-        assertThat(resource).isNotNull();
     }
 
     @Ignore

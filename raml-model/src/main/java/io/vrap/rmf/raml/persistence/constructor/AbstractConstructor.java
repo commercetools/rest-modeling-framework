@@ -3,20 +3,16 @@ package io.vrap.rmf.raml.persistence.constructor;
 import io.vrap.rmf.raml.model.facets.FacetsFactory;
 import io.vrap.rmf.raml.model.facets.StringInstance;
 import io.vrap.rmf.raml.model.types.*;
-import io.vrap.rmf.raml.persistence.antlr.RAMLBaseVisitor;
 import io.vrap.rmf.raml.persistence.antlr.RAMLParser;
 import io.vrap.rmf.raml.persistence.typeexpressions.TypeExpressionsParser;
 import org.antlr.v4.runtime.CommonToken;
 import org.antlr.v4.runtime.Token;
-import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.*;
@@ -24,11 +20,10 @@ import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.*;
 /**
  * Abstract base class for antlr based constructors.
  */
-public abstract class AbstractConstructor extends RAMLBaseVisitor<Object> {
+public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> {
     private static final FacetsFactory FACETS_FACTORY = FacetsFactory.eINSTANCE;
     private static final TypesFactory TYPES_FACTORY = TypesFactory.eINSTANCE;
     private final TypeExpressionsParser typeExpressionsParser = new TypeExpressionsParser();
-    protected Scope scope;
 
     public abstract EObject construct(final RAMLParser parser, final Scope scope);
 
@@ -204,78 +199,9 @@ public abstract class AbstractConstructor extends RAMLBaseVisitor<Object> {
         return scope.eObject();
     }
 
-    protected <T> T withinScope(final Scope scope, final Function<Scope, T> within) {
-        pushScope(scope);
-
-        T value = within.apply(scope);
-
-        popScope();
-
-        return value;
-    }
-
-    protected Scope pushScope(final Scope scope) {
-        return this.scope = scope;
-    }
-
-    protected Scope popScope() {
-        return this.scope = scope.getParent();
-    }
-
     @Override
     public Object visitAttributeFacet(final RAMLParser.AttributeFacetContext attributeFacet) {
         final Object value = setAttribute(attributeFacet, scope.eObject());
         return value;
-    }
-
-    /**
-     * Sets an attribute given by the attribute facet on the given eobject.
-     *
-     * @param attributeFacet the attribute facet
-     * @param eObject        the object to set the attribute
-     */
-    protected Object setAttribute(final RAMLParser.AttributeFacetContext attributeFacet, final EObject eObject) {
-        final EClass eClass = eObject.eClass();
-        final String attributeName = attributeFacet.facet.getText();
-        final EAttribute eAttribute = eClass.getEAllAttributes().stream()
-                .filter(a -> a.getName().equals(attributeName))
-                .findFirst()
-                .orElse(null);
-
-        final Object value;
-        if (eAttribute == null) {
-            scope.addError("Unknown attribute {0}", attributeName);
-            value = null;
-        } else {
-            value = attributeFacet.facetValue().value == null ?
-                    attributeFacet.facetValue().values :
-                    attributeFacet.facetValue().value;
-
-            if (attributeFacet.facetValue().value != null) {
-                setAttribute(eObject, eAttribute, attributeFacet.facetValue().value);
-            } else {
-                setAttribute(eObject, eAttribute, attributeFacet.facetValue().values);
-            }
-        }
-        return value;
-    }
-
-    private void setAttribute(final EObject eObject, final EAttribute eAttribute, final List<RAMLParser.IdContext> valueTokens) {
-        final List<Object> values = valueTokens.stream()
-                .map(RAMLParser.IdContext::getText)
-                .map(v -> EcoreUtil.createFromString(eAttribute.getEAttributeType(), v))
-                .collect(Collectors.toList());
-
-        eObject.eSet(eAttribute, values);
-    }
-
-    private void setAttribute(final EObject eObject, final EAttribute eAttribute, final RAMLParser.IdContext valueToken) {
-        final Object value = EcoreUtil.createFromString(eAttribute.getEAttributeType(), valueToken.getText());
-
-        if (eAttribute.isMany()) {
-            eObject.eSet(eAttribute, Collections.singletonList(value));
-        } else {
-            eObject.eSet(eAttribute, value);
-        }
     }
 }
