@@ -13,7 +13,7 @@ tokens {
 
 api:
     MAP_START
-    ( securitySchemesFacet | securedByFacet | resourceTypesFacet | attributeFacet | typesFacet | annotationFacet )*
+    ( usesFacet | securitySchemesFacet | securedByFacet | resourceTypesFacet | attributeFacet | typesFacet | annotationFacet )*
     MAP_END;
 
 securitySchemesFacet:
@@ -41,8 +41,8 @@ attributeFacet:
     facet=SCALAR value=facetValue;
 
 facetValue:
-        value=SCALAR
-    |   (LIST_START values+=SCALAR* LIST_END)
+        value=id
+    |   (LIST_START values+=id* LIST_END)
     ;
 
 library:
@@ -95,9 +95,14 @@ typeFacet:
 
 propertiesFacet:
     facet='properties'
-        MAP_START
-        ( propertyFacets+=propertyFacet )*
-        MAP_END
+        (
+            SCALAR
+            |   (
+                    MAP_START
+                    ( propertyFacets+=propertyFacet )*
+                    MAP_END
+                )
+        )
     ;
 
 propertyFacet:
@@ -116,7 +121,13 @@ propertyMap:
     ;
 
 id:
-        'required'
+        'annotationTypes'
+    |   'items'
+    |   'properties'
+    |   'required' | 'resourceTypes'
+    |   'type' | 'types'
+    |   'uses'
+    |   'securedBy' | 'securitySchemes'
     |   SCALAR
     ;
 

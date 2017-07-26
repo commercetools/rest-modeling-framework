@@ -1,46 +1,32 @@
 package io.vrap.rmf.raml.persistence.constructor;
 
 import io.vrap.rmf.raml.model.modules.Api;
-import io.vrap.rmf.raml.model.modules.ModulesFactory;
-import io.vrap.rmf.raml.persistence.RamlResourceSet;
 import io.vrap.rmf.raml.persistence.antlr.RAMLParser;
-import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
-import org.eclipse.emf.ecore.resource.Resource;
 
 public class ApiConstructor extends AbstractConstructor {
-    protected final static ModulesFactory FACTORY = ModulesFactory.eINSTANCE;
 
     @Override
     public EObject construct(final RAMLParser parser, final Scope scope) {
+        final TypeDeclarationResolver typeDeclarationResolver = new TypeDeclarationResolver();
+        typeDeclarationResolver.resolve(parser.api(), scope);
+        parser.reset();
+
         final Api api = (Api) withinScope(scope,
                 s -> visitApi(parser.api()));
-
         return api;
     }
 
     @Override
     public Object visitApi(final RAMLParser.ApiContext ctx) {
-        final Api api = FACTORY.createApi();
-        scope.getResource().getContents().add(api);
+        final EObject rootObject = scope.getResource().getContents().get(0);
 
-        pushScope(scope.with(api));
+        return withinScope(scope.with(rootObject), rootScope -> {
+            ctx.annotationFacet().forEach(this::visitAnnotationFacet);
+            ctx.attributeFacet().forEach(this::visitAttributeFacet);
+            ctx.typesFacet().forEach(this::visitTypesFacet);
 
-        ctx.annotationFacet().forEach(this::visitAnnotationFacet);
-        ctx.attributeFacet().forEach(this::visitAttributeFacet);
-        ctx.typesFacet().forEach(this::visitTypesFacet);
-
-        popScope();
-
-        return api;
-    }
-
-    public static ApiConstructor of(final URI uri) {
-        final Resource resource = new RamlResourceSet().createResource(uri);
-
-        final ApiConstructor constructor = new ApiConstructor();
-        constructor.pushScope(Scope.of(resource));
-
-        return constructor;
+            return rootObject;
+        });
     }
 }

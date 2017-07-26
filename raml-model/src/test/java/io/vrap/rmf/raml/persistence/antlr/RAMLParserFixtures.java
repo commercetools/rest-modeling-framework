@@ -21,7 +21,7 @@ public interface RAMLParserFixtures {
      * @return the parser
      * @throws IOException
      */
-    default RAMLParser parseFromClasspath(final String name) throws IOException {
+    default RAMLParser parserFromClasspath(final String name) throws IOException {
         final URL url = getClass().getResource(name);
         final RAMLCustomLexer yamlLexer = lexer(url);
         final TokenStream tokenStream = new CommonTokenStream(yamlLexer);

@@ -3,6 +3,8 @@ package io.vrap.rmf.raml.persistence.constructor;
 import io.vrap.rmf.raml.model.modules.Library;
 import io.vrap.rmf.raml.model.modules.LibraryUse;
 import io.vrap.rmf.raml.model.types.BuiltinType;
+import org.antlr.v4.runtime.CommonToken;
+import org.antlr.v4.runtime.Token;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EClass;
@@ -12,11 +14,7 @@ import org.eclipse.emf.ecore.InternalEObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.util.EcoreUtil;
-import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.error.Mark;
-import org.yaml.snakeyaml.nodes.Node;
 
-import java.io.*;
 import java.text.MessageFormat;
 import java.util.List;
 import java.util.Optional;
@@ -37,19 +35,15 @@ public class Scope {
     private final ResourceSet resourceSet;
     private final EObject eObject;
     private final EStructuralFeature feature;
-    private final Yaml yaml;
-    private final Node valueNode;
 
-    private Scope(final Scope parent, final Resource resource, final URI uri, final Yaml yaml,
-                  final EObject eObject, final EStructuralFeature feature, final Node valueNode) {
+    private Scope(final Scope parent, final Resource resource, final URI uri,
+                  final EObject eObject, final EStructuralFeature feature) {
         this.parent = parent;
         this.resource = resource;
         this.uri = uri;
-        this.yaml = yaml;
         this.resourceSet = resource.getResourceSet();
         this.eObject = eObject;
         this.feature = feature;
-        this.valueNode = valueNode;
     }
 
     public Library getUsedLibrary(final String name) {
@@ -86,10 +80,6 @@ public class Scope {
         return uri.trimSegments(1);
     }
 
-    public Node getValueNode() {
-        return valueNode;
-    }
-
     public Resource getResource(final String relativePath) {
         final URI uri = resolve(relativePath);
         return resourceSet.getResource(uri, true);
@@ -104,7 +94,7 @@ public class Scope {
         return resolvedType;
     }
 
-    private String getUriFragment(final String id) {
+    public String getUriFragment(final String id) {
         final EClass type = (EClass) feature.getEType();
         final String fragment = ANY_ANNOTATION_TYPE.isSuperTypeOf(type) ?
                 TYPE_CONTAINER__ANNOTATION_TYPES.getName() :
@@ -154,9 +144,9 @@ public class Scope {
      * @return the value
      */
     @SuppressWarnings("unchecked")
-    public <T> T setValue(final T value) {
+    public <T> T setValue(final T value, final Token token) {
         final EStructuralFeature feature = eFeature();
-        return setValue(feature, value);
+        return setValue(feature, value, token);
     }
 
     /**
@@ -167,60 +157,36 @@ public class Scope {
      *                a {@link EObject} or a {@link List} of these types.
      * @return the value
      */
-    public <T> T setValue(final EStructuralFeature feature, final T value) {
+    public <T> T setValue(final EStructuralFeature feature, final T value, final Token token) {
         final EObject container = eObject();
-        if (feature.isMany() && !(value instanceof List)) {
-            final EList<T> eList = (EList<T>) container.eGet(feature);
-            eList.add(value);
+        final boolean isValidValue = container.eClass().getEAllStructuralFeatures().contains(feature) &&
+                feature.getEType().isInstance(value);
+
+        if (isValidValue) {
+            if (feature.isMany() && !(value instanceof List)) {
+                final EList<T> eList = (EList<T>) container.eGet(feature);
+                eList.add(value);
+            } else {
+                container.eSet(feature, value);
+            }
         } else {
-            container.eSet(feature, value);
+            addError("Invalid value {0} for feature {1} of {2} at {3}",
+                    value, feature.getName(), eObject.eClass().getName(), token);
         }
         return value;
-    }
-
-    /**
-     * Composes a yaml node from the given reader.
-     *
-     * @param reader the reader
-     * @return the composed node
-     */
-    public Node compose(final Reader reader) {
-        return yaml.compose(reader);
-    }
-
-    /**
-     * Composes a yaml node from the given uri.
-     *
-     * @param uri the uri
-     * @return the composed node
-     */
-    public Scope compose(final String uri) {
-        try {
-            final URI resolvedUri = resolve(uri);
-            final InputStream inputStream = resourceSet.getURIConverter()
-                    .createInputStream(resolvedUri);
-
-            try (final Reader reader = new InputStreamReader(new BufferedInputStream(inputStream, 1024))) {
-                return with(yaml.compose(reader), resolvedUri);
-            }
-        } catch (IOException e) {
-            addError(e.getMessage());
-            return this;
-        }
     }
 
     public void addError(final String messagePattern, final Object... arguments) {
         final String message = MessageFormat.format(messagePattern, arguments);
 
-        final Optional<Node> optionalNode = Stream.of(arguments)
-                .filter(Node.class::isInstance)
-                .map(Node.class::cast)
+        final Optional<CommonToken> optionalToken = Stream.of(arguments)
+                .filter(CommonToken.class::isInstance)
+                .map(CommonToken.class::cast)
                 .findFirst();
-        final Optional<Mark> startMark = optionalNode.map(Node::getStartMark);
 
-        final int line = startMark.map(Mark::getLine).orElse(0);
-        final int column = startMark.map(Mark::getColumn).orElse(0);
-        final String location = uri.toString();
+        final int line = optionalToken.map(CommonToken::getLine).orElse(-1);
+        final int column = optionalToken.map(CommonToken::getCharPositionInLine).orElse(-1);
+        final String location = "<UNKOWN SOURCE>";
 
         resource.getErrors()
                 .add(new RamlDiagnostic(message, location, line, column));
@@ -236,19 +202,11 @@ public class Scope {
     }
 
     public Scope with(final EObject eObject) {
-        return new Scope(this, resource, uri, yaml, eObject, feature, valueNode);
+        return new Scope(this, resource, uri, eObject, feature);
     }
 
     public Scope with(final EObject eObject, final EStructuralFeature feature) {
-        return new Scope(this, resource, uri, yaml, eObject, feature, null);
-    }
-
-    public Scope with(final Node node, final URI uri) {
-        return new Scope(this, resource, uri, yaml, eObject, feature, node);
-    }
-
-    public Scope with(final Node node) {
-        return with(node, uri);
+        return new Scope(this, resource, uri, eObject, feature);
     }
 
     public Scope with(final EStructuralFeature feature) {
@@ -256,11 +214,11 @@ public class Scope {
     }
 
     public Scope with(final Resource resource) {
-        return new Scope(this, resource, uri, yaml, eObject, feature, valueNode);
+        return new Scope(this, resource, uri, eObject, feature);
     }
 
     public static Scope of(final Resource resource) {
-        return new Scope(null, resource, resource.getURI(), new Yaml(), null, null, null);
+        return new Scope(null, resource, resource.getURI(), null, null);
     }
 
     private static class RamlDiagnostic implements Resource.Diagnostic {
