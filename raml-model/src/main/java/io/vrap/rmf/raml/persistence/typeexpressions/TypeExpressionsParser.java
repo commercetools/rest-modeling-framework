@@ -24,6 +24,9 @@ import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.UNION_TYPE;
 
 /**
  * This class parses a type expression and transforms it to an {@link AnyType}.
+ *
+ * This visitor works returns an {@link EObject} because it can parse types and
+ * annotation types.
  */
 public class TypeExpressionsParser {
 
