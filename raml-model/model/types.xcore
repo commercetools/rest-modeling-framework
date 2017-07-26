@@ -137,6 +137,20 @@ class NilType extends AnyType {
 }
 
 /*
+ * A union type is a composition of one of its types.
+ */
+class UnionType extends AnyType {
+	refers AnyType[] oneOf	
+}
+
+/*
+ * An intersection type is the composition of all of its types.
+ */
+class IntersectionType extends AnyType {
+	refers AnyType[] allOf
+}
+
+/*
  * The location within an API specification where annotations can be applied MUST be one of the target locations
  * in the following Target Locations table. The targets are the locations themselves, not sub-properties within the locations.
  * For example, the Method target refers to the method node, not to the method display name, description, and so on.

@@ -1,6 +1,7 @@
 package io.vrap.rmf.raml.persistence.typeexpressions;
 
 import io.vrap.rmf.raml.model.types.AnyType;
+import io.vrap.rmf.raml.model.types.UnionType;
 import io.vrap.rmf.raml.persistence.antlr.TypeExpressionBaseVisitor;
 import io.vrap.rmf.raml.persistence.antlr.TypeExpressionLexer;
 import io.vrap.rmf.raml.persistence.antlr.TypeExpressionParser;
@@ -9,12 +10,17 @@ import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.TokenStream;
+import org.eclipse.emf.common.util.ECollections;
+import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
+import java.util.stream.Collectors;
+
 import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.ARRAY_TYPE;
+import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.UNION_TYPE;
 
 /**
  * This class parses a type expression and transforms it to an {@link AnyType}.
@@ -57,12 +63,19 @@ public class TypeExpressionsParser {
 
         @Override
         public EObject visitUnionType(final TypeExpressionParser.UnionTypeContext ctx) {
-            return super.visitUnionType(ctx);
+            final UnionType unionType = (UnionType) EcoreUtil.create(UNION_TYPE);
+            final EList<AnyType> oneOfType = ECollections.asEList(ctx.type_expr().stream()
+                    .map(this::visit)
+                    .map(AnyType.class::cast)
+                    .collect(Collectors.toList()));
+            unionType.getOneOf().addAll(oneOfType);
+
+            return unionType;
         }
 
         @Override
         public EObject visitParens(final TypeExpressionParser.ParensContext ctx) {
-            return super.visitParens(ctx);
+            return super.visit(ctx.type_expr());
         }
 
         @Override
