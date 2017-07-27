@@ -13,6 +13,8 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assume.assumeTrue;
@@ -151,6 +153,28 @@ public class RamlResourceTest implements ResourceFixtures {
         for (final AnyType anyType : types) {
             assertThat(anyType.eIsProxy()).isFalse();
         }
+    }
+
+    @Test
+    public void apiSuperCrossReferencer() {
+        final File apiFile = new File("/Users/mkoester/Development/commercetools-api-reference/api.raml");
+        assumeTrue(apiFile.exists());
+
+        final URI fileURI = URI.createURI(apiFile.toURI().toString());
+        final Resource resource = fromUri(fileURI);
+        assertThat(resource).isNotNull();
+        assertThat(resource.getErrors()).isEmpty();
+
+        final EList<EObject> contents = resource.getContents();
+        final Api api = (Api) contents.get(0);
+        final Optional<AnyType> optionalDestinationType = api.getTypes().stream()
+                .filter(anyType -> "Destination".equals(anyType.getName()))
+                .findFirst();
+
+        assertThat(optionalDestinationType.isPresent());
+        final AnyType destinationType = optionalDestinationType.get();
+        final List<AnyType> subTypes = destinationType.subTypes();
+        assertThat(subTypes).hasSize(3);
     }
 
     @Ignore

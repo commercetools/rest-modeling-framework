@@ -17,6 +17,8 @@ import io.vrap.rmf.raml.model.facets.NumberTypeFacet
 import io.vrap.rmf.raml.model.facets.ObjectTypeFacet
 import io.vrap.rmf.raml.model.facets.StringTypeFacet
 
+import io.vrap.rmf.raml.model.util.SuperTypeCrossReferencer
+
 /*
  * Every type, whether built-in or user-defined, has the any type at the root of its inheritance tree.
  * By definition, the any type is a type which imposes no restrictions, i.e. any instance of data is
@@ -27,6 +29,13 @@ class AnyType extends AnnotationsFacet, DocumentableElement, IdentifiableElement
 	 * The type which this type extends.
 	 */
 	refers AnyType ^type	
+	
+	/*
+	 * Returns the computed sub types of this type.
+	 */
+	op AnyType[] subTypes() {
+		SuperTypeCrossReferencer.getSubTypes(this)
+	}
 }
 
 class Property extends AnnotationsFacet {

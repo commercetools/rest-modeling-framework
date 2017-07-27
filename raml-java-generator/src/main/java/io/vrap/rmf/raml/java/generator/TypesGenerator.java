@@ -1,5 +1,7 @@
 package io.vrap.rmf.raml.java.generator;
 
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.google.common.base.CaseFormat;
 import com.google.common.base.Converter;
 import com.squareup.javapoet.*;
@@ -139,6 +141,31 @@ public class TypesGenerator {
                 interfaceBuilder = TypeSpec.interfaceBuilder(objectType.getName());
                 interfaceBuilder.addModifiers(Modifier.PUBLIC);
 
+                if (objectType.getDiscriminator() != null) {
+                    // @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type", visible = true)
+                    interfaceBuilder.addAnnotation(AnnotationSpec.builder(JsonTypeInfo.class)
+                            .addMember("use", "$L", "JsonTypeInfo.Id.NAME")
+                            .addMember("include", "$L", "JsonTypeInfo.As.PROPERTY")
+                            .addMember("type", "$S", objectType.getDiscriminator())
+                            .addMember("visible", "$L", true)
+                            .build());
+
+                    final List<ObjectType> subTypes = objectType.subTypes().stream()
+                            .filter(ObjectType.class::isInstance)
+                            .map(ObjectType.class::cast)
+                            .filter(subType -> subType.getDiscriminatorValue() != null)
+                            .collect(Collectors.toList());
+                    final AnnotationSpec.Builder jsonSubTypesBuilder = AnnotationSpec.builder(JsonSubTypes.class);
+
+                    for (final ObjectType subType : subTypes) {
+                        jsonSubTypesBuilder.addMember("value", "$L",
+                                AnnotationSpec.builder(JsonSubTypes.Type.class)
+                                        .addMember("value", "$T", ClassName.get(packageName, subType.getName()))
+                                        .addMember("name", "$S", subType.getDiscriminatorValue())
+                                        .build());
+                    }
+                    interfaceBuilder.addAnnotation(jsonSubTypesBuilder.build());
+                }
                 final TypeName typeName = typeMappingVisitor.doSwitch(objectType.getType());
                 final String superTypeName = objectType.getType().getName();
                 if (!BuiltinType.of(superTypeName).isPresent()) {
@@ -178,7 +205,9 @@ public class TypesGenerator {
 
         @Override
         public TypeName caseStringType(final StringType stringType) {
-            return ClassName.get(String.class);
+            return stringType.getName() == null || stringType.getEnum().isEmpty() ?
+                    ClassName.get(String.class) :
+                    ClassName.get(packageName, stringType.getName());
         }
 
         @Override
