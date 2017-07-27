@@ -1,5 +1,7 @@
 package io.vrap.rmf.raml.java.generator;
 
+import com.google.common.base.CaseFormat;
+import com.google.common.base.Converter;
 import com.squareup.javapoet.*;
 import io.vrap.rmf.raml.model.modules.TypeContainer;
 import io.vrap.rmf.raml.model.types.*;
@@ -105,12 +107,38 @@ public class TypesGenerator {
     private class TypeGeneratingVisitor extends TypesSwitch<TypeSpec> {
 
         @Override
+        public TypeSpec caseStringType(final StringType stringType) {
+            if (stringType.getEnum().isEmpty()) {
+                return null;
+            } else {
+                final TypeSpec.Builder enumBuilder = TypeSpec.enumBuilder(stringType.getName());
+                enumBuilder.addModifiers(Modifier.PUBLIC);
+
+                final Converter<String, String> enumCamelConverter = CaseFormat.LOWER_CAMEL
+                        .converterTo(CaseFormat.UPPER_UNDERSCORE);
+                final Converter<String, String> enumHyphenConverter = CaseFormat.LOWER_HYPHEN
+                        .converterTo(CaseFormat.UPPER_UNDERSCORE);
+
+                for (final String enumValue : stringType.getEnum()) {
+
+                    final String enumLiteral = enumValue.contains("-") ?
+                            enumHyphenConverter.convert(enumValue) :
+                            enumCamelConverter.convert(enumValue);
+                    enumBuilder.addEnumConstant(enumLiteral);
+                }
+                return enumBuilder.build();
+            }
+        }
+
+        @Override
         public TypeSpec caseObjectType(final ObjectType objectType) {
             final TypeSpec.Builder interfaceBuilder;
             if (objectType.getName() == null) {
                 interfaceBuilder = null;
             } else {
                 interfaceBuilder = TypeSpec.interfaceBuilder(objectType.getName());
+                interfaceBuilder.addModifiers(Modifier.PUBLIC);
+
                 final TypeName typeName = typeMappingVisitor.doSwitch(objectType.getType());
                 final String superTypeName = objectType.getType().getName();
                 if (!BuiltinType.of(superTypeName).isPresent()) {
