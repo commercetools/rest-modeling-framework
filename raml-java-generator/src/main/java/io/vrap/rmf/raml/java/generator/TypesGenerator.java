@@ -146,7 +146,6 @@ public class TypesGenerator {
                 interfaceBuilder.addModifiers(Modifier.PUBLIC);
 
                 if (objectType.getDiscriminator() != null) {
-                    // @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type", visible = true)
                     interfaceBuilder.addAnnotation(AnnotationSpec.builder(JsonTypeInfo.class)
                             .addMember("use", "$L", "JsonTypeInfo.Id.NAME")
                             .addMember("include", "$L", "JsonTypeInfo.As.PROPERTY")
