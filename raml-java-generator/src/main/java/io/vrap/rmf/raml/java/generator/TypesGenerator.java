@@ -65,7 +65,7 @@ public class TypesGenerator {
 
     public static void main(String... args) {
         final long startTimeMillis = System.currentTimeMillis();
-        final File generateTo = new File("./build/raml-gen");
+        final File generateTo = new File("./demo/src/main/java-gen");
         final File apiFile = new File("/Users/mkoester/Development/commercetools-api-reference/api.raml");
 
         final URI fileURI = URI.createURI(apiFile.toURI().toString());
@@ -146,7 +146,7 @@ public class TypesGenerator {
                     interfaceBuilder.addAnnotation(AnnotationSpec.builder(JsonTypeInfo.class)
                             .addMember("use", "$L", "JsonTypeInfo.Id.NAME")
                             .addMember("include", "$L", "JsonTypeInfo.As.PROPERTY")
-                            .addMember("type", "$S", objectType.getDiscriminator())
+                            .addMember("property", "$S", objectType.getDiscriminator())
                             .addMember("visible", "$L", true)
                             .build());
 
@@ -160,7 +160,7 @@ public class TypesGenerator {
                     for (final ObjectType subType : subTypes) {
                         jsonSubTypesBuilder.addMember("value", "$L",
                                 AnnotationSpec.builder(JsonSubTypes.Type.class)
-                                        .addMember("value", "$T", ClassName.get(packageName, subType.getName()))
+                                        .addMember("value", "$T.class", ClassName.get(packageName, subType.getName()))
                                         .addMember("name", "$S", subType.getDiscriminatorValue())
                                         .build());
                     }
