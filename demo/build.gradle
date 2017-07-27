@@ -1,15 +1,24 @@
 
 sourceSets {
-    main {
-        java {
-            srcDir 'java-gen'
-        }
+    generated {
+        java.srcDir "/src/java-gen/"
     }
+}
+
+compileGeneratedJava {
+    classpath = configurations.compile
+}
+
+compileJava {
+    dependsOn(compileGeneratedJava)
+    source += sourceSets.generated.java
 }
 
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
     testCompile 'org.assertj:assertj-core:3.8.0'
 
+    def jvmSdkVersion = "1.21.0"
+    compile "com.commercetools.sdk.jvm.core:commercetools-sdk-base:$jvmSdkVersion"
     compile 'com.fasterxml.jackson.core:jackson-annotations:2.8.9'
 }

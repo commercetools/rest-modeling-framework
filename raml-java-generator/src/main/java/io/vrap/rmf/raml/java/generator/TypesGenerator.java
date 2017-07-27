@@ -19,7 +19,9 @@ import java.io.File;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.ZonedDateTime;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -33,7 +35,8 @@ public class TypesGenerator {
     private String packageName;
     private final File generateTo;
 
-    private TypeMappingVisitor typeMappingVisitor = new TypeMappingVisitor();
+    private Map<String, String> customTypeMapping = Collections.singletonMap("LocalizedString", "io.sphere.sdk.models.LocalizedString");
+    private TypeMappingVisitor typeMappingVisitor = new TypeMappingVisitor(customTypeMapping);
     private PropertyGeneratingVisitor propertyGeneratingVisitor = new PropertyGeneratingVisitor();
     private TypeGeneratingVisitor typeGeneratingVisitor = new TypeGeneratingVisitor();
 
@@ -55,6 +58,7 @@ public class TypesGenerator {
      */
     public void generate(final TypeContainer typeContainer) {
         final List<TypeSpec> typeSpecs = typeContainer.getTypes().stream()
+                .filter(anyType -> !customTypeMapping.containsKey(anyType.getName()))
                 .map(typeGeneratingVisitor::doSwitch)
                 .collect(Collectors.toList());
 
@@ -198,6 +202,12 @@ public class TypesGenerator {
     }
 
     private class TypeMappingVisitor extends TypesSwitch<TypeName> {
+        private final Map<String, String> customMapping;
+
+        public TypeMappingVisitor(Map<String, String> customMapping) {
+            this.customMapping = customMapping;
+        }
+
         @Override
         public TypeName caseAnyType(final AnyType anyType) {
             return ClassName.get(Object.class);
@@ -227,7 +237,12 @@ public class TypesGenerator {
 
         @Override
         public TypeName caseObjectType(final ObjectType objectType) {
-            return ClassName.get(packageName, objectType.getName());
+            final String name = objectType.getName();
+            return customMapping.containsKey(name) ?
+                ClassName.bestGuess(customMapping.get(name)) :
+                    BuiltinType.OBJECT.getName().equals(name) ?
+                            ClassName.get(Object.class) :
+                            ClassName.get(packageName, name);
         }
 
         @Override
