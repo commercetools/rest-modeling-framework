@@ -1,1 +1,1 @@
-include 'functional-utils', 'raml-model'
+include 'functional-utils', 'raml-model', 'raml-java-generator'
