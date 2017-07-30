@@ -1,10 +1,7 @@
 @Ecore(nsPrefix="types",nsURI="http://www.vrap.io/raml/types")
-@GenModel(
-    modelDirectory="/raml-model/src/main/java-gen",
-    complianceLevel="8.0"
-)
+@GenModel(modelDirectory="/raml-model/src/main/java-gen",
+    complianceLevel="8.0")
 package io.vrap.rmf.raml.model.types
-
 
 import io.vrap.rmf.raml.model.elements.DocumentableElement
 import io.vrap.rmf.raml.model.elements.IdentifiableElement
@@ -16,7 +13,6 @@ import io.vrap.rmf.raml.model.facets.Instance
 import io.vrap.rmf.raml.model.facets.NumberTypeFacet
 import io.vrap.rmf.raml.model.facets.ObjectTypeFacet
 import io.vrap.rmf.raml.model.facets.StringTypeFacet
-
 import io.vrap.rmf.raml.model.util.SuperTypeCrossReferencer
 
 /*
@@ -28,8 +24,7 @@ class AnyType extends AnnotationsFacet, DocumentableElement, IdentifiableElement
 	/*
 	 * The type which this type extends.
 	 */
-	refers AnyType ^type	
-	
+	refers AnyType ^type
 	/*
 	 * Returns the computed sub types of this type.
 	 */
@@ -38,41 +33,48 @@ class AnyType extends AnnotationsFacet, DocumentableElement, IdentifiableElement
 	}
 }
 
-class Property extends AnnotationsFacet {
+interface TypedElement {
 	/*
-	 * The name of this property.
+	 * The inline types that this element declares.
 	 */
-	String name
+	contains AnyType[] inlineTypes
 
 	/*
-	 * The type of this property.
+	 * The name of this element.
+	 */
+	String name
+	
+	/*
+	 * The type of this element.
 	 */
 	refers AnyType ^type
 
 	/*
-	 * Specifies that the property is required or not.
+	 * Specifies if the element is required or not.
 	 */
 	Boolean required = "true"
+}
+
+class Property extends AnnotationsFacet, TypedElement {
 }
 
 interface PropertiesFacet {
 	/*
 	 * The properties that instances of this type can or must have.
 	 */
-	contains Property[] properties	
+	contains Property[] properties
 }
 
 class ObjectType extends AnyType, ObjectTypeFacet, PropertiesFacet {
-	
 	op Property getProperty(String name) {
 		for (Property property : properties) {
-			if (name == property.name) return property
+			if(name == property.name) return property
 		}
 		return null
 	}
 }
 
-interface ItemsFacet {	
+interface ItemsFacet {
 	/*
 	 * Indicates the type that all items in the array are inherited from.
 	 * Can be a reference to an existing type or an inline type declaration.
@@ -149,7 +151,7 @@ class NilType extends AnyType {
  * A union type is a composition of one of its types.
  */
 class UnionType extends AnyType {
-	refers AnyType[] oneOf	
+	refers AnyType[] oneOf
 }
 
 /*
@@ -168,69 +170,85 @@ enum AnnotationTarget {
 	/*
 	 * The root of a RAML document
 	 */
-	API,
+	API
+	,
 	/*
 	 * An item in the collection of items that is the value of the root-level documentation node.
 	 */
-	DocumentationItem,
+	DocumentationItem
+	,
 	/*
 	 * A resource (relative URI) node, root-level or nested
 	 */
-	Resource,
+	Resource
+	,
 	/*
 	 * A method node.
 	 */
-	Method,
+	Method
+	,
 	/*
 	 * A declaration of the responses node, whose key is an HTTP status code.
 	 */
-	Response,
+	Response
+	,
 	/*
 	 * The body node of a method.
 	 */
-	RequestBody,
+	RequestBody
+	,
 	/*
 	 * The body node of a response.
 	 */
-	ResponseBody,
+	ResponseBody
+	,
 	/*
 	 * A data type declaration (inline or in a global type collection), header declaration,
 	 * query parameter declaration, URI parameter declaration, or a property within any of these declarations,
 	 * where the type property can be used.
 	 */
-	TypeDeclaration,
+	TypeDeclaration
+	,
 	/*
 	 * Either an example or examples node
 	 */
-	Example,
+	Example
+	,
 	/*
 	 * A resource type node.
 	 */
-	ResourceType,
+	ResourceType
+	,
 	/*
 	 * A trait node.
 	 */
-	Trait,
+	Trait
+	,
 	/*
 	 * A security scheme declaration.
 	 */
-	SecurityScheme,
+	SecurityScheme
+	,
 	/*
 	 * The settings node of a security scheme declaration
 	 */
-	SecuritySchemeSettings,
+	SecuritySchemeSettings
+	,
 	/*
 	 * A declaration of the annotationTypes node, whose key is a name of an annotation type and whose value describes the annotation.
 	 */
-	AnnotationType,
+	AnnotationType
+	,
 	/*
 	 * The root of a library.
 	 */
-	Library,
+	Library
+	,
 	/*
 	 * The root of an overlay.
 	 */
-	Overlay,
+	Overlay
+	,
 	/*
 	 * The root of an extension.
 	 */
@@ -248,17 +266,16 @@ enum AnnotationTarget {
  * The allowedTargets node restricts the kinds of locations where the annotation can be applied. Annotation types, like data types,
  * can extend other data types, but annotation types themselves can neither be extended nor used anywhere data types can be used.
  */
-class AnyAnnotationType extends DocumentableElement, IdentifiableElement, AnnotationsFacet {	
-		/*
+class AnyAnnotationType extends DocumentableElement, IdentifiableElement, AnnotationsFacet {
+	/*
 	 * The type which this type extends.
 	 */
 	refers AnyAnnotationType ^type
-	
 	/*
 	 * The locations to which annotations are restricted.
 	 * If this node is specified, annotations of this type may be applied only on a node corresponding to one of the locations.
 	 */
-	AnnotationTarget[] allowedTargets	
+	AnnotationTarget[] allowedTargets
 }
 
 class TimeOnlyAnnotationType extends AnyAnnotationType {
@@ -279,19 +296,19 @@ class NumberAnnotationType extends NumberTypeFacet, AnyAnnotationType {
 class IntegerAnnotationType extends NumberAnnotationType {
 }
 
-class BooleanAnnotationType extends AnyAnnotationType {	
+class BooleanAnnotationType extends AnyAnnotationType {
 }
 
-class StringAnnotationType extends StringTypeFacet, AnyAnnotationType {	
+class StringAnnotationType extends StringTypeFacet, AnyAnnotationType {
 }
 
 class NilAnnotationType extends AnyAnnotationType {
 }
 
-class FileAnnotationType extends FileTypeFacet, AnyAnnotationType {	
+class FileAnnotationType extends FileTypeFacet, AnyAnnotationType {
 }
 
-class ObjectAnnotationType extends AnyAnnotationType, ObjectTypeFacet, PropertiesFacet  {	
+class ObjectAnnotationType extends AnyAnnotationType, ObjectTypeFacet, PropertiesFacet  {
 }
 
 class ArrayAnnotationType extends AnyAnnotationType, ArrayTypeFacet, ItemsFacet {
@@ -309,7 +326,6 @@ class Annotation {
 	 * The annotation type of this annotation.
 	 */
 	refers AnyAnnotationType ^type
-	
 	/*
 	 * The value of this annotation.
 	 */

@@ -5,7 +5,11 @@ import io.vrap.rmf.raml.model.modules.UriTemplate;
 import io.vrap.rmf.raml.persistence.antlr.RAMLParser;
 import org.eclipse.emf.ecore.EObject;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import static io.vrap.rmf.raml.model.modules.ModulesPackage.Literals.API__BASE_URI;
+import static io.vrap.rmf.raml.model.modules.ModulesPackage.Literals.API__BASE_URI_PARAMETERS;
 
 public class ApiConstructor extends AbstractConstructor {
     private final UriTemplateConstructor uriTemplateConstructor = new UriTemplateConstructor();
@@ -30,6 +34,7 @@ public class ApiConstructor extends AbstractConstructor {
             ctx.attributeFacet().forEach(this::visitAttributeFacet);
             ctx.typesFacet().forEach(this::visitTypesFacet);
             ctx.baseUriFacet().forEach(this::visitBaseUriFacet);
+            ctx.baseUriParametersFacet().forEach(this::visitBaseUriParametersFacet);
 
             return rootObject;
         });
@@ -43,4 +48,18 @@ public class ApiConstructor extends AbstractConstructor {
 
         return uriTemplate;
     }
+
+
+    @Override
+    public Object visitBaseUriParametersFacet(RAMLParser.BaseUriParametersFacetContext baseUriParametersFacet) {
+        return withinScope(scope.with(API__BASE_URI_PARAMETERS), baseUriParametersScope -> {
+            final List<Object> baseUriParameters = baseUriParametersFacet.uriParameterFacets.stream()
+                    .map(this::visitTypedElementFacet)
+                    .collect(Collectors.toList());
+
+            return baseUriParameters;
+        });
+
+    }
+
 }

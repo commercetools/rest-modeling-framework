@@ -14,13 +14,25 @@ tokens {
 api:
     MAP_START
     (
-        usesFacet | baseUriFacet
+        usesFacet | baseUriFacet | baseUriParametersFacet
         | securitySchemesFacet | securedByFacet
         | resourceTypesFacet | attributeFacet | typesFacet | annotationFacet )*
     MAP_END;
 
 baseUriFacet:
     'baseUri' baseUri=SCALAR
+    ;
+
+baseUriParametersFacet:
+    'baseUriParameters'
+        (
+            SCALAR
+            |   (
+                    MAP_START
+                    ( uriParameterFacets+=typedElementFacet )*
+                    MAP_END
+                )
+        )
     ;
 
 securitySchemesFacet:
@@ -106,21 +118,21 @@ propertiesFacet:
             SCALAR
             |   (
                     MAP_START
-                    ( propertyFacets+=propertyFacet )*
+                    ( propertyFacets+=typedElementFacet )*
                     MAP_END
                 )
         )
     ;
 
-propertyFacet:
-    propertyTuple | propertyMap
+typedElementFacet:
+    typedElementTuple | typedElementMap
     ;
 
-propertyTuple:
+typedElementTuple:
     name=id type=SCALAR
     ;
 
-propertyMap:
+typedElementMap:
     name=id
         MAP_START
         ( attributeFacet | propertiesFacet | requiredFacet | typeFacet | annotationFacet )*
@@ -129,6 +141,7 @@ propertyMap:
 
 id:
         'annotationTypes'
+    |   'baseUri' | 'baseUriParameters'
     |   'items'
     |   'properties'
     |   'required' | 'resourceTypes'

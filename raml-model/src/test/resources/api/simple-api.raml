@@ -1,6 +1,8 @@
 title: Simple API
 version: v1
-baseUri: https://api.simple.com/{version}/api
+baseUri: https://api.simple.com/{version}/api/{userId}
+baseUriParameters:
+  userId: integer
 protocols:
     - http
     - https

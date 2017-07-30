@@ -30,9 +30,10 @@ public class ApiConstructorTest implements RAMLParserFixtures, ResourceFixtures 
         final UriTemplate baseUri = api.getBaseUri();
         assertThat(baseUri).isNotNull();
         final EList<UriTemplatePart> parts = baseUri.getParts();
-        assertThat(parts.size()).isEqualTo(3);
+        assertThat(parts.size()).isEqualTo(4);
         assertThat(parts.get(0)).isInstanceOf(UriTemplateLiteral.class);
         assertThat(parts.get(1)).isInstanceOf(UriTemplateExpression.class);
         assertThat(parts.get(2)).isInstanceOf(UriTemplateLiteral.class);
+        assertThat(parts.get(3)).isInstanceOf(UriTemplateExpression.class);
     }
 }

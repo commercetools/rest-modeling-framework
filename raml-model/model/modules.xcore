@@ -8,6 +8,7 @@ package io.vrap.rmf.raml.model.modules
 import io.vrap.rmf.raml.model.types.AnnotationsFacet
 import io.vrap.rmf.raml.model.types.AnyAnnotationType
 import io.vrap.rmf.raml.model.types.AnyType
+import io.vrap.rmf.raml.model.types.TypedElement
 
 class UriTemplate {
 	contains UriTemplatePart[] parts	
@@ -24,14 +25,6 @@ class UriTemplateLiteral extends UriTemplatePart {
 class UriTemplateExpression extends UriTemplatePart {
 	String operator
 	String[] variables 	
-}
-
-interface TypedElement {
-	contains AnyType[] inlineTypes
-
-	String name
-		
-	refers AnyType ^type
 }
 
 class UriParameter extends TypedElement {

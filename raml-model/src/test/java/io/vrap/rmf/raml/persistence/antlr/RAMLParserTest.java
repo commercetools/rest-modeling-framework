@@ -14,7 +14,7 @@ public class RAMLParserTest implements RAMLParserFixtures {
     public void simpleApi() throws IOException {
         final ApiContext api = parserFromClasspath("/api/simple-api.raml").api();
 
-        assertThat(api.getChildCount()).isEqualTo(7);
+        assertThat(api.getChildCount()).isEqualTo(8);
         final List<AttributeFacetContext> apiFacets = api.attributeFacet();
         assertThat(apiFacets).hasSize(4);
 
@@ -25,10 +25,6 @@ public class RAMLParserTest implements RAMLParserFixtures {
         assertThat(apiFacets.get(1).getChildCount()).isEqualTo(2);
         assertThat(apiFacets.get(1).facet.getText()).isEqualTo("version");
         assertThat(apiFacets.get(1).facetValue().value.getText()).isEqualTo("v1");
-
-//        assertThat(apiFacets.get(2).getChildCount()).isEqualTo(2);
-//        assertThat(apiFacets.get(2).facet.getText()).isEqualTo("baseUri");
-//        assertThat(apiFacets.get(2).facetValue().value.getText()).isEqualTo("https://api.simple.com");
 
         assertThat(apiFacets.get(2).facet.getText()).isEqualTo("protocols");
         assertThat(apiFacets.get(2).facetValue().values).hasSize(2);
@@ -54,8 +50,8 @@ public class RAMLParserTest implements RAMLParserFixtures {
         final PropertiesFacetContext propertiesFacet = typeDeclaration
                 .typeDeclarationMap().propertiesFacet(0);
         final String requiredPropertyName = propertiesFacet
-                .propertyFacet(2)
-                .propertyMap().name.getText();
+                .typedElementFacet(2)
+                .typedElementMap().name.getText();
         assertThat(requiredPropertyName).isEqualTo("required");
     }
 }
