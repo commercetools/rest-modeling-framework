@@ -1,4 +1,4 @@
-package io.vrap.rmf.raml.persistence.typeexpressions;
+package io.vrap.rmf.raml.persistence.constructor;
 
 
 import io.vrap.rmf.raml.model.types.AnyType;
@@ -6,7 +6,6 @@ import io.vrap.rmf.raml.model.types.ArrayType;
 import io.vrap.rmf.raml.model.types.BuiltinType;
 import io.vrap.rmf.raml.model.types.UnionType;
 import io.vrap.rmf.raml.persistence.ResourceFixtures;
-import io.vrap.rmf.raml.persistence.constructor.Scope;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
@@ -15,8 +14,8 @@ import org.junit.Test;
 import static io.vrap.rmf.raml.model.modules.ModulesPackage.Literals.TYPE_CONTAINER__TYPES;
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class TypeExpressionsParserTest implements ResourceFixtures {
-    private final TypeExpressionsParser parser = new TypeExpressionsParser();
+public class TypeExpressionConstructorTest implements ResourceFixtures {
+    private final TypeExpressionConstructor parser = new TypeExpressionConstructor();
     private final Resource builtinTypesResource = fromUri(BuiltinType.RESOURCE_URI);
     private final Scope builinTypeScope = Scope.of(builtinTypesResource).with(TYPE_CONTAINER__TYPES);
 

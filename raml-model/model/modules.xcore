@@ -9,6 +9,34 @@ import io.vrap.rmf.raml.model.types.AnnotationsFacet
 import io.vrap.rmf.raml.model.types.AnyAnnotationType
 import io.vrap.rmf.raml.model.types.AnyType
 
+class UriTemplate {
+	contains UriTemplatePart[] parts	
+}
+
+interface UriTemplatePart {
+	
+}
+
+class UriTemplateLiteral extends UriTemplatePart {
+	String literal	
+}
+
+class UriTemplateExpression extends UriTemplatePart {
+	String operator
+	String[] variables 	
+}
+
+interface TypedElement {
+	contains AnyType[] inlineTypes
+
+	String name
+		
+	refers AnyType ^type
+}
+
+class UriParameter extends TypedElement {
+}
+
 class Api extends AnnotationsFacet, TypeContainer {
 	/*
 	 * A short, plain-text label for the API. Its value is a string.
@@ -29,8 +57,13 @@ class Api extends AnnotationsFacet, TypeContainer {
 	 * A URI that serves as the base for URIs of all resources. Often used as the base
 	 * of the URL of each resource containing the location of the API. Can be a template URI.
 	 */
-	String baseUri
+	contains UriTemplate baseUri
 
+	/*
+	 * Specifies the uri parameters in the base URI.
+	 */
+	contains UriParameter[] baseUriParameters
+	
 	/*
 	 * The protocols supported by the API.
 	 */

@@ -4,7 +4,6 @@ import io.vrap.rmf.raml.model.facets.FacetsFactory;
 import io.vrap.rmf.raml.model.facets.StringInstance;
 import io.vrap.rmf.raml.model.types.*;
 import io.vrap.rmf.raml.persistence.antlr.RAMLParser;
-import io.vrap.rmf.raml.persistence.typeexpressions.TypeExpressionsParser;
 import org.antlr.v4.runtime.CommonToken;
 import org.antlr.v4.runtime.Token;
 import org.eclipse.emf.ecore.EClass;
@@ -23,7 +22,7 @@ import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.*;
 public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> {
     private static final FacetsFactory FACETS_FACTORY = FacetsFactory.eINSTANCE;
     private static final TypesFactory TYPES_FACTORY = TypesFactory.eINSTANCE;
-    private final TypeExpressionsParser typeExpressionsParser = new TypeExpressionsParser();
+    private final TypeExpressionConstructor typeExpressionConstructor = new TypeExpressionConstructor();
 
     public abstract EObject construct(final RAMLParser parser, final Scope scope);
 
@@ -83,7 +82,7 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
     public Object visitTypeFacet(final RAMLParser.TypeFacetContext ctx) {
         final String typeExpression = ctx.SCALAR().getText();
 
-        return typeExpressionsParser.parse(typeExpression, scope);
+        return typeExpressionConstructor.parse(typeExpression, scope);
     }
 
     @Override
@@ -142,7 +141,7 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
 
         final EObject propertyType = type == null ?
                 scope.getImportedTypeById(BuiltinType.STRING.getName()) :
-                typeExpressionsParser.parse(type.getText(), scope);
+                typeExpressionConstructor.parse(type.getText(), scope);
         final boolean isRequired = !name.endsWith("?");
         scope.setValue(PROPERTY__REQUIRED, isRequired, propertyTuple.getStart());
         final String parsedName = isRequired ? name : name.substring(0, name.length() - 1);

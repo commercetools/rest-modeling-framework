@@ -1,11 +1,10 @@
-package io.vrap.rmf.raml.persistence.typeexpressions;
+package io.vrap.rmf.raml.persistence.constructor;
 
 import io.vrap.rmf.raml.model.types.AnyType;
 import io.vrap.rmf.raml.model.types.UnionType;
 import io.vrap.rmf.raml.persistence.antlr.TypeExpressionBaseVisitor;
 import io.vrap.rmf.raml.persistence.antlr.TypeExpressionLexer;
 import io.vrap.rmf.raml.persistence.antlr.TypeExpressionParser;
-import io.vrap.rmf.raml.persistence.constructor.Scope;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -28,7 +27,7 @@ import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.UNION_TYPE;
  * This visitor works returns an {@link EObject} because it can parse types and
  * annotation types.
  */
-public class TypeExpressionsParser {
+public class TypeExpressionConstructor {
 
     public EObject parse(final String typeExpression, final Scope scope) {
         final CharStream charStream = CharStreams.fromString(typeExpression);

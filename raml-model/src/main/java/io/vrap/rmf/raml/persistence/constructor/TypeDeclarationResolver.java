@@ -6,7 +6,6 @@ import io.vrap.rmf.raml.model.modules.LibraryUse;
 import io.vrap.rmf.raml.model.modules.ModulesFactory;
 import io.vrap.rmf.raml.model.types.BuiltinType;
 import io.vrap.rmf.raml.persistence.antlr.RAMLParser;
-import io.vrap.rmf.raml.persistence.typeexpressions.TypeExpressionsParser;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.eclipse.emf.common.util.EList;
@@ -29,7 +28,7 @@ import static io.vrap.rmf.raml.model.modules.ModulesPackage.Literals.TYPE_CONTAI
  * This is necessary because the type defines which facets a type declaration can have.
  */
 public class TypeDeclarationResolver {
-    private final TypeExpressionsParser typeExpressionsParser = new TypeExpressionsParser();
+    private final TypeExpressionConstructor typeExpressionConstructor = new TypeExpressionConstructor();
 
     /**
      * The ordered map of unresolved type declarations.
@@ -259,7 +258,7 @@ public class TypeDeclarationResolver {
                     .getResourceSet()
                     .getEObject(BuiltinType.RESOURCE_URI.appendFragment("/types/string"), true);
         } else {
-            superType = typeExpressionsParser.parse(typeExpression, scope);
+            superType = typeExpressionConstructor.parse(typeExpression, scope);
         }
         return superType;
     }
@@ -267,6 +266,6 @@ public class TypeDeclarationResolver {
     private Object visitTypeFacet(final Scope scope, final RAMLParser.TypeFacetContext typeFacet) {
         final String typeExpression = typeFacet.typeExpression.getText();
 
-        return typeExpressionsParser.parse(typeExpression, scope);
+        return typeExpressionConstructor.parse(typeExpression, scope);
     }
 }

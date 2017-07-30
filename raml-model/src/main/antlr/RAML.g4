@@ -13,8 +13,15 @@ tokens {
 
 api:
     MAP_START
-    ( usesFacet | securitySchemesFacet | securedByFacet | resourceTypesFacet | attributeFacet | typesFacet | annotationFacet )*
+    (
+        usesFacet | baseUriFacet
+        | securitySchemesFacet | securedByFacet
+        | resourceTypesFacet | attributeFacet | typesFacet | annotationFacet )*
     MAP_END;
+
+baseUriFacet:
+    'baseUri' baseUri=SCALAR
+    ;
 
 securitySchemesFacet:
     'securitySchemes'
