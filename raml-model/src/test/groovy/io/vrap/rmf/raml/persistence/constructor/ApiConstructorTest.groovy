@@ -93,6 +93,26 @@ class ApiConstructorTest extends Specification {
         resource.displayName == 'Users'
     }
 
+    def "simple uri parameters"() {
+        when:
+        Api api = constructApi(
+                '''\
+        /user/{userId}:
+            uriParameters:
+                userId: integer
+        ''')
+
+        then:
+        api.resources.size() == 1
+        Resource resource = api.resources[0]
+        resource.relativeUri.parts.size() == 2
+        resource.relativeUri.parts[0] instanceof UriTemplateLiteral
+        resource.relativeUri.parts[1] instanceof UriTemplateExpression
+        resource.uriParameters.size() == 1
+        resource.uriParameters[0].name == 'userId'
+        resource.uriParameters[0].type.name == 'integer'
+    }
+
     Api constructApi(String input) {
         RAMLParser parser = parser(input)
         def apiConstructor = new ApiConstructor()

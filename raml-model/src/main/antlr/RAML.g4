@@ -25,7 +25,19 @@ resourceFacet:
             SCALAR
             |   (
                     MAP_START
-                    ( attributeFacet )*
+                    ( attributeFacet | uriParametersFacet )*
+                    MAP_END
+                )
+        )
+    ;
+
+uriParametersFacet:
+    'uriParameters'
+        (
+            SCALAR
+            |   (
+                    MAP_START
+                    ( uriParameterFacets+=typedElementFacet )*
                     MAP_END
                 )
         )
@@ -158,7 +170,7 @@ id:
     |   'properties'
     |   'required' | 'resourceTypes'
     |   'type' | 'types'
-    |   'uses'
+    |   'uses' | 'uriParameters'
     |   'securedBy' | 'securitySchemes'
     |   SCALAR
     ;

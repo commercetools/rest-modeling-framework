@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 import static io.vrap.rmf.raml.model.modules.ModulesPackage.Literals.API__BASE_URI;
 import static io.vrap.rmf.raml.model.modules.ModulesPackage.Literals.API__BASE_URI_PARAMETERS;
 import static io.vrap.rmf.raml.model.resources.ResourcesPackage.Literals.RESOURCE_CONTAINER__RESOURCES;
+import static io.vrap.rmf.raml.model.resources.ResourcesPackage.Literals.RESOURCE__URI_PARAMETERS;
 
 public class ApiConstructor extends AbstractConstructor {
     private final UriTemplateConstructor uriTemplateConstructor = new UriTemplateConstructor();
@@ -63,7 +64,6 @@ public class ApiConstructor extends AbstractConstructor {
 
             return baseUriParameters;
         });
-
     }
 
     @Override
@@ -79,8 +79,24 @@ public class ApiConstructor extends AbstractConstructor {
                         .map(this::visitAttributeFacet)
                         .collect(Collectors.toList())
             );
+            withinScope(scope.with(resource), resourceScope ->
+                    resourceFacet.uriParametersFacet().stream()
+                            .map(this::visitUriParametersFacet)
+                            .collect(Collectors.toList())
+            );
 
             return resource;
+        });
+    }
+
+    @Override
+    public Object visitUriParametersFacet(RAMLParser.UriParametersFacetContext uriParametersFacet) {
+        return withinScope(scope.with(RESOURCE__URI_PARAMETERS), baseUriParametersScope -> {
+            final List<Object> baseUriParameters = uriParametersFacet.uriParameterFacets.stream()
+                    .map(this::visitTypedElementFacet)
+                    .collect(Collectors.toList());
+
+            return baseUriParameters;
         });
     }
 }
