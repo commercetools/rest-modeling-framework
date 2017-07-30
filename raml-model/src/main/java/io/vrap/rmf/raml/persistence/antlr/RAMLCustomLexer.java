@@ -8,9 +8,11 @@ import org.eclipse.emf.ecore.resource.URIConverter;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.events.*;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -50,6 +52,19 @@ public class RAMLCustomLexer implements TokenSource {
     private final URIConverter uriConverter;
 
     public RAMLCustomLexer(final URI uri, final URIConverter uriConverter) {
+        this(uriConverter);
+        loadEvents(uri);
+    }
+
+
+    public RAMLCustomLexer(final String input, final URI uri, final URIConverter uriConverter) {
+        this(uriConverter);
+        this.uri.push(uri);
+        final InputStream inputStream = new ByteArrayInputStream(input.getBytes(StandardCharsets.UTF_8));
+        loadEvents(inputStream);
+    }
+
+    private RAMLCustomLexer(URIConverter uriConverter) {
         initTokens();
         this.uriConverter = uriConverter;
         mapStart = symbolTokenTypes.get(MAP_START);
@@ -65,8 +80,6 @@ public class RAMLCustomLexer implements TokenSource {
                 .on(SequenceEndEvent.class, this::listEnd)
                 .on(ScalarEvent.class, this::scalar)
                 .fallthrough(event -> getTokenFactory().create(Token.INVALID_TYPE, null));
-
-        loadEvents(uri);
     }
 
     private void initTokens() {
@@ -85,8 +98,8 @@ public class RAMLCustomLexer implements TokenSource {
 
     private Properties loadTokens() {
         final Properties tokens = new Properties();
-        try (final InputStream inputStream = getClass ().getResourceAsStream("RAML.tokens")) {
-              tokens.load(inputStream);
+        try (final InputStream inputStream = getClass().getResourceAsStream("RAML.tokens")) {
+            tokens.load(inputStream);
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }
@@ -99,18 +112,27 @@ public class RAMLCustomLexer implements TokenSource {
             // TODO add circular include error
         } else {
             this.uri.push(uri);
-            final Iterator<Event> eventIterator;
-            try (final InputStreamReader reader = new InputStreamReader(uriConverter.createInputStream(uri))) {
-                final Iterable<Event> eventIterable = yaml.parse(reader);
-
-                final List<Event> eagerLoadedEvents = new ArrayList<>();
-                eventIterable.forEach(eagerLoadedEvents::add);
-                eventIterator = eagerLoadedEvents.iterator();
+            try {
+                final InputStream inputStream = uriConverter.createInputStream(uri);
+                loadEvents(inputStream);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-            this.eventIteratorStack.push(eventIterator);
         }
+    }
+
+    private void loadEvents(InputStream inputStream) {
+        final Iterator<Event> eventIterator;
+        try (final InputStreamReader reader = new InputStreamReader(inputStream)) {
+            final Iterable<Event> eventIterable = yaml.parse(reader);
+
+            final List<Event> eagerLoadedEvents = new ArrayList<>();
+            eventIterable.forEach(eagerLoadedEvents::add);
+            eventIterator = eagerLoadedEvents.iterator();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        this.eventIteratorStack.push(eventIterator);
     }
 
     private Token mapStart(final MappingStartEvent event) {
