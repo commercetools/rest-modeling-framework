@@ -1,6 +1,6 @@
 package io.vrap.rmf.raml.persistence.constructor
 
-import io.vrap.rmf.raml.model.modules.UriTemplate
+import io.vrap.rmf.raml.model.resources.UriTemplate
 import spock.lang.Specification
 
 class UriTemplateConstructorTest extends Specification {

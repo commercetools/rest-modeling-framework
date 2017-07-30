@@ -1,6 +1,6 @@
 package io.vrap.rmf.raml.persistence.constructor;
 
-import io.vrap.rmf.raml.model.modules.*;
+import io.vrap.rmf.raml.model.resources.*;
 import io.vrap.rmf.raml.persistence.antlr.URIBaseVisitor;
 import io.vrap.rmf.raml.persistence.antlr.URILexer;
 import io.vrap.rmf.raml.persistence.antlr.URIParser;
@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * This class parses an uri template and transforms it to an {@link io.vrap.rmf.raml.model.modules.UriTemplate}.
+ * This class parses an uri template and transforms it to an {@link UriTemplate}.
  */
 public class UriTemplateConstructor {
     private final static UriTemplateBuilder BUILDER = new UriTemplateBuilder();
@@ -32,11 +32,10 @@ public class UriTemplateConstructor {
     }
 
     private static class UriTemplateBuilder extends URIBaseVisitor<EObject> {
-        private final static ModulesFactory MODULES_FACTORY = ModulesFactory.eINSTANCE;
 
         @Override
         public EObject visitUriTemplate(URIParser.UriTemplateContext ctx) {
-            final UriTemplate uriTemplate = MODULES_FACTORY.createUriTemplate();
+            final UriTemplate uriTemplate = ResourcesFactory.eINSTANCE.createUriTemplate();
             final EList<UriTemplatePart> parts = ECollections.toEList(ctx.parts.stream()
                     .map(this::visitUriTemplatePart)
                     .map(UriTemplatePart.class::cast)
@@ -48,14 +47,14 @@ public class UriTemplateConstructor {
 
         @Override
         public EObject visitLiteral(URIParser.LiteralContext ctx) {
-            final UriTemplateLiteral literal = MODULES_FACTORY.createUriTemplateLiteral();
+            final UriTemplateLiteral literal = ResourcesFactory.eINSTANCE.createUriTemplateLiteral();
             literal.setLiteral(ctx.LITERAL().getText());
             return literal;
         }
 
         @Override
         public EObject visitExpression(URIParser.ExpressionContext ctx) {
-            final UriTemplateExpression expression = MODULES_FACTORY.createUriTemplateExpression();
+            final UriTemplateExpression expression = ResourcesFactory.eINSTANCE.createUriTemplateExpression();
             if (ctx.operator != null) {
                 expression.setOperator(ctx.operator.getText());
             }

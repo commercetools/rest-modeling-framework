@@ -8,29 +8,12 @@ package io.vrap.rmf.raml.model.modules
 import io.vrap.rmf.raml.model.types.AnnotationsFacet
 import io.vrap.rmf.raml.model.types.AnyAnnotationType
 import io.vrap.rmf.raml.model.types.AnyType
-import io.vrap.rmf.raml.model.types.TypedElement
 
-class UriTemplate {
-	contains UriTemplatePart[] parts	
-}
+import io.vrap.rmf.raml.model.resources.ResourceContainer
+import io.vrap.rmf.raml.model.resources.UriTemplate
+import io.vrap.rmf.raml.model.resources.UriParameter
 
-interface UriTemplatePart {
-	
-}
-
-class UriTemplateLiteral extends UriTemplatePart {
-	String literal	
-}
-
-class UriTemplateExpression extends UriTemplatePart {
-	String operator
-	String[] variables 	
-}
-
-class UriParameter extends TypedElement {
-}
-
-class Api extends AnnotationsFacet, TypeContainer {
+class Api extends AnnotationsFacet, TypeContainer, ResourceContainer {
 	/*
 	 * A short, plain-text label for the API. Its value is a string.
 	 */

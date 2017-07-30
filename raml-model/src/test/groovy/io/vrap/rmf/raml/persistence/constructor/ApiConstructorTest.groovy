@@ -1,8 +1,9 @@
 package io.vrap.rmf.raml.persistence.constructor
 
 import io.vrap.rmf.raml.model.modules.Api
-import io.vrap.rmf.raml.model.modules.UriTemplateExpression
-import io.vrap.rmf.raml.model.modules.UriTemplateLiteral
+import io.vrap.rmf.raml.model.resources.Resource
+import io.vrap.rmf.raml.model.resources.UriTemplateExpression
+import io.vrap.rmf.raml.model.resources.UriTemplateLiteral
 import io.vrap.rmf.raml.persistence.RamlResourceSet
 import io.vrap.rmf.raml.persistence.antlr.RAMLCustomLexer
 import io.vrap.rmf.raml.persistence.antlr.RAMLParser
@@ -19,13 +20,15 @@ import spock.lang.Specification
  * Unit tests for {@link ApiConstructor}
  */
 class ApiConstructorTest extends Specification {
-    @Shared ResourceSet resourceSet = new RamlResourceSet()
-    @Shared URI uri = URI.createURI("test.raml");
+    @Shared
+    ResourceSet resourceSet = new RamlResourceSet()
+    @Shared
+    URI uri = URI.createURI("test.raml");
 
-    def "simple attributes"() {
+    def "simple api attributes"() {
         when:
         Api api = constructApi(
-        '''\
+                '''\
         title: Simple API
         version: v1
         protocols:
@@ -43,7 +46,7 @@ class ApiConstructorTest extends Specification {
     def "base uri and base uri parameters"() {
         when:
         Api api = constructApi(
-        '''\
+                '''\
         baseUri: https://api.simple.com/{version}/api/{userId}
         baseUriParameters:
             userId: integer
@@ -70,6 +73,24 @@ class ApiConstructorTest extends Specification {
         api.baseUriParameters.size() == 1
         api.baseUriParameters[0].name == 'userId'
         api.baseUriParameters[0].type.name == 'integer'
+    }
+
+    def "simple resource attributes"() {
+        when:
+        Api api = constructApi(
+                '''\
+        /user:
+            description: User endpoint
+            displayName: Users
+        ''')
+
+        then:
+        api.resources.size() == 1
+        Resource resource = api.resources[0]
+        resource.relativeUri.parts.size() == 1
+        resource.relativeUri.parts[0] instanceof UriTemplateLiteral
+        resource.description == 'User endpoint'
+        resource.displayName == 'Users'
     }
 
     Api constructApi(String input) {

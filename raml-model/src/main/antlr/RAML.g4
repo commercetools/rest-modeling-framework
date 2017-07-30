@@ -8,16 +8,28 @@ package io.vrap.rmf.raml.persistence.antlr;
 
 tokens {
     MAP_START, MAP_END, LIST_START, LIST_END, SCALAR,
-    ANNOTATION_TYPE_REF
+    ANNOTATION_TYPE_REF, RELATIVE_URI
 }
 
 api:
     MAP_START
     (
-        usesFacet | baseUriFacet | baseUriParametersFacet
+        usesFacet | baseUriFacet | baseUriParametersFacet | resourceFacet
         | securitySchemesFacet | securedByFacet
         | resourceTypesFacet | attributeFacet | typesFacet | annotationFacet )*
     MAP_END;
+
+resourceFacet:
+    relativeUri=RELATIVE_URI
+        (
+            SCALAR
+            |   (
+                    MAP_START
+                    ( attributeFacet )*
+                    MAP_END
+                )
+        )
+    ;
 
 baseUriFacet:
     'baseUri' baseUri=SCALAR

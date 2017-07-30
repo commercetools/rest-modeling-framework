@@ -1,0 +1,44 @@
+@Ecore(nsPrefix="resources",nsURI="http://www.vrap.io/raml/resources")
+@GenModel(modelDirectory="/raml-model/src/main/java-gen",
+    complianceLevel="8.0")
+package io.vrap.rmf.raml.model.resources
+
+import io.vrap.rmf.raml.model.elements.DocumentableElement
+import io.vrap.rmf.raml.model.types.TypedElement
+
+
+class UriTemplate {
+	contains UriTemplatePart[] parts	
+}
+
+interface UriTemplatePart {
+	
+}
+
+class UriTemplateLiteral extends UriTemplatePart {
+	String literal	
+}
+
+class UriTemplateExpression extends UriTemplatePart {
+	String operator
+	String[] variables 	
+}
+
+class UriParameter extends TypedElement {
+}
+
+interface ResourceContainer {
+	contains Resource[] resources
+}
+
+class Resource extends DocumentableElement {
+	/*
+	 * The reltaive uri of this resource.
+	 */
+	contains UriTemplate relativeUri
+	
+	/*
+	 * The uri parameters of this resource.
+	 */
+	contains UriParameter[] uriParameters
+}

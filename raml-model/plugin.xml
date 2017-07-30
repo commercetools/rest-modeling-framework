@@ -24,14 +24,6 @@
    </runtime>
 
    <extension point="org.eclipse.emf.ecore.generated_package">
-      <!-- @generated types -->
-      <package
-            uri="http://www.vrap.io/raml/types"
-            class="io.vrap.rmf.raml.model.types.TypesPackage"
-            genModel="model/types.xcore"/>
-   </extension>
-
-   <extension point="org.eclipse.emf.ecore.generated_package">
       <!-- @generated elements -->
       <package
             uri="http://www.vrap.io/raml/elements"
@@ -61,6 +53,22 @@
             uri="http://www.vrap.io/raml/instances"
             class="io.vrap.rmf.raml.model.instances.InstancesPackage"
             genModel="model/instances.xcore"/>
+   </extension>
+
+   <extension point="org.eclipse.emf.ecore.generated_package">
+      <!-- @generated resources -->
+      <package
+            uri="http://www.vrap.io/raml/resources"
+            class="io.vrap.rmf.raml.model.resources.ResourcesPackage"
+            genModel="model/resources.xcore"/>
+   </extension>
+
+   <extension point="org.eclipse.emf.ecore.generated_package">
+      <!-- @generated types -->
+      <package
+            uri="http://www.vrap.io/raml/types"
+            class="io.vrap.rmf.raml.model.types.TypesPackage"
+            genModel="model/types.xcore"/>
    </extension>
 
 </plugin>

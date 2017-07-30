@@ -28,7 +28,7 @@ public class RAMLCustomLexer implements TokenSource {
     private static final String LIST_END = "LIST_END";
     private static final String SCALAR = "SCALAR";
     private static final String ANNOTATION_TYPE_REF = "ANNOTATION_TYPE_REF";
-
+    private static final String RELATIVE_URI = "RELATIVE_URI";
     private static final String INCLUDE_TAG = "!include";
 
     private static final Pattern ANNOTATION_TYPE_REF_PATTERN = Pattern.compile("\\(([^\\)]*)\\)");
@@ -48,6 +48,8 @@ public class RAMLCustomLexer implements TokenSource {
     private final int listEnd;
     private final int scalar;
     private final int annotationTypeRef;
+    private final int relativeUri;
+
     private final Stack<URI> uri = new Stack<>();
     private final URIConverter uriConverter;
 
@@ -73,6 +75,7 @@ public class RAMLCustomLexer implements TokenSource {
         listEnd = symbolTokenTypes.get(LIST_END);
         scalar = symbolTokenTypes.get(SCALAR);
         annotationTypeRef = symbolTokenTypes.get(ANNOTATION_TYPE_REF);
+        relativeUri = symbolTokenTypes.get(RELATIVE_URI);
         eventSwitch = new TypeSwitch<Event, Token>()
                 .on(MappingStartEvent.class, this::mapStart)
                 .on(MappingEndEvent.class, this::mapEnd)
@@ -158,7 +161,8 @@ public class RAMLCustomLexer implements TokenSource {
                 literalTokenTypes.get(scalarValue) :
                 matcher.matches() ?
                         annotationTypeRef :
-                        scalar;
+                        scalarValue.startsWith("/") && !scalarValue.endsWith("/") ?
+                                relativeUri : scalar;
         final String text = matcher.matches() ?
                 matcher.group(1) :
                 scalarValue;
