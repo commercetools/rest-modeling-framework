@@ -28,10 +28,13 @@ class UriParameter extends TypedElement {
 }
 
 interface ResourceContainer {
+	/*
+	 * The (sub-) resources that this element contains. 
+	 */
 	contains Resource[] resources
 }
 
-class Resource extends DocumentableElement {
+class Resource extends DocumentableElement, ResourceContainer {
 	/*
 	 * The reltaive uri of this resource.
 	 */

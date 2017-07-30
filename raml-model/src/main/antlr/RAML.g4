@@ -25,7 +25,7 @@ resourceFacet:
             SCALAR
             |   (
                     MAP_START
-                    ( attributeFacet | uriParametersFacet )*
+                    ( attributeFacet | uriParametersFacet | resourceFacet )*
                     MAP_END
                 )
         )

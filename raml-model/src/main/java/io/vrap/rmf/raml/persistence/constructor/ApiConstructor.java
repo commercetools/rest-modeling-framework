@@ -84,6 +84,11 @@ public class ApiConstructor extends AbstractConstructor {
                             .map(this::visitUriParametersFacet)
                             .collect(Collectors.toList())
             );
+            withinScope(scope.with(resource), resourceScope ->
+                    resourceFacet.resourceFacet().stream()
+                            .map(this::visitResourceFacet)
+                            .collect(Collectors.toList())
+            );
 
             return resource;
         });

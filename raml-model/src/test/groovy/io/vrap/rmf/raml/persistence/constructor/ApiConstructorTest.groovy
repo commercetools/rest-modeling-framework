@@ -113,6 +113,31 @@ class ApiConstructorTest extends Specification {
         resource.uriParameters[0].type.name == 'integer'
     }
 
+    def "simple sub resources"() {
+        when:
+        Api api = constructApi(
+                '''\
+        /user:
+            /{userId}:
+                uriParameters:
+                    userId: integer
+        ''')
+
+        then:
+        api.resources.size() == 1
+        Resource resource = api.resources[0]
+        resource.relativeUri.parts.size() == 1
+        resource.relativeUri.parts[0] instanceof UriTemplateLiteral
+        resource.resources.size() == 1
+        Resource subResource = resource.resources[0]
+        subResource.relativeUri.parts.size() == 2
+        subResource.relativeUri.parts[0] instanceof UriTemplateLiteral
+        subResource.relativeUri.parts[1] instanceof UriTemplateExpression
+        subResource.uriParameters.size() == 1
+        subResource.uriParameters[0].name == 'userId'
+        subResource.uriParameters[0].type.name == 'integer'
+    }
+
     Api constructApi(String input) {
         RAMLParser parser = parser(input)
         def apiConstructor = new ApiConstructor()
