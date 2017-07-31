@@ -78,6 +78,11 @@ public class ApiConstructor extends AbstractConstructor {
                         .map(this::visitAttributeFacet)
                         .collect(Collectors.toList())
         );
+        withinScope(resourceScope, annotationsScope ->
+                resourceFacet.annotationFacet().stream()
+                        .map(this::visitAnnotationFacet)
+                        .collect(Collectors.toList())
+        );
         withinScope(resourceScope.with(RESOURCE__URI_PARAMETERS), baseUriParametersScope ->
                 resourceFacet.uriParametersFacet().stream()
                         .map(this::visitUriParametersFacet)
@@ -108,6 +113,8 @@ public class ApiConstructor extends AbstractConstructor {
         final Scope methodScope = scope.with(method);
         withinScope(methodScope, attributeScope ->
                 methodFacet.attributeFacet().stream().map(this::visitAttributeFacet).collect(Collectors.toList()));
+        withinScope(methodScope, annotationsScope ->
+                methodFacet.annotationFacet().stream().map(this::visitAnnotationFacet).collect(Collectors.toList()));
 
         withinScope(methodScope.with(METHOD__HEADERS), headersScope ->
                 methodFacet.headersFacet().stream().map(this::visitHeadersFacet).collect(Collectors.toList()));

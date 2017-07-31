@@ -6,6 +6,8 @@ package io.vrap.rmf.raml.model.resources
 import io.vrap.rmf.raml.model.facets.ProtocolsFacet
 
 import io.vrap.rmf.raml.model.elements.DocumentableElement
+
+import io.vrap.rmf.raml.model.types.AnnotationsFacet
 import io.vrap.rmf.raml.model.types.TypedElement
 
 
@@ -36,7 +38,7 @@ interface ResourceContainer {
 	contains Resource[] resources
 }
 
-class Resource extends DocumentableElement, ResourceContainer {
+class Resource extends DocumentableElement, AnnotationsFacet, ResourceContainer {
 	/*
 	 * The reltaive uri of this resource.
 	 */
@@ -84,7 +86,7 @@ class QueryParameter extends TypedElement {
 	
 }
 
-class Method extends DocumentableElement, ProtocolsFacet {
+class Method extends DocumentableElement, AnnotationsFacet, ProtocolsFacet {
 	/*
 	 * The HTTP method.
 	 */
