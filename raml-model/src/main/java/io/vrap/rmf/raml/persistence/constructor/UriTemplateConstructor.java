@@ -1,6 +1,7 @@
 package io.vrap.rmf.raml.persistence.constructor;
 
 import io.vrap.rmf.raml.model.resources.*;
+import io.vrap.rmf.raml.persistence.antlr.ParserErrorCollector;
 import io.vrap.rmf.raml.persistence.antlr.URIBaseVisitor;
 import io.vrap.rmf.raml.persistence.antlr.URILexer;
 import io.vrap.rmf.raml.persistence.antlr.URIParser;
@@ -21,13 +22,22 @@ import java.util.stream.Collectors;
 public class UriTemplateConstructor {
     private final static UriTemplateBuilder BUILDER = new UriTemplateBuilder();
 
-    public UriTemplate parse(final String uriTemplateStr) {
+    public UriTemplate parse(final String uriTemplateStr, final Scope scope) {
         final CharStream charStream = CharStreams.fromString(uriTemplateStr);
         final URILexer lexer = new URILexer(charStream);
         final TokenStream tokenStream = new CommonTokenStream(lexer);
         final URIParser uriParser = new URIParser(tokenStream);
 
+        lexer.removeErrorListeners();
+        uriParser.removeErrorListeners();
+
+        final ParserErrorCollector errorCollector = new ParserErrorCollector();
+        lexer.addErrorListener(errorCollector);
+        uriParser.addErrorListener(errorCollector);
+
         final UriTemplate uriTemplate = (UriTemplate) BUILDER.visitUriTemplate(uriParser.uriTemplate());
+        scope.getResource().getErrors().addAll(errorCollector.getErrors());
+
         return uriTemplate;
     }
 

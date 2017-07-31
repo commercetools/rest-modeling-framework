@@ -48,7 +48,7 @@ public class ApiConstructor extends AbstractConstructor {
     @Override
     public Object visitBaseUriFacet(RAMLParser.BaseUriFacetContext ctx) {
         final String baseUriText = ctx.baseUri.getText();
-        final UriTemplate uriTemplate = uriTemplateConstructor.parse(baseUriText);
+        final UriTemplate uriTemplate = uriTemplateConstructor.parse(baseUriText, scope);
         scope.with(API__BASE_URI).setValue(uriTemplate, ctx.getStart());
 
         return uriTemplate;
@@ -72,7 +72,7 @@ public class ApiConstructor extends AbstractConstructor {
             final Resource resource = ResourcesFactory.eINSTANCE.createResource();
             resourcesScope.setValue(resource, resourceFacet.getStart());
 
-            final UriTemplate relativeUri = uriTemplateConstructor.parse(resourceFacet.relativeUri.getText());
+            final UriTemplate relativeUri = uriTemplateConstructor.parse(resourceFacet.relativeUri.getText(), scope);
             resource.setRelativeUri(relativeUri);
             withinScope(scope.with(resource), resourceScope ->
                     resourceFacet.attributeFacet().stream()

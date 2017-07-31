@@ -49,8 +49,9 @@ public class RamlResource extends ResourceImpl {
 
         try {
             rootConstructor.construct(parser, resourceScope);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             getErrors().addAll(errorCollector.getErrors());
+            throw e;
         }
     }
 

@@ -2,6 +2,7 @@ package io.vrap.rmf.raml.persistence.constructor;
 
 import io.vrap.rmf.raml.model.types.AnyType;
 import io.vrap.rmf.raml.model.types.UnionType;
+import io.vrap.rmf.raml.persistence.antlr.ParserErrorCollector;
 import io.vrap.rmf.raml.persistence.antlr.TypeExpressionBaseVisitor;
 import io.vrap.rmf.raml.persistence.antlr.TypeExpressionLexer;
 import io.vrap.rmf.raml.persistence.antlr.TypeExpressionParser;
@@ -34,9 +35,18 @@ public class TypeExpressionConstructor {
         final TypeExpressionLexer lexer = new TypeExpressionLexer(charStream);
         final TokenStream tokenStream = new CommonTokenStream(lexer);
         final TypeExpressionParser typeExpressionParser = new TypeExpressionParser(tokenStream);
+
+        lexer.removeErrorListeners();
+        typeExpressionParser.removeErrorListeners();
+
+        final ParserErrorCollector errorCollector = new ParserErrorCollector();
+        lexer.addErrorListener(errorCollector);
+        typeExpressionParser.addErrorListener(errorCollector);
+
         final TypeExpressionParser.Type_exprContext typeExpr = typeExpressionParser.type_expr();
 
         final EObject anyType = new TypeExpressionBuilder(scope, ARRAY_TYPE).visit(typeExpr);
+        scope.getResource().getErrors().addAll(errorCollector.getErrors());
 
         return anyType;
     }
