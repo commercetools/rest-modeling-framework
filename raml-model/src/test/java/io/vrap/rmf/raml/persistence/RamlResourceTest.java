@@ -188,31 +188,4 @@ public class RamlResourceTest implements ResourceFixtures {
         resource.getContents();
         assertThat(resource).isNotNull();
     }
-
-
-    @Ignore
-    @Test
-    public void tckTest() throws IOException {
-        Files.walk(Paths.get("./build/raml-tck-1.1/tests/raml-1.0"))
-                .filter(Files::isRegularFile)
-                .filter(path -> path.toString().endsWith(".raml"))
-                .filter(
-                        path -> {
-                            final File jsonFile = Paths.get(path.toString().replace(".raml", "-tck.json")).toFile();
-                            return jsonFile.exists();
-                        }
-                )
-                .forEach((f)  -> {
-                    final URI fileURI = URI.createURI(f.toFile().toURI().toString());
-                    try {
-                        final Resource resource = fromUri(fileURI);
-                        if (!resource.getErrors().isEmpty()) {
-                            String file = fileURI.toString();
-                            System.out.println(file);
-                        }
-                    } catch (Exception e) {
-                        System.out.println("Exception:" + e.getMessage());
-                    }
-                });
-    }
 }
