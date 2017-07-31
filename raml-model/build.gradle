@@ -1,7 +1,10 @@
 plugins {
     id "org.xtext.builder" version "1.0.18"
     id "antlr"
+    id "de.undercouch.download" version "3.2.0"
 }
+
+import de.undercouch.gradle.tasks.download.Download
 
 ext {
     xtextVersion = '2.10.0'
@@ -77,3 +80,15 @@ dependencies {
     xtextLanguages 'org.eclipse.emf:org.eclipse.emf.codegen:2.11+'
     xtextLanguages 'org.eclipse.emf:org.eclipse.emf.codegen.ecore:2.11+'
 }
+
+task downloadZipFile(type: Download) {
+    src 'https://github.com/raml-org/raml-tck/archive/v1.1.zip'
+    dest new File(buildDir, 'raml-tck-1.1.zip')
+}
+
+task downloadAndUnzipFile(dependsOn: downloadZipFile, type: Copy) {
+    from zipTree(downloadZipFile.dest)
+    into buildDir
+}
+
+test.dependsOn(downloadAndUnzipFile)
