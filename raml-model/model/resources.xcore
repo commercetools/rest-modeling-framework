@@ -44,4 +44,39 @@ class Resource extends DocumentableElement, ResourceContainer {
 	 * The uri parameters of this resource.
 	 */
 	contains UriParameter[] uriParameters
+	
+	/*
+	 * The methods that this resource provides.
+	 */
+	contains Method[] methods
+	
+	/*
+	 * Returns the method with the given http method or null if
+	 * no method with the given http method exists.
+	 */
+	op Method getMethod(HttpMethod httpMethod) {
+		for (Method method : methods) {
+			if (method.method == httpMethod) {
+				return method
+			}
+		}
+		return null
+	}
+}
+
+enum HttpMethod {
+	^get 
+	patch
+	put
+	post
+	delete
+	head
+	options 
+}
+
+class Method extends DocumentableElement {
+	/*
+	 * The HTTP method.
+	 */
+	HttpMethod method
 }

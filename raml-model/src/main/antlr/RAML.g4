@@ -25,10 +25,23 @@ resourceFacet:
             SCALAR
             |   (
                     MAP_START
-                    ( attributeFacet | uriParametersFacet | resourceFacet )*
+                    ( methodFacet | attributeFacet | uriParametersFacet | resourceFacet )*
                     MAP_END
                 )
         )
+    ;
+
+methodFacet:
+    httpMethod
+    (
+        MAP_START
+            attributeFacet*
+        MAP_END
+    )?
+    ;
+
+httpMethod:
+    'get' | 'patch' | 'put' | 'post' | 'delete' | 'head' | 'options'
     ;
 
 uriParametersFacet:
@@ -166,6 +179,7 @@ typedElementMap:
 id:
         'annotationTypes'
     |   'baseUri' | 'baseUriParameters'
+    |   'get' | 'patch' | 'put' | 'post' | 'delete' | 'head' | 'options'
     |   'items'
     |   'properties'
     |   'required' | 'resourceTypes'

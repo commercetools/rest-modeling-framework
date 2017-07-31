@@ -1,6 +1,7 @@
 package io.vrap.rmf.raml.persistence.constructor
 
 import io.vrap.rmf.raml.model.modules.Api
+import io.vrap.rmf.raml.model.resources.HttpMethod
 import io.vrap.rmf.raml.model.resources.Resource
 import io.vrap.rmf.raml.model.resources.UriTemplateExpression
 import io.vrap.rmf.raml.model.resources.UriTemplateLiteral
@@ -136,6 +137,23 @@ class ApiConstructorTest extends Specification {
         subResource.uriParameters.size() == 1
         subResource.uriParameters[0].name == 'userId'
         subResource.uriParameters[0].type.name == 'integer'
+    }
+
+    def "resource with method"() {
+        when:
+        Api api = constructApi(
+                '''\
+        /user:
+            get:
+                displayName: Get users
+        ''')
+
+        then:
+        api.resources.size() == 1
+        Resource resource = api.resources[0]
+        resource.methods.size() == 1
+        resource.methods[0].method == HttpMethod.GET
+        resource.methods[0].displayName == 'Get users'
     }
 
     Api constructApi(String input) {

@@ -1,10 +1,9 @@
 package io.vrap.rmf.raml.persistence.constructor;
 
 import io.vrap.rmf.raml.model.modules.Api;
-import io.vrap.rmf.raml.model.resources.Resource;
-import io.vrap.rmf.raml.model.resources.ResourcesFactory;
-import io.vrap.rmf.raml.model.resources.UriTemplate;
+import io.vrap.rmf.raml.model.resources.*;
 import io.vrap.rmf.raml.persistence.antlr.RAMLParser;
+import org.eclipse.emf.common.util.ECollections;
 import org.eclipse.emf.ecore.EObject;
 
 import java.util.List;
@@ -12,8 +11,7 @@ import java.util.stream.Collectors;
 
 import static io.vrap.rmf.raml.model.modules.ModulesPackage.Literals.API__BASE_URI;
 import static io.vrap.rmf.raml.model.modules.ModulesPackage.Literals.API__BASE_URI_PARAMETERS;
-import static io.vrap.rmf.raml.model.resources.ResourcesPackage.Literals.RESOURCE_CONTAINER__RESOURCES;
-import static io.vrap.rmf.raml.model.resources.ResourcesPackage.Literals.RESOURCE__URI_PARAMETERS;
+import static io.vrap.rmf.raml.model.resources.ResourcesPackage.Literals.*;
 
 public class ApiConstructor extends AbstractConstructor {
     private final UriTemplateConstructor uriTemplateConstructor = new UriTemplateConstructor();
@@ -39,7 +37,8 @@ public class ApiConstructor extends AbstractConstructor {
             ctx.typesFacet().forEach(this::visitTypesFacet);
             ctx.baseUriFacet().forEach(this::visitBaseUriFacet);
             ctx.baseUriParametersFacet().forEach(this::visitBaseUriParametersFacet);
-            ctx.resourceFacet().forEach(this::visitResourceFacet);
+            withinScope(scope.with(RESOURCE_CONTAINER__RESOURCES), resourcesScope ->
+                    ctx.resourceFacet().stream().map(this::visitResourceFacet).collect(Collectors.toList()));
 
             return rootObject;
         });
@@ -68,40 +67,58 @@ public class ApiConstructor extends AbstractConstructor {
 
     @Override
     public Object visitResourceFacet(RAMLParser.ResourceFacetContext resourceFacet) {
-        return withinScope(scope.with(RESOURCE_CONTAINER__RESOURCES), resourcesScope -> {
-            final Resource resource = ResourcesFactory.eINSTANCE.createResource();
-            resourcesScope.setValue(resource, resourceFacet.getStart());
+        final Resource resource = ResourcesFactory.eINSTANCE.createResource();
+        scope.setValue(resource, resourceFacet.getStart());
 
-            final UriTemplate relativeUri = uriTemplateConstructor.parse(resourceFacet.relativeUri.getText(), scope);
-            resource.setRelativeUri(relativeUri);
-            withinScope(scope.with(resource), resourceScope ->
-                    resourceFacet.attributeFacet().stream()
+        final UriTemplate relativeUri = uriTemplateConstructor.parse(resourceFacet.relativeUri.getText(), scope);
+        resource.setRelativeUri(relativeUri);
+        final Scope resourceScope = scope.with(resource);
+        withinScope(resourceScope, attributeScope ->
+                resourceFacet.attributeFacet().stream()
                         .map(this::visitAttributeFacet)
                         .collect(Collectors.toList())
-            );
-            withinScope(scope.with(resource), resourceScope ->
-                    resourceFacet.uriParametersFacet().stream()
-                            .map(this::visitUriParametersFacet)
-                            .collect(Collectors.toList())
-            );
-            withinScope(scope.with(resource), resourceScope ->
-                    resourceFacet.resourceFacet().stream()
-                            .map(this::visitResourceFacet)
-                            .collect(Collectors.toList())
-            );
+        );
+        withinScope(resourceScope.with(RESOURCE__URI_PARAMETERS), baseUriParametersScope ->
+                resourceFacet.uriParametersFacet().stream()
+                        .map(this::visitUriParametersFacet)
+                        .collect(Collectors.toList())
+        );
+        withinScope(scope.with(RESOURCE_CONTAINER__RESOURCES), resoureResourcesScope ->
+                resourceFacet.resourceFacet().stream()
+                        .map(this::visitResourceFacet)
+                        .collect(Collectors.toList())
+        );
+        withinScope(scope.with(RESOURCE__METHODS), resourceMethodsScope ->
+                resourceFacet.methodFacet().stream()
+                        .map(this::visitMethodFacet)
+                        .collect(Collectors.toList())
+        );
 
-            return resource;
-        });
+        return resource;
+    }
+
+    @Override
+    public Object visitMethodFacet(RAMLParser.MethodFacetContext methodFacet) {
+        final Method method = ResourcesFactory.eINSTANCE.createMethod();
+        final String httpMethodText = methodFacet.httpMethod().getText();
+        final HttpMethod httpMethod = (HttpMethod) ResourcesFactory.eINSTANCE.createFromString(HTTP_METHOD, httpMethodText);
+        method.setMethod(httpMethod);
+        scope.setValue(method, methodFacet.getStart());
+
+        final Scope methodScope = scope.with(method);
+        withinScope(methodScope, attributeScope ->
+                methodFacet.attributeFacet().stream().map(this::visitAttributeFacet).collect(Collectors.toList()));
+
+        return method;
     }
 
     @Override
     public Object visitUriParametersFacet(RAMLParser.UriParametersFacetContext uriParametersFacet) {
-        return withinScope(scope.with(RESOURCE__URI_PARAMETERS), baseUriParametersScope -> {
-            final List<Object> baseUriParameters = uriParametersFacet.uriParameterFacets.stream()
-                    .map(this::visitTypedElementFacet)
-                    .collect(Collectors.toList());
+        final List<Object> baseUriParameters = ECollections.asEList(uriParametersFacet.uriParameterFacets.stream()
+                .map(this::visitTypedElementFacet)
+                .collect(Collectors.toList()));
+        scope.setValue(baseUriParameters, uriParametersFacet.getStart());
 
-            return baseUriParameters;
-        });
+        return baseUriParameters;
     }
 }
