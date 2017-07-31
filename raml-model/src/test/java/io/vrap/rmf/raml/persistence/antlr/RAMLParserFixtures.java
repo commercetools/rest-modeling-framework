@@ -26,7 +26,12 @@ public interface RAMLParserFixtures {
         final RAMLCustomLexer yamlLexer = lexer(url);
         final TokenStream tokenStream = new CommonTokenStream(yamlLexer);
 
-        return new RAMLParser(tokenStream);
+        final RAMLParser ramlParser = new RAMLParser(tokenStream);
+
+        ramlParser.removeErrorListeners();
+        ramlParser.addErrorListener(new ParserErrorCollector());
+
+        return ramlParser;
     }
 
     default RAMLCustomLexer lexer(final URL url) {

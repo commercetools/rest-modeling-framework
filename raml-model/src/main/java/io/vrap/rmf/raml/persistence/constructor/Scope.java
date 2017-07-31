@@ -1,5 +1,6 @@
 package io.vrap.rmf.raml.persistence.constructor;
 
+import io.vrap.rmf.raml.model.RamlError;
 import io.vrap.rmf.raml.model.modules.Library;
 import io.vrap.rmf.raml.model.modules.LibraryUse;
 import io.vrap.rmf.raml.model.types.BuiltinType;
@@ -189,7 +190,7 @@ public class Scope {
         final String location = "<UNKOWN SOURCE>";
 
         resource.getErrors()
-                .add(new RamlDiagnostic(message, location, line, column));
+                .add(RamlError.of(message, location, line, column));
     }
 
     /**
@@ -221,37 +222,4 @@ public class Scope {
         return new Scope(null, resource, resource.getURI(), null, null);
     }
 
-    private static class RamlDiagnostic implements Resource.Diagnostic {
-        private final String message;
-        private final String location;
-        private final int line;
-        private final int column;
-
-        public RamlDiagnostic(final String message, final String location, final int line, final int column) {
-            this.message = message;
-            this.location = location;
-            this.line = line;
-            this.column = column;
-        }
-
-        @Override
-        public String getMessage() {
-            return message;
-        }
-
-        @Override
-        public String getLocation() {
-            return location;
-        }
-
-        @Override
-        public int getLine() {
-            return line;
-        }
-
-        @Override
-        public int getColumn() {
-            return column;
-        }
-    }
 }

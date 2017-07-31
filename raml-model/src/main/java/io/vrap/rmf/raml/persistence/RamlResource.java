@@ -1,5 +1,6 @@
 package io.vrap.rmf.raml.persistence;
 
+import io.vrap.rmf.raml.persistence.antlr.ParserErrorCollector;
 import io.vrap.rmf.raml.persistence.antlr.RAMLCustomLexer;
 import io.vrap.rmf.raml.persistence.antlr.RAMLParser;
 import io.vrap.rmf.raml.persistence.constructor.*;
@@ -42,7 +43,15 @@ public class RamlResource extends ResourceImpl {
         final TokenStream tokenStream = new CommonTokenStream(lexer);
         final RAMLParser parser = new RAMLParser(tokenStream);
 
-        rootConstructor.construct(parser, resourceScope);
+        parser.removeErrorListeners();
+        final ParserErrorCollector errorCollector = new ParserErrorCollector();
+        parser.addErrorListener(errorCollector);
+
+        try {
+            rootConstructor.construct(parser, resourceScope);
+        } catch (Exception e) {
+            getErrors().addAll(errorCollector.getErrors());
+        }
     }
 
     @Override

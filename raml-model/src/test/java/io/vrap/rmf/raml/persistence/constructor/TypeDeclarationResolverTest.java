@@ -33,10 +33,8 @@ public class TypeDeclarationResolverTest implements RAMLParserFixtures, Resource
         final TokenStream tokenStream = new CommonTokenStream(lexer);
 
         final RAMLParser parser = new RAMLParser(tokenStream);
-
-        final RAMLParser.ApiContext api = parser.api();
-
         final Resource resource = new RamlResourceSet().createResource(apiUri);
+
         final Scope scope = Scope.of(resource);
         final TypeDeclarationResolver resolver = new TypeDeclarationResolver();
         resolver.resolve(parser.api(), scope);
