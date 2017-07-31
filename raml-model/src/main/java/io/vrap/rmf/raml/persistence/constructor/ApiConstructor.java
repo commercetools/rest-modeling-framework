@@ -112,6 +112,9 @@ public class ApiConstructor extends AbstractConstructor {
         withinScope(methodScope.with(METHOD__HEADERS), headersScope ->
                 methodFacet.headersFacet().stream().map(this::visitHeadersFacet).collect(Collectors.toList()));
 
+        withinScope(methodScope.with(METHOD__QUERY_PARAMETERS), queryParametersScope ->
+                methodFacet.queryParametersFacet().stream().map(this::visitQueryParametersFacet).collect(Collectors.toList()));
+
         return method;
     }
 
@@ -121,6 +124,16 @@ public class ApiConstructor extends AbstractConstructor {
                 .map(this::visitTypedElementFacet)
                 .collect(Collectors.toList()));
         scope.setValue(baseUriParameters, headersFacet.getStart());
+
+        return baseUriParameters;
+    }
+
+    @Override
+    public Object visitQueryParametersFacet(RAMLParser.QueryParametersFacetContext queryParametersFacet) {
+        final List<Object> baseUriParameters = ECollections.asEList(queryParametersFacet.queryParameters.stream()
+                .map(this::visitTypedElementFacet)
+                .collect(Collectors.toList()));
+        scope.setValue(baseUriParameters, queryParametersFacet.getStart());
 
         return baseUriParameters;
     }

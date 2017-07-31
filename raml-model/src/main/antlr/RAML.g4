@@ -35,7 +35,7 @@ methodFacet:
     httpMethod
     (
         MAP_START
-            ( attributeFacet | headersFacet )*
+            ( attributeFacet | headersFacet | queryParametersFacet )*
         MAP_END
     )?
     ;
@@ -56,6 +56,17 @@ headersFacet:
         )
     ;
 
+queryParametersFacet:
+    'queryParameters'
+        (
+            SCALAR
+            |   (
+                    MAP_START
+                    ( queryParameters+=typedElementFacet )*
+                    MAP_END
+                )
+        )
+    ;
 
 uriParametersFacet:
     'uriParameters'
@@ -196,6 +207,7 @@ id:
     |   'headers'
     |   'items'
     |   'properties'
+    |   'queryParameters'
     |   'required' | 'resourceTypes'
     |   'type' | 'types'
     |   'uses' | 'uriParameters'

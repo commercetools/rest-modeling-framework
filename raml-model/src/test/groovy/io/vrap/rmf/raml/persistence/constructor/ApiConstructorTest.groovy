@@ -180,6 +180,30 @@ class ApiConstructorTest extends Specification {
         resource.methods[0].headers[0].type.name == 'string'
     }
 
+    def "resource with method and query parameters"() {
+        when:
+        Api api = constructApi(
+                '''\
+        /user:
+            get:
+                queryParameters:
+                    userId: string
+                    expand?: boolean
+        ''')
+
+        then:
+        api.resources.size() == 1
+        Resource resource = api.resources[0]
+        resource.methods.size() == 1
+        resource.methods[0].method == HttpMethod.GET
+        resource.methods[0].queryParameters.size() == 2
+        resource.methods[0].queryParameters[0].name == 'userId'
+        resource.methods[0].queryParameters[0].type.name == 'string'
+        resource.methods[0].queryParameters[1].name == 'expand'
+        resource.methods[0].queryParameters[1].required == false
+        resource.methods[0].queryParameters[1].type.name == 'boolean'
+    }
+
     Api constructApi(String input) {
         RAMLParser parser = parser(input)
         def apiConstructor = new ApiConstructor()

@@ -80,6 +80,10 @@ class Header extends TypedElement {
 	
 }
 
+class QueryParmeter extends TypedElement {
+	
+}
+
 class Method extends DocumentableElement, ProtocolsFacet {
 	/*
 	 * The HTTP method.
@@ -90,4 +94,10 @@ class Method extends DocumentableElement, ProtocolsFacet {
 	 * Detailed information about any request headers needed by this method.
 	 */
 	contains Header[] headers
+	
+	/*
+	 * Detailed information about any query parameters needed by this method. 
+	 * Mutually exclusive with queryString.
+	 */
+	contains QueryParmeter[] queryParameters
 }
