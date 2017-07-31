@@ -80,7 +80,7 @@ class Header extends TypedElement {
 	
 }
 
-class QueryParmeter extends TypedElement {
+class QueryParameter extends TypedElement {
 	
 }
 
@@ -99,5 +99,5 @@ class Method extends DocumentableElement, ProtocolsFacet {
 	 * Detailed information about any query parameters needed by this method. 
 	 * Mutually exclusive with queryString.
 	 */
-	contains QueryParmeter[] queryParameters
+	contains QueryParameter[] queryParameters
 }
