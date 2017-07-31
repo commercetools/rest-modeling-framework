@@ -63,7 +63,7 @@ public class TypeDeclarationResolver {
                         typeDeclarationFacet.typeDeclarationMap().name :
                         typeDeclarationFacet.typeDeclarationTuple().name;
 
-                scope.addError("Type '{0}' ({1}) couldn't be resolved",
+                scope.addError("Type {0} ({1}) couldn't be resolved",
                         nameToken.getText(), nameToken);
             });
         }

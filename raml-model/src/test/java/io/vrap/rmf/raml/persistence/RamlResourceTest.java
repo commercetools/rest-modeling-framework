@@ -4,7 +4,6 @@ import io.vrap.rmf.raml.model.modules.Api;
 import io.vrap.rmf.raml.model.modules.Library;
 import io.vrap.rmf.raml.model.modules.LibraryUse;
 import io.vrap.rmf.raml.model.types.*;
-import io.vrap.rmf.raml.persistence.antlr.RAMLParser;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
@@ -15,6 +14,7 @@ import org.junit.Test;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
@@ -190,6 +190,12 @@ public class RamlResourceTest implements ResourceFixtures {
     }
 
 
+    @Test
+    public void test() {
+        final URI file = URI.createFileURI("./build/raml-tck-1.1/tests/raml-1.0/Types/Facets/test005/api.raml");
+        loadSingleFile(file);
+    }
+
     @Ignore
     @Test
     public void tckTest() throws IOException {
@@ -202,17 +208,23 @@ public class RamlResourceTest implements ResourceFixtures {
                             return jsonFile.exists();
                         }
                 )
-                .forEach((f)  -> {
-                    final URI fileURI = URI.createURI(f.toFile().toURI().toString());
-                    try {
-                        final Resource resource = fromUri(fileURI);
-                        if (!resource.getErrors().isEmpty()) {
-                            String file = fileURI.toString();
-                            System.out.println(file);
-                        }
-                    } catch (Exception e) {
-                        System.out.println("Exception:" + e.getMessage());
-                    }
-                });
+                .forEach(this::loadSingleFile);
+    }
+
+    private void loadSingleFile(Path file) {
+        final URI fileURI = URI.createURI(file.toUri().toString());
+        loadSingleFile(fileURI);
+    }
+
+    private void loadSingleFile(URI fileURI) {
+        try {
+            final Resource resource = fromUri(fileURI);
+            if (!resource.getErrors().isEmpty()) {
+                System.out.println(fileURI);
+                resource.getErrors().forEach(error -> System.err.println("Error:" + error));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

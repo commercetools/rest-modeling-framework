@@ -1,6 +1,8 @@
 package io.vrap.rmf.raml.persistence.constructor
 
 import io.vrap.rmf.raml.model.resources.UriTemplate
+import io.vrap.rmf.raml.persistence.RamlResource
+import org.eclipse.emf.common.util.URI
 import spock.lang.Specification
 
 class UriTemplateConstructorTest extends Specification {
@@ -17,6 +19,6 @@ class UriTemplateConstructorTest extends Specification {
     }
 
     UriTemplate parse(String input) {
-        new UriTemplateConstructor().parse(input)
+        new UriTemplateConstructor().parse(input, Scope.of(new RamlResource(URI.createFileURI("test.raml"))))
     }
 }
