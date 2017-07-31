@@ -160,6 +160,26 @@ class ApiConstructorTest extends Specification {
         resource.methods[0].protocols == ['https']
     }
 
+    def "resource with method and headers"() {
+        when:
+        Api api = constructApi(
+                '''\
+        /user:
+            get:
+                headers:
+                    X-Correlation-Id: string
+        ''')
+
+        then:
+        api.resources.size() == 1
+        Resource resource = api.resources[0]
+        resource.methods.size() == 1
+        resource.methods[0].method == HttpMethod.GET
+        resource.methods[0].headers.size() == 1
+        resource.methods[0].headers[0].name == 'X-Correlation-Id'
+        resource.methods[0].headers[0].type.name == 'string'
+    }
+
     Api constructApi(String input) {
         RAMLParser parser = parser(input)
         def apiConstructor = new ApiConstructor()

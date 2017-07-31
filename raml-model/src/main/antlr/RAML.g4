@@ -35,7 +35,7 @@ methodFacet:
     httpMethod
     (
         MAP_START
-            attributeFacet*
+            ( attributeFacet | headersFacet )*
         MAP_END
     )?
     ;
@@ -43,6 +43,19 @@ methodFacet:
 httpMethod:
     'get' | 'patch' | 'put' | 'post' | 'delete' | 'head' | 'options'
     ;
+
+headersFacet:
+    'headers'
+        (
+            SCALAR
+            |   (
+                    MAP_START
+                    ( headerFacets+=typedElementFacet )*
+                    MAP_END
+                )
+        )
+    ;
+
 
 uriParametersFacet:
     'uriParameters'
@@ -180,6 +193,7 @@ id:
         'annotationTypes'
     |   'baseUri' | 'baseUriParameters'
     |   'get' | 'patch' | 'put' | 'post' | 'delete' | 'head' | 'options'
+    |   'headers'
     |   'items'
     |   'properties'
     |   'required' | 'resourceTypes'

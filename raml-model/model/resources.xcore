@@ -76,9 +76,18 @@ enum HttpMethod {
 	options 
 }
 
+class Header extends TypedElement {
+	
+}
+
 class Method extends DocumentableElement, ProtocolsFacet {
 	/*
 	 * The HTTP method.
 	 */
 	HttpMethod method
+	
+	/*
+	 * Detailed information about any request headers needed by this method.
+	 */
+	contains Header[] headers
 }
