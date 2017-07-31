@@ -5,6 +5,7 @@
 )
 package io.vrap.rmf.raml.model.modules
 
+import io.vrap.rmf.raml.model.facets.ProtocolsFacet
 import io.vrap.rmf.raml.model.types.AnnotationsFacet
 import io.vrap.rmf.raml.model.types.AnyAnnotationType
 import io.vrap.rmf.raml.model.types.AnyType
@@ -13,7 +14,7 @@ import io.vrap.rmf.raml.model.resources.ResourceContainer
 import io.vrap.rmf.raml.model.resources.UriTemplate
 import io.vrap.rmf.raml.model.resources.UriParameter
 
-class Api extends AnnotationsFacet, TypeContainer, ResourceContainer {
+class Api extends AnnotationsFacet, TypeContainer, ResourceContainer, ProtocolsFacet {
 	/*
 	 * A short, plain-text label for the API. Its value is a string.
 	 */
@@ -39,11 +40,6 @@ class Api extends AnnotationsFacet, TypeContainer, ResourceContainer {
 	 * Specifies the uri parameters in the base URI.
 	 */
 	contains UriParameter[] baseUriParameters
-	
-	/*
-	 * The protocols supported by the API.
-	 */
-	String[] protocols
 
 	/*
 	 * The default media types to use for request and response bodies (payloads),

@@ -3,6 +3,8 @@
     complianceLevel="8.0")
 package io.vrap.rmf.raml.model.resources
 
+import io.vrap.rmf.raml.model.facets.ProtocolsFacet
+
 import io.vrap.rmf.raml.model.elements.DocumentableElement
 import io.vrap.rmf.raml.model.types.TypedElement
 
@@ -74,7 +76,7 @@ enum HttpMethod {
 	options 
 }
 
-class Method extends DocumentableElement {
+class Method extends DocumentableElement, ProtocolsFacet {
 	/*
 	 * The HTTP method.
 	 */

@@ -146,6 +146,8 @@ class ApiConstructorTest extends Specification {
         /user:
             get:
                 displayName: Get users
+                description: This method retrieves all users.
+                protocols: [https]
         ''')
 
         then:
@@ -154,6 +156,8 @@ class ApiConstructorTest extends Specification {
         resource.methods.size() == 1
         resource.methods[0].method == HttpMethod.GET
         resource.methods[0].displayName == 'Get users'
+        resource.methods[0].description == 'This method retrieves all users.'
+        resource.methods[0].protocols == ['https']
     }
 
     Api constructApi(String input) {
