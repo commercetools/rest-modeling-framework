@@ -86,6 +86,7 @@ task downloadZipFile(type: Download) {
     src 'https://github.com/raml-org/raml-tck/archive/v1.1.zip'
     dest new File(buildDir, 'raml-tck-1.1.zip')
     onlyIfNewer(true)
+    overwrite(false)
 }
 
 task downloadAndUnzipFile(dependsOn: downloadZipFile, type: Copy) {
