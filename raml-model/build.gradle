@@ -58,6 +58,7 @@ dependencies {
     testCompile 'com.tngtech.java:junit-dataprovider:1.12.0'
     testCompile 'org.assertj:assertj-core:3.8.0'
     testCompile "org.spockframework:spock-core:${versions.spock}"
+    testCompile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.0.1'
 
     compile project(':functional-utils')
     compile 'org.yaml:snakeyaml:1.18'
@@ -83,9 +84,16 @@ dependencies {
     xtextLanguages 'org.eclipse.emf:org.eclipse.emf.codegen.ecore:2.11+'
 }
 
-task downloadZipFile(type: Download) {
+task downloadTck1ZipFile(type: Download) {
     src 'https://github.com/raml-org/raml-tck/archive/v' + ramlTckVersion + '.zip'
     dest new File(buildDir, 'raml-tck-' + ramlTckVersion + '.zip')
+    onlyIfNewer(true)
+    overwrite(false)
+}
+
+task downloadTck2ZipFile(type: Download) {
+    src 'https://github.com/raml-org/raml-tck/archive/wip/2.0.0.zip'
+    dest new File(buildDir, 'raml-tck-2.0.zip')
     onlyIfNewer(true)
     overwrite(false)
 }
@@ -94,9 +102,15 @@ tasks.withType(Test) {
     environment('RAML_TCK_VERSION', ramlTckVersion)
 }
 
-task downloadAndUnzipFile(dependsOn: downloadZipFile, type: Copy) {
-    from zipTree(downloadZipFile.dest)
+task downloadAndUnzipTck1File(dependsOn: downloadTck1ZipFile, type: Copy) {
+    from zipTree(downloadTck1ZipFile.dest)
     into "build/resources/test"
 }
 
-test.dependsOn(downloadAndUnzipFile)
+task downloadAndUnzipTck2File(dependsOn: downloadTck2ZipFile, type: Copy) {
+    from zipTree(downloadTck2ZipFile.dest)
+    into "build/resources/test"
+}
+
+test.dependsOn(downloadAndUnzipTck1File)
+test.dependsOn(downloadAndUnzipTck2File)
