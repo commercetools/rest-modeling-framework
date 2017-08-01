@@ -23,7 +23,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Ignore
 @RunWith(DataProviderRunner.class)
 public class RamlTckTest implements ResourceFixtures {
-
+    private class TckParseException extends Exception {
+        public TckParseException(String message, Throwable cause) {
+            super(message, cause);
+        }
+    }
     private static final String TCK_VERSION = "1.1";
     private static final String RAML_VERSION = "1.0";
     private static final String RAML_TCK_VERSION = Optional.ofNullable(System.getenv("RAML_TCK_VERSION")).orElse(TCK_VERSION);
@@ -31,18 +35,28 @@ public class RamlTckTest implements ResourceFixtures {
 
     @Test
     @UseDataProvider("allTckRamlFiles")
-    public void tckFilesParse(final File f) throws IOException {
+    public void tckFilesParse(final File f) throws IOException, TckParseException {
+        final Resource resource;
         final URI fileURI = URI.createURI(f.toURI().toString());
-        final Resource resource = fromUri(fileURI);
+        try {
+            resource = fromUri(fileURI);
+        } catch (Exception e) {
+            throw new TckParseException(fileURI.toString(), e);
+        }
         assertThat(resource).isInstanceOf(Resource.class)
                 .overridingErrorMessage("Failed to parse: " + f.toString());
     }
 
     @Test
     @UseDataProvider("allTckInvalidRamlFiles")
-    public void tckInvalidRaml(final File f) throws IOException {
+    public void tckInvalidRaml(final File f) throws IOException, TckParseException  {
+        final Resource resource;
         final URI fileURI = URI.createURI(f.toURI().toString());
-        final Resource resource = fromUri(fileURI);
+        try {
+            resource = fromUri(fileURI);
+        } catch (Exception e) {
+            throw new TckParseException(fileURI.toString(), e);
+        }
         assertThat(resource.getErrors())
             .overridingErrorMessage("No errors found parsing invalid raml: " + f.toString())
             .isNotEmpty();
@@ -51,9 +65,14 @@ public class RamlTckTest implements ResourceFixtures {
 
     @Test
     @UseDataProvider("allTckValidRamlFiles")
-    public void tckValidRaml(final File f) throws IOException {
+    public void tckValidRaml(final File f) throws IOException, TckParseException  {
+        final Resource resource;
         final URI fileURI = URI.createURI(f.toURI().toString());
-        final Resource resource = fromUri(fileURI);
+        try {
+            resource = fromUri(fileURI);
+        } catch (Exception e) {
+            throw new TckParseException(fileURI.toString(), e);
+        }
         assertThat(resource.getErrors())
             .overridingErrorMessage("Errors found parsing valid raml: " + f.toString())
             .isEmpty();
@@ -61,9 +80,14 @@ public class RamlTckTest implements ResourceFixtures {
 
     @Test
     @UseDataProvider("allTckApiRamlFiles")
-    public void tckTest(final File f) throws IOException {
+    public void tckTest(final File f) throws IOException, TckParseException  {
+        final Resource resource;
         final URI fileURI = URI.createURI(f.toURI().toString());
-        final Resource resource = fromUri(fileURI);
+        try {
+            resource = fromUri(fileURI);
+        } catch (Exception e) {
+            throw new TckParseException(fileURI.toString(), e);
+        }
         if (!resource.getErrors().isEmpty()) {
             String file = fileURI.toString();
             System.out.println(file);
