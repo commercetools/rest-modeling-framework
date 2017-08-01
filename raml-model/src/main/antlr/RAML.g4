@@ -99,8 +99,33 @@ baseUriParametersFacet:
 securitySchemesFacet:
     'securitySchemes'
         MAP_START
-            SCALAR*
+            securitySchemeFacet*
         MAP_END
+    ;
+
+securitySchemeFacet:
+    name=id
+    (
+        MAP_START
+            ( securitySchemeTypeFacet | securitySchemeSettingsFacet )*
+        MAP_END
+    )?
+    ;
+
+securitySchemeTypeFacet:
+    'type' type=SCALAR
+    ;
+
+securitySchemeSettingsFacet:
+    'settings'
+        (
+            SCALAR
+            |   (
+                    MAP_START
+                    securitySchemeSettingsFacets+=attributeFacet*
+                    MAP_END
+                )
+        )
     ;
 
 securedByFacet:
@@ -211,7 +236,7 @@ id:
     |   'required' | 'resourceTypes'
     |   'type' | 'types'
     |   'uses' | 'uriParameters'
-    |   'securedBy' | 'securitySchemes'
+    |   'securedBy' | 'securitySchemes' | 'settings'
     |   SCALAR
     ;
 

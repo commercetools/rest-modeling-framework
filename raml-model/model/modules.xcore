@@ -13,6 +13,7 @@ import io.vrap.rmf.raml.model.types.AnyType
 import io.vrap.rmf.raml.model.resources.ResourceContainer
 import io.vrap.rmf.raml.model.resources.UriTemplate
 import io.vrap.rmf.raml.model.resources.UriParameter
+import io.vrap.rmf.raml.model.elements.DocumentableElement
 
 class Api extends AnnotationsFacet, TypeContainer, ResourceContainer, ProtocolsFacet {
 	/*
@@ -48,9 +49,95 @@ class Api extends AnnotationsFacet, TypeContainer, ResourceContainer, ProtocolsF
 	String[] mediaType
 
 	/*
+	 * Declarations of security schemes for use within the API.
+	 */
+	contains SecurityScheme[] securitySchemes
+	
+	/*
 	 * The security schemes that apply to every resource and method in the API.
 	 */
 	String[] securedBy
+}
+
+enum SecuritySchemeType {
+	OAuth_10 as "OAuth 1.0"
+	OAuth_20 as "OAuth 2.0"
+	Basic_Authentication as "Basic Authentication"
+	Digest_Authentication as "Digest Authentication"
+	Pass_Through as "Pass Through"
+	x_Other as "x-other"	
+}
+
+class SecurityScheme extends DocumentableElement {
+	/*
+	 * The name of this security scheme.
+	 */
+	String name
+	
+	/*
+	 * Specifies the API security mechanisms. One API-supported authentication method is allowed. 
+	 */
+	SecuritySchemeType ^type
+	
+	/*
+	 * The settings attribute MAY be used to provide security scheme-specific information.
+	 */
+	contains SecuritySchemeSettings settings
+}
+
+interface SecuritySchemeSettings {
+	
+}
+
+class OAuth10Settings extends SecuritySchemeSettings {
+	/*
+	 * The URI of the Temporary Credential Request endpoint as defined in RFC5849 Section 2.1.
+	 */
+	String requestTokenUri
+		
+	/*
+	 * The URI of the Resource Owner Authorization endpoint as defined in RFC5849 Section 2.2.
+	 */
+	String authorizationUri
+	
+	/*
+	 * The URI of the Token Request endpoint as defined in RFC5849 Section 2.3
+	 */
+	String tokenCredentialsUri
+	
+	/*
+	 * A list of signature methods used by the Authorization server, which can be any of the following: 
+	 * HMAC-SHA1, RSA-SHA1, or PLAINTEXT. If signatures is missing, it is assumed that the 
+	 * Authentication server allows any signature method defined in RFC5849 Section 3.4.
+	 */
+	String[] signatures
+}
+
+class OAuth20Settings extends SecuritySchemeSettings {
+	/*
+	 * The URI of the Authorization Endpoint as defined in RFC6749 Section 3.1. 
+	 * Providing an Authorization Endpoint is only mandatory using either the authorization_code or 
+	 * implicit grant type. It is not mandatory for any other.
+	 */
+	String authorizationUri	
+	
+	/*
+	 * The URI of the Token Endpoint as defined in RFC6749 Section 3.2.
+	 */
+	String accessTokenUri
+	
+	/*
+	 * A list of the authorization grants supported by the API as defined in RFC6749 Sections 4.1, 4.2, 4.3 and 4.4, 
+	 * which can be either any of the following grants: authorization_code, password, client_credentials, 
+	 * or implicit; or any absolute URI as defined in section [4.5]
+	 * (defined in https://tools.ietf.org/html/rfc6749#section-4.5).
+	 */
+	String[] authorizationGrants 
+	
+	/*
+	 * A list of scopes supported by the API as defined in RFC6749 Section 3.3.
+	 */
+	String[] scopes
 }
 
 interface TypeContainer {

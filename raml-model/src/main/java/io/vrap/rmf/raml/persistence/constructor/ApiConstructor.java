@@ -40,6 +40,7 @@ public class ApiConstructor extends AbstractConstructor {
             withinScope(scope.with(RESOURCE_CONTAINER__RESOURCES), resourcesScope ->
                     ctx.resourceFacet().stream().map(this::visitResourceFacet).collect(Collectors.toList()));
 
+            ctx.securitySchemesFacet().forEach(this::visitSecuritySchemesFacet);
             return rootObject;
         });
     }

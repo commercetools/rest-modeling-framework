@@ -23,7 +23,7 @@ abstract class AbstractScopedVisitor<T> extends RAMLBaseVisitor<T> {
 
         T value = within.apply(scope);
 
-        popScope();
+        this.scope = popScope();
 
         return value;
     }
@@ -33,7 +33,7 @@ abstract class AbstractScopedVisitor<T> extends RAMLBaseVisitor<T> {
     }
 
     protected Scope popScope() {
-        return this.scope = scope.getParent();
+        return scope.getParent();
     }
 
 

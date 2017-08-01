@@ -2,6 +2,10 @@ package io.vrap.rmf.raml.persistence.constructor;
 
 import io.vrap.rmf.raml.model.facets.FacetsFactory;
 import io.vrap.rmf.raml.model.facets.StringInstance;
+import io.vrap.rmf.raml.model.modules.ModulesFactory;
+import io.vrap.rmf.raml.model.modules.SecurityScheme;
+import io.vrap.rmf.raml.model.modules.SecuritySchemeSettings;
+import io.vrap.rmf.raml.model.modules.SecuritySchemeType;
 import io.vrap.rmf.raml.model.types.*;
 import io.vrap.rmf.raml.persistence.antlr.RAMLParser;
 import org.antlr.v4.runtime.CommonToken;
@@ -14,6 +18,7 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static io.vrap.rmf.raml.model.modules.ModulesPackage.Literals.*;
 import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.*;
 
 /**
@@ -25,6 +30,63 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
     private final TypeExpressionConstructor typeExpressionConstructor = new TypeExpressionConstructor();
 
     public abstract EObject construct(final RAMLParser parser, final Scope scope);
+
+    @Override
+    public Object visitSecuritySchemeFacet(RAMLParser.SecuritySchemeFacetContext securitySchemeFacet) {
+        final SecurityScheme securityScheme;
+        if (securitySchemeFacet.securitySchemeTypeFacet() == null) {
+            scope.addError("Missing type for security scheme", securitySchemeFacet.getStart());
+            securityScheme = null;
+        } else {
+            securityScheme = ModulesFactory.eINSTANCE.createSecurityScheme();
+            final String name = securitySchemeFacet.name.getText();
+            securityScheme.setName(name);
+            withinScope(scope.with(securityScheme), securitySchemeScope -> {
+                withinScope(securitySchemeScope.with(SECURITY_SCHEME__TYPE), s ->
+                        securitySchemeFacet.securitySchemeTypeFacet().stream()
+                                .map(this::visitSecuritySchemeTypeFacet)
+                                .collect(Collectors.toList()));
+                SecuritySchemeSettings securitySchemeSettings = null;
+                switch (securityScheme.getType()) {
+                    case OAUTH_10:
+                        securitySchemeSettings = ModulesFactory.eINSTANCE.createOAuth10Settings();
+                        break;
+                    case OAUTH_20:
+                        securitySchemeSettings = ModulesFactory.eINSTANCE.createOAuth20Settings();
+                        break;
+                    default:
+                        if (securitySchemeFacet.securitySchemeSettingsFacet() != null) {
+                            scope.addError("Settings not supported for type {0}", securityScheme.getType());
+                        }
+                }
+                if (securitySchemeSettings != null) {
+                    scope.with(SECURITY_SCHEME__SETTINGS).setValue(securitySchemeSettings, securitySchemeFacet.getStart());
+                    withinScope(scope.with(securitySchemeSettings), settingsScope ->
+                            securitySchemeFacet.securitySchemeSettingsFacet().stream()
+                                    .map(this::visitSecuritySchemeSettingsFacet)
+                                    .collect(Collectors.toList()));
+                }
+                return securitySchemeScope.eObject();
+            });
+            scope.with(API__SECURITY_SCHEMES).setValue(securityScheme, securitySchemeFacet.getStart());
+        }
+        return securityScheme;
+    }
+
+    @Override
+    public Object visitSecuritySchemeSettingsFacet(RAMLParser.SecuritySchemeSettingsFacetContext securitySchemeSettingsFacet) {
+        securitySchemeSettingsFacet.attributeFacet().forEach(this::visitAttributeFacet);
+        return scope.eObject();
+    }
+
+    @Override
+    public Object visitSecuritySchemeTypeFacet(RAMLParser.SecuritySchemeTypeFacetContext securitySchemeTypeFacet) {
+        final String securityTypeText = securitySchemeTypeFacet.type.getText();
+        final SecuritySchemeType securitySchemeType = (SecuritySchemeType) ModulesFactory.eINSTANCE.createFromString(SECURITY_SCHEME_TYPE, securityTypeText);
+        scope.setValue(securitySchemeType, securitySchemeTypeFacet.getStart());
+
+        return securitySchemeType;
+    }
 
     @Override
     public Object visitAnnotationFacet(final RAMLParser.AnnotationFacetContext annotationFacet) {

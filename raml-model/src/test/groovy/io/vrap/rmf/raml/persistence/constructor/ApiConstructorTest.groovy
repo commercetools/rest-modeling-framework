@@ -1,6 +1,7 @@
 package io.vrap.rmf.raml.persistence.constructor
 
 import io.vrap.rmf.raml.model.modules.Api
+import io.vrap.rmf.raml.model.modules.OAuth20Settings
 import io.vrap.rmf.raml.model.resources.HttpMethod
 import io.vrap.rmf.raml.model.resources.Resource
 import io.vrap.rmf.raml.model.resources.UriTemplateExpression
@@ -25,6 +26,30 @@ class ApiConstructorTest extends Specification {
     ResourceSet resourceSet = new RamlResourceSet()
     @Shared
     URI uri = URI.createURI("test.raml");
+
+    def "security scheme"() {
+        when:
+        Api api = constructApi(
+                '''\
+        securitySchemes:
+            oauth_2_0:
+                type: OAuth 2.0
+                settings:
+                    accessTokenUri: https://api.example.com/1/oauth2/token
+                    authorizationGrants: [ authorization_code, implicit ]
+                    authorizationUri: https://www.example.com/1/oauth2/authorize
+        ''')
+
+        then:
+        api.securitySchemes.size() == 1
+        api.securitySchemes[0].name == 'oauth_2_0'
+        api.securitySchemes[0].type.literal == 'OAuth 2.0'
+        api.securitySchemes[0].settings instanceof OAuth20Settings
+        OAuth20Settings oauth20Settings = api.securitySchemes[0].settings
+        oauth20Settings.accessTokenUri == 'https://api.example.com/1/oauth2/token'
+        oauth20Settings.authorizationGrants == ['authorization_code', 'implicit']
+        oauth20Settings.authorizationUri == 'https://www.example.com/1/oauth2/authorize'
+    }
 
     def "simple api attributes"() {
         when:
