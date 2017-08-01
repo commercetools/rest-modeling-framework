@@ -1,11 +1,11 @@
 package io.vrap.rmf.raml.persistence.constructor
 
 import io.vrap.rmf.raml.model.modules.Api
-import io.vrap.rmf.raml.model.modules.OAuth20Settings
 import io.vrap.rmf.raml.model.resources.HttpMethod
 import io.vrap.rmf.raml.model.resources.Resource
 import io.vrap.rmf.raml.model.resources.UriTemplateExpression
 import io.vrap.rmf.raml.model.resources.UriTemplateLiteral
+import io.vrap.rmf.raml.model.securityschemes.OAuth20Settings
 import io.vrap.rmf.raml.persistence.RamlResourceSet
 import io.vrap.rmf.raml.persistence.antlr.RAMLCustomLexer
 import io.vrap.rmf.raml.persistence.antlr.RAMLParser
@@ -110,18 +110,25 @@ class ApiConstructorTest extends Specification {
         when:
         Api api = constructApi(
                 '''\
+        securitySchemes:
+            basic_auth:
+                type: Basic Authentication
         /user:
             description: User endpoint
             displayName: Users
+            securedBy: [ basic_auth ]
         ''')
 
         then:
         api.resources.size() == 1
+        api.securitySchemes.size() == 1
         Resource resource = api.resources[0]
         resource.relativeUri.parts.size() == 1
         resource.relativeUri.parts[0] instanceof UriTemplateLiteral
         resource.description == 'User endpoint'
         resource.displayName == 'Users'
+        resource.securedBy.size() == 1
+        resource.securedBy[0] == api.securitySchemes[0]
     }
 
     def "simple uri parameters"() {
@@ -148,14 +155,19 @@ class ApiConstructorTest extends Specification {
         when:
         Api api = constructApi(
                 '''\
+        securitySchemes:
+            basic_auth:
+                type: Basic Authentication
         /user:
             /{userId}:
                 uriParameters:
                     userId: integer
+                securedBy: [ basic_auth ]
         ''')
 
         then:
         api.resources.size() == 1
+        api.securitySchemes.size() == 1
         Resource resource = api.resources[0]
         resource.relativeUri.parts.size() == 1
         resource.relativeUri.parts[0] instanceof UriTemplateLiteral
@@ -167,27 +179,36 @@ class ApiConstructorTest extends Specification {
         subResource.uriParameters.size() == 1
         subResource.uriParameters[0].name == 'userId'
         subResource.uriParameters[0].type.name == 'integer'
+        subResource.securedBy.size() == 1
+        subResource.securedBy[0] == api.securitySchemes[0]
     }
 
     def "resource with method"() {
         when:
         Api api = constructApi(
                 '''\
+        securitySchemes:
+            basic_auth:
+                type: Basic Authentication
         /user:
             get:
                 displayName: Get users
                 description: This method retrieves all users.
                 protocols: [https]
+                securedBy: [ basic_auth ]
         ''')
 
         then:
         api.resources.size() == 1
+        api.securitySchemes.size() == 1
         Resource resource = api.resources[0]
         resource.methods.size() == 1
         resource.methods[0].method == HttpMethod.GET
         resource.methods[0].displayName == 'Get users'
         resource.methods[0].description == 'This method retrieves all users.'
         resource.methods[0].protocols == ['https']
+        resource.methods[0].securedBy.size() == 1
+        resource.methods[0].securedBy[0] == api.securitySchemes[0]
     }
 
     def "resource with method and headers"() {

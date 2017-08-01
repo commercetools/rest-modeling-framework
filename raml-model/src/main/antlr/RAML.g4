@@ -25,7 +25,10 @@ resourceFacet:
             SCALAR
             |   (
                     MAP_START
-                    ( methodFacet | attributeFacet | uriParametersFacet | resourceFacet | annotationFacet )*
+                    (
+                        methodFacet | attributeFacet | uriParametersFacet | resourceFacet | annotationFacet
+                        | securedByFacet
+                    )*
                     MAP_END
                 )
         )
@@ -35,7 +38,10 @@ methodFacet:
     httpMethod
     (
         MAP_START
-            ( attributeFacet | headersFacet | queryParametersFacet | annotationFacet )*
+        (
+            attributeFacet | headersFacet | queryParametersFacet | annotationFacet
+            | securedByFacet
+        )*
         MAP_END
     )?
     ;

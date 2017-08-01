@@ -2,10 +2,10 @@ package io.vrap.rmf.raml.persistence.constructor;
 
 import io.vrap.rmf.raml.model.facets.FacetsFactory;
 import io.vrap.rmf.raml.model.facets.StringInstance;
-import io.vrap.rmf.raml.model.modules.ModulesFactory;
-import io.vrap.rmf.raml.model.modules.SecurityScheme;
-import io.vrap.rmf.raml.model.modules.SecuritySchemeSettings;
-import io.vrap.rmf.raml.model.modules.SecuritySchemeType;
+import io.vrap.rmf.raml.model.securityschemes.SecurityScheme;
+import io.vrap.rmf.raml.model.securityschemes.SecuritySchemeSettings;
+import io.vrap.rmf.raml.model.securityschemes.SecuritySchemeType;
+import io.vrap.rmf.raml.model.securityschemes.SecurityschemesFactory;
 import io.vrap.rmf.raml.model.types.*;
 import io.vrap.rmf.raml.persistence.antlr.RAMLParser;
 import org.antlr.v4.runtime.CommonToken;
@@ -20,7 +20,7 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static io.vrap.rmf.raml.model.modules.ModulesPackage.Literals.*;
+import static io.vrap.rmf.raml.model.securityschemes.SecurityschemesPackage.Literals.*;
 import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.*;
 
 /**
@@ -40,7 +40,7 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
             scope.addError("Missing type for security scheme", securitySchemeFacet.getStart());
             securityScheme = null;
         } else {
-            securityScheme = ModulesFactory.eINSTANCE.createSecurityScheme();
+            securityScheme = SecurityschemesFactory.eINSTANCE.createSecurityScheme();
             final String name = securitySchemeFacet.name.getText();
             securityScheme.setName(name);
             withinScope(scope.with(securityScheme), securitySchemeScope -> {
@@ -51,10 +51,10 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
                 SecuritySchemeSettings securitySchemeSettings = null;
                 switch (securityScheme.getType()) {
                     case OAUTH_10:
-                        securitySchemeSettings = ModulesFactory.eINSTANCE.createOAuth10Settings();
+                        securitySchemeSettings = SecurityschemesFactory.eINSTANCE.createOAuth10Settings();
                         break;
                     case OAUTH_20:
-                        securitySchemeSettings = ModulesFactory.eINSTANCE.createOAuth20Settings();
+                        securitySchemeSettings = SecurityschemesFactory.eINSTANCE.createOAuth20Settings();
                         break;
                     default:
                         if (securitySchemeFacet.securitySchemeSettingsFacet() != null) {
@@ -85,7 +85,7 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
     public Object visitSecuritySchemeTypeFacet(RAMLParser.SecuritySchemeTypeFacetContext securitySchemeTypeFacet) {
         final String securityTypeText = securitySchemeTypeFacet.type.getText();
         try {
-            final SecuritySchemeType securitySchemeType = (SecuritySchemeType) ModulesFactory.eINSTANCE.createFromString(SECURITY_SCHEME_TYPE, securityTypeText);
+            final SecuritySchemeType securitySchemeType = (SecuritySchemeType) SecurityschemesFactory.eINSTANCE.createFromString(SECURITY_SCHEME_TYPE, securityTypeText);
             scope.setValue(securitySchemeType, securitySchemeTypeFacet.getStart());
             return securitySchemeType;
         } catch (IllegalArgumentException e) {
@@ -96,7 +96,7 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
 
     @Override
     public Object visitSecuredByFacet(RAMLParser.SecuredByFacetContext securedByFacet) {
-        return withinScope(scope.with(API__SECURED_BY), securedByScope -> {
+        return withinScope(scope.with(SECURED_BY_FACET__SECURED_BY), securedByScope -> {
             EList<EObject> securedBySchemes = ECollections.asEList(securedByFacet.securitySchemes.stream()
                     .map(name -> scope.getEObjectByName(name.getText()))
                     .collect(Collectors.toList()));

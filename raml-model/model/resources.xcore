@@ -10,6 +10,7 @@ import io.vrap.rmf.raml.model.elements.DocumentableElement
 import io.vrap.rmf.raml.model.types.AnnotationsFacet
 import io.vrap.rmf.raml.model.types.TypedElement
 
+import io.vrap.rmf.raml.model.securityschemes.SecuredByFacet
 
 class UriTemplate {
 	contains UriTemplatePart[] parts	
@@ -38,7 +39,7 @@ interface ResourceContainer {
 	contains Resource[] resources
 }
 
-class Resource extends DocumentableElement, AnnotationsFacet, ResourceContainer {
+class Resource extends DocumentableElement, AnnotationsFacet, ResourceContainer, SecuredByFacet {
 	/*
 	 * The reltaive uri of this resource.
 	 */
@@ -86,7 +87,7 @@ class QueryParameter extends TypedElement {
 	
 }
 
-class Method extends DocumentableElement, AnnotationsFacet, ProtocolsFacet {
+class Method extends DocumentableElement, AnnotationsFacet, ProtocolsFacet, SecuredByFacet {
 	/*
 	 * The HTTP method.
 	 */

@@ -1,7 +1,7 @@
 package io.vrap.rmf.raml.persistence.constructor
 
 import io.vrap.rmf.raml.model.modules.Library
-import io.vrap.rmf.raml.model.modules.OAuth20Settings
+import io.vrap.rmf.raml.model.securityschemes.OAuth20Settings
 import io.vrap.rmf.raml.persistence.RamlResourceSet
 import io.vrap.rmf.raml.persistence.antlr.RAMLCustomLexer
 import io.vrap.rmf.raml.persistence.antlr.RAMLParser

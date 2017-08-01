@@ -37,14 +37,15 @@ public class ApiConstructor extends AbstractConstructor {
             ctx.typesFacet().forEach(this::visitTypesFacet);
             ctx.baseUriFacet().forEach(this::visitBaseUriFacet);
             ctx.baseUriParametersFacet().forEach(this::visitBaseUriParametersFacet);
-            withinScope(scope.with(RESOURCE_CONTAINER__RESOURCES), resourcesScope ->
-                    ctx.resourceFacet().stream().map(this::visitResourceFacet).collect(Collectors.toList()));
 
             // order is relevant:
             // 1. construct security schemes
-            ctx.securitySchemesFacet().forEach(this::visitSecuritySchemesFacet);
+            ctx.securitySchemesFacet().forEach(this::visitSecuritySchemesFacet); // TODO move to first construction phase
             // 2. resolve secured by
+
             ctx.securedByFacet().forEach(this::visitSecuredByFacet);
+            withinScope(scope.with(RESOURCE_CONTAINER__RESOURCES), resourcesScope ->
+                    ctx.resourceFacet().stream().map(this::visitResourceFacet).collect(Collectors.toList()));
 
             return rootObject;
         });
@@ -84,21 +85,30 @@ public class ApiConstructor extends AbstractConstructor {
                         .map(this::visitAttributeFacet)
                         .collect(Collectors.toList())
         );
-        withinScope(resourceScope, annotationsScope ->
+        withinScope(resourceScope, s ->
                 resourceFacet.annotationFacet().stream()
                         .map(this::visitAnnotationFacet)
                         .collect(Collectors.toList())
         );
+        withinScope(resourceScope, s ->
+            resourceFacet.securedByFacet().stream()
+                    .map(this::visitSecuredByFacet)
+                    .collect(Collectors.toList())
+        );
+
+        // TODO cleanup
         withinScope(resourceScope.with(RESOURCE__URI_PARAMETERS), baseUriParametersScope ->
                 resourceFacet.uriParametersFacet().stream()
                         .map(this::visitUriParametersFacet)
                         .collect(Collectors.toList())
         );
+        // TODO cleanup
         withinScope(scope.with(RESOURCE_CONTAINER__RESOURCES), resoureResourcesScope ->
                 resourceFacet.resourceFacet().stream()
                         .map(this::visitResourceFacet)
                         .collect(Collectors.toList())
         );
+        // TODO cleanup
         withinScope(scope.with(RESOURCE__METHODS), resourceMethodsScope ->
                 resourceFacet.methodFacet().stream()
                         .map(this::visitMethodFacet)
@@ -121,6 +131,11 @@ public class ApiConstructor extends AbstractConstructor {
                 methodFacet.attributeFacet().stream().map(this::visitAttributeFacet).collect(Collectors.toList()));
         withinScope(methodScope, annotationsScope ->
                 methodFacet.annotationFacet().stream().map(this::visitAnnotationFacet).collect(Collectors.toList()));
+        withinScope(methodScope, s ->
+                methodFacet.securedByFacet().stream()
+                        .map(this::visitSecuredByFacet)
+                        .collect(Collectors.toList())
+        );
 
         withinScope(methodScope.with(METHOD__HEADERS), headersScope ->
                 methodFacet.headersFacet().stream().map(this::visitHeadersFacet).collect(Collectors.toList()));

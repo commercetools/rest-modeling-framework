@@ -71,4 +71,12 @@
             genModel="model/types.xcore"/>
    </extension>
 
+   <extension point="org.eclipse.emf.ecore.generated_package">
+      <!-- @generated securityschemes -->
+      <package
+            uri="http://www.vrap.io/raml/securityschemes"
+            class="io.vrap.rmf.raml.model.securityschemes.SecurityschemesPackage"
+            genModel="model/securityschemes.xcore"/>
+   </extension>
+
 </plugin>
