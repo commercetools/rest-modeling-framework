@@ -34,10 +34,24 @@ public class RamlTck2Test implements ResourceFixtures {
     private final static URL tckURL = RamlTck2Test.class.getResource("/raml-tck-wip-2.0.0/tests");
 
     @Test
-    @UseDataProvider("testFiles")
-    public void tckFilesParse(final File f, final Boolean valid, final String description) throws IOException, TckParseException {
+    @UseDataProvider("tckSemanticFiles")
+    public void semantic(final File f, final Boolean valid, final String description) throws IOException, TckParseException {
+        tckParse(f, valid, description);
+    }
 
+    @Test
+    @UseDataProvider("tckSpecExampleFiles")
+    public void specExamples(final File f, final Boolean valid, final String description) throws IOException, TckParseException {
+        tckParse(f, valid, description);
+    }
 
+    @Test
+    @UseDataProvider("tckSyntaxFiles")
+    public void syntax(final File f, final Boolean valid, final String description) throws IOException, TckParseException {
+        tckParse(f, valid, description);
+    }
+
+    public void tckParse(final File f, final Boolean valid, final String description) throws IOException, TckParseException {
         final Resource resource;
         final URI fileURI = URI.createURI(f.toURI().toString());
         try {
@@ -57,9 +71,25 @@ public class RamlTck2Test implements ResourceFixtures {
     }
 
     @DataProvider
-    public static List<List<Object>> testFiles() throws IOException {
+    public static List<List<Object>> tckSemanticFiles() throws IOException {
+        return testFiles("semantic");
+    }
+
+    @DataProvider
+    public static List<List<Object>> tckSpecExampleFiles() throws IOException {
+        return testFiles("spec-examples");
+    }
+
+    @DataProvider
+    public static List<List<Object>> tckSyntaxFiles() throws IOException {
+        return testFiles("syntax");
+    }
+
+    @DataProvider
+    public static List<List<Object>> testFiles(final String testSuite) throws IOException {
         final List<File> files = Files.walk(Paths.get(tckURL.getPath()))
                 .filter(Files::isRegularFile)
+                .filter(path -> path.toString().contains(testSuite))
                 .filter(path -> path.toString().endsWith("test-config.json")).map(Path::toFile).collect(Collectors.toList());
         return files.stream().map(file -> {
             List<List<Object>> map = Lists.newArrayList();
