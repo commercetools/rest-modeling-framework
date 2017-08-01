@@ -31,6 +31,7 @@ public class LibraryConstructor extends AbstractConstructor {
             ctx.annotationFacet().forEach(this::visitAnnotationFacet);
             ctx.attributeFacet().forEach(this::visitAttributeFacet);
             ctx.typesFacet().forEach(this::visitTypesFacet);
+            ctx.securitySchemesFacet().forEach(this::visitSecuritySchemesFacet);
 
             return rootObject;
         });

@@ -94,7 +94,7 @@ public class TypeExpressionConstructor {
         @Override
         public EObject visitTypeReference(final TypeExpressionParser.TypeReferenceContext ctx) {
             final String typeName = ctx.getText();
-            final EObject anyType = scope.getImportedTypeById(typeName);
+            final EObject anyType = scope.getEObjectByName(typeName);
 
             return anyType;
         }

@@ -131,7 +131,7 @@ securitySchemeSettingsFacet:
 securedByFacet:
     'securedBy'
         LIST_START
-            SCALAR*
+            securitySchemes+=SCALAR*
         LIST_END
     ;
 
@@ -152,7 +152,7 @@ facetValue:
 
 library:
     MAP_START
-    ( usesFacet | attributeFacet | typesFacet | annotationFacet )*
+    ( usesFacet | attributeFacet | typesFacet | annotationFacet | securitySchemesFacet )*
     MAP_END
     ;
 

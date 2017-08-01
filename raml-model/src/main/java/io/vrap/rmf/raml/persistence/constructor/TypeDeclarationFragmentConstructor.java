@@ -33,9 +33,9 @@ public class TypeDeclarationFragmentConstructor extends AbstractConstructor {
             final RAMLParser.TypeFacetContext typeFacet = typeDeclarationFragment.typeFacet().get(0);
             superType = (EObject) visitTypeFacet(typeFacet);
         } else if (typeDeclarationFragment.propertiesFacet().size() > 0) {
-            superType = scope.getImportedTypeById(BuiltinType.OBJECT.getName());
+            superType = scope.getEObjectByName(BuiltinType.OBJECT.getName());
         } else {
-            superType = scope.getImportedTypeById(BuiltinType.STRING.getName());
+            superType = scope.getEObjectByName(BuiltinType.STRING.getName());
         }
 
         final EObject declaredType = EcoreUtil.create(superType.eClass());

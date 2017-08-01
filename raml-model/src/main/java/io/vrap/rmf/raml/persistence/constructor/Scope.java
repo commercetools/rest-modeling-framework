@@ -22,8 +22,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static io.vrap.rmf.raml.model.modules.ModulesPackage.Literals.TYPE_CONTAINER__ANNOTATION_TYPES;
-import static io.vrap.rmf.raml.model.modules.ModulesPackage.Literals.TYPE_CONTAINER__TYPES;
+import static io.vrap.rmf.raml.model.modules.ModulesPackage.Literals.*;
 import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.ANY_ANNOTATION_TYPE;
 
 /**
@@ -86,25 +85,28 @@ public class Scope {
         return resourceSet.getResource(uri, true);
     }
 
-    public EObject getImportedTypeById(final String id) {
-        final String uriFragment = getUriFragment(id);
+    public EObject getEObjectByName(final String name) {
+        final String uriFragment = getUriFragment(name);
 
         final Resource builtinTypeResource = resourceSet.getResource(BuiltinType.RESOURCE_URI, true);
         final EObject resolvedType = Optional.ofNullable(builtinTypeResource.getEObject(uriFragment))
-                .orElseGet(() -> getImportedTypeById(this.resource, id));
+                .orElseGet(() -> getEObjectByName(this.resource, name));
         return resolvedType;
     }
 
     public String getUriFragment(final String id) {
         final EClass type = (EClass) feature.getEType();
+        // TODO replace ternary with visitor
         final String fragment = ANY_ANNOTATION_TYPE.isSuperTypeOf(type) ?
                 TYPE_CONTAINER__ANNOTATION_TYPES.getName() :
-                TYPE_CONTAINER__TYPES.getName();
+                SECURITY_SCHEME.isSuperTypeOf(type) ?
+                        SECURITY_SCHEME_CONTAINER__SECURITY_SCHEMES.getName() :
+                        TYPE_CONTAINER__TYPES.getName();
         return Stream.of(fragment, id)
                 .collect(Collectors.joining("/", "/", ""));
     }
 
-    private EObject getImportedTypeById(final Resource resource, final String id) {
+    private EObject getEObjectByName(final Resource resource, final String id) {
         final EClass type = (EClass) feature.getEType();
         final String uriFragment = getUriFragment(id);
 
@@ -128,7 +130,7 @@ public class Scope {
             } else {
                 final String resolvedId = segments[1];
                 final Scope usedLibraryScope = with(usedLibrary.eResource());
-                resolvedType = usedLibraryScope.getImportedTypeById(resolvedId);
+                resolvedType = usedLibraryScope.getEObjectByName(resolvedId);
             }
         } else {
             addError("Uses has invalid format {0}", id);
@@ -160,8 +162,7 @@ public class Scope {
      */
     public <T> T setValue(final EStructuralFeature feature, final T value, final Token token) {
         final EObject container = eObject();
-        final boolean isValidValue = container.eClass().getEAllStructuralFeatures().contains(feature) &&
-                feature.getEType().isInstance(value);
+        final boolean isValidValue = container.eClass().getEAllStructuralFeatures().contains(feature);
 
         if (isValidValue) {
             if (feature.isMany() && !(value instanceof List)) {

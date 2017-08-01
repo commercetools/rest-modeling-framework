@@ -15,7 +15,7 @@ import io.vrap.rmf.raml.model.resources.UriTemplate
 import io.vrap.rmf.raml.model.resources.UriParameter
 import io.vrap.rmf.raml.model.elements.DocumentableElement
 
-class Api extends AnnotationsFacet, TypeContainer, ResourceContainer, ProtocolsFacet {
+class Api extends AnnotationsFacet, TypeContainer, ResourceContainer, ProtocolsFacet, SecuritySchemeContainer {
 	/*
 	 * A short, plain-text label for the API. Its value is a string.
 	 */
@@ -47,16 +47,18 @@ class Api extends AnnotationsFacet, TypeContainer, ResourceContainer, ProtocolsF
 	 * for example "application/json".
 	 */
 	String[] mediaType
-
-	/*
-	 * Declarations of security schemes for use within the API.
-	 */
-	contains SecurityScheme[] securitySchemes
 	
 	/*
 	 * The security schemes that apply to every resource and method in the API.
 	 */
-	String[] securedBy
+	refers SecurityScheme[] securedBy
+}
+
+interface SecuritySchemeContainer {
+	/*
+	 * Declarations of security schemes for use within this container.
+	 */
+	contains SecurityScheme[] securitySchemes	
 }
 
 enum SecuritySchemeType {
@@ -147,7 +149,7 @@ interface TypeContainer {
     contains AnyAnnotationType[] annotationTypes
 }
 
-class Library extends AnnotationsFacet, TypeContainer {
+class Library extends AnnotationsFacet, TypeContainer, SecuritySchemeContainer {
     String usage
 }
 

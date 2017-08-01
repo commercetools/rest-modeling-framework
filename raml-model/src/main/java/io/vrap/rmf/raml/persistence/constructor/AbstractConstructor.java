@@ -10,6 +10,8 @@ import io.vrap.rmf.raml.model.types.*;
 import io.vrap.rmf.raml.persistence.antlr.RAMLParser;
 import org.antlr.v4.runtime.CommonToken;
 import org.antlr.v4.runtime.Token;
+import org.eclipse.emf.common.util.ECollections;
+import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EStructuralFeature;
@@ -68,7 +70,7 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
                 }
                 return securitySchemeScope.eObject();
             });
-            scope.with(API__SECURITY_SCHEMES).setValue(securityScheme, securitySchemeFacet.getStart());
+            scope.with(SECURITY_SCHEME_CONTAINER__SECURITY_SCHEMES).setValue(securityScheme, securitySchemeFacet.getStart());
         }
         return securityScheme;
     }
@@ -93,6 +95,17 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
     }
 
     @Override
+    public Object visitSecuredByFacet(RAMLParser.SecuredByFacetContext securedByFacet) {
+        return withinScope(scope.with(API__SECURED_BY), securedByScope -> {
+            EList<EObject> securedBySchemes = ECollections.asEList(securedByFacet.securitySchemes.stream()
+                    .map(name -> scope.getEObjectByName(name.getText()))
+                    .collect(Collectors.toList()));
+            scope.setValue(securedBySchemes, securedByFacet.getStart());
+            return securedBySchemes;
+        });
+    }
+
+    @Override
     public Object visitAnnotationFacet(final RAMLParser.AnnotationFacetContext annotationFacet) {
         final RAMLParser.AnnotationTupleContext annotationTuple = annotationFacet.annotationTuple();
         return withinScope(scope.with(ANNOTATIONS_FACET__ANNOTATIONS), annotationsScope -> {
@@ -103,7 +116,7 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
                 final String annotationTypeRef = annotationTuple.ANNOTATION_TYPE_REF().getText();
                 final Scope annotationTypeScope = annotationsScope.with(ANNOTATION__TYPE);
                 final AnyAnnotationType annotationType = (AnyAnnotationType)
-                        annotationTypeScope.getImportedTypeById(annotationTypeRef);
+                        annotationTypeScope.getEObjectByName(annotationTypeRef);
 
                 final StringInstance value = FACETS_FACTORY.createStringInstance();
                 value.setValue(annotationTuple.value.getText());
@@ -153,7 +166,7 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
 
     @Override
     public Object visitTypeDeclarationTuple(final RAMLParser.TypeDeclarationTupleContext typeDeclarationTuple) {
-        final EObject declaredType = scope.getImportedTypeById(typeDeclarationTuple.name.getText());
+        final EObject declaredType = scope.getEObjectByName(typeDeclarationTuple.name.getText());
         return declaredType;
     }
 
@@ -163,7 +176,7 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
      */
     @Override
     public Object visitTypeDeclarationMap(final RAMLParser.TypeDeclarationMapContext typeDeclarationMap) {
-        final EObject declaredType = scope.getImportedTypeById(typeDeclarationMap.name.getText());
+        final EObject declaredType = scope.getEObjectByName(typeDeclarationMap.name.getText());
 
         return withinScope(scope.with(declaredType), typeScope -> {
             typeDeclarationMap.annotationFacet().forEach(this::visitAnnotationFacet);
@@ -208,7 +221,7 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
         final String name = typedeElementTuple.name.getText();
 
         final EObject propertyType = type == null ?
-                scope.getImportedTypeById(BuiltinType.STRING.getName()) :
+                scope.getEObjectByName(BuiltinType.STRING.getName()) :
                 typeExpressionConstructor.parse(type.getText(), scope);
         final boolean isRequired = !name.endsWith("?");
         scope.setValue(TYPED_ELEMENT__REQUIRED, isRequired, typedeElementTuple.getStart());
@@ -245,9 +258,9 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
             propertyType = (EObject) withinScope(scope.with(TYPED_ELEMENT__TYPE),
                     propertyTypeScope -> visitTypeFacet(typeFacet));
         } else if (typedElementMap.propertiesFacet().size() == 1) {
-            propertyType = scope.getImportedTypeById(BuiltinType.OBJECT.getName());
+            propertyType = scope.getEObjectByName(BuiltinType.OBJECT.getName());
         } else {
-            propertyType = scope.getImportedTypeById(BuiltinType.STRING.getName());
+            propertyType = scope.getEObjectByName(BuiltinType.STRING.getName());
         }
 
         // inline type declaration

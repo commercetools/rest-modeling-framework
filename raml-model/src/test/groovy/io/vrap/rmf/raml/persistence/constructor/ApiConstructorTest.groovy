@@ -38,17 +38,22 @@ class ApiConstructorTest extends Specification {
                     accessTokenUri: https://api.example.com/1/oauth2/token
                     authorizationGrants: [ authorization_code, implicit ]
                     authorizationUri: https://www.example.com/1/oauth2/authorize
+        securedBy: [ oauth_2_0 ]
         ''')
 
         then:
         api.securitySchemes.size() == 1
         api.securitySchemes[0].name == 'oauth_2_0'
         api.securitySchemes[0].type.literal == 'OAuth 2.0'
+
         api.securitySchemes[0].settings instanceof OAuth20Settings
         OAuth20Settings oauth20Settings = api.securitySchemes[0].settings
         oauth20Settings.accessTokenUri == 'https://api.example.com/1/oauth2/token'
         oauth20Settings.authorizationGrants == ['authorization_code', 'implicit']
         oauth20Settings.authorizationUri == 'https://www.example.com/1/oauth2/authorize'
+
+        api.securedBy.size() == 1
+        api.securedBy[0] == api.securitySchemes[0]
     }
 
     def "simple api attributes"() {

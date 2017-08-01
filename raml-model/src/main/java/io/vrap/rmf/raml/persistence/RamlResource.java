@@ -10,6 +10,7 @@ import org.antlr.v4.runtime.TokenStream;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EAttribute;
+import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.resource.impl.ResourceImpl;
@@ -68,11 +69,15 @@ public class RamlResource extends ResourceImpl {
             final EObject rootObject = getEObjectForURIFragmentRootSegment("");
             final String featureName = uriFragmentPath.get(0);
             final EReference feature = (EReference) rootObject.eClass().getEStructuralFeature(featureName);
-            final EAttribute idAttribute = feature.getEReferenceType().getEIDAttribute();
+            final EClass eReferenceType = feature.getEReferenceType();
+            final EAttribute idAttribute = eReferenceType.getEIDAttribute();
+            final EAttribute nameAttribute = idAttribute == null ?
+                    (EAttribute) eReferenceType.getEStructuralFeature("name") :
+                    idAttribute;
             @SuppressWarnings("unchecked")            final EList<EObject> children = (EList<EObject>) rootObject.eGet(feature);
-            final String id = uriFragmentPath.get(1);
+            final String name = uriFragmentPath.get(1);
             return children.stream()
-                    .filter(eObject -> id.equals(eObject.eGet(idAttribute)))
+                    .filter(eObject -> name.equals(eObject.eGet(nameAttribute)))
                     .findFirst().orElse(null);
         }
         return null;
