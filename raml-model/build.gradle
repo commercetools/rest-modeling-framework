@@ -8,6 +8,7 @@ import de.undercouch.gradle.tasks.download.Download
 
 ext {
     xtextVersion = '2.10.0'
+    ramlTckVersion = '1.1'
 }
 
 xtext {
@@ -83,15 +84,19 @@ dependencies {
 }
 
 task downloadZipFile(type: Download) {
-    src 'https://github.com/raml-org/raml-tck/archive/v1.1.zip'
-    dest new File(buildDir, 'raml-tck-1.1.zip')
+    src 'https://github.com/raml-org/raml-tck/archive/v' + ramlTckVersion + '.zip'
+    dest new File(buildDir, 'raml-tck-' + ramlTckVersion + '.zip')
     onlyIfNewer(true)
     overwrite(false)
 }
 
+tasks.withType(Test) {
+    environment('RAML_TCK_VERSION', ramlTckVersion)
+}
+
 task downloadAndUnzipFile(dependsOn: downloadZipFile, type: Copy) {
     from zipTree(downloadZipFile.dest)
-    into buildDir
+    into "build/resources/test"
 }
 
 test.dependsOn(downloadAndUnzipFile)
