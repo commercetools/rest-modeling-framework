@@ -82,10 +82,14 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
     @Override
     public Object visitSecuritySchemeTypeFacet(RAMLParser.SecuritySchemeTypeFacetContext securitySchemeTypeFacet) {
         final String securityTypeText = securitySchemeTypeFacet.type.getText();
-        final SecuritySchemeType securitySchemeType = (SecuritySchemeType) ModulesFactory.eINSTANCE.createFromString(SECURITY_SCHEME_TYPE, securityTypeText);
-        scope.setValue(securitySchemeType, securitySchemeTypeFacet.getStart());
-
-        return securitySchemeType;
+        try {
+            final SecuritySchemeType securitySchemeType = (SecuritySchemeType) ModulesFactory.eINSTANCE.createFromString(SECURITY_SCHEME_TYPE, securityTypeText);
+            scope.setValue(securitySchemeType, securitySchemeTypeFacet.getStart());
+            return securitySchemeType;
+        } catch (IllegalArgumentException e) {
+            scope.addError(e.getMessage(), securitySchemeTypeFacet.getStart());
+            return null;
+        }
     }
 
     @Override

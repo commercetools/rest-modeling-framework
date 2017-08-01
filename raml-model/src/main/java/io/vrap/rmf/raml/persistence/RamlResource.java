@@ -79,6 +79,9 @@ public class RamlResource extends ResourceImpl {
         @SuppressWarnings("resource")        final String header = new Scanner(inputStream).useDelimiter("\\n").next();
         inputStream.reset();
         final RamlFragmentKind fragmentKind = RamlFragmentKind.fromHeader(header).orElse(null);
+        if (fragmentKind == null) {
+            throw new IllegalStateException("Unknown fragment kind: " + header);
+        }
         switch (fragmentKind) {
             case API: return new ApiConstructor();
             case LIBRARY: return new LibraryConstructor();

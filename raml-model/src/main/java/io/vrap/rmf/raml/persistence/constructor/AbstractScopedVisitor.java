@@ -70,21 +70,33 @@ abstract class AbstractScopedVisitor<T> extends RAMLBaseVisitor<T> {
     }
 
     private void setAttribute(final EObject eObject, final EAttribute eAttribute, final List<RAMLParser.IdContext> valueTokens) {
-        final List<Object> values = valueTokens.stream()
-                .map(RAMLParser.IdContext::getText)
-                .map(v -> EcoreUtil.createFromString(eAttribute.getEAttributeType(), v))
-                .collect(Collectors.toList());
+        if (eAttribute.isMany()) {
+            final List<Object> values = valueTokens.stream()
+                    .map(RAMLParser.IdContext::getText)
+                    .map(v -> EcoreUtil.createFromString(eAttribute.getEAttributeType(), v))
+                    .collect(Collectors.toList());
 
-        eObject.eSet(eAttribute, values);
+            eObject.eSet(eAttribute, values);
+        } else {
+            final String messagePattern = "Trying to set attribute {0} with many values";
+            if (valueTokens.isEmpty()) {
+                scope.addError(messagePattern, eAttribute);
+            } else {
+                scope.addError(messagePattern + " at {1}", eAttribute, valueTokens.get(0).getStart());
+            }
+        }
     }
 
     private void setAttribute(final EObject eObject, final EAttribute eAttribute, final RAMLParser.IdContext valueToken) {
-        final Object value = EcoreUtil.createFromString(eAttribute.getEAttributeType(), valueToken.getText());
-
-        if (eAttribute.isMany()) {
-            eObject.eSet(eAttribute, Collections.singletonList(value));
-        } else {
-            eObject.eSet(eAttribute, value);
+        try {
+            final Object value = EcoreUtil.createFromString(eAttribute.getEAttributeType(), valueToken.getText());
+            if (eAttribute.isMany()) {
+                eObject.eSet(eAttribute, Collections.singletonList(value));
+            } else {
+                eObject.eSet(eAttribute, value);
+            }
+        } catch (IllegalArgumentException e) {
+            scope.addError(e.getMessage(), valueToken.getStart());
         }
     }
 }

@@ -157,10 +157,10 @@ public class TypeDeclarationResolver {
         private EObject constructType(final Token nameToken, final EObject superType) {
             final EObject declaredType;
             final Optional<BuiltinType> optionalBuiltinType = BuiltinType.of(nameToken.getText());
-            if (optionalBuiltinType.isPresent() || !superType.eIsProxy()) {
+            if (optionalBuiltinType.isPresent() || superType == null || !superType.eIsProxy()) {
                 final EClass eClass = optionalBuiltinType
                         .map(builtinType -> builtinType.getScopedMetaType(scope))
-                        .orElse(superType.eClass());
+                        .orElseGet(() -> superType == null ? BuiltinType.STRING.getTypeDeclarationType() : superType.eClass());
                 declaredType = EcoreUtil.create(eClass);
                 final Scope typeScope = scope.with(declaredType);
 

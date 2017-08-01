@@ -78,6 +78,7 @@ public class TypeExpressionConstructor {
             final UnionType unionType = (UnionType) EcoreUtil.create(UNION_TYPE);
             final EList<AnyType> oneOfType = ECollections.asEList(ctx.type_expr().stream()
                     .map(this::visit)
+                    .filter(AnyType.class::isInstance) // TODO report errors
                     .map(AnyType.class::cast)
                     .collect(Collectors.toList()));
             unionType.getOneOf().addAll(oneOfType);
