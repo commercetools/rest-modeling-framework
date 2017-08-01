@@ -38,6 +38,16 @@ public class RamlError implements Resource.Diagnostic {
         return column;
     }
 
+    @Override
+    public String toString() {
+        return "RamlError{" +
+                "message='" + message + '\'' +
+                ", location='" + location + '\'' +
+                ", line=" + line +
+                ", column=" + column +
+                '}';
+    }
+
     public static RamlError of(final String message, final String location, final int line, final int column) {
         return new RamlError(message, location, line, column);
     }

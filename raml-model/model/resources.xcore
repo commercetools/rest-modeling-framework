@@ -3,7 +3,11 @@
     complianceLevel="8.0")
 package io.vrap.rmf.raml.model.resources
 
+import io.vrap.rmf.raml.model.facets.ProtocolsFacet
+
 import io.vrap.rmf.raml.model.elements.DocumentableElement
+
+import io.vrap.rmf.raml.model.types.AnnotationsFacet
 import io.vrap.rmf.raml.model.types.TypedElement
 
 
@@ -34,7 +38,7 @@ interface ResourceContainer {
 	contains Resource[] resources
 }
 
-class Resource extends DocumentableElement, ResourceContainer {
+class Resource extends DocumentableElement, AnnotationsFacet, ResourceContainer {
 	/*
 	 * The reltaive uri of this resource.
 	 */
@@ -44,4 +48,58 @@ class Resource extends DocumentableElement, ResourceContainer {
 	 * The uri parameters of this resource.
 	 */
 	contains UriParameter[] uriParameters
+	
+	/*
+	 * The methods that this resource provides.
+	 */
+	contains Method[] methods
+	
+	/*
+	 * Returns the method with the given http method or null if
+	 * no method with the given http method exists.
+	 */
+	op Method getMethod(HttpMethod httpMethod) {
+		for (Method method : methods) {
+			if (method.method == httpMethod) {
+				return method
+			}
+		}
+		return null
+	}
+}
+
+enum HttpMethod {
+	^get 
+	patch
+	put
+	post
+	delete
+	head
+	options 
+}
+
+class Header extends TypedElement {
+	
+}
+
+class QueryParameter extends TypedElement {
+	
+}
+
+class Method extends DocumentableElement, AnnotationsFacet, ProtocolsFacet {
+	/*
+	 * The HTTP method.
+	 */
+	HttpMethod method
+	
+	/*
+	 * Detailed information about any request headers needed by this method.
+	 */
+	contains Header[] headers
+	
+	/*
+	 * Detailed information about any query parameters needed by this method. 
+	 * Mutually exclusive with queryString.
+	 */
+	contains QueryParameter[] queryParameters
 }

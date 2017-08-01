@@ -25,7 +25,44 @@ resourceFacet:
             SCALAR
             |   (
                     MAP_START
-                    ( attributeFacet | uriParametersFacet | resourceFacet )*
+                    ( methodFacet | attributeFacet | uriParametersFacet | resourceFacet | annotationFacet )*
+                    MAP_END
+                )
+        )
+    ;
+
+methodFacet:
+    httpMethod
+    (
+        MAP_START
+            ( attributeFacet | headersFacet | queryParametersFacet | annotationFacet )*
+        MAP_END
+    )?
+    ;
+
+httpMethod:
+    'get' | 'patch' | 'put' | 'post' | 'delete' | 'head' | 'options'
+    ;
+
+headersFacet:
+    'headers'
+        (
+            SCALAR
+            |   (
+                    MAP_START
+                    ( headerFacets+=typedElementFacet )*
+                    MAP_END
+                )
+        )
+    ;
+
+queryParametersFacet:
+    'queryParameters'
+        (
+            SCALAR
+            |   (
+                    MAP_START
+                    ( queryParameters+=typedElementFacet )*
                     MAP_END
                 )
         )
@@ -166,8 +203,11 @@ typedElementMap:
 id:
         'annotationTypes'
     |   'baseUri' | 'baseUriParameters'
+    |   'get' | 'patch' | 'put' | 'post' | 'delete' | 'head' | 'options'
+    |   'headers'
     |   'items'
     |   'properties'
+    |   'queryParameters'
     |   'required' | 'resourceTypes'
     |   'type' | 'types'
     |   'uses' | 'uriParameters'

@@ -179,3 +179,11 @@ class PropertyValue {
 	String name
 	contains Instance value
 }
+
+interface ProtocolsFacet {
+
+	/*
+	 * The protocols supported by this element.
+	 */
+	String[] protocols
+}
