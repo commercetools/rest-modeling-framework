@@ -60,11 +60,16 @@ public class TypeDeclarationResolver {
         if (unresolvedTypeDeclarations.size() > 0) {
             unresolvedTypeDeclarations.keySet().forEach(typeDeclarationFacet -> {
                 final Token nameToken = typeDeclarationFacet.typeDeclarationTuple() == null ?
-                        typeDeclarationFacet.typeDeclarationMap().name :
-                        typeDeclarationFacet.typeDeclarationTuple().name;
+                        Optional.ofNullable(typeDeclarationFacet.typeDeclarationMap()).map(t -> t.name).orElse(null) :
+                        Optional.ofNullable(typeDeclarationFacet.typeDeclarationTuple()).map(t -> t.name).orElse(null);
 
-                scope.addError("Type {0} ({1}) couldn't be resolved",
-                        nameToken.getText(), nameToken);
+                if (nameToken == null) {
+                    final EObject eObject = unresolvedTypeDeclarations.get(typeDeclarationFacet);
+                    scope.addError("Type {0} couldn't be resolved", eObject);
+                } else {
+                    scope.addError("Type {0} couldn't be resolved at {1}",
+                            nameToken.getText(), nameToken);
+                }
             });
         }
     }
