@@ -63,27 +63,19 @@ public class RamlTckTest implements ResourceFixtures {
     @UseDataProvider("allTckRamlFiles")
     public void tckFilesParse(final File f) throws IOException {
         final URI fileURI = URI.createURI(f.toURI().toString());
-        try {
-            final Resource resource = fromUri(fileURI);
-            assertThat(resource).isInstanceOf(Resource.class)
-                    .overridingErrorMessage("Failed to parse: " + f.toString());
-        } catch (Exception e) {
-            System.out.println("Exception:" + e.getMessage());
-        }
+        final Resource resource = fromUri(fileURI);
+        assertThat(resource).isInstanceOf(Resource.class)
+                .overridingErrorMessage("Failed to parse: " + f.toString());
     }
 
     @Test
     @UseDataProvider("allTckInvalidRamlFiles")
     public void tckInvalidRaml(final File f) throws IOException {
         final URI fileURI = URI.createURI(f.toURI().toString());
-        try {
-            final Resource resource = fromUri(fileURI);
-            assertThat(resource.getErrors())
-                .overridingErrorMessage("No errors found parsing invalid raml: " + f.toString())
-                .isNotEmpty();
-        } catch (Exception e) {
-            System.out.println("Exception:" + e.getMessage() + " (" + f.toString() + ")");
-        }
+        final Resource resource = fromUri(fileURI);
+        assertThat(resource.getErrors())
+            .overridingErrorMessage("No errors found parsing invalid raml: " + f.toString())
+            .isNotEmpty();
     }
 
 
@@ -91,28 +83,20 @@ public class RamlTckTest implements ResourceFixtures {
     @UseDataProvider("allTckValidRamlFiles")
     public void tckValidRaml(final File f) throws IOException {
         final URI fileURI = URI.createURI(f.toURI().toString());
-        try {
         final Resource resource = fromUri(fileURI);
         assertThat(resource.getErrors())
             .overridingErrorMessage("Errors found parsing valid raml: " + f.toString())
             .isEmpty();
-        } catch (Exception e) {
-            System.out.println("Exception:" + e.getMessage() + " (" + f.toString() + ")");
-        }
     }
 
     @Test
     @UseDataProvider("allTckApiRamlFiles")
     public void tckTest(final File f) throws IOException {
         final URI fileURI = URI.createURI(f.toURI().toString());
-        try {
-            final Resource resource = fromUri(fileURI);
-            if (!resource.getErrors().isEmpty()) {
-                String file = fileURI.toString();
-                System.out.println(file);
-            }
-        } catch (Exception e) {
-            System.out.println("Exception:" + e.getMessage() + " (" + f.toString() + ")");
+        final Resource resource = fromUri(fileURI);
+        if (!resource.getErrors().isEmpty()) {
+            String file = fileURI.toString();
+            System.out.println(file);
         }
     }
 
