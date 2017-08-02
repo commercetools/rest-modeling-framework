@@ -165,7 +165,7 @@ public class TypeDeclarationResolver {
             if (optionalBuiltinType.isPresent() || superType == null || !superType.eIsProxy()) {
                 final EClass eClass = optionalBuiltinType
                         .map(builtinType -> builtinType.getScopedMetaType(scope))
-                        .orElseGet(() -> superType == null ? BuiltinType.STRING.getTypeDeclarationType() : superType.eClass());
+                        .orElseGet(() -> superType == null ? BuiltinType.STRING.getScopedMetaType(scope) : superType.eClass());
                 declaredType = EcoreUtil.create(eClass);
                 final Scope typeScope = scope.with(declaredType);
 
@@ -243,14 +243,10 @@ public class TypeDeclarationResolver {
             final RAMLParser.TypeFacetContext typeFacet = typeDeclarationMap.typeFacet().get(0);
             superType = (EObject) visitTypeFacet(scope, typeFacet);
         } else if (typeDeclarationMap.propertiesFacet().size() == 1) {
-            superType = scope.getResource()
-                    .getResourceSet()
-                    .getEObject(BuiltinType.RESOURCE_URI.appendFragment("/types/object"), true);
+            superType = scope.getEObjectByName(BuiltinType.OBJECT.getName());
 
         } else {
-            superType = scope.getResource()
-                    .getResourceSet()
-                    .getEObject(BuiltinType.RESOURCE_URI.appendFragment("/types/string"), true);
+            superType = scope.getEObjectByName(BuiltinType.STRING.getName());
         }
         return superType;
     }
@@ -259,9 +255,7 @@ public class TypeDeclarationResolver {
         final EObject superType;
         final String typeExpression = typeDeclarationTuple.typeExpression.getText();
         if (typeExpression.isEmpty()) {
-            superType = scope.getResource()
-                    .getResourceSet()
-                    .getEObject(BuiltinType.RESOURCE_URI.appendFragment("/types/string"), true);
+            superType = scope.getEObjectByName(BuiltinType.STRING.getName());
         } else {
             superType = typeExpressionConstructor.parse(typeExpression, scope);
         }
