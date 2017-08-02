@@ -91,14 +91,13 @@ public class RamlTck2Test implements ResourceFixtures {
             List<List<Object>> map = Lists.newArrayList();
             ObjectMapper mapper = new ObjectMapper();
             try {
-                JsonNode json = mapper.readValue(file, JsonNode.class);
-                JsonNode tests = json.get("tests");
-                if (tests != null) {
-                    tests.elements().forEachRemaining(jsonNode -> {
+                final TestConfig testConfig = mapper.readValue(file, TestConfig.class);
+                if (testConfig.getTests() != null) {
+                    testConfig.getTests().forEach(testDescription -> {
                         List<Object> a = Lists.newArrayList(
-                                new File(file.getParentFile().getPath() + "/" + jsonNode.get("input").asText()),
-                                jsonNode.get("valid").asBoolean(),
-                                jsonNode.get("description").asText()
+                                new File(file.getParentFile().getPath() + "/" + testDescription.getInput()),
+                                testDescription.getValid(),
+                                testDescription.getDescription()
                         );
                         map.add(a);
                     });
