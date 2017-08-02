@@ -39,7 +39,7 @@ xtext {
 sourceSets {
     test {
         resources {
-            srcDirs += "$buildDir/raml-tck"
+            srcDirs += "$buildDir/resources/test/raml-tck"
         }
     }
 }
@@ -112,12 +112,12 @@ tasks.withType(Test) {
 
 task downloadAndUnzipTck1File(dependsOn: downloadTck1ZipFile, type: Copy) {
     from zipTree(downloadTck1ZipFile.dest)
-    into "build/raml-tck"
+    into "$buildDir/resources/test/raml-tck"
 }
 
 task downloadAndUnzipTck2File(dependsOn: downloadTck2ZipFile, type: Copy) {
     from zipTree(downloadTck2ZipFile.dest)
-    into "build/raml-tck"
+    into "$buildDir/resources/test/raml-tck"
 }
 
 test.dependsOn(downloadAndUnzipTck1File)
