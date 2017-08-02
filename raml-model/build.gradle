@@ -36,6 +36,14 @@ xtext {
 	}
 }
 
+sourceSets {
+    test {
+        resources {
+            srcDirs += "$buildDir/raml-tck"
+        }
+    }
+}
+
 generateGrammarSource {
     outputDirectory = file("src/main/java-gen/io/vrap/rmf/raml/persistence/antlr")
     arguments += ["-visitor"]
@@ -104,12 +112,12 @@ tasks.withType(Test) {
 
 task downloadAndUnzipTck1File(dependsOn: downloadTck1ZipFile, type: Copy) {
     from zipTree(downloadTck1ZipFile.dest)
-    into "build/resources/test"
+    into "build/raml-tck"
 }
 
 task downloadAndUnzipTck2File(dependsOn: downloadTck2ZipFile, type: Copy) {
     from zipTree(downloadTck2ZipFile.dest)
-    into "build/resources/test"
+    into "build/raml-tck"
 }
 
 test.dependsOn(downloadAndUnzipTck1File)
