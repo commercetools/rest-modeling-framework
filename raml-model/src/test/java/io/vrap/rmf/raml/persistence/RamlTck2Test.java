@@ -56,7 +56,7 @@ public class RamlTck2Test implements ResourceFixtures {
         try {
             resource = fromUri(fileURI);
         } catch (Exception e) {
-            throw new TckParseException(fileURI.toString(), e);
+            throw new TckParseException(f.toString() + "(" + f.getName() + ":0)", e);
         }
         if (valid) {
             assertThat(resource.getErrors()).describedAs(fileURI.toFileString().replace(tckURL.getPath(), "") + "(" + f.getName() + ":0) " + description).isEmpty();
