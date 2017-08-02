@@ -20,6 +20,7 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static io.vrap.rmf.raml.model.elements.ElementsPackage.Literals.IDENTIFIABLE_ELEMENT__NAME;
 import static io.vrap.rmf.raml.model.securityschemes.SecurityschemesPackage.Literals.*;
 import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.*;
 
@@ -227,7 +228,7 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
         scope.setValue(TYPED_ELEMENT__REQUIRED, isRequired, typedeElementTuple.getStart());
         final String parsedName = isRequired ? name : name.substring(0, name.length() - 1);
 
-        scope.setValue(TYPED_ELEMENT__NAME, parsedName, typedeElementTuple.getStart());
+        scope.setValue(IDENTIFIABLE_ELEMENT__NAME, parsedName, typedeElementTuple.getStart());
         scope.setValue(TYPED_ELEMENT__TYPE, propertyType, typedeElementTuple.getStart());
 
         return scope.eObject();
@@ -250,7 +251,7 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
             scope.setValue(TYPED_ELEMENT__REQUIRED, requiredValue, typedElementMap.getStart());
         }
 
-        scope.setValue(TYPED_ELEMENT__NAME, parsedName, typedElementMap.getStart());
+        scope.setValue(IDENTIFIABLE_ELEMENT__NAME, parsedName, typedElementMap.getStart());
 
         EObject typedElementType;
         if (typedElementMap.typeFacet().size() > 0) {
@@ -266,7 +267,7 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
         // inline type declaration
         if (typedElementMap.attributeFacet().size() > 0) {
             typedElementType = EcoreUtil.create(typedElementType.eClass());
-            scope.addValue(TYPED_ELEMENT__INLINE_TYPES, typedElementType);
+            scope.addValue(INLINE_TYPE_CONTAINER__INLINE_TYPES, typedElementType);
             withinScope(scope.with(typedElementType),
                     inlineTypeDeclarationScope ->
                             typedElementMap.attributeFacet().stream()

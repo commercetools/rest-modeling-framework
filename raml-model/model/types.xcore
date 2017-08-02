@@ -20,7 +20,7 @@ import io.vrap.rmf.raml.model.util.SuperTypeCrossReferencer
  * By definition, the any type is a type which imposes no restrictions, i.e. any instance of data is
  * valid against it.
  */
-class AnyType extends AnnotationsFacet, DocumentableElement, IdentifiableElement, EnumFacet {
+class AnyType extends AnnotationsFacet, DocumentableElement, IdentifiableElement, EnumFacet, InlineTypeContainer {
 	/*
 	 * The type which this type extends.
 	 */
@@ -33,17 +33,14 @@ class AnyType extends AnnotationsFacet, DocumentableElement, IdentifiableElement
 	}
 }
 
-interface TypedElement {
+interface InlineTypeContainer {
 	/*
 	 * The inline types that this element declares.
 	 */
-	contains AnyType[] inlineTypes
+	contains AnyType[] inlineTypes	
+}
 
-	/*
-	 * The name of this element.
-	 */
-	String name
-	
+interface TypedElement extends IdentifiableElement, InlineTypeContainer {
 	/*
 	 * The type of this element.
 	 */
@@ -270,7 +267,7 @@ enum AnnotationTarget {
  * The allowedTargets node restricts the kinds of locations where the annotation can be applied. Annotation types, like data types,
  * can extend other data types, but annotation types themselves can neither be extended nor used anywhere data types can be used.
  */
-class AnyAnnotationType extends DocumentableElement, IdentifiableElement, AnnotationsFacet {
+class AnyAnnotationType extends DocumentableElement, IdentifiableElement, AnnotationsFacet, InlineTypeContainer {
 	/*
 	 * The type which this type extends.
 	 */

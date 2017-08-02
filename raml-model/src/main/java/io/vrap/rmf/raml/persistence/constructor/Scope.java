@@ -8,10 +8,7 @@ import org.antlr.v4.runtime.CommonToken;
 import org.antlr.v4.runtime.Token;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.URI;
-import org.eclipse.emf.ecore.EClass;
-import org.eclipse.emf.ecore.EObject;
-import org.eclipse.emf.ecore.EStructuralFeature;
-import org.eclipse.emf.ecore.InternalEObject;
+import org.eclipse.emf.ecore.*;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.util.EcoreUtil;
@@ -166,17 +163,31 @@ public class Scope {
      */
     public <T> T setValue(final EStructuralFeature feature, final T value, final Token token) {
         final boolean isValidValue = eObject.eClass().getEAllStructuralFeatures().contains(feature) && value != null;
+        final boolean isCollectionValue = value instanceof Collection;
+        final EClassifier eType = feature.getEType();
 
         if (isValidValue) {
-            if (feature.isMany() && !(value instanceof Collection)) {
-                addValue(feature, value);
-            } else {
-                if (feature.getEType().isInstance(value)) {
-                    eObject.eSet(feature, value);
+            if (feature.isMany()) {
+                if (isCollectionValue) {
+                    final Collection collectionValue = (Collection) value;
+                    if (!collectionValue.isEmpty()) {
+                        for (final Object item : collectionValue) {
+                            if (eType.isInstance(item)) {
+                                addValue(feature, item);
+                            } else {
+                                addError("Invalid value {0} for feature {1} of {2} at {3}",
+                                        value, feature.getName(), eObject.eClass().getName(), token);
+                            }
+                        }
+                    }
                 } else {
-                    addError("Invalid value {0} for feature {1} of {2} at {3}",
-                            value, feature.getName(), eObject.eClass().getName(), token);
+                    addValue(feature, value);
                 }
+            } else if (eType.isInstance(value)) {
+                eObject.eSet(feature, value);
+            } else {
+                addError("Invalid value {0} for feature {1} of {2} at {3}",
+                        value, feature.getName(), eObject.eClass().getName(), token);
             }
         } else {
             addError("Invalid value {0} for feature {1} of {2} at {3}",
