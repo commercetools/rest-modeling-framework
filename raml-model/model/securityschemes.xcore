@@ -6,6 +6,7 @@
 package io.vrap.rmf.raml.model.securityschemes
 
 import io.vrap.rmf.raml.model.elements.DocumentableElement
+import io.vrap.rmf.raml.model.elements.IdentifiableElement
 
 interface SecuredByFacet {
 		
@@ -31,12 +32,7 @@ enum SecuritySchemeType {
 	x_Other as "x-other"	
 }
 
-class SecurityScheme extends DocumentableElement {
-	/*
-	 * The name of this security scheme.
-	 */
-	String name
-	
+class SecurityScheme extends DocumentableElement, IdentifiableElement {
 	/*
 	 * Specifies the API security mechanisms. One API-supported authentication method is allowed. 
 	 */

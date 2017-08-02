@@ -9,7 +9,7 @@ interface IdentifiableElement {
 	/*
 	 * The optional name of this element.
 	 */
-	id String name
+	String name
 }
 
 /*

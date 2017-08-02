@@ -19,8 +19,7 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 
 import java.util.stream.Collectors;
 
-import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.ARRAY_TYPE;
-import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.UNION_TYPE;
+import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.*;
 
 /**
  * This class parses a type expression and transforms it to an {@link AnyType}.
@@ -54,28 +53,29 @@ public class TypeExpressionConstructor {
 
     private final static class TypeExpressionBuilder extends TypeExpressionBaseVisitor<EObject> {
         private final Scope scope;
-        private final EClass arrayType;
+        private final EClass arrayTypeDeclarationType;
         private final EStructuralFeature itemsFeature;
 
-        public TypeExpressionBuilder(final Scope scope, final EClass arrayType) {
+        public TypeExpressionBuilder(final Scope scope, final EClass arrayTypeDeclarationType) {
             this.scope = scope;
-            this.arrayType = arrayType;
-            this.itemsFeature = arrayType.getEStructuralFeature("items");
+            this.arrayTypeDeclarationType = arrayTypeDeclarationType;
+            this.itemsFeature = arrayTypeDeclarationType.getEStructuralFeature("items");
         }
 
         @Override
         public EObject visitArrayType(final TypeExpressionParser.ArrayTypeContext ctx) {
-            final EObject anyType = EcoreUtil.create(this.arrayType);
-
+            final EObject arrayType = EcoreUtil.create(arrayTypeDeclarationType);
+            scope.addValue(TYPED_ELEMENT__INLINE_TYPES, arrayType);
             final EObject itemsType = visit(ctx.type_expr());
-            anyType.eSet(itemsFeature, itemsType);
+            arrayType.eSet(itemsFeature, itemsType);
 
-            return anyType;
+            return arrayType;
         }
 
         @Override
         public EObject visitUnionType(final TypeExpressionParser.UnionTypeContext ctx) {
             final UnionType unionType = (UnionType) EcoreUtil.create(UNION_TYPE);
+            scope.addValue(TYPED_ELEMENT__INLINE_TYPES, unionType);
             final EList<AnyType> oneOfType = ECollections.asEList(ctx.type_expr().stream()
                     .map(this::visit)
                     .filter(AnyType.class::isInstance) // TODO report errors

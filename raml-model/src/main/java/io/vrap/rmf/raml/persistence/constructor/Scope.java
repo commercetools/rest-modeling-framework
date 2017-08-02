@@ -17,6 +17,7 @@ import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
 import java.text.MessageFormat;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -109,12 +110,12 @@ public class Scope {
                 .collect(Collectors.joining("/", "/", ""));
     }
 
-    private EObject getEObjectByName(final Resource resource, final String id) {
+    private EObject getEObjectByName(final Resource resource, final String name) {
         final EClass type = (EClass) feature.getEType();
-        final String uriFragment = getUriFragment(id);
+        final String uriFragment = getUriFragment(name);
 
         final EObject resolvedType;
-        final String[] segments = id.split("\\.");
+        final String[] segments = name.split("\\.");
         if (segments.length == 1) {
             final EObject eObject = resource.getEObject(uriFragment);
             if (eObject != null) {
@@ -136,7 +137,7 @@ public class Scope {
                 resolvedType = usedLibraryScope.getEObjectByName(resolvedId);
             }
         } else {
-            addError("Uses has invalid format {0}", id);
+            addError("Uses has invalid format {0}", name);
             resolvedType = null;
         }
         return resolvedType;
@@ -164,21 +165,32 @@ public class Scope {
      * @return the value
      */
     public <T> T setValue(final EStructuralFeature feature, final T value, final Token token) {
-        final EObject container = eObject();
-        final boolean isValidValue = container.eClass().getEAllStructuralFeatures().contains(feature);
+        final boolean isValidValue = eObject.eClass().getEAllStructuralFeatures().contains(feature) && value != null;
 
         if (isValidValue) {
-            if (feature.isMany() && !(value instanceof List)) {
-                final EList<T> eList = (EList<T>) container.eGet(feature);
-                eList.add(value);
+            if (feature.isMany() && !(value instanceof Collection)) {
+                addValue(feature, value);
             } else {
-                container.eSet(feature, value);
+                if (feature.getEType().isInstance(value)) {
+                    eObject.eSet(feature, value);
+                } else {
+                    addError("Invalid value {0} for feature {1} of {2} at {3}",
+                            value, feature.getName(), eObject.eClass().getName(), token);
+                }
             }
         } else {
             addError("Invalid value {0} for feature {1} of {2} at {3}",
                     value, feature.getName(), eObject.eClass().getName(), token);
         }
         return value;
+    }
+
+    public <T> void addValue(EStructuralFeature feature, T value) {
+        assert feature.isMany();
+        assert !(value instanceof Collection);
+
+        final EList<T> eList = (EList<T>) eObject.eGet(feature);
+        eList.add(value);
     }
 
     public void addError(final String messagePattern, final Object... arguments) {

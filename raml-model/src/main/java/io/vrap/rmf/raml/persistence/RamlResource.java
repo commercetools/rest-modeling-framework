@@ -1,5 +1,6 @@
 package io.vrap.rmf.raml.persistence;
 
+import io.vrap.rmf.raml.model.RamlError;
 import io.vrap.rmf.raml.persistence.antlr.ParserErrorCollector;
 import io.vrap.rmf.raml.persistence.antlr.RAMLCustomLexer;
 import io.vrap.rmf.raml.persistence.antlr.RAMLParser;
@@ -9,11 +10,11 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.TokenStream;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.URI;
-import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.resource.impl.ResourceImpl;
+import org.eclipse.emf.ecore.util.Diagnostician;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -24,6 +25,8 @@ import java.util.Optional;
 import java.util.Scanner;
 import java.util.stream.Collectors;
 
+import static io.vrap.rmf.raml.model.elements.ElementsPackage.Literals.IDENTIFIABLE_ELEMENT;
+import static io.vrap.rmf.raml.model.elements.ElementsPackage.Literals.IDENTIFIABLE_ELEMENT__NAME;
 import static io.vrap.rmf.raml.model.modules.ModulesPackage.Literals.TYPE_CONTAINER__ANNOTATION_TYPES;
 import static io.vrap.rmf.raml.model.modules.ModulesPackage.Literals.TYPE_CONTAINER__TYPES;
 
@@ -53,11 +56,25 @@ public class RamlResource extends ResourceImpl {
 
             try {
                 rootConstructor.construct(parser, resourceScope);
+                validate();
             } catch (final Exception e) {
                 getErrors().addAll(errorCollector.getErrors());
                 throw e;
             }
         }
+    }
+
+    protected void validate() {
+        for (final EObject eObject : getContents()) {
+            org.eclipse.emf.common.util.Diagnostic diagnostic = Diagnostician.INSTANCE.validate(eObject);
+            if (diagnostic.getSeverity() != org.eclipse.emf.common.util.Diagnostic.OK) {
+                diagnostic.getChildren().forEach(this::addValidationError);
+            }
+        }
+    }
+
+    private void addValidationError(final org.eclipse.emf.common.util.Diagnostic diagnostic) {
+        errors.add(RamlError.of(diagnostic.getMessage(), diagnostic.getSource(), -1, -1));
     }
 
     @Override
@@ -70,15 +87,15 @@ public class RamlResource extends ResourceImpl {
             final String featureName = uriFragmentPath.get(0);
             final EReference feature = (EReference) rootObject.eClass().getEStructuralFeature(featureName);
             final EClass eReferenceType = feature.getEReferenceType();
-            final EAttribute idAttribute = eReferenceType.getEIDAttribute();
-            final EAttribute nameAttribute = idAttribute == null ?
-                    (EAttribute) eReferenceType.getEStructuralFeature("name") :
-                    idAttribute;
-            @SuppressWarnings("unchecked")            final EList<EObject> children = (EList<EObject>) rootObject.eGet(feature);
-            final String name = uriFragmentPath.get(1);
-            return children.stream()
-                    .filter(eObject -> name.equals(eObject.eGet(nameAttribute)))
-                    .findFirst().orElse(null);
+
+            if (IDENTIFIABLE_ELEMENT.isSuperTypeOf(eReferenceType)) {
+                @SuppressWarnings("unchecked") final EList<EObject> children = (EList<EObject>) rootObject.eGet(feature);
+                final String name = uriFragmentPath.get(1);
+                return children.stream()
+                        .filter(eObject -> name.equals(eObject.eGet(IDENTIFIABLE_ELEMENT__NAME)))
+                        .findFirst()
+                        .orElse(null);
+            }
         }
         return null;
     }

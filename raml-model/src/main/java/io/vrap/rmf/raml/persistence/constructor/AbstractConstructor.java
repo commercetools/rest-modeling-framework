@@ -252,21 +252,22 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
 
         scope.setValue(TYPED_ELEMENT__NAME, parsedName, typedElementMap.getStart());
 
-        EObject propertyType;
+        EObject typedElementType;
         if (typedElementMap.typeFacet().size() > 0) {
             final RAMLParser.TypeFacetContext typeFacet = typedElementMap.typeFacet().get(0);
-            propertyType = (EObject) withinScope(scope.with(TYPED_ELEMENT__TYPE),
+            typedElementType = (EObject) withinScope(scope.with(TYPED_ELEMENT__TYPE),
                     propertyTypeScope -> visitTypeFacet(typeFacet));
         } else if (typedElementMap.propertiesFacet().size() == 1) {
-            propertyType = scope.getEObjectByName(BuiltinType.OBJECT.getName());
+            typedElementType = scope.getEObjectByName(BuiltinType.OBJECT.getName());
         } else {
-            propertyType = scope.getEObjectByName(BuiltinType.STRING.getName());
+            typedElementType = scope.getEObjectByName(BuiltinType.STRING.getName());
         }
 
         // inline type declaration
         if (typedElementMap.attributeFacet().size() > 0) {
-            propertyType = EcoreUtil.create(propertyType.eClass());
-            withinScope(scope.with(propertyType),
+            typedElementType = EcoreUtil.create(typedElementType.eClass());
+            scope.addValue(TYPED_ELEMENT__INLINE_TYPES, typedElementType);
+            withinScope(scope.with(typedElementType),
                     inlineTypeDeclarationScope ->
                             typedElementMap.attributeFacet().stream()
                                     .map(this::visitAttributeFacet)
@@ -274,7 +275,7 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
         }
 
         typedElementMap.annotationFacet().forEach(this::visitAnnotationFacet);
-        scope.setValue(TYPED_ELEMENT__TYPE, propertyType, typedElementMap.getStart());
+        scope.setValue(TYPED_ELEMENT__TYPE, typedElementType, typedElementMap.getStart());
 
         return scope.eObject();
     }

@@ -1,10 +1,7 @@
 package io.vrap.rmf.raml.persistence.constructor;
 
 
-import io.vrap.rmf.raml.model.types.AnyType;
-import io.vrap.rmf.raml.model.types.ArrayType;
-import io.vrap.rmf.raml.model.types.BuiltinType;
-import io.vrap.rmf.raml.model.types.UnionType;
+import io.vrap.rmf.raml.model.types.*;
 import io.vrap.rmf.raml.persistence.ResourceFixtures;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EObject;
@@ -17,11 +14,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class TypeExpressionConstructorTest implements ResourceFixtures {
     private final TypeExpressionConstructor parser = new TypeExpressionConstructor();
     private final Resource builtinTypesResource = fromUri(BuiltinType.RESOURCE_URI);
-    private final Scope builinTypeScope = Scope.of(builtinTypesResource).with(TYPE_CONTAINER__TYPES);
+    private final Scope typedElementScope = Scope.of(builtinTypesResource)
+            .with(TYPE_CONTAINER__TYPES)
+            .with(TypesFactory.eINSTANCE.createProperty());
 
     @Test
     public void typeReference() {
-        final AnyType parsedType = (AnyType) parser.parse("string", builinTypeScope);
+        final AnyType parsedType = (AnyType) parse("string");
 
         assertThat(parsedType).isNotNull();
         assertThat(parsedType.getName()).isEqualTo("string");
@@ -29,7 +28,8 @@ public class TypeExpressionConstructorTest implements ResourceFixtures {
 
     @Test
     public void arrayType() {
-        final EObject parsedType = parser.parse("string[]", builinTypeScope);
+        String typeExpression = "string[]";
+        final EObject parsedType = parse(typeExpression);
 
         assertThat(parsedType).isInstanceOf(ArrayType.class);
         final ArrayType arrayType = (ArrayType) parsedType;
@@ -40,7 +40,7 @@ public class TypeExpressionConstructorTest implements ResourceFixtures {
 
     @Test
     public void multiDimArrayType() {
-        final EObject parsedType = parser.parse("string[][]", builinTypeScope);
+        final EObject parsedType = parse("string[][]");
 
         assertThat(parsedType).isInstanceOf(ArrayType.class);
 
@@ -54,7 +54,7 @@ public class TypeExpressionConstructorTest implements ResourceFixtures {
 
     @Test
     public void unionType() {
-        final EObject parsedType = parser.parse("string|number", builinTypeScope);
+        final EObject parsedType = parse("string|number");
 
         assertThat(parsedType).isInstanceOf(UnionType.class);
         final UnionType unionType = (UnionType) parsedType;
@@ -67,7 +67,7 @@ public class TypeExpressionConstructorTest implements ResourceFixtures {
 
     @Test
     public void unionTypeParens() {
-        final EObject parsedType = parser.parse("(string|number)", builinTypeScope);
+        final EObject parsedType = parse("(string|number)");
 
         assertThat(parsedType).isInstanceOf(UnionType.class);
         final UnionType unionType = (UnionType) parsedType;
@@ -76,5 +76,10 @@ public class TypeExpressionConstructorTest implements ResourceFixtures {
         assertThat(oneOf).hasSize(2);
         assertThat(oneOf.get(0).getName()).isEqualTo("string");
         assertThat(oneOf.get(1).getName()).isEqualTo("number");
+    }
+
+
+    private EObject parse(String typeExpression) {
+        return parser.parse(typeExpression, typedElementScope);
     }
 }
