@@ -1,6 +1,5 @@
 package io.vrap.rmf.raml.persistence;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tngtech.java.junit.dataprovider.DataProvider;
 import com.tngtech.java.junit.dataprovider.DataProviderRunner;
@@ -85,7 +84,7 @@ public class RamlTck2Test implements ResourceFixtures {
     public static List<List<Object>> testFiles(final String testSuite) throws IOException {
         final List<File> files = Files.walk(Paths.get(tckURL.getPath()))
                 .filter(Files::isRegularFile)
-                .filter(path -> path.toString().contains(testSuite))
+                .filter(path -> path.toString().contains("/" + testSuite + "/"))
                 .filter(path -> path.toString().endsWith("test-config.json")).map(Path::toFile).collect(Collectors.toList());
         return files.stream().map(file -> {
             List<List<Object>> map = Lists.newArrayList();
