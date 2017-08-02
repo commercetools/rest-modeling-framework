@@ -36,19 +36,18 @@ public class RAMLCustomLexer implements TokenSource {
     private final Yaml yaml = new Yaml();
     private final Stack<Iterator<Event>> eventIteratorStack = new Stack<>();
     private Map<String, Integer> literalTokenTypes = new HashMap<>();
-    private Map<String, Integer> symbolTokenTypes = new HashMap<>();
     private final TypeSwitch<Event, Token> eventSwitch;
 
     private TokenFactory<?> factory;
     private Event currentEvent;
 
-    private final int mapStart;
-    private final int mapEnd;
-    private final int listStart;
-    private final int listEnd;
-    private final int scalar;
-    private final int annotationTypeRef;
-    private final int relativeUri;
+    private final int mapStart  = RAMLParser.MAP_START;
+    private final int mapEnd = RAMLParser.MAP_END;
+    private final int listStart = RAMLParser.LIST_START;
+    private final int listEnd = RAMLParser.LIST_END;
+    private final int scalar = RAMLParser.SCALAR;
+    private final int annotationTypeRef = RAMLParser.ANNOTATION_TYPE_REF;
+    private final int relativeUri = RAMLParser.RELATIVE_URI;
 
     private final Stack<URI> uri = new Stack<>();
     private final URIConverter uriConverter;
@@ -69,13 +68,6 @@ public class RAMLCustomLexer implements TokenSource {
     private RAMLCustomLexer(URIConverter uriConverter) {
         initTokens();
         this.uriConverter = uriConverter;
-        mapStart = symbolTokenTypes.get(MAP_START);
-        mapEnd = symbolTokenTypes.get(MAP_END);
-        listStart = symbolTokenTypes.get(LIST_START);
-        listEnd = symbolTokenTypes.get(LIST_END);
-        scalar = symbolTokenTypes.get(SCALAR);
-        annotationTypeRef = symbolTokenTypes.get(ANNOTATION_TYPE_REF);
-        relativeUri = symbolTokenTypes.get(RELATIVE_URI);
         eventSwitch = new TypeSwitch<Event, Token>()
                 .on(MappingStartEvent.class, this::mapStart)
                 .on(MappingEndEvent.class, this::mapEnd)
@@ -86,29 +78,15 @@ public class RAMLCustomLexer implements TokenSource {
     }
 
     private void initTokens() {
-        final Properties tokens = loadTokens();
-        final Set<String> stringPropertyNames = tokens.stringPropertyNames();
-        for (final String token : stringPropertyNames) {
-            final int tokenType = Integer.parseInt(tokens.getProperty(token));
-            if (token.startsWith("'")) {
-                final String keyWord = token.substring(1, token.length() - 1);
-                literalTokenTypes.put(keyWord, tokenType);
-            } else {
-                symbolTokenTypes.put(token, tokenType);
+        final Vocabulary vocabulary = RAMLParser.VOCABULARY;
+        for (int tokenType = 0; tokenType <= vocabulary.getMaxTokenType(); tokenType++) {
+            final String literalName = vocabulary.getLiteralName(tokenType);
+            if (literalName != null) {
+                final String literalText = literalName.substring(1, literalName.length() - 1);
+                literalTokenTypes.put(literalText, tokenType);
             }
         }
     }
-
-    private Properties loadTokens() {
-        final Properties tokens = new Properties();
-        try (final InputStream inputStream = getClass().getResourceAsStream("RAML.tokens")) {
-            tokens.load(inputStream);
-        } catch (IOException e) {
-            throw new IllegalStateException(e);
-        }
-        return tokens;
-    }
-
 
     private void loadEvents(final URI uri) {
         if (this.uri.contains(uri)) {
