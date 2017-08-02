@@ -5,6 +5,9 @@ import io.vrap.rmf.raml.persistence.RamlResource
 import org.eclipse.emf.common.util.URI
 import spock.lang.Specification
 
+/**
+ * Unit tests for {@link UriTemplateConstructor}.
+ */
 class UriTemplateConstructorTest extends Specification {
 
     def "simple uri template"() {
