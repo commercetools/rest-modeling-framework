@@ -1,12 +1,10 @@
 package io.vrap.rmf.raml.persistence.constructor
 
 import io.vrap.rmf.raml.model.modules.Api
-import io.vrap.rmf.raml.model.resources.HttpMethod
-import io.vrap.rmf.raml.model.resources.Resource
-import io.vrap.rmf.raml.model.resources.UriTemplateExpression
-import io.vrap.rmf.raml.model.resources.UriTemplateLiteral
+import io.vrap.rmf.raml.model.resources.*
 import io.vrap.rmf.raml.model.securityschemes.OAuth20Settings
 import io.vrap.rmf.raml.model.types.IntegerType
+import io.vrap.rmf.raml.model.types.ObjectType
 import io.vrap.rmf.raml.model.types.StringType
 import io.vrap.rmf.raml.persistence.RamlResourceSet
 import io.vrap.rmf.raml.persistence.antlr.RAMLCustomLexer
@@ -337,6 +335,52 @@ class ApiConstructorTest extends Specification {
         api.resources[0].methods[1].bodies[0].type instanceof IntegerType
         IntegerType integerType = api.resources[0].methods[1].bodies[0].type
         integerType.maximum == 32
+    }
+
+    def "resource with method, body and properties"() {
+        when:
+        Api api = constructApi(
+                '''\
+        /user:
+            get:
+                body:
+                    properties:
+                        name?: string
+        ''')
+        then:
+        api.resources.size() == 1
+        api.resources[0].methods.size() == 1
+        api.resources[0].methods[0].bodies.size() == 1
+        BodyType bodyType = api.resources[0].methods[0].bodies[0]
+        bodyType.type instanceof ObjectType
+        ObjectType objectType = bodyType.type
+        objectType.properties.size() == 1
+        objectType.getProperty('name') != null
+        objectType.getProperty('name').type instanceof StringType
+    }
+
+    def "resource with method, body, content type and properties"() {
+        when:
+        Api api = constructApi(
+                '''\
+        /user:
+            get:
+                body:
+                    application/json:
+                        properties:
+                            name?: string
+        ''')
+        then:
+        api.resources.size() == 1
+        api.resources[0].methods.size() == 1
+        api.resources[0].methods[0].bodies.size() == 1
+        BodyType bodyType = api.resources[0].methods[0].bodies[0]
+        bodyType.contentTypes == [ 'application/json' ]
+        bodyType.type instanceof ObjectType
+        ObjectType objectType = bodyType.type
+        objectType.properties.size() == 1
+        objectType.getProperty('name') != null
+        objectType.getProperty('name').type instanceof StringType
     }
 
     Api constructApi(String input) {

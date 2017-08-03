@@ -147,23 +147,26 @@ public class ApiConstructor extends AbstractConstructor {
             bodyType.getContentTypes().add(contentType);
         }
         final Scope bodyTypeScope = scope.with(bodyType);
-        EObject type;
+        EObject type = null;
         if (bodyContentType.typeFacet().size() == 1) {
             type = (EObject) visitTypeFacet(bodyContentType.typeFacet(0));
         } else if (bodyContentType.propertiesFacet().size() == 1) {
             type = scope.getEObjectByName(BuiltinType.OBJECT.getName());
-        } else {
+        }
+        if (type == null) {
             type = scope.getEObjectByName(BuiltinType.ANY.getName());
         }
         // inline type declaration
-        if (bodyContentType.attributeFacet().size() > 0) {
+        if (bodyContentType.attributeFacet().size() > 0 || bodyContentType.propertiesFacet().size() > 0) {
             type = EcoreUtil.create(type.eClass());
             bodyTypeScope.addValue(INLINE_TYPE_CONTAINER__INLINE_TYPES, type);
             withinScope(scope.with(type),
-                    inlineTypeDeclarationScope ->
-                            bodyContentType.attributeFacet().stream()
-                                    .map(this::visitAttributeFacet)
-                                    .collect(Collectors.toList()));
+                    inlineTypeDeclarationScope -> {
+                        bodyContentType.attributeFacet().forEach(this::visitAttributeFacet);
+                        bodyContentType.propertiesFacet().forEach(this::visitPropertiesFacet);
+
+                        return inlineTypeDeclarationScope.eObject();
+                    });
         }
         bodyTypeScope.with(TYPED_ELEMENT__TYPE).setValue(type, bodyContentType.getStart());
 
@@ -177,32 +180,35 @@ public class ApiConstructor extends AbstractConstructor {
     public Object visitBodyTypeFacet(RAMLParser.BodyTypeFacetContext bodyTypeFacet) {
         final BodyType bodyType = ResourcesFactory.eINSTANCE.createBodyType();
         scope.setValue(bodyType, bodyTypeFacet.getStart());
-        final Scope bodyTypeScope = scope.with(bodyType);
-        EObject type;
-        if (bodyTypeFacet.typeFacet().size() == 1) {
-            type = (EObject) visitTypeFacet(bodyTypeFacet.typeFacet(0));
-            scope.with(bodyType, TYPED_ELEMENT__TYPE).setValue(type, bodyTypeFacet.getStart());
-        } else if (bodyTypeFacet.propertiesFacet().size() == 1) {
-            type = scope.getEObjectByName(BuiltinType.OBJECT.getName());
-        } else {
-            type = scope.getEObjectByName(BuiltinType.ANY.getName());
-        }
-        // inline type declaration
-        if (bodyTypeFacet.attributeFacet().size() > 0) {
-            type = EcoreUtil.create(type.eClass());
-            bodyTypeScope.addValue(INLINE_TYPE_CONTAINER__INLINE_TYPES, type);
-            withinScope(scope.with(type),
-                    inlineTypeDeclarationScope ->
-                            bodyTypeFacet.attributeFacet().stream()
-                                    .map(this::visitAttributeFacet)
-                                    .collect(Collectors.toList()));
-        }
-        bodyTypeScope.with(TYPED_ELEMENT__TYPE).setValue(type, bodyTypeFacet.getStart());
 
-        bodyTypeFacet.annotationFacet().forEach(this::visitAnnotationFacet);
-        bodyTypeFacet.propertiesFacet().forEach(this::visitPropertiesFacet);
+        return withinScope(scope.with(bodyType), bodyTypeScope -> {
+            EObject type;
+            if (bodyTypeFacet.typeFacet().size() == 1) {
+                type = (EObject) visitTypeFacet(bodyTypeFacet.typeFacet(0));
+                scope.with(bodyType, TYPED_ELEMENT__TYPE).setValue(type, bodyTypeFacet.getStart());
+            } else if (bodyTypeFacet.propertiesFacet().size() == 1) {
+                type = scope.getEObjectByName(BuiltinType.OBJECT.getName());
+            } else {
+                type = scope.getEObjectByName(BuiltinType.ANY.getName());
+            }
+            // inline type declaration
+            if (bodyTypeFacet.attributeFacet().size() > 0 || bodyTypeFacet.propertiesFacet().size() > 0) {
+                type = EcoreUtil.create(type.eClass());
+                bodyTypeScope.addValue(INLINE_TYPE_CONTAINER__INLINE_TYPES, type);
+                withinScope(scope.with(type),
+                        inlineTypeDeclarationScope -> {
+                            bodyTypeFacet.attributeFacet().forEach(this::visitAttributeFacet);
+                            bodyTypeFacet.propertiesFacet().forEach(this::visitPropertiesFacet);
 
-        return bodyType;
+                            return inlineTypeDeclarationScope.eObject();
+                        });
+            }
+            bodyTypeScope.with(TYPED_ELEMENT__TYPE).setValue(type, bodyTypeFacet.getStart());
+
+            bodyTypeFacet.annotationFacet().forEach(this::visitAnnotationFacet);
+
+            return bodyType;
+        });
     }
 
     @Override
