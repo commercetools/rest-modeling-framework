@@ -83,40 +83,27 @@ public class ApiConstructor extends AbstractConstructor {
 
         final UriTemplate relativeUri = uriTemplateConstructor.parse(resourceFacet.relativeUri.getText(), scope);
         resource.setRelativeUri(relativeUri);
-        final Scope resourceScope = scope.with(resource);
-        withinScope(resourceScope, attributeScope ->
-                resourceFacet.attributeFacet().stream()
-                        .map(this::visitAttributeFacet)
-                        .collect(Collectors.toList())
-        );
-        withinScope(resourceScope, s ->
-                resourceFacet.annotationFacet().stream()
-                        .map(this::visitAnnotationFacet)
-                        .collect(Collectors.toList())
-        );
-        withinScope(resourceScope, s ->
-            resourceFacet.securedByFacet().stream()
-                    .map(this::visitSecuredByFacet)
-                    .collect(Collectors.toList())
-        );
+        return withinScope(scope.with(resource), resourceScope -> {
+            resourceFacet.attributeFacet().forEach(this::visitAttributeFacet);
+            resourceFacet.annotationFacet().forEach(this::visitAnnotationFacet);
+            resourceFacet.securedByFacet().forEach(this::visitSecuredByFacet);
 
-        // TODO cleanup
-        withinScope(resourceScope.with(RESOURCE__URI_PARAMETERS), baseUriParametersScope ->
-                resourceFacet.uriParametersFacet().stream()
-                        .map(this::visitUriParametersFacet)
-                        .collect(Collectors.toList())
-        );
-        // TODO cleanup
-        withinScope(scope.with(RESOURCE_CONTAINER__RESOURCES), resoureResourcesScope ->
-                resourceFacet.resourceFacet().stream()
-                        .map(this::visitResourceFacet)
-                        .collect(Collectors.toList())
-        );
-        resourceFacet.methodFacet().stream()
-                .map(this::visitMethodFacet)
-                .collect(Collectors.toList());
+            resourceFacet.methodFacet().forEach(this::visitMethodFacet);
+            // TODO cleanup
+            withinScope(resourceScope.with(RESOURCE__URI_PARAMETERS), baseUriParametersScope ->
+                    resourceFacet.uriParametersFacet().stream()
+                            .map(this::visitUriParametersFacet)
+                            .collect(Collectors.toList())
+            );
+            // TODO cleanup
+            withinScope(scope.with(RESOURCE_CONTAINER__RESOURCES), resoureResourcesScope ->
+                    resourceFacet.resourceFacet().stream()
+                            .map(this::visitResourceFacet)
+                            .collect(Collectors.toList())
+            );
 
-        return resource;
+            return resource;
+        });
     }
 
     @Override
@@ -163,7 +150,6 @@ public class ApiConstructor extends AbstractConstructor {
         EObject type;
         if (bodyContentType.typeFacet().size() == 1) {
             type = (EObject) visitTypeFacet(bodyContentType.typeFacet(0));
-            scope.with(bodyType, TYPED_ELEMENT__TYPE).setValue(type, bodyContentType.getStart());
         } else if (bodyContentType.propertiesFacet().size() == 1) {
             type = scope.getEObjectByName(BuiltinType.OBJECT.getName());
         } else {
@@ -181,8 +167,8 @@ public class ApiConstructor extends AbstractConstructor {
         }
         bodyTypeScope.with(TYPED_ELEMENT__TYPE).setValue(type, bodyContentType.getStart());
 
-        bodyTypeScope.with(TYPED_ELEMENT__TYPE).setValue(type, bodyContentType.getStart());
         bodyContentType.annotationFacet().forEach(this::visitAnnotationFacet);
+        bodyContentType.propertiesFacet().forEach(this::visitPropertiesFacet);
 
         return bodyType;
     }
