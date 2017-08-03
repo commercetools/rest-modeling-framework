@@ -103,4 +103,16 @@ class Method extends DocumentableElement, AnnotationsFacet, ProtocolsFacet, Secu
 	 * Mutually exclusive with queryString.
 	 */
 	contains QueryParameter[] queryParameters
+	
+	/*
+	 * The body types of this method.
+	 */
+	contains BodyType[] bodies
+}
+
+class BodyType extends TypedElement {
+	/*
+	 * The content types that this body supports.
+	 */
+	String[] contentTypes
 }

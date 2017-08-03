@@ -8,7 +8,7 @@ package io.vrap.rmf.raml.persistence.antlr;
 
 tokens {
     MAP_START, MAP_END, LIST_START, LIST_END, SCALAR,
-    ANNOTATION_TYPE_REF, RELATIVE_URI
+    ANNOTATION_TYPE_REF, RELATIVE_URI, MEDIA_TYPE
 }
 
 api:
@@ -39,11 +39,34 @@ methodFacet:
     (
         MAP_START
         (
-            attributeFacet | headersFacet | queryParametersFacet | annotationFacet
+            bodyFacet | attributeFacet | headersFacet | queryParametersFacet | annotationFacet
             | securedByFacet
         )*
         MAP_END
     )?
+    ;
+
+bodyFacet:
+    'body'
+        (
+            SCALAR
+            |   (
+                    MAP_START
+                    (bodyContentTypeFacet* | bodyTypeFacet?)
+                    MAP_END
+                )
+        )
+    ;
+
+bodyContentTypeFacet:
+    contentType=SCALAR
+        MAP_START
+        ( propertiesFacet | typeFacet | annotationFacet | attributeFacet )*
+        MAP_END
+    ;
+
+bodyTypeFacet:
+    ( propertiesFacet | typeFacet | annotationFacet | attributeFacet )*
     ;
 
 httpMethod:
@@ -233,6 +256,7 @@ typedElementMap:
 
 id:
         'annotationTypes'
+    |   'body'
     |   'baseUri' | 'baseUriParameters'
     |   'get' | 'patch' | 'put' | 'post' | 'delete' | 'head' | 'options'
     |   'headers'

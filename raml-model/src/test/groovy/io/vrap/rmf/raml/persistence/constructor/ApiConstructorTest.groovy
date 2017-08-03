@@ -6,6 +6,8 @@ import io.vrap.rmf.raml.model.resources.Resource
 import io.vrap.rmf.raml.model.resources.UriTemplateExpression
 import io.vrap.rmf.raml.model.resources.UriTemplateLiteral
 import io.vrap.rmf.raml.model.securityschemes.OAuth20Settings
+import io.vrap.rmf.raml.model.types.IntegerType
+import io.vrap.rmf.raml.model.types.StringType
 import io.vrap.rmf.raml.persistence.RamlResourceSet
 import io.vrap.rmf.raml.persistence.antlr.RAMLCustomLexer
 import io.vrap.rmf.raml.persistence.antlr.RAMLParser
@@ -253,6 +255,88 @@ class ApiConstructorTest extends Specification {
         resource.methods[0].queryParameters[1].name == 'expand'
         resource.methods[0].queryParameters[1].required == false
         resource.methods[0].queryParameters[1].type.name == 'boolean'
+    }
+
+    def "resource with methods, body and content type"() {
+        when:
+        Api api = constructApi(
+                '''\
+        /name:
+            get:
+                body:
+                    application/json:
+                        type: string
+            post:
+                body:
+                    application/xml:
+                        type: integer
+                        maximum: 32
+        ''')
+        then:
+        api.resources.size() == 1
+        api.resources[0].methods.size() == 2
+        api.resources[0].methods[0].bodies.size() == 1
+        api.resources[0].methods[0].bodies[0].contentTypes == [ 'application/json' ]
+        api.resources[0].methods[0].bodies[0].type instanceof StringType
+        api.resources[0].methods[1].bodies.size() == 1
+        api.resources[0].methods[1].bodies[0].contentTypes == [ 'application/xml' ]
+        api.resources[0].methods[1].bodies[0].name == null
+        api.resources[0].methods[1].bodies[0].type instanceof IntegerType
+        IntegerType integerType = api.resources[0].methods[1].bodies[0].type
+        integerType.maximum == 32
+    }
+
+    def "resource with method and bodies"() {
+        when:
+        Api api = constructApi(
+                '''\
+        /name:
+            get:
+                body:
+                    application/json:
+                        type: string
+                    application/xml:
+                        type: integer
+                        maximum: 32
+        ''')
+        then:
+        api.resources.size() == 1
+        api.resources[0].methods.size() == 1
+        api.resources[0].methods[0].bodies.size() == 2
+        api.resources[0].methods[0].bodies[0].contentTypes == [ 'application/json' ]
+        api.resources[0].methods[0].bodies[0].type instanceof StringType
+        api.resources[0].methods[0].bodies[1].contentTypes == [ 'application/xml' ]
+        api.resources[0].methods[0].bodies[1].name == null
+        api.resources[0].methods[0].bodies[1].type instanceof IntegerType
+        IntegerType integerType = api.resources[0].methods[0].bodies[1].type
+        integerType.maximum == 32
+    }
+
+    def "resource with methods and body"() {
+        when:
+        Api api = constructApi(
+                '''\
+        /name:
+            get:
+                body:
+                    type: string
+            post:
+                body:
+                    type: integer
+                    maximum: 32
+        ''')
+        then:
+        api.resources.size() == 1
+        api.resources[0].methods.size() == 2
+        api.resources[0].methods[0].bodies.size() == 1
+        api.resources[0].methods[0].bodies[0].contentTypes.size() == 0
+        api.resources[0].methods[0].bodies[0].type instanceof StringType
+        api.resources[0].methods[1].bodies.size() == 1
+        api.resources[0].methods[1].bodies[0].contentTypes.size() == 0
+        api.resources[0].methods[1].bodies[0].name == null
+        api.resources[0].methods[1].bodies[0].type instanceof IntegerType
+        IntegerType integerType = api.resources[0].methods[1].bodies[0].type
+        integerType.maximum == 32
     }
 
     Api constructApi(String input) {
