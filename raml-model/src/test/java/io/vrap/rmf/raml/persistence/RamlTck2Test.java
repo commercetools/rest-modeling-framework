@@ -93,12 +93,15 @@ public class RamlTck2Test implements ResourceFixtures {
                 final TestConfig testConfig = mapper.readValue(file, TestConfig.class);
                 if (testConfig.getTests() != null) {
                     testConfig.getTests().forEach(testDescription -> {
-                        List<Object> a = Lists.newArrayList(
-                                new File(file.getParentFile().getPath() + "/" + testDescription.getInput()),
-                                testDescription.getValid(),
-                                testDescription.getDescription()
-                        );
-                        map.add(a);
+                        final File testRamlFile = new File(file.getParentFile().getPath() + "/" + testDescription.getInput() + ".raml");
+                        if (testRamlFile.exists()) {
+                            List<Object> a = Lists.newArrayList(
+                                    testRamlFile,
+                                    testDescription.getValid(),
+                                    testDescription.getDescription()
+                            );
+                            map.add(a);
+                        }
                     });
                 }
             } catch (Exception e) {
