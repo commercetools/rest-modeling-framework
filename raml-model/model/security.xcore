@@ -1,9 +1,9 @@
-@Ecore(nsPrefix="securityschemes",nsURI="http://www.vrap.io/raml/securityschemes")
+@Ecore(nsPrefix="security",nsURI="http://www.vrap.io/raml/security")
 @GenModel(
     modelDirectory="/raml-model/src/main/java-gen",
     complianceLevel="8.0"
 )
-package io.vrap.rmf.raml.model.securityschemes
+package io.vrap.rmf.raml.model.security
 
 import io.vrap.rmf.raml.model.elements.DocumentableElement
 import io.vrap.rmf.raml.model.elements.IdentifiableElement

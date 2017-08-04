@@ -10,7 +10,7 @@ import io.vrap.rmf.raml.model.elements.DocumentableElement
 import io.vrap.rmf.raml.model.types.AnnotationsFacet
 import io.vrap.rmf.raml.model.types.TypedElement
 
-import io.vrap.rmf.raml.model.securityschemes.SecuredByFacet
+import io.vrap.rmf.raml.model.security.SecuredByFacet
 
 class UriTemplate {
 	contains UriTemplatePart[] parts	

@@ -14,8 +14,8 @@ import io.vrap.rmf.raml.model.resources.ResourceContainer
 import io.vrap.rmf.raml.model.resources.UriTemplate
 import io.vrap.rmf.raml.model.resources.UriParameter
 
-import io.vrap.rmf.raml.model.securityschemes.SecuritySchemeContainer
-import io.vrap.rmf.raml.model.securityschemes.SecuredByFacet
+import io.vrap.rmf.raml.model.security.SecuritySchemeContainer
+import io.vrap.rmf.raml.model.security.SecuredByFacet
 
 class Api extends AnnotationsFacet, TypeContainer, ResourceContainer, ProtocolsFacet, SecuritySchemeContainer, SecuredByFacet {
 	/*

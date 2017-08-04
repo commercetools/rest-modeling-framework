@@ -22,8 +22,8 @@ import java.util.stream.Stream;
 
 import static io.vrap.rmf.raml.model.modules.ModulesPackage.Literals.TYPE_CONTAINER__ANNOTATION_TYPES;
 import static io.vrap.rmf.raml.model.modules.ModulesPackage.Literals.TYPE_CONTAINER__TYPES;
-import static io.vrap.rmf.raml.model.securityschemes.SecurityschemesPackage.Literals.SECURITY_SCHEME;
-import static io.vrap.rmf.raml.model.securityschemes.SecurityschemesPackage.Literals.SECURITY_SCHEME_CONTAINER__SECURITY_SCHEMES;
+import static io.vrap.rmf.raml.model.security.SecurityPackage.Literals.SECURITY_SCHEME;
+import static io.vrap.rmf.raml.model.security.SecurityPackage.Literals.SECURITY_SCHEME_CONTAINER__SECURITY_SCHEMES;
 import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.ANY_ANNOTATION_TYPE;
 
 /**

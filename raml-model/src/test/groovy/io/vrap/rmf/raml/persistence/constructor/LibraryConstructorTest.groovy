@@ -1,7 +1,7 @@
 package io.vrap.rmf.raml.persistence.constructor
 
 import io.vrap.rmf.raml.model.modules.Library
-import io.vrap.rmf.raml.model.securityschemes.OAuth20Settings
+import io.vrap.rmf.raml.model.security.OAuth20Settings
 import io.vrap.rmf.raml.model.types.AnnotationTarget
 import io.vrap.rmf.raml.model.types.ObjectType
 import io.vrap.rmf.raml.model.types.StringAnnotationType

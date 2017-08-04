@@ -2,10 +2,10 @@ package io.vrap.rmf.raml.persistence.constructor;
 
 import io.vrap.rmf.raml.model.facets.FacetsFactory;
 import io.vrap.rmf.raml.model.facets.StringInstance;
-import io.vrap.rmf.raml.model.securityschemes.SecurityScheme;
-import io.vrap.rmf.raml.model.securityschemes.SecuritySchemeSettings;
-import io.vrap.rmf.raml.model.securityschemes.SecuritySchemeType;
-import io.vrap.rmf.raml.model.securityschemes.SecurityschemesFactory;
+import io.vrap.rmf.raml.model.security.SecurityFactory;
+import io.vrap.rmf.raml.model.security.SecurityScheme;
+import io.vrap.rmf.raml.model.security.SecuritySchemeSettings;
+import io.vrap.rmf.raml.model.security.SecuritySchemeType;
 import io.vrap.rmf.raml.model.types.*;
 import io.vrap.rmf.raml.persistence.antlr.RAMLParser;
 import org.antlr.v4.runtime.CommonToken;
@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static io.vrap.rmf.raml.model.elements.ElementsPackage.Literals.IDENTIFIABLE_ELEMENT__NAME;
-import static io.vrap.rmf.raml.model.securityschemes.SecurityschemesPackage.Literals.*;
+import static io.vrap.rmf.raml.model.security.SecurityPackage.Literals.*;
 import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.*;
 
 /**
@@ -41,12 +41,12 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
             scope.addError("Missing type for security scheme", securitySchemeFacet.getStart());
             securityScheme = null;
         } else {
-            securityScheme = SecurityschemesFactory.eINSTANCE.createSecurityScheme();
+            securityScheme = SecurityFactory.eINSTANCE.createSecurityScheme();
             final String name = securitySchemeFacet.name.getText();
             securityScheme.setName(name);
             withinScope(scope.with(securityScheme), securitySchemeScope -> {
                 securitySchemeFacet.attributeFacet().forEach(this::visitAttributeFacet);
-                
+
                 withinScope(securitySchemeScope.with(SECURITY_SCHEME__TYPE), s ->
                         securitySchemeFacet.securitySchemeTypeFacet().stream()
                                 .map(this::visitSecuritySchemeTypeFacet)
@@ -54,10 +54,10 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
                 SecuritySchemeSettings securitySchemeSettings = null;
                 switch (securityScheme.getType()) {
                     case OAUTH_10:
-                        securitySchemeSettings = SecurityschemesFactory.eINSTANCE.createOAuth10Settings();
+                        securitySchemeSettings = SecurityFactory.eINSTANCE.createOAuth10Settings();
                         break;
                     case OAUTH_20:
-                        securitySchemeSettings = SecurityschemesFactory.eINSTANCE.createOAuth20Settings();
+                        securitySchemeSettings = SecurityFactory.eINSTANCE.createOAuth20Settings();
                         break;
                     default:
                         if (securitySchemeFacet.securitySchemeSettingsFacet() != null) {
@@ -88,7 +88,7 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
     public Object visitSecuritySchemeTypeFacet(RAMLParser.SecuritySchemeTypeFacetContext securitySchemeTypeFacet) {
         final String securityTypeText = securitySchemeTypeFacet.type.getText();
         try {
-            final SecuritySchemeType securitySchemeType = (SecuritySchemeType) SecurityschemesFactory.eINSTANCE.createFromString(SECURITY_SCHEME_TYPE, securityTypeText);
+            final SecuritySchemeType securitySchemeType = (SecuritySchemeType) SecurityFactory.eINSTANCE.createFromString(SECURITY_SCHEME_TYPE, securityTypeText);
             scope.setValue(securitySchemeType, securitySchemeTypeFacet.getStart());
             return securitySchemeType;
         } catch (IllegalArgumentException e) {
