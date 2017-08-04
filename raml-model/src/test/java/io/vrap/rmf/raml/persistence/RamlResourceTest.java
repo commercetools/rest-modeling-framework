@@ -4,7 +4,6 @@ import io.vrap.rmf.raml.model.modules.Api;
 import io.vrap.rmf.raml.model.modules.Library;
 import io.vrap.rmf.raml.model.modules.LibraryUse;
 import io.vrap.rmf.raml.model.types.*;
-import io.vrap.rmf.raml.persistence.antlr.RAMLParser;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
@@ -14,8 +13,6 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 
@@ -158,6 +155,7 @@ public class RamlResourceTest implements ResourceFixtures {
         }
     }
 
+    @Ignore
     @Test
     public void apiSuperCrossReferencer() {
         final File apiFile = new File("/Users/mkoester/Development/commercetools-api-reference/api.raml");

@@ -33,17 +33,22 @@ class ApiConstructorTest extends Specification {
                 '''\
         securitySchemes:
             oauth_2_0:
+                description: OAuth 2.0 security scheme
                 type: OAuth 2.0
                 settings:
                     accessTokenUri: https://api.example.com/1/oauth2/token
                     authorizationGrants: [ authorization_code, implicit ]
                     authorizationUri: https://www.example.com/1/oauth2/authorize
+                    scopes:
+                        - manage
+                        - update
         securedBy: [ oauth_2_0 ]
         ''')
 
         then:
         api.securitySchemes.size() == 1
         api.securitySchemes[0].name == 'oauth_2_0'
+        api.securitySchemes[0].description == 'OAuth 2.0 security scheme'
         api.securitySchemes[0].type.literal == 'OAuth 2.0'
 
         api.securitySchemes[0].settings instanceof OAuth20Settings
@@ -51,6 +56,7 @@ class ApiConstructorTest extends Specification {
         oauth20Settings.accessTokenUri == 'https://api.example.com/1/oauth2/token'
         oauth20Settings.authorizationGrants == ['authorization_code', 'implicit']
         oauth20Settings.authorizationUri == 'https://www.example.com/1/oauth2/authorize'
+        oauth20Settings.scopes == [ 'manage', 'update' ]
 
         api.securedBy.size() == 1
         api.securedBy[0] == api.securitySchemes[0]

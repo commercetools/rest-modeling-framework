@@ -45,6 +45,8 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
             final String name = securitySchemeFacet.name.getText();
             securityScheme.setName(name);
             withinScope(scope.with(securityScheme), securitySchemeScope -> {
+                securitySchemeFacet.attributeFacet().forEach(this::visitAttributeFacet);
+                
                 withinScope(securitySchemeScope.with(SECURITY_SCHEME__TYPE), s ->
                         securitySchemeFacet.securitySchemeTypeFacet().stream()
                                 .map(this::visitSecuritySchemeTypeFacet)

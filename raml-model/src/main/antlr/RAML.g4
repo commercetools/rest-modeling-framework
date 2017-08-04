@@ -136,7 +136,7 @@ securitySchemeFacet:
     name=id
     (
         MAP_START
-            ( securitySchemeTypeFacet | securitySchemeSettingsFacet )*
+            ( securitySchemeTypeFacet | securitySchemeSettingsFacet | attributeFacet )*
         MAP_END
     )?
     ;
