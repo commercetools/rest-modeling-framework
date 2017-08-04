@@ -98,6 +98,13 @@ task downloadTck2ZipFile(type: Download) {
     overwrite(false)
 }
 
+task downloadCtpApiZipFile(type: Download) {
+    src 'https://github.com/commercetools/commercetools-api-reference/archive/master.zip'
+    dest new File(buildDir, 'commercetools-api-reference.zip')
+    onlyIfNewer(true)
+    overwrite(false)
+}
+
 tasks.withType(Test) {
     environment('RAML_TCK_VERSION', ramlTckVersion)
 }
@@ -112,5 +119,11 @@ task downloadAndUnzipTck2File(dependsOn: downloadTck2ZipFile, type: Copy) {
     into "$buildDir/resources/test/raml-tck"
 }
 
+task downloadAndUnzipCtpApiFile(dependsOn: downloadCtpApiZipFile, type: Copy) {
+    from zipTree(downloadCtpApiZipFile.dest)
+    into "$buildDir/resources/test/raml-tck"
+}
+
 test.dependsOn(downloadAndUnzipTck1File)
 test.dependsOn(downloadAndUnzipTck2File)
+test.dependsOn(downloadAndUnzipCtpApiFile)
