@@ -20,8 +20,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static io.vrap.rmf.raml.model.modules.ModulesPackage.Literals.TYPE_CONTAINER__ANNOTATION_TYPES;
-import static io.vrap.rmf.raml.model.modules.ModulesPackage.Literals.TYPE_CONTAINER__TYPES;
+import static io.vrap.rmf.raml.model.modules.ModulesPackage.Literals.*;
+import static io.vrap.rmf.raml.model.resources.ResourcesPackage.Literals.TRAIT;
 import static io.vrap.rmf.raml.model.security.SecurityPackage.Literals.SECURITY_SCHEME;
 import static io.vrap.rmf.raml.model.security.SecurityPackage.Literals.SECURITY_SCHEME_CONTAINER__SECURITY_SCHEMES;
 import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.ANY_ANNOTATION_TYPE;
@@ -102,7 +102,9 @@ public class Scope {
                 TYPE_CONTAINER__ANNOTATION_TYPES.getName() :
                 SECURITY_SCHEME.isSuperTypeOf(type) ?
                         SECURITY_SCHEME_CONTAINER__SECURITY_SCHEMES.getName() :
-                        TYPE_CONTAINER__TYPES.getName();
+                        TRAIT.isSuperTypeOf(type) ?
+                                TRAIT_CONTAINER__TRAITS.getName() :
+                                TYPE_CONTAINER__TYPES.getName();
         return Stream.of(fragment, id)
                 .collect(Collectors.joining("/", "/", ""));
     }

@@ -118,6 +118,11 @@ class Method extends DocumentableElement, AnnotationsFacet, ProtocolsFacet, Secu
 	 * Information about the expected responses to a request.
 	 */
 	contains Response[] responses
+	
+	/*
+	 * A list of the traits to apply to this method.
+	 */
+	refers Trait[] is
 }
 
 class BodyType extends TypedElement {

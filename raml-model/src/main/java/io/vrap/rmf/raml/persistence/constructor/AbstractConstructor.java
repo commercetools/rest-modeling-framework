@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static io.vrap.rmf.raml.model.elements.ElementsPackage.Literals.IDENTIFIABLE_ELEMENT__NAME;
-import static io.vrap.rmf.raml.model.modules.ModulesPackage.Literals.API__TRAITS;
+import static io.vrap.rmf.raml.model.modules.ModulesPackage.Literals.TRAIT_CONTAINER__TRAITS;
 import static io.vrap.rmf.raml.model.security.SecurityPackage.Literals.*;
 import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.*;
 
@@ -39,7 +39,7 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
 
     @Override
     public Object visitTraitsFacet(RAMLParser.TraitsFacetContext traitsFacet) {
-        return withinScope(scope.with(API__TRAITS), traitsScope ->
+        return withinScope(scope.with(TRAIT_CONTAINER__TRAITS), traitsScope ->
                 traitsFacet.traitFacet().stream()
                         .map(this::visitTraitFacet)
                         .collect(Collectors.toList())
@@ -58,6 +58,22 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
 
             return trait;
         });
+    }
+
+    @Override
+    public Object visitIsFacet(RAMLParser.IsFacetContext isFacet) {
+        if (isFacet.trait == null) {
+            final EList<EObject> traits = ECollections.asEList(isFacet.traits.stream()
+                    .map(traitNameToken -> scope.getEObjectByName(traitNameToken.getText()))
+                    .collect(Collectors.toList()));
+            return scope.setValue(traits, isFacet.getStart());
+        } else {
+            final String traitName = isFacet.trait.getText();
+            final EObject trait = scope.getEObjectByName(traitName);
+            scope.setValue(trait, isFacet.getStart());
+
+            return ECollections.asEList(trait);
+        }
     }
 
     @Override

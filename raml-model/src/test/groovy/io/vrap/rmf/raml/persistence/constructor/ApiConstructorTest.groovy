@@ -74,6 +74,9 @@ class ApiConstructorTest extends Specification {
                 headers:
                     access_token:
                         type: string
+        /user:
+            get:
+                is: [ secured ]
         ''')
         then:
         api.traits.size() == 1
@@ -83,6 +86,11 @@ class ApiConstructorTest extends Specification {
         api.traits[0].displayName == 'Secured Method'
         api.traits[0].headers.size() == 1
         api.traits[0].headers[0].name == 'access_token'
+
+        api.resources.size() == 1
+        api.resources[0].methods.size() == 1
+        api.resources[0].methods[0].is.size() == 1
+        api.resources[0].methods[0].is[0] == api.traits[0]
     }
 
     def "simple api attributes"() {

@@ -69,12 +69,23 @@ methodFacet:
             |   (
                     MAP_START
                     (
-                        bodyFacet | attributeFacet | headersFacet | queryParametersFacet | annotationFacet
+                        bodyFacet | attributeFacet
+                        | headersFacet | queryParametersFacet
+                        | isFacet
+                        | annotationFacet
                         | responsesFacet | securedByFacet
                     )*
                     MAP_END
                 )
         )
+    ;
+
+isFacet:
+    'is'
+    (
+            trait=id
+        |   (LIST_START traits+=id* LIST_END)
+    )?
     ;
 
 bodyFacet:
@@ -227,7 +238,8 @@ resourceTypesFacet:
     ;
 
 attributeFacet:
-    facet=SCALAR value=facetValue;
+    facet=SCALAR value=facetValue
+    ;
 
 facetValue:
         value=id
@@ -315,7 +327,7 @@ id:
     |   'baseUri' | 'baseUriParameters'
     |   'get' | 'patch' | 'put' | 'post' | 'delete' | 'head' | 'options'
     |   'headers'
-    |   'items'
+    |   'items' | 'is'
     |   'properties'
     |   'queryParameters'
     |   'required' | 'resourceTypes'

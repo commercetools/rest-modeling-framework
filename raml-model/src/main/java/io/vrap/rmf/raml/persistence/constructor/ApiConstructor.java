@@ -127,6 +127,12 @@ public class ApiConstructor extends AbstractConstructor {
                             methodFacet.responsesFacet().forEach(this::visitResponsesFacet);
                             return null;
                         });
+
+                        withinScope(methodScope.with(METHOD__IS), isScope -> {
+                           methodFacet.isFacet().forEach(this::visitIsFacet);
+
+                           return null;
+                        });
                         return methodScope.eObject();
                     });
 

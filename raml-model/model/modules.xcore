@@ -18,7 +18,8 @@ import io.vrap.rmf.raml.model.resources.UriParameter
 import io.vrap.rmf.raml.model.security.SecuritySchemeContainer
 import io.vrap.rmf.raml.model.security.SecuredByFacet
 
-class Api extends AnnotationsFacet, TypeContainer, ResourceContainer, ProtocolsFacet, SecuritySchemeContainer, SecuredByFacet {
+class Api extends AnnotationsFacet, TypeContainer, ResourceContainer, ProtocolsFacet, 
+		SecuritySchemeContainer, SecuredByFacet, TraitContainer {
 	/*
 	 * A short, plain-text label for the API. Its value is a string.
 	 */
@@ -50,11 +51,13 @@ class Api extends AnnotationsFacet, TypeContainer, ResourceContainer, ProtocolsF
 	 * for example "application/json".
 	 */
 	String[] mediaType
-	
+}
+
+interface TraitContainer {
 	/*
-	 * Declarations of traits for use within the API.
+	 * Declarations of traits for use within this element.
 	 */
-	contains Trait[] traits
+	contains Trait[] traits	
 }
 
 interface TypeContainer {
@@ -64,7 +67,7 @@ interface TypeContainer {
     contains AnyAnnotationType[] annotationTypes
 }
 
-class Library extends AnnotationsFacet, TypeContainer, SecuritySchemeContainer {
+class Library extends AnnotationsFacet, TypeContainer, SecuritySchemeContainer, TraitContainer {
     String usage
 }
 
