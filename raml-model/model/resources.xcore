@@ -83,20 +83,22 @@ class Header extends TypedElement {
 	
 }
 
+interface HeadersFacet {
+	/*
+	 * Detailed information about any request headers needed by this method.
+	 */
+	contains Header[] headers	
+}
+
 class QueryParameter extends TypedElement {
 	
 }
 
-class Method extends DocumentableElement, AnnotationsFacet, ProtocolsFacet, SecuredByFacet {
+class Method extends DocumentableElement, AnnotationsFacet, ProtocolsFacet, SecuredByFacet, HeadersFacet {
 	/*
 	 * The HTTP method.
 	 */
 	HttpMethod method
-	
-	/*
-	 * Detailed information about any request headers needed by this method.
-	 */
-	contains Header[] headers
 	
 	/*
 	 * Detailed information about any query parameters needed by this method. 
@@ -115,4 +117,21 @@ class BodyType extends TypedElement {
 	 * The content types that this body supports.
 	 */
 	String[] contentTypes
+}
+
+class Response extends AnnotationsFacet, HeadersFacet {
+	/*
+	 * A possible HTTP status codes for that method on that resource.
+	 */
+	String statusCode
+	
+	/*
+	 * A substantial, human-friendly description of the type. Its value is a string and MAY be formatted using markdown.
+	 */
+	String description
+	
+		/*
+	 * The body types of this response.
+	 */
+	contains BodyType[] bodies
 }

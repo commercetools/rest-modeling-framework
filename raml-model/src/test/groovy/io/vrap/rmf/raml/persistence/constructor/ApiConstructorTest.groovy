@@ -189,6 +189,31 @@ class ApiConstructorTest extends Specification {
         subResource.securedBy[0] == api.securitySchemes[0]
     }
 
+
+    def "simple.raml (TCK)"() {
+        when:
+        Api api = constructApi(
+                '''\
+        title: hola
+        /top:
+            get:
+                description: "get something"
+            post:
+            /child:
+        ''')
+        then:
+        api.resources.size() == 1
+        api.resources[0].methods.size() == 2
+        api.resources[0].methods[0].method == HttpMethod.GET
+        api.resources[0].methods[0].description == 'get something'
+        api.resources[0].methods[1].method == HttpMethod.POST
+        api.resources[0].resources.size() == 1
+        api.resources[0].resources[0].relativeUri.parts.size() == 1
+        api.resources[0].resources[0].relativeUri.parts[0] instanceof UriTemplateLiteral
+        UriTemplateLiteral uriTemplateLiteral = api.resources[0].resources[0].relativeUri.parts[0]
+        uriTemplateLiteral.literal == '/child'
+    }
+
     def "resource with method"() {
         when:
         Api api = constructApi(

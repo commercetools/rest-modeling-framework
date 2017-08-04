@@ -26,7 +26,7 @@ resourceFacet:
             |   (
                     MAP_START
                     (
-                        methodFacet | attributeFacet | uriParametersFacet | resourceFacet | annotationFacet
+                        resourceFacet | methodFacet | attributeFacet | uriParametersFacet | annotationFacet
                         | securedByFacet
                     )*
                     MAP_END
@@ -36,14 +36,17 @@ resourceFacet:
 
 methodFacet:
     httpMethod
-    (
-        MAP_START
         (
-            bodyFacet | attributeFacet | headersFacet | queryParametersFacet | annotationFacet
-            | securedByFacet
-        )*
-        MAP_END
-    )?
+            SCALAR
+            |   (
+                    MAP_START
+                    (
+                        bodyFacet | attributeFacet | headersFacet | queryParametersFacet | annotationFacet
+                        | responsesFacet | securedByFacet
+                    )*
+                    MAP_END
+                )
+        )
     ;
 
 bodyFacet:
@@ -67,6 +70,18 @@ bodyContentTypeFacet:
 
 bodyTypeFacet:
     ( propertiesFacet | typeFacet | annotationFacet | attributeFacet )*
+    ;
+
+responsesFacet:
+    'responses'
+            (
+                SCALAR
+                |   (
+                        MAP_START
+                        ( headersFacet | bodyFacet )*
+                        MAP_END
+                    )
+            )
     ;
 
 httpMethod:
@@ -266,6 +281,7 @@ id:
     |   'required' | 'resourceTypes'
     |   'type' | 'types'
     |   'uses' | 'uriParameters'
+    |   'responses'
     |   'securedBy' | 'securitySchemes' | 'settings'
     |   SCALAR
     ;

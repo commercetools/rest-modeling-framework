@@ -89,13 +89,8 @@ public class ApiConstructor extends AbstractConstructor {
             resourceFacet.securedByFacet().forEach(this::visitSecuredByFacet);
 
             resourceFacet.methodFacet().forEach(this::visitMethodFacet);
-            // TODO cleanup
-            withinScope(resourceScope.with(RESOURCE__URI_PARAMETERS), baseUriParametersScope ->
-                    resourceFacet.uriParametersFacet().stream()
-                            .map(this::visitUriParametersFacet)
-                            .collect(Collectors.toList())
-            );
-            // TODO cleanup
+            resourceFacet.uriParametersFacet().forEach(this::visitUriParametersFacet);
+
             withinScope(scope.with(RESOURCE_CONTAINER__RESOURCES), resoureResourcesScope ->
                     resourceFacet.resourceFacet().stream()
                             .map(this::visitResourceFacet)
@@ -115,25 +110,21 @@ public class ApiConstructor extends AbstractConstructor {
             method.setMethod(httpMethod);
             methodsScope.setValue(method, methodFacet.getStart());
 
-            final Scope methodScope = methodsScope.with(method);
-            withinScope(methodScope, attributeScope ->
-                    methodFacet.attributeFacet().stream().map(this::visitAttributeFacet).collect(Collectors.toList()));
-            withinScope(methodScope, annotationsScope ->
-                    methodFacet.annotationFacet().stream().map(this::visitAnnotationFacet).collect(Collectors.toList()));
-            withinScope(methodScope, s ->
-                    methodFacet.securedByFacet().stream()
-                            .map(this::visitSecuredByFacet)
-                            .collect(Collectors.toList())
-            );
+            withinScope(methodsScope.with(method), methodScope -> {
+                        methodFacet.attributeFacet().forEach(this::visitAttributeFacet);
+                        methodFacet.annotationFacet().forEach(this::visitAnnotationFacet);
+                        methodFacet.securedByFacet().forEach(this::visitSecuredByFacet);
+                        methodFacet.headersFacet().forEach(this::visitHeadersFacet);
+                        methodFacet.queryParametersFacet().forEach(this::visitQueryParametersFacet);
 
-            withinScope(methodScope.with(METHOD__HEADERS), headersScope ->
-                    methodFacet.headersFacet().stream().map(this::visitHeadersFacet).collect(Collectors.toList()));
+                        withinScope(methodScope.with(METHOD__BODIES), bodiesScope -> {
+                            methodFacet.bodyFacet().forEach(this::visitBodyFacet);
+                            return bodiesScope.eObject();
+                        });
 
-            withinScope(methodScope.with(METHOD__QUERY_PARAMETERS), queryParametersScope ->
-                    methodFacet.queryParametersFacet().stream().map(this::visitQueryParametersFacet).collect(Collectors.toList()));
+                        return methodScope.eObject();
+                    });
 
-            withinScope(methodScope.with(METHOD__BODIES), bodiesScope ->
-                    methodFacet.bodyFacet().stream().map(this::visitBodyFacet).collect(Collectors.toList()));
             return method;
         });
     }
@@ -213,31 +204,37 @@ public class ApiConstructor extends AbstractConstructor {
 
     @Override
     public Object visitHeadersFacet(RAMLParser.HeadersFacetContext headersFacet) {
-        final List<Object> baseUriParameters = ECollections.asEList(headersFacet.headerFacets.stream()
-                .map(this::visitTypedElementFacet)
-                .collect(Collectors.toList()));
-        scope.setValue(baseUriParameters, headersFacet.getStart());
+        return withinScope(scope.with(HEADERS_FACET__HEADERS), headersScope -> {
+            final List<Object> headers = ECollections.asEList(headersFacet.headerFacets.stream()
+                    .map(this::visitTypedElementFacet)
+                    .collect(Collectors.toList()));
+            scope.setValue(headers, headersFacet.getStart());
 
-        return baseUriParameters;
+            return headers;
+        });
     }
 
     @Override
     public Object visitQueryParametersFacet(RAMLParser.QueryParametersFacetContext queryParametersFacet) {
-        final List<Object> baseUriParameters = ECollections.asEList(queryParametersFacet.queryParameters.stream()
-                .map(this::visitTypedElementFacet)
-                .collect(Collectors.toList()));
-        scope.setValue(baseUriParameters, queryParametersFacet.getStart());
+        return withinScope(scope.with(METHOD__QUERY_PARAMETERS), queryParametersScope -> {
+            final List<Object> queryParameters = ECollections.asEList(queryParametersFacet.queryParameters.stream()
+                    .map(this::visitTypedElementFacet)
+                    .collect(Collectors.toList()));
+            scope.setValue(queryParameters, queryParametersFacet.getStart());
 
-        return baseUriParameters;
+            return queryParameters;
+        });
     }
 
     @Override
     public Object visitUriParametersFacet(RAMLParser.UriParametersFacetContext uriParametersFacet) {
-        final List<Object> baseUriParameters = ECollections.asEList(uriParametersFacet.uriParameterFacets.stream()
-                .map(this::visitTypedElementFacet)
-                .collect(Collectors.toList()));
-        scope.setValue(baseUriParameters, uriParametersFacet.getStart());
+        return withinScope(scope.with(RESOURCE__URI_PARAMETERS), uriParametersScope -> {
+            final List<Object> uriParameters = ECollections.asEList(uriParametersFacet.uriParameterFacets.stream()
+                    .map(this::visitTypedElementFacet)
+                    .collect(Collectors.toList()));
+            scope.setValue(uriParameters, uriParametersFacet.getStart());
 
-        return baseUriParameters;
+            return uriParameters;
+        });
     }
 }
