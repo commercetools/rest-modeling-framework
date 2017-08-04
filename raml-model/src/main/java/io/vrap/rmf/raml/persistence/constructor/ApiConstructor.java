@@ -119,13 +119,45 @@ public class ApiConstructor extends AbstractConstructor {
 
                         withinScope(methodScope.with(METHOD__BODIES), bodiesScope -> {
                             methodFacet.bodyFacet().forEach(this::visitBodyFacet);
-                            return bodiesScope.eObject();
+                            return null;
                         });
 
+                        withinScope(methodScope.with(METHOD__RESPONSES), responsesScope -> {
+                            methodFacet.responsesFacet().forEach(this::visitResponsesFacet);
+                            return null;
+                        });
                         return methodScope.eObject();
                     });
 
             return method;
+        });
+    }
+
+    @Override
+    public Object visitResponsesFacet(RAMLParser.ResponsesFacetContext responsesFacetContext) {
+        final List<Object> responses = ECollections.asEList(responsesFacetContext.responseFacet().stream()
+                .map(this::visitResponseFacet)
+                .collect(Collectors.toList()));
+
+        return responses;
+    }
+
+    @Override
+    public Object visitResponseFacet(RAMLParser.ResponseFacetContext responseFacet) {
+        final Response response = ResourcesFactory.eINSTANCE.createResponse();
+        scope.setValue(response, responseFacet.getStart());
+        response.setStatusCode(responseFacet.statusCode.getText());
+        return withinScope(scope.with(response), responseScope -> {
+            responseFacet.attributeFacet().forEach(this::visitAttributeFacet);
+            responseFacet.headersFacet().forEach(this::visitHeadersFacet);
+
+            withinScope(responseScope.with(RESPONSE__BODIES), bodiesScope -> {
+                responseFacet.bodyFacet().forEach(this::visitBodyFacet);
+
+                return null;
+            });
+
+            return response;
         });
     }
 

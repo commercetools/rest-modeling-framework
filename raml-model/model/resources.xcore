@@ -110,6 +110,11 @@ class Method extends DocumentableElement, AnnotationsFacet, ProtocolsFacet, Secu
 	 * The body types of this method.
 	 */
 	contains BodyType[] bodies
+	
+	/*
+	 * Information about the expected responses to a request.
+	 */
+	contains Response[] responses
 }
 
 class BodyType extends TypedElement {

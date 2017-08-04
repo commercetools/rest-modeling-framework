@@ -189,7 +189,6 @@ class ApiConstructorTest extends Specification {
         subResource.securedBy[0] == api.securitySchemes[0]
     }
 
-
     def "simple.raml (TCK)"() {
         when:
         Api api = constructApi(
@@ -212,6 +211,30 @@ class ApiConstructorTest extends Specification {
         api.resources[0].resources[0].relativeUri.parts[0] instanceof UriTemplateLiteral
         UriTemplateLiteral uriTemplateLiteral = api.resources[0].resources[0].relativeUri.parts[0]
         uriTemplateLiteral.literal == '/child'
+    }
+
+    def "resource and method with response"() {
+        when:
+        Api api = constructApi(
+                '''\
+        /user:
+            get:
+                responses: 
+                    200:
+                        body: 
+                            application/json:
+                                type: object
+        ''')
+        then:
+        api.resources.size() == 1
+        api.resources[0].methods.size() == 1
+        api.resources[0].methods[0].method == HttpMethod.GET
+        api.resources[0].methods[0].responses.size() == 1
+        api.resources[0].methods[0].responses[0].statusCode == '200'
+        api.resources[0].methods[0].responses[0].bodies.size() == 1
+        api.resources[0].methods[0].responses[0].bodies[0].contentTypes == [ 'application/json' ]
+        api.resources[0].methods[0].responses[0].bodies[0].type instanceof ObjectType
+        api.resources[0].methods[0].responses[0].bodies[0].type.name == 'object'
     }
 
     def "resource with method"() {

@@ -78,7 +78,19 @@ responsesFacet:
                 SCALAR
                 |   (
                         MAP_START
-                        ( headersFacet | bodyFacet )*
+                        ( responseFacet )*
+                        MAP_END
+                    )
+            )
+    ;
+
+responseFacet:
+    statusCode=SCALAR
+            (
+                SCALAR
+                |   (
+                        MAP_START
+                        ( headersFacet | bodyFacet | attributeFacet )*
                         MAP_END
                     )
             )
