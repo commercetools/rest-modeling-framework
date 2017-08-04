@@ -16,8 +16,36 @@ api:
     (
         usesFacet | baseUriFacet | baseUriParametersFacet | resourceFacet
         | securitySchemesFacet | securedByFacet
-        | resourceTypesFacet | attributeFacet | typesFacet | annotationFacet )*
+        | resourceTypesFacet | attributeFacet
+        | typesFacet | traitsFacet | annotationFacet )*
     MAP_END;
+
+traitsFacet:
+    'traits'
+        (
+            SCALAR
+            |   (
+                    MAP_START
+                    ( traitFacet )*
+                    MAP_END
+                )
+        )
+    ;
+
+traitFacet:
+    name=SCALAR
+        (
+            SCALAR
+            |   (
+                    MAP_START
+                    (
+                        bodyFacet | attributeFacet | headersFacet | queryParametersFacet | annotationFacet
+                        | responsesFacet | securedByFacet
+                    )*
+                    MAP_END
+                )
+        )
+    ;
 
 resourceFacet:
     relativeUri=RELATIVE_URI
@@ -295,6 +323,7 @@ id:
     |   'uses' | 'uriParameters'
     |   'responses'
     |   'securedBy' | 'securitySchemes' | 'settings'
+    |   'traits'
     |   SCALAR
     ;
 

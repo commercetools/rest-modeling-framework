@@ -62,6 +62,29 @@ class ApiConstructorTest extends Specification {
         api.securedBy[0] == api.securitySchemes[0]
     }
 
+    def "traits"() {
+        when:
+        Api api = constructApi(
+                '''\
+        traits:
+            secured:
+                usage: Apply this to any method that needs to be secured
+                description: Some requests require authentication.
+                displayName: Secured Method
+                headers:
+                    access_token:
+                        type: string
+        ''')
+        then:
+        api.traits.size() == 1
+        api.traits[0].name == 'secured'
+        api.traits[0].usage == 'Apply this to any method that needs to be secured'
+        api.traits[0].description == 'Some requests require authentication.'
+        api.traits[0].displayName == 'Secured Method'
+        api.traits[0].headers.size() == 1
+        api.traits[0].headers[0].name == 'access_token'
+    }
+
     def "simple api attributes"() {
         when:
         Api api = constructApi(

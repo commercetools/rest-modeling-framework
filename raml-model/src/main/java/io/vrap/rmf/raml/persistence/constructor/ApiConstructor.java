@@ -38,6 +38,7 @@ public class ApiConstructor extends AbstractConstructor {
         return withinScope(scope.with(rootObject), rootScope -> {
             ctx.annotationFacet().forEach(this::visitAnnotationFacet);
             ctx.attributeFacet().forEach(this::visitAttributeFacet);
+            ctx.traitsFacet().forEach(this::visitTraitsFacet);
             ctx.typesFacet().forEach(this::visitTypesFacet);
             ctx.baseUriFacet().forEach(this::visitBaseUriFacet);
             ctx.baseUriParametersFacet().forEach(this::visitBaseUriParametersFacet);
@@ -248,7 +249,7 @@ public class ApiConstructor extends AbstractConstructor {
 
     @Override
     public Object visitQueryParametersFacet(RAMLParser.QueryParametersFacetContext queryParametersFacet) {
-        return withinScope(scope.with(METHOD__QUERY_PARAMETERS), queryParametersScope -> {
+        return withinScope(scope.with(QUERY_PARAMETERS_FACET__QUERY_PARAMETERS), queryParametersScope -> {
             final List<Object> queryParameters = ECollections.asEList(queryParametersFacet.queryParameters.stream()
                     .map(this::visitTypedElementFacet)
                     .collect(Collectors.toList()));

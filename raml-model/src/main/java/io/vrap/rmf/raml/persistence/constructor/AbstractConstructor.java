@@ -2,6 +2,8 @@ package io.vrap.rmf.raml.persistence.constructor;
 
 import io.vrap.rmf.raml.model.facets.FacetsFactory;
 import io.vrap.rmf.raml.model.facets.StringInstance;
+import io.vrap.rmf.raml.model.resources.ResourcesFactory;
+import io.vrap.rmf.raml.model.resources.Trait;
 import io.vrap.rmf.raml.model.security.SecurityFactory;
 import io.vrap.rmf.raml.model.security.SecurityScheme;
 import io.vrap.rmf.raml.model.security.SecuritySchemeSettings;
@@ -21,6 +23,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static io.vrap.rmf.raml.model.elements.ElementsPackage.Literals.IDENTIFIABLE_ELEMENT__NAME;
+import static io.vrap.rmf.raml.model.modules.ModulesPackage.Literals.API__TRAITS;
 import static io.vrap.rmf.raml.model.security.SecurityPackage.Literals.*;
 import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.*;
 
@@ -33,6 +36,29 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
     private final TypeExpressionConstructor typeExpressionConstructor = new TypeExpressionConstructor();
 
     public abstract EObject construct(final RAMLParser parser, final Scope scope);
+
+    @Override
+    public Object visitTraitsFacet(RAMLParser.TraitsFacetContext traitsFacet) {
+        return withinScope(scope.with(API__TRAITS), traitsScope ->
+                traitsFacet.traitFacet().stream()
+                        .map(this::visitTraitFacet)
+                        .collect(Collectors.toList())
+        );
+    }
+
+    @Override
+    public Object visitTraitFacet(RAMLParser.TraitFacetContext traitFacet) {
+        final Trait trait = ResourcesFactory.eINSTANCE.createTrait();
+        scope.setValue(trait, traitFacet.getStart());
+        trait.setName(traitFacet.name.getText());
+        return withinScope(scope.with(trait), traitScope -> {
+            traitFacet.attributeFacet().forEach(this::visitAttributeFacet);
+            traitFacet.headersFacet().forEach(this::visitHeadersFacet);
+            traitFacet.queryParametersFacet().forEach(this::visitQueryParametersFacet);
+
+            return trait;
+        });
+    }
 
     @Override
     public Object visitSecuritySchemeFacet(RAMLParser.SecuritySchemeFacetContext securitySchemeFacet) {

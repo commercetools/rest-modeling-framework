@@ -11,6 +11,7 @@ import io.vrap.rmf.raml.model.types.AnnotationsFacet
 import io.vrap.rmf.raml.model.types.TypedElement
 
 import io.vrap.rmf.raml.model.security.SecuredByFacet
+import io.vrap.rmf.raml.model.elements.IdentifiableElement
 
 class UriTemplate {
 	contains UriTemplatePart[] parts	
@@ -94,17 +95,19 @@ class QueryParameter extends TypedElement {
 	
 }
 
-class Method extends DocumentableElement, AnnotationsFacet, ProtocolsFacet, SecuredByFacet, HeadersFacet {
+interface QueryParametersFacet {
+	/*
+	 * Detailed information about any query parameters needed by this element. 
+	 * Mutually exclusive with queryString.
+	 */
+	contains QueryParameter[] queryParameters
+}
+
+class Method extends DocumentableElement, AnnotationsFacet, ProtocolsFacet, SecuredByFacet, HeadersFacet, QueryParametersFacet {
 	/*
 	 * The HTTP method.
 	 */
 	HttpMethod method
-	
-	/*
-	 * Detailed information about any query parameters needed by this method. 
-	 * Mutually exclusive with queryString.
-	 */
-	contains QueryParameter[] queryParameters
 	
 	/*
 	 * The body types of this method.
@@ -139,4 +142,8 @@ class Response extends AnnotationsFacet, HeadersFacet {
 	 * The body types of this response.
 	 */
 	contains BodyType[] bodies
+}
+
+class Trait extends DocumentableElement, AnnotationsFacet, IdentifiableElement, HeadersFacet {
+	String usage
 }
