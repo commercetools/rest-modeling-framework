@@ -1,7 +1,11 @@
 package io.vrap.rmf.raml.persistence.constructor
 
 import io.vrap.rmf.raml.model.modules.Api
-import io.vrap.rmf.raml.model.resources.*
+import io.vrap.rmf.raml.model.resources.HttpMethod
+import io.vrap.rmf.raml.model.resources.Resource
+import io.vrap.rmf.raml.model.resources.UriTemplateExpression
+import io.vrap.rmf.raml.model.resources.UriTemplateLiteral
+import io.vrap.rmf.raml.model.responses.BodyType
 import io.vrap.rmf.raml.model.security.OAuth20Settings
 import io.vrap.rmf.raml.model.types.IntegerType
 import io.vrap.rmf.raml.model.types.ObjectType
@@ -42,6 +46,19 @@ class ApiConstructorTest extends Specification {
                     scopes:
                         - manage
                         - update
+                describedBy:
+                    headers:
+                        Authorization:
+                            description: |
+                                On successful completion of an authorization flow,
+                                a client will be given an `access_token`, which they need to include in requests
+                                to authorized service endpoints via the HTTP `Authorization` header like this:
+
+                                Authorization: Bearer {access_token}
+                            type: string
+                    responses:
+                        401:
+                            description: Unauthorized
         securedBy: [ oauth_2_0 ]
         ''')
 
@@ -50,6 +67,15 @@ class ApiConstructorTest extends Specification {
         api.securitySchemes[0].name == 'oauth_2_0'
         api.securitySchemes[0].description == 'OAuth 2.0 security scheme'
         api.securitySchemes[0].type.literal == 'OAuth 2.0'
+
+        api.securitySchemes[0].describedBy != null
+        api.securitySchemes[0].describedBy.headers.size() == 1
+        api.securitySchemes[0].describedBy.headers[0].name == 'Authorization'
+        api.securitySchemes[0].describedBy.headers[0].type instanceof StringType
+        // TODO: api.securitySchemes[0].describedBy.headers[0].type.name == 'string'
+        api.securitySchemes[0].describedBy.responses.size() == 1
+        api.securitySchemes[0].describedBy.responses[0].statusCode == '401'
+        api.securitySchemes[0].describedBy.responses[0].description == 'Unauthorized'
 
         api.securitySchemes[0].settings instanceof OAuth20Settings
         OAuth20Settings oauth20Settings = api.securitySchemes[0].settings

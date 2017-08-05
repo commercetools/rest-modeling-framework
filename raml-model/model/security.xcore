@@ -8,6 +8,11 @@ package io.vrap.rmf.raml.model.security
 import io.vrap.rmf.raml.model.elements.DocumentableElement
 import io.vrap.rmf.raml.model.elements.IdentifiableElement
 
+import io.vrap.rmf.raml.model.types.HeadersFacet
+import io.vrap.rmf.raml.model.types.QueryParametersFacet
+
+import io.vrap.rmf.raml.model.responses.ResponsesFacet
+
 interface SecuredByFacet {
 		
 	/*
@@ -42,6 +47,19 @@ class SecurityScheme extends DocumentableElement, IdentifiableElement {
 	 * The settings attribute MAY be used to provide security scheme-specific information.
 	 */
 	contains SecuritySchemeSettings settings
+	
+	/*
+	 * A description of the following security-related request components determined by the scheme: 
+	 * the headers, query parameters, or responses. 
+	 * 
+	 * As a best practice, even for standard security schemes, API designers SHOULD describe these 
+	 * nodes of security schemes. Including the security scheme description completes the API documentation.
+	 */
+	contains SecuritySchemeDescription describedBy
+}
+
+class SecuritySchemeDescription extends HeadersFacet, QueryParametersFacet, ResponsesFacet {
+	
 }
 
 interface SecuritySchemeSettings {

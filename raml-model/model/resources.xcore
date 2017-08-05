@@ -8,10 +8,15 @@ import io.vrap.rmf.raml.model.facets.ProtocolsFacet
 import io.vrap.rmf.raml.model.elements.DocumentableElement
 
 import io.vrap.rmf.raml.model.types.AnnotationsFacet
+import io.vrap.rmf.raml.model.types.HeadersFacet
+import io.vrap.rmf.raml.model.types.QueryParametersFacet
 import io.vrap.rmf.raml.model.types.TypedElement
 
 import io.vrap.rmf.raml.model.security.SecuredByFacet
 import io.vrap.rmf.raml.model.elements.IdentifiableElement
+
+import io.vrap.rmf.raml.model.responses.BodyType
+import io.vrap.rmf.raml.model.responses.ResponsesFacet
 
 class UriTemplate {
 	contains UriTemplatePart[] parts	
@@ -80,30 +85,8 @@ enum HttpMethod {
 	options 
 }
 
-class Header extends TypedElement {
-	
-}
-
-interface HeadersFacet {
-	/*
-	 * Detailed information about any request headers needed by this method.
-	 */
-	contains Header[] headers	
-}
-
-class QueryParameter extends TypedElement {
-	
-}
-
-interface QueryParametersFacet {
-	/*
-	 * Detailed information about any query parameters needed by this element. 
-	 * Mutually exclusive with queryString.
-	 */
-	contains QueryParameter[] queryParameters
-}
-
-class Method extends DocumentableElement, AnnotationsFacet, ProtocolsFacet, SecuredByFacet, HeadersFacet, QueryParametersFacet {
+class Method extends DocumentableElement, AnnotationsFacet, ProtocolsFacet, SecuredByFacet, 
+					 HeadersFacet, QueryParametersFacet, ResponsesFacet {
 	/*
 	 * The HTTP method.
 	 */
@@ -115,38 +98,9 @@ class Method extends DocumentableElement, AnnotationsFacet, ProtocolsFacet, Secu
 	contains BodyType[] bodies
 	
 	/*
-	 * Information about the expected responses to a request.
-	 */
-	contains Response[] responses
-	
-	/*
 	 * A list of the traits to apply to this method.
 	 */
 	refers Trait[] is
-}
-
-class BodyType extends TypedElement {
-	/*
-	 * The content types that this body supports.
-	 */
-	String[] contentTypes
-}
-
-class Response extends AnnotationsFacet, HeadersFacet {
-	/*
-	 * A possible HTTP status codes for that method on that resource.
-	 */
-	String statusCode
-	
-	/*
-	 * A substantial, human-friendly description of the type. Its value is a string and MAY be formatted using markdown.
-	 */
-	String description
-	
-		/*
-	 * The body types of this response.
-	 */
-	contains BodyType[] bodies
 }
 
 class Trait extends DocumentableElement, AnnotationsFacet, IdentifiableElement, HeadersFacet {

@@ -27,7 +27,10 @@ Export-Package: io.vrap.rmf.raml.model.types,
  io.vrap.rmf.raml.model.securityschemes.util,
  io.vrap.rmf.raml.model.security,
  io.vrap.rmf.raml.model.security.impl,
- io.vrap.rmf.raml.model.security.util
+ io.vrap.rmf.raml.model.security.util,
+ io.vrap.rmf.raml.model.responses,
+ io.vrap.rmf.raml.model.responses.impl,
+ io.vrap.rmf.raml.model.responses.util
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.emf.ecore;visibility:=reexport,
  org.eclipse.xtext.xbase.lib,

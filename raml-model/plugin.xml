@@ -87,4 +87,12 @@
             genModel="model/security.xcore"/>
    </extension>
 
+   <extension point="org.eclipse.emf.ecore.generated_package">
+      <!-- @generated responses -->
+      <package
+            uri="http://www.vrap.io/raml/responses"
+            class="io.vrap.rmf.raml.model.responses.ResponsesPackage"
+            genModel="model/responses.xcore"/>
+   </extension>
+
 </plugin>

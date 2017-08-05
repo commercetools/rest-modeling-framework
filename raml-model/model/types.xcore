@@ -332,3 +332,28 @@ class Annotation {
 	 */
 	contains Instance value
 }
+
+
+class Header extends TypedElement {
+	
+}
+
+interface HeadersFacet {
+	/*
+	 * Detailed information about any request headers needed by this method.
+	 */
+	contains Header[] headers	
+}
+
+class QueryParameter extends TypedElement {
+	
+}
+
+interface QueryParametersFacet {
+	/*
+	 * Detailed information about any query parameters needed by this element. 
+	 * Mutually exclusive with queryString.
+	 */
+	contains QueryParameter[] queryParameters
+}
+

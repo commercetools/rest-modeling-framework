@@ -2,11 +2,9 @@ package io.vrap.rmf.raml.persistence.constructor;
 
 import io.vrap.rmf.raml.model.modules.Api;
 import io.vrap.rmf.raml.model.resources.*;
-import io.vrap.rmf.raml.model.types.BuiltinType;
 import io.vrap.rmf.raml.persistence.antlr.RAMLParser;
 import org.eclipse.emf.common.util.ECollections;
 import org.eclipse.emf.ecore.EObject;
-import org.eclipse.emf.ecore.util.EcoreUtil;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -14,8 +12,6 @@ import java.util.stream.Collectors;
 import static io.vrap.rmf.raml.model.modules.ModulesPackage.Literals.API__BASE_URI;
 import static io.vrap.rmf.raml.model.modules.ModulesPackage.Literals.API__BASE_URI_PARAMETERS;
 import static io.vrap.rmf.raml.model.resources.ResourcesPackage.Literals.*;
-import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.INLINE_TYPE_CONTAINER__INLINE_TYPES;
-import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.TYPED_ELEMENT__TYPE;
 
 public class ApiConstructor extends AbstractConstructor {
     private final UriTemplateConstructor uriTemplateConstructor = new UriTemplateConstructor();
@@ -123,10 +119,7 @@ public class ApiConstructor extends AbstractConstructor {
                             return null;
                         });
 
-                        withinScope(methodScope.with(METHOD__RESPONSES), responsesScope -> {
-                            methodFacet.responsesFacet().forEach(this::visitResponsesFacet);
-                            return null;
-                        });
+                        methodFacet.responsesFacet().forEach(this::visitResponsesFacet);
 
                         withinScope(methodScope.with(METHOD__IS), isScope -> {
                            methodFacet.isFacet().forEach(this::visitIsFacet);
@@ -137,131 +130,6 @@ public class ApiConstructor extends AbstractConstructor {
                     });
 
             return method;
-        });
-    }
-
-    @Override
-    public Object visitResponsesFacet(RAMLParser.ResponsesFacetContext responsesFacetContext) {
-        final List<Object> responses = ECollections.asEList(responsesFacetContext.responseFacet().stream()
-                .map(this::visitResponseFacet)
-                .collect(Collectors.toList()));
-
-        return responses;
-    }
-
-    @Override
-    public Object visitResponseFacet(RAMLParser.ResponseFacetContext responseFacet) {
-        final Response response = ResourcesFactory.eINSTANCE.createResponse();
-        scope.setValue(response, responseFacet.getStart());
-        response.setStatusCode(responseFacet.statusCode.getText());
-        return withinScope(scope.with(response), responseScope -> {
-            responseFacet.attributeFacet().forEach(this::visitAttributeFacet);
-            responseFacet.headersFacet().forEach(this::visitHeadersFacet);
-
-            withinScope(responseScope.with(RESPONSE__BODIES), bodiesScope -> {
-                responseFacet.bodyFacet().forEach(this::visitBodyFacet);
-
-                return null;
-            });
-
-            return response;
-        });
-    }
-
-    @Override
-    public Object visitBodyContentTypeFacet(RAMLParser.BodyContentTypeFacetContext bodyContentType) {
-        final BodyType bodyType = ResourcesFactory.eINSTANCE.createBodyType();
-        scope.setValue(bodyType, bodyContentType.getStart());
-        if (bodyContentType.contentType != null) {
-            final String contentType = bodyContentType.contentType.getText();
-            bodyType.getContentTypes().add(contentType);
-        }
-        final Scope bodyTypeScope = scope.with(bodyType);
-        EObject type = null;
-        if (bodyContentType.typeFacet().size() == 1) {
-            type = (EObject) visitTypeFacet(bodyContentType.typeFacet(0));
-        } else if (bodyContentType.propertiesFacet().size() == 1) {
-            type = scope.getEObjectByName(BuiltinType.OBJECT.getName());
-        }
-        if (type == null) {
-            type = scope.getEObjectByName(BuiltinType.ANY.getName());
-        }
-        // inline type declaration
-        if (bodyContentType.attributeFacet().size() > 0 || bodyContentType.propertiesFacet().size() > 0) {
-            type = EcoreUtil.create(type.eClass());
-            bodyTypeScope.addValue(INLINE_TYPE_CONTAINER__INLINE_TYPES, type);
-            withinScope(scope.with(type),
-                    inlineTypeDeclarationScope -> {
-                        bodyContentType.attributeFacet().forEach(this::visitAttributeFacet);
-                        bodyContentType.propertiesFacet().forEach(this::visitPropertiesFacet);
-
-                        return inlineTypeDeclarationScope.eObject();
-                    });
-        }
-        bodyTypeScope.with(TYPED_ELEMENT__TYPE).setValue(type, bodyContentType.getStart());
-
-        bodyContentType.annotationFacet().forEach(this::visitAnnotationFacet);
-        bodyContentType.propertiesFacet().forEach(this::visitPropertiesFacet);
-
-        return bodyType;
-    }
-
-    @Override
-    public Object visitBodyTypeFacet(RAMLParser.BodyTypeFacetContext bodyTypeFacet) {
-        final BodyType bodyType = ResourcesFactory.eINSTANCE.createBodyType();
-        scope.setValue(bodyType, bodyTypeFacet.getStart());
-
-        return withinScope(scope.with(bodyType), bodyTypeScope -> {
-            EObject type;
-            if (bodyTypeFacet.typeFacet().size() == 1) {
-                type = (EObject) visitTypeFacet(bodyTypeFacet.typeFacet(0));
-                scope.with(bodyType, TYPED_ELEMENT__TYPE).setValue(type, bodyTypeFacet.getStart());
-            } else if (bodyTypeFacet.propertiesFacet().size() == 1) {
-                type = scope.getEObjectByName(BuiltinType.OBJECT.getName());
-            } else {
-                type = scope.getEObjectByName(BuiltinType.ANY.getName());
-            }
-            // inline type declaration
-            if (bodyTypeFacet.attributeFacet().size() > 0 || bodyTypeFacet.propertiesFacet().size() > 0) {
-                type = EcoreUtil.create(type.eClass());
-                bodyTypeScope.addValue(INLINE_TYPE_CONTAINER__INLINE_TYPES, type);
-                withinScope(scope.with(type),
-                        inlineTypeDeclarationScope -> {
-                            bodyTypeFacet.attributeFacet().forEach(this::visitAttributeFacet);
-                            bodyTypeFacet.propertiesFacet().forEach(this::visitPropertiesFacet);
-
-                            return inlineTypeDeclarationScope.eObject();
-                        });
-            }
-            bodyTypeScope.with(TYPED_ELEMENT__TYPE).setValue(type, bodyTypeFacet.getStart());
-
-            bodyTypeFacet.annotationFacet().forEach(this::visitAnnotationFacet);
-
-            return bodyType;
-        });
-    }
-
-    @Override
-    public Object visitHeadersFacet(RAMLParser.HeadersFacetContext headersFacet) {
-        return withinScope(scope.with(HEADERS_FACET__HEADERS), headersScope -> {
-            final List<Object> headers = ECollections.asEList(headersFacet.headerFacets.stream()
-                    .map(this::visitTypedElementFacet)
-                    .collect(Collectors.toList()));
-            scope.setValue(headers, headersFacet.getStart());
-
-            return headers;
-        });
-    }
-
-    @Override
-    public Object visitQueryParametersFacet(RAMLParser.QueryParametersFacetContext queryParametersFacet) {
-        return withinScope(scope.with(QUERY_PARAMETERS_FACET__QUERY_PARAMETERS), queryParametersScope -> {
-            final List<Object> queryParameters = ECollections.asEList(queryParametersFacet.queryParameters.stream()
-                    .map(this::visitTypedElementFacet)
-                    .collect(Collectors.toList()));
-            scope.setValue(queryParameters, queryParametersFacet.getStart());
-
-            return queryParameters;
         });
     }
 

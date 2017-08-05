@@ -1,0 +1,40 @@
+@Ecore(nsPrefix="responses",nsURI="http://www.vrap.io/raml/responses")
+@GenModel(modelDirectory="/raml-model/src/main/java-gen",
+    complianceLevel="8.0")
+package io.vrap.rmf.raml.model.responses
+
+
+import io.vrap.rmf.raml.model.types.AnnotationsFacet
+import io.vrap.rmf.raml.model.types.HeadersFacet
+import io.vrap.rmf.raml.model.types.TypedElement
+
+interface ResponsesFacet {
+	/*
+	 * Information about the expected responses to a request.
+	 */
+	contains Response[] responses	
+}
+
+class Response extends AnnotationsFacet, HeadersFacet {
+	/*
+	 * A possible HTTP status codes for that method on that resource.
+	 */
+	String statusCode
+	
+	/*
+	 * A substantial, human-friendly description of the type. Its value is a string and MAY be formatted using markdown.
+	 */
+	String description
+	
+		/*
+	 * The body types of this response.
+	 */
+	contains BodyType[] bodies
+}
+
+class BodyType extends TypedElement {
+	/*
+	 * The content types that this body supports.
+	 */
+	String[] contentTypes
+}

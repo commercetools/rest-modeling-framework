@@ -202,9 +202,21 @@ securitySchemeFacet:
     name=id
     (
         MAP_START
-            ( securitySchemeTypeFacet | securitySchemeSettingsFacet | attributeFacet )*
+            ( securitySchemeTypeFacet | securitySchemeSettingsFacet | attributeFacet | describedByFacet )*
         MAP_END
     )?
+    ;
+
+describedByFacet:
+    'describedBy'
+        (
+            SCALAR
+            |   (
+                    MAP_START
+                    (queryParametersFacet | headersFacet | responsesFacet )*
+                    MAP_END
+                )
+        )
     ;
 
 securitySchemeTypeFacet:
@@ -326,6 +338,7 @@ id:
     |   'body'
     |   'baseUri' | 'baseUriParameters'
     |   'get' | 'patch' | 'put' | 'post' | 'delete' | 'head' | 'options'
+    |   'describedBy'
     |   'headers'
     |   'items' | 'is'
     |   'properties'
