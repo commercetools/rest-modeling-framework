@@ -219,6 +219,8 @@ class ApiConstructorTest extends Specification {
                 headers:
                     access_token:
                         type: string
+                queryParameters:
+                    clientId:
         /user:
             get:
                 is: [ secured ]
@@ -231,6 +233,8 @@ class ApiConstructorTest extends Specification {
         api.traits[0].displayName == 'Secured Method'
         api.traits[0].headers.size() == 1
         api.traits[0].headers[0].name == 'access_token'
+        api.traits[0].queryParameters.size() == 1
+        api.traits[0].queryParameters[0].name == 'clientId'
 
         api.resources.size() == 1
         api.resources[0].methods.size() == 1

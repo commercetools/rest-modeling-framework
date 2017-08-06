@@ -103,6 +103,7 @@ class Method extends DocumentableElement, AnnotationsFacet, ProtocolsFacet, Secu
 	refers Trait[] is
 }
 
-class Trait extends DocumentableElement, AnnotationsFacet, IdentifiableElement, HeadersFacet {
+class Trait extends DocumentableElement, AnnotationsFacet, IdentifiableElement, 
+					HeadersFacet, QueryParametersFacet {
 	String usage
 }
