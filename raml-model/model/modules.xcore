@@ -51,6 +51,24 @@ class Api extends AnnotationsFacet, TypeContainer, ResourceContainer, ProtocolsF
 	 * for example "application/json".
 	 */
 	String[] mediaType
+	
+	/*
+	 * Additional overall documentation for the API.
+	 */
+	contains Document[] documentation
+}
+
+class Document {
+	/*
+	 * Title of the document. Its value MUST be a non-empty string.
+	 */
+	String title	
+	
+	/*
+	 * Content of the document. 
+	 * Its value MUST be a non-empty string and MAY be formatted using markdown.
+	 */
+	String content
 }
 
 interface TraitContainer {

@@ -66,6 +66,24 @@ class ApiConstructorTest extends Specification {
         stringInstance1.value == 'John Doe'
     }
 
+    def "api with documentation"() {
+        when:
+        Api api = constructApi(
+                '''\
+        documentation:
+            - title: Home
+              content: This is the API homepage.
+            - title: Legal
+              content: It's legal to use this API.
+        ''')
+        then:
+        api.documentation.size() == 2
+        api.documentation[0].title == 'Home'
+        api.documentation[0].content == 'This is the API homepage.'
+        api.documentation[1].title == 'Legal'
+        api.documentation[1].content == 'It\'s legal to use this API.'
+    }
+
     def "type with examples"() {
         when:
         Api api = constructApi(

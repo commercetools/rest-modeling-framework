@@ -1,6 +1,8 @@
 package io.vrap.rmf.raml.persistence.constructor;
 
 import io.vrap.rmf.raml.model.modules.Api;
+import io.vrap.rmf.raml.model.modules.Document;
+import io.vrap.rmf.raml.model.modules.ModulesFactory;
 import io.vrap.rmf.raml.model.resources.*;
 import io.vrap.rmf.raml.persistence.antlr.RAMLParser;
 import org.eclipse.emf.common.util.ECollections;
@@ -9,8 +11,7 @@ import org.eclipse.emf.ecore.EObject;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static io.vrap.rmf.raml.model.modules.ModulesPackage.Literals.API__BASE_URI;
-import static io.vrap.rmf.raml.model.modules.ModulesPackage.Literals.API__BASE_URI_PARAMETERS;
+import static io.vrap.rmf.raml.model.modules.ModulesPackage.Literals.*;
 import static io.vrap.rmf.raml.model.resources.ResourcesPackage.Literals.*;
 
 public class ApiConstructor extends BaseConstructor {
@@ -32,6 +33,7 @@ public class ApiConstructor extends BaseConstructor {
         final EObject rootObject = scope.getResource().getContents().get(0);
 
         return withinScope(scope.with(rootObject), rootScope -> {
+            ctx.documentationFacet().forEach(this::visitDocumentationFacet);
             ctx.annotationFacet().forEach(this::visitAnnotationFacet);
             ctx.attributeFacet().forEach(this::visitAttributeFacet);
             ctx.traitsFacet().forEach(this::visitTraitsFacet);
@@ -49,6 +51,25 @@ public class ApiConstructor extends BaseConstructor {
                     ctx.resourceFacet().stream().map(this::visitResourceFacet).collect(Collectors.toList()));
 
             return rootObject;
+        });
+    }
+
+    @Override
+    public Object visitDocumentationFacet(RAMLParser.DocumentationFacetContext documentationFacet) {
+        return withinScope(scope.with(API__DOCUMENTATION), documentationScope ->
+                documentationFacet.document().stream().map(this::visitDocument).collect(Collectors.toList())
+        );
+    }
+
+    @Override
+    public Object visitDocument(RAMLParser.DocumentContext ctx) {
+        final Document document = ModulesFactory.eINSTANCE.createDocument();
+        scope.setValue(document, ctx.getStart());
+
+        return withinScope(scope.with(document), documentScope -> {
+            ctx.attributeFacet().forEach(this::visitAttributeFacet);
+
+            return document;
         });
     }
 

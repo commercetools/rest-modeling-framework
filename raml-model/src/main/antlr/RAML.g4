@@ -14,11 +14,23 @@ tokens {
 api:
     MAP_START
     (
-        usesFacet | baseUriFacet | baseUriParametersFacet | resourceFacet
+        usesFacet | baseUriFacet | baseUriParametersFacet | documentationFacet
+        | resourceFacet
         | securitySchemesFacet | securedByFacet
         | resourceTypesFacet | attributeFacet
         | typesFacet | traitsFacet | annotationFacet )*
     MAP_END;
+
+documentationFacet:
+    'documentation'
+        LIST_START
+        ( MAP_START document MAP_END )*
+        LIST_END
+    ;
+
+document:
+    ( attributeFacet )+
+    ;
 
 traitsFacet:
     'traits'
@@ -394,7 +406,7 @@ id:
     |   'body'
     |   'baseUri' | 'baseUriParameters'
     |   'get' | 'patch' | 'put' | 'post' | 'delete' | 'head' | 'options'
-    |   'default' | 'describedBy'
+    |   'default' | 'describedBy' | 'documentation'
     |   'example' | 'examples'
     |   'headers'
     |   'items' | 'is'
