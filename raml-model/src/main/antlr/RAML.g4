@@ -382,7 +382,7 @@ instance:
     ;
 
 simpleInstance:
-    value=SCALAR
+    value=id
     ;
 
 arrayInstance:

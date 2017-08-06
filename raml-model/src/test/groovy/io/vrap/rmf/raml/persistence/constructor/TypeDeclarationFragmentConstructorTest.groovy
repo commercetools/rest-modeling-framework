@@ -120,6 +120,21 @@ class TypeDeclarationFragmentConstructorTest extends Specification {
         arrayType.items instanceof StringType
     }
 
+    def "reference-type-id.raml"() {
+        when:
+        AnyType type = constructType(
+                '''\
+        displayName: ReferenceTypeId
+        type: string
+        enum:
+        - type
+        - zone
+        - inventory-entry
+        ''')
+        then:
+        type.enum.size() == 3
+    }
+
     AnyType constructType(String input) {
         RAMLParser parser = parser(input)
         def constructor = new TypeDeclarationFragmentConstructor(TYPE_CONTAINER__TYPES)
