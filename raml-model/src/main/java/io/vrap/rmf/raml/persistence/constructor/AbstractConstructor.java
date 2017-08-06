@@ -456,13 +456,21 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
         }
 
         // inline type declaration
-        if (typedElementMap.attributeFacet().size() > 0 || typedElementMap.propertiesFacet().size() > 0) {
+        final boolean isInlineTypeDeclaration =
+                typedElementMap.attributeFacet().size() > 0 || typedElementMap.propertiesFacet().size() > 0 ||
+                typedElementMap.exampleFacet().size() > 0 || typedElementMap.examplesFacet().size() > 0 ||
+                typedElementMap.defaultFacet().size() > 0;
+        if (isInlineTypeDeclaration) {
             typedElementType = EcoreUtil.create(typedElementType.eClass());
             scope.addValue(INLINE_TYPE_CONTAINER__INLINE_TYPES, typedElementType);
             withinScope(scope.with(typedElementType),
                     inlineTypeDeclarationScope -> {
                             typedElementMap.attributeFacet().forEach(this::visitAttributeFacet);
                             typedElementMap.propertiesFacet().forEach(this::visitPropertiesFacet);
+                            typedElementMap.defaultFacet().forEach(this::visitDefaultFacet);
+                            typedElementMap.exampleFacet().forEach(this::visitExampleFacet);
+                            typedElementMap.examplesFacet().forEach(this::visitExamplesFacet);
+
                             return inlineTypeDeclarationScope.eObject();
             });
         }

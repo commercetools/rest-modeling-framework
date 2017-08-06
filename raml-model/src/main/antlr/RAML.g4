@@ -354,7 +354,7 @@ typedElementTuple:
 typedElementMap:
     name=id
         MAP_START
-        ( attributeFacet | propertiesFacet | requiredFacet | typeFacet | annotationFacet )*
+        ( attributeFacet | propertiesFacet | requiredFacet | typeFacet | annotationFacet | exampleFacet | examplesFacet | defaultFacet )*
         MAP_END
     ;
 
