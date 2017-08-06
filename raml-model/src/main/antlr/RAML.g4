@@ -407,7 +407,7 @@ id:
     |   'baseUri' | 'baseUriParameters'
     |   'get' | 'patch' | 'put' | 'post' | 'delete' | 'head' | 'options'
     |   'default' | 'describedBy' | 'documentation'
-    |   'example' | 'examples'
+    |   'enum' | 'example' | 'examples'
     |   'headers'
     |   'items' | 'is'
     |   'properties'

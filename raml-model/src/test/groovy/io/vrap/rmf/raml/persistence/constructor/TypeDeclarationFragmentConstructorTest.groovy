@@ -1,10 +1,7 @@
 package io.vrap.rmf.raml.persistence.constructor
 
 import io.vrap.rmf.raml.model.facets.StringInstance
-import io.vrap.rmf.raml.model.types.AnyType
-import io.vrap.rmf.raml.model.types.BuiltinType
-import io.vrap.rmf.raml.model.types.ObjectType
-import io.vrap.rmf.raml.model.types.StringType
+import io.vrap.rmf.raml.model.types.*
 import io.vrap.rmf.raml.persistence.RamlResourceSet
 import io.vrap.rmf.raml.persistence.antlr.RAMLCustomLexer
 import io.vrap.rmf.raml.persistence.antlr.RAMLParser
@@ -101,6 +98,26 @@ class TypeDeclarationFragmentConstructorTest extends Specification {
         namePropertyType.name == null
         namePropertyType != stringType
         namePropertyType.default instanceof StringInstance
+    }
+
+    def "attribute-enum-type.rmal"() {
+        when:
+        AnyType type = constructType(
+                '''\
+        displayName: AttributeEnumType
+        discriminatorValue: enum
+        properties:
+            values:
+                type: string[]
+        ''')
+        then:
+        type instanceof  ObjectType
+        ObjectType objectType = type
+        objectType.discriminatorValue == 'enum'
+        objectType.properties.size() == 1
+        objectType.properties[0].type instanceof ArrayType
+        ArrayType arrayType = objectType.properties[0].type
+        arrayType.items instanceof StringType
     }
 
     AnyType constructType(String input) {
