@@ -292,18 +292,22 @@ typeDeclarationTuple:
 typeDeclarationMap:
     name=SCALAR
         MAP_START
-        ( attributeFacet | propertiesFacet | typeFacet | annotationFacet )*
+        ( attributeFacet | propertiesFacet | typeFacet | defaultFacet | annotationFacet )*
         MAP_END
     ;
 
 typeDeclarationFragment:
     MAP_START
-    ( attributeFacet | propertiesFacet | typeFacet | annotationFacet )*
+    ( attributeFacet | propertiesFacet | typeFacet | defaultFacet | annotationFacet )*
     MAP_END
     ;
 
 typeFacet:
     facet=( 'type' | 'items') typeExpression=SCALAR
+    ;
+
+defaultFacet:
+    'default' instance
     ;
 
 propertiesFacet:
@@ -362,7 +366,7 @@ id:
     |   'body'
     |   'baseUri' | 'baseUriParameters'
     |   'get' | 'patch' | 'put' | 'post' | 'delete' | 'head' | 'options'
-    |   'describedBy'
+    |   'default' | 'describedBy'
     |   'headers'
     |   'items' | 'is'
     |   'properties'

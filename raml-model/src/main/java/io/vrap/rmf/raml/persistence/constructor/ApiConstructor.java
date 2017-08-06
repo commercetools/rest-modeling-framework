@@ -13,7 +13,7 @@ import static io.vrap.rmf.raml.model.modules.ModulesPackage.Literals.API__BASE_U
 import static io.vrap.rmf.raml.model.modules.ModulesPackage.Literals.API__BASE_URI_PARAMETERS;
 import static io.vrap.rmf.raml.model.resources.ResourcesPackage.Literals.*;
 
-public class ApiConstructor extends AbstractConstructor {
+public class ApiConstructor extends BaseConstructor {
     private final UriTemplateConstructor uriTemplateConstructor = new UriTemplateConstructor();
 
     @Override

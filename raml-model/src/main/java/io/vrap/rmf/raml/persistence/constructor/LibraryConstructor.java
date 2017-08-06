@@ -7,7 +7,7 @@ import org.eclipse.emf.ecore.EObject;
 /**
  * Constructs a library from a {@link RAMLParser.LibraryContext}.
  */
-public class LibraryConstructor extends AbstractConstructor {
+public class LibraryConstructor extends BaseConstructor {
 
     @Override
     public EObject construct(final RAMLParser parser, final Scope scope) {

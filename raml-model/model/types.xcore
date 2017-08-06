@@ -31,6 +31,17 @@ class AnyType extends AnnotationsFacet, DocumentableElement, IdentifiableElement
 	op AnyType[] subTypes() {
 		SuperTypeCrossReferencer.getSubTypes(this)
 	}
+	
+	/*
+	 * A default value for a type.
+	 */
+	contains Instance ^default
+	
+	/*
+	 * An example of an instance of this type that can be used, 
+	 * for example, by documentation generators to generate sample values for an object of this type. 
+	 */
+	contains Instance example
 }
 
 interface InlineTypeContainer {

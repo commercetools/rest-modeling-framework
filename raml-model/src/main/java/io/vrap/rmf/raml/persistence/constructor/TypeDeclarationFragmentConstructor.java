@@ -7,7 +7,7 @@ import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
-public class TypeDeclarationFragmentConstructor extends AbstractConstructor {
+public class TypeDeclarationFragmentConstructor extends BaseConstructor {
     private final EReference typeContainer;
 
     public TypeDeclarationFragmentConstructor(final EReference typeContainer) {
@@ -48,6 +48,7 @@ public class TypeDeclarationFragmentConstructor extends AbstractConstructor {
             typeDeclarationFragment.annotationFacet().forEach(this::visitAnnotationFacet);
             typeDeclarationFragment.attributeFacet().forEach(this::visitAttributeFacet);
             typeDeclarationFragment.propertiesFacet().forEach(this::visitPropertiesFacet);
+            typeDeclarationFragment.defaultFacet().forEach(this::visitDefaultFacet);
 
             return declaredType;
         });
