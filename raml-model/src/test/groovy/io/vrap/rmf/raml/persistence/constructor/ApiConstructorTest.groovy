@@ -1,5 +1,7 @@
 package io.vrap.rmf.raml.persistence.constructor
 
+import io.vrap.rmf.raml.model.facets.ObjectInstance
+import io.vrap.rmf.raml.model.facets.StringInstance
 import io.vrap.rmf.raml.model.modules.Api
 import io.vrap.rmf.raml.model.resources.HttpMethod
 import io.vrap.rmf.raml.model.resources.Resource
@@ -30,6 +32,66 @@ class ApiConstructorTest extends Specification {
     ResourceSet resourceSet = new RamlResourceSet()
     @Shared
     URI uri = URI.createURI("test.raml");
+
+    def "type with example"() {
+        when:
+        Api api = constructApi(
+                '''\
+        types:
+            Person:
+                properties:
+                    name:
+                example:
+                    name: Mr. X
+            Name:
+                type: string
+                example: John Doe        
+        ''')
+        then:
+        api.types.size() == 2
+        api.types[0].example instanceof ObjectInstance
+        ObjectInstance example = api.types[0].example
+        example.propertyValues.size() == 1
+        example.propertyValues[0].name == 'name'
+        example.propertyValues[0].value instanceof StringInstance
+        StringInstance stringInstance = example.propertyValues[0].value
+        stringInstance.value == 'Mr. X'
+
+
+        api.types[1].example instanceof StringInstance
+        StringInstance stringInstance1 = api.types[1].example
+        stringInstance1.value == 'John Doe'
+    }
+
+    def "types with default"() {
+        when:
+        Api api = constructApi(
+                '''\
+        types:
+            Person:
+                properties:
+                    name:
+                default:
+                    name: Mr. X
+            Name:
+                type: string
+                default: John Doe
+        ''')
+        then:
+        api.types.size() == 2
+
+        api.types[0].default instanceof ObjectInstance
+        ObjectInstance default_ = api.types[0].default
+        default_.propertyValues.size() == 1
+        default_.propertyValues[0].name == 'name'
+        default_.propertyValues[0].value instanceof StringInstance
+        StringInstance stringInstance = default_.propertyValues[0].value
+        stringInstance.value == 'Mr. X'
+
+        api.types[1].default instanceof StringInstance
+        StringInstance stringInstance1 = api.types[1].default
+        stringInstance1.value == 'John Doe'
+    }
 
     def "security scheme"() {
         when:
