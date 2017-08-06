@@ -333,6 +333,30 @@ typedElementMap:
         MAP_END
     ;
 
+instance:
+    simpleInstance | arrayInstance | objectInstance
+    ;
+
+simpleInstance:
+    value=SCALAR
+    ;
+
+arrayInstance:
+    LIST_START
+    ( instance )*
+    LIST_END
+    ;
+
+objectInstance:
+    MAP_START
+    ( instanceProperty )*
+    MAP_END
+    ;
+
+instanceProperty:
+    name=id value=instance
+    ;
+
 id:
         'annotationTypes'
     |   'body'

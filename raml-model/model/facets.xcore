@@ -171,6 +171,10 @@ class IntegerInstance extends Instance {
 	Integer value
 }
 
+class ArrayInstance extends Instance {
+	contains Instance[] values
+}
+
 class ObjectInstance extends Instance {
 	contains PropertyValue[] propertyValues
 }
