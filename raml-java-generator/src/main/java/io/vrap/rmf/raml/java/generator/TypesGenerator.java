@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.google.common.base.CaseFormat;
 import com.google.common.base.Converter;
 import com.squareup.javapoet.*;
+import io.vrap.rmf.raml.model.facets.StringInstance;
 import io.vrap.rmf.raml.model.modules.TypeContainer;
 import io.vrap.rmf.raml.model.types.*;
 import io.vrap.rmf.raml.model.types.util.TypesSwitch;
@@ -125,7 +126,13 @@ public class TypesGenerator {
                 final Converter<String, String> enumHyphenConverter = CaseFormat.LOWER_HYPHEN
                         .converterTo(CaseFormat.UPPER_UNDERSCORE);
 
-                for (final String enumValue : stringType.getEnum()) {
+                final List<String> enumStringValues = stringType.getEnum().stream()
+                        .filter(StringInstance.class::isInstance)
+                        .map(StringInstance.class::cast)
+                        .map(StringInstance::getValue)
+                        .collect(Collectors.toList());
+
+                for (final String enumValue : enumStringValues) {
 
                     final String enumLiteral = enumValue.contains("-") ?
                             enumHyphenConverter.convert(enumValue) :

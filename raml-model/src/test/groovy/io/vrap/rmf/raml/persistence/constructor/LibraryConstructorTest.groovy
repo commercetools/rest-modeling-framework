@@ -1,5 +1,6 @@
 package io.vrap.rmf.raml.persistence.constructor
 
+import io.vrap.rmf.raml.model.facets.StringInstance
 import io.vrap.rmf.raml.model.modules.Library
 import io.vrap.rmf.raml.model.security.OAuth20Settings
 import io.vrap.rmf.raml.model.types.AnnotationTarget
@@ -82,7 +83,14 @@ class LibraryConstructorTest extends Specification {
 
         library.types[5].name == 'Enum'
         library.types[5].type instanceof StringType
-        library.types[5].enum == [ 'v1', 'v2' ]
+
+        library.types[5].enum.size() == 2
+        library.types[5].enum[0] instanceof StringInstance
+        StringInstance enumValue1 = library.types[5].enum[0]
+        enumValue1.value == 'v1'
+        library.types[5].enum[1] instanceof StringInstance
+        StringInstance enumValue2 = library.types[5].enum[1]
+        enumValue2.value == 'v2'
     }
 
     def "library with annotation type"() {

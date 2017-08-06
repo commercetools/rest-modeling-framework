@@ -292,13 +292,20 @@ typeDeclarationTuple:
 typeDeclarationMap:
     name=SCALAR
         MAP_START
-        ( attributeFacet | propertiesFacet | typeFacet | defaultFacet | exampleFacet | examplesFacet |annotationFacet )*
+        ( attributeFacet | enumFacet | propertiesFacet | typeFacet | defaultFacet | exampleFacet | examplesFacet |annotationFacet )*
         MAP_END
+    ;
+
+enumFacet:
+    'enum'
+        LIST_START
+        values+=instance*
+        LIST_END
     ;
 
 typeDeclarationFragment:
     MAP_START
-    ( attributeFacet | propertiesFacet | typeFacet | defaultFacet | exampleFacet | examplesFacet | annotationFacet )*
+    ( attributeFacet | enumFacet | propertiesFacet | typeFacet | defaultFacet | exampleFacet | examplesFacet | annotationFacet )*
     MAP_END
     ;
 
@@ -354,7 +361,7 @@ typedElementTuple:
 typedElementMap:
     name=id
         MAP_START
-        ( attributeFacet | propertiesFacet | requiredFacet | typeFacet | annotationFacet | exampleFacet | examplesFacet | defaultFacet )*
+        ( attributeFacet | enumFacet | propertiesFacet | requiredFacet | typeFacet | annotationFacet | exampleFacet | examplesFacet | defaultFacet )*
         MAP_END
     ;
 

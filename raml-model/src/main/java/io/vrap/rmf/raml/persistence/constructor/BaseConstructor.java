@@ -13,6 +13,14 @@ public abstract class BaseConstructor extends AbstractConstructor {
     private final InstanceConstructor instanceConstructor = new InstanceConstructor();
 
     @Override
+    public Object visitEnumFacet(RAMLParser.EnumFacetContext enumFacet) {
+        return instanceConstructor.withinScope(scope.with(ENUM_FACET__ENUM), enumScope ->
+                enumFacet.instance().stream()
+                        .map(instanceConstructor::visitInstance)
+                        .collect(Collectors.toList()));
+    }
+
+    @Override
     public Object visitInstance(RAMLParser.InstanceContext instance) {
         return instanceConstructor.withinScope(scope, instanceScope ->
             instanceConstructor.visitInstance(instance));

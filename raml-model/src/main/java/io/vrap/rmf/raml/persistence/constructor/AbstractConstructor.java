@@ -363,6 +363,7 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
             typeDeclarationMap.defaultFacet().forEach(this::visitDefaultFacet);
             typeDeclarationMap.exampleFacet().forEach(this::visitExampleFacet);
             typeDeclarationMap.examplesFacet().forEach(this::visitExamplesFacet);
+            typeDeclarationMap.enumFacet().forEach(this::visitEnumFacet);
 
             return declaredType;
         });
@@ -448,7 +449,7 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
         final boolean isInlineTypeDeclaration =
                 typedElementMap.attributeFacet().size() > 0 || typedElementMap.propertiesFacet().size() > 0 ||
                         typedElementMap.exampleFacet().size() > 0 || typedElementMap.examplesFacet().size() > 0 ||
-                        typedElementMap.defaultFacet().size() > 0;
+                        typedElementMap.defaultFacet().size() > 0 || typedElementMap.enumFacet().size() > 0;
         if (isInlineTypeDeclaration) {
             typedElementType = EcoreUtil.create(typedElementType.eClass());
             scope.addValue(INLINE_TYPE_CONTAINER__INLINE_TYPES, typedElementType);
@@ -459,6 +460,7 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
                         typedElementMap.defaultFacet().forEach(this::visitDefaultFacet);
                         typedElementMap.exampleFacet().forEach(this::visitExampleFacet);
                         typedElementMap.examplesFacet().forEach(this::visitExamplesFacet);
+                        typedElementMap.enumFacet().forEach(this::visitEnumFacet);
 
                         return inlineTypeDeclarationScope.eObject();
                     });
