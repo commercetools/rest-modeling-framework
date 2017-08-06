@@ -49,8 +49,10 @@ class ApiConstructorTest extends Specification {
         ''')
         then:
         api.types.size() == 2
-        api.types[0].example instanceof ObjectInstance
-        ObjectInstance example = api.types[0].example
+        api.types[0].example != null
+        api.types[0].example.name == null
+        api.types[0].example.value instanceof ObjectInstance
+        ObjectInstance example = api.types[0].example.value
         example.propertyValues.size() == 1
         example.propertyValues[0].name == 'name'
         example.propertyValues[0].value instanceof StringInstance
@@ -58,8 +60,9 @@ class ApiConstructorTest extends Specification {
         stringInstance.value == 'Mr. X'
 
 
-        api.types[1].example instanceof StringInstance
-        StringInstance stringInstance1 = api.types[1].example
+        api.types[1].example != null
+        api.types[1].example.value instanceof StringInstance
+        StringInstance stringInstance1 = api.types[1].example.value
         stringInstance1.value == 'John Doe'
     }
 

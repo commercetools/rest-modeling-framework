@@ -41,7 +41,19 @@ class AnyType extends AnnotationsFacet, DocumentableElement, IdentifiableElement
 	 * An example of an instance of this type that can be used, 
 	 * for example, by documentation generators to generate sample values for an object of this type. 
 	 */
-	contains Instance example
+	contains Example example
+}
+
+class Example {
+	/*
+	 * The optional name of an example.
+	 */
+	String name
+	
+	/*
+	 * The value of the example.
+	 */
+	contains Instance value
 }
 
 interface InlineTypeContainer {
