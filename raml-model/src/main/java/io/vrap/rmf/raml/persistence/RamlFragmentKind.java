@@ -1,5 +1,6 @@
 package io.vrap.rmf.raml.persistence;
 
+import io.vrap.rmf.raml.model.resources.ResourcesPackage;
 import org.eclipse.emf.ecore.EClass;
 
 import java.util.Optional;
@@ -32,7 +33,11 @@ public enum RamlFragmentKind {
     /**
      * A single annotation type declaration.
      */
-    ANNOTATION_TYPE_DECLARATION("AnnotationTypeDeclaration", ANY_ANNOTATION_TYPE);
+    ANNOTATION_TYPE_DECLARATION("AnnotationTypeDeclaration", ANY_ANNOTATION_TYPE),
+    /**
+     * A single trait declaration.
+     */
+    TRAIT("Trait", ResourcesPackage.Literals.TRAIT);
 
     private final static Pattern HEADER_PATTERN = Pattern.compile("(#%RAML 1.0)(\\s(\\w+))?");
 

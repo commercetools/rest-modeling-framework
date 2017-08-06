@@ -270,7 +270,7 @@ class ApiConstructorTest extends Specification {
         uriTemplateLiteral.literal == '/child'
     }
 
-    def "resource and method with response"() {
+    def "resource and method with responses"() {
         when:
         Api api = constructApi(
                 '''\
@@ -281,17 +281,29 @@ class ApiConstructorTest extends Specification {
                         body: 
                             application/json:
                                 type: object
+                    401:
+                        body: 
+                            application/json:
+                                type: string
         ''')
         then:
         api.resources.size() == 1
         api.resources[0].methods.size() == 1
         api.resources[0].methods[0].method == HttpMethod.GET
-        api.resources[0].methods[0].responses.size() == 1
+
+        api.resources[0].methods[0].responses.size() == 2
+
         api.resources[0].methods[0].responses[0].statusCode == '200'
         api.resources[0].methods[0].responses[0].bodies.size() == 1
         api.resources[0].methods[0].responses[0].bodies[0].contentTypes == [ 'application/json' ]
         api.resources[0].methods[0].responses[0].bodies[0].type instanceof ObjectType
         api.resources[0].methods[0].responses[0].bodies[0].type.name == 'object'
+
+        api.resources[0].methods[0].responses[1].statusCode == '401'
+        api.resources[0].methods[0].responses[1].bodies.size() == 1
+        api.resources[0].methods[0].responses[1].bodies[0].contentTypes == [ 'application/json' ]
+        api.resources[0].methods[0].responses[1].bodies[0].type instanceof StringType
+        api.resources[0].methods[0].responses[1].bodies[0].type.name == 'string'
     }
 
     def "resource with method"() {
