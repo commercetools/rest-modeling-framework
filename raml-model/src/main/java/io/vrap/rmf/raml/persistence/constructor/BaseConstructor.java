@@ -3,6 +3,9 @@ package io.vrap.rmf.raml.persistence.constructor;
 import io.vrap.rmf.raml.model.types.Example;
 import io.vrap.rmf.raml.model.types.TypesFactory;
 import io.vrap.rmf.raml.persistence.antlr.RAMLParser;
+import org.eclipse.emf.common.util.ECollections;
+
+import java.util.stream.Collectors;
 
 import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.*;
 
@@ -24,6 +27,25 @@ public abstract class BaseConstructor extends AbstractConstructor {
             instanceConstructor.withinScope(exampleScope.with(example, EXAMPLE__VALUE), exampleValueScope ->
                     instanceConstructor.visitInstance(exampleFacet.instance()));
             return example;
-            });
-        }
+        });
+    }
+
+    @Override
+    public Object visitExamplesFacet(RAMLParser.ExamplesFacetContext examplesFacet) {
+        return withinScope(scope.with(ANY_TYPE__EXAMPLES), examplesScope ->
+                ECollections.asEList(examplesFacet.namedExample().stream()
+                        .map(this::visitNamedExample)
+                        .collect(Collectors.toList()))
+        );
+    }
+
+    @Override
+    public Object visitNamedExample(RAMLParser.NamedExampleContext namedExample) {
+        final Example example = TypesFactory.eINSTANCE.createExample();
+        example.setName(namedExample.name.getText());
+        scope.setValue(example, namedExample.getStart());
+        return instanceConstructor.withinScope(scope.with(example, EXAMPLE__VALUE), exampleValueScope ->
+                instanceConstructor.visitInstance(namedExample.instance())
+        );
+    }
 }

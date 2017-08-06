@@ -42,6 +42,12 @@ class AnyType extends AnnotationsFacet, DocumentableElement, IdentifiableElement
 	 * for example, by documentation generators to generate sample values for an object of this type. 
 	 */
 	contains Example example
+
+	/*
+	 * Examples of instances of this type. 
+	 * This can be used, for example, by documentation generators to generate sample values for an object of this type.  
+	 */
+	contains Example[] examples
 }
 
 class Example {

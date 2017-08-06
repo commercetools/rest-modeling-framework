@@ -66,6 +66,42 @@ class ApiConstructorTest extends Specification {
         stringInstance1.value == 'John Doe'
     }
 
+    def "type with examples"() {
+        when:
+        Api api = constructApi(
+                '''\
+        types:
+            Person:
+                properties:
+                    name:
+                examples:
+                    Mr. X:
+                        name: Mr. X
+                    Mrs. Y:
+                        name: Mrs. Y
+        ''')
+        then:
+        api.types.size() == 1
+        api.types[0].examples.size() == 2
+        api.types[0].examples[0].name == 'Mr. X'
+        api.types[0].examples[0].value instanceof ObjectInstance
+        ObjectInstance exampleInstance1 = api.types[0].examples[0].value
+        exampleInstance1.propertyValues.size() == 1
+        exampleInstance1.propertyValues[0].name == 'name'
+        exampleInstance1.propertyValues[0].value instanceof StringInstance
+        StringInstance exampleValue1 = exampleInstance1.propertyValues[0].value
+        exampleValue1.value == 'Mr. X'
+
+        api.types[0].examples[1].name == 'Mrs. Y'
+        api.types[0].examples[1].value instanceof ObjectInstance
+        ObjectInstance exampleInstance2 = api.types[0].examples[1].value
+        exampleInstance2.propertyValues.size() == 1
+        exampleInstance2.propertyValues[0].name == 'name'
+        exampleInstance2.propertyValues[0].value instanceof StringInstance
+        StringInstance exampleValue2 = exampleInstance2.propertyValues[0].value
+        exampleValue2.value == 'Mrs. Y'
+    }
+
     def "types with default"() {
         when:
         Api api = constructApi(

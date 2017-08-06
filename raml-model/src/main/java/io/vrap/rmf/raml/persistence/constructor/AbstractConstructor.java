@@ -373,6 +373,7 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
             typeDeclarationMap.propertiesFacet().forEach(this::visitPropertiesFacet);
             typeDeclarationMap.defaultFacet().forEach(this::visitDefaultFacet);
             typeDeclarationMap.exampleFacet().forEach(this::visitExampleFacet);
+            typeDeclarationMap.examplesFacet().forEach(this::visitExamplesFacet);
 
             return declaredType;
         });
