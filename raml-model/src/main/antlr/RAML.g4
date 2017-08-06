@@ -115,12 +115,12 @@ bodyFacet:
 bodyContentTypeFacet:
     contentType=SCALAR
         MAP_START
-        ( propertiesFacet | typeFacet | annotationFacet | attributeFacet )*
+        ( attributeFacet | enumFacet | propertiesFacet | typeFacet | defaultFacet | exampleFacet | examplesFacet | annotationFacet )*
         MAP_END
     ;
 
 bodyTypeFacet:
-    ( propertiesFacet | typeFacet | annotationFacet | attributeFacet )*
+    ( attributeFacet | enumFacet | propertiesFacet | typeFacet | defaultFacet | exampleFacet | examplesFacet | annotationFacet )*
     ;
 
 responsesFacet:
@@ -304,7 +304,7 @@ typeDeclarationTuple:
 typeDeclarationMap:
     name=SCALAR
         MAP_START
-        ( attributeFacet | enumFacet | propertiesFacet | typeFacet | defaultFacet | exampleFacet | examplesFacet |annotationFacet )*
+        ( attributeFacet | enumFacet | propertiesFacet | typeFacet | defaultFacet | exampleFacet | examplesFacet | annotationFacet )*
         MAP_END
     ;
 

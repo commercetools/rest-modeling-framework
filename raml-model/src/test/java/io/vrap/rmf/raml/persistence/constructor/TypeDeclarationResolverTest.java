@@ -11,6 +11,7 @@ import org.antlr.v4.runtime.TokenStream;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.URIConverter;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;
@@ -20,6 +21,7 @@ import static org.junit.Assume.assumeTrue;
 
 public class TypeDeclarationResolverTest implements RAMLParserFixtures, ResourceFixtures {
 
+    @Ignore
     @Test
     public void api() {
         final File apiFile = new File("/Users/mkoester/Development/commercetools-api-reference/api.raml");
