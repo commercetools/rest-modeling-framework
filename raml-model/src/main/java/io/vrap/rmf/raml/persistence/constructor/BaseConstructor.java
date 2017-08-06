@@ -12,6 +12,11 @@ import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.*;
 public abstract class BaseConstructor extends AbstractConstructor {
     private final InstanceConstructor instanceConstructor = new InstanceConstructor();
 
+    @Override
+    public Object visitInstance(RAMLParser.InstanceContext instance) {
+        return instanceConstructor.withinScope(scope, instanceScope ->
+            instanceConstructor.visitInstance(instance));
+    }
 
     @Override
     public Object visitDefaultFacet(RAMLParser.DefaultFacetContext defaultFacet) {

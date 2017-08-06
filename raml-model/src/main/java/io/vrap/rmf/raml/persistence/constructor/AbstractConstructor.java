@@ -1,7 +1,6 @@
 package io.vrap.rmf.raml.persistence.constructor;
 
 import io.vrap.rmf.raml.model.facets.FacetsFactory;
-import io.vrap.rmf.raml.model.facets.StringInstance;
 import io.vrap.rmf.raml.model.resources.ResourcesFactory;
 import io.vrap.rmf.raml.model.resources.Trait;
 import io.vrap.rmf.raml.model.responses.BodyType;
@@ -10,7 +9,6 @@ import io.vrap.rmf.raml.model.responses.ResponsesFactory;
 import io.vrap.rmf.raml.model.security.*;
 import io.vrap.rmf.raml.model.types.*;
 import io.vrap.rmf.raml.persistence.antlr.RAMLParser;
-import org.antlr.v4.runtime.CommonToken;
 import org.antlr.v4.runtime.Token;
 import org.eclipse.emf.common.util.ECollections;
 import org.eclipse.emf.common.util.EList;
@@ -296,27 +294,18 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
 
     @Override
     public Object visitAnnotationFacet(final RAMLParser.AnnotationFacetContext annotationFacet) {
-        final RAMLParser.AnnotationTupleContext annotationTuple = annotationFacet.annotationTuple();
         return withinScope(scope.with(ANNOTATIONS_FACET__ANNOTATIONS), annotationsScope -> {
-            final Annotation annotation;
-            if (annotationTuple != null) {
-                annotation = TYPES_FACTORY.createAnnotation();
+            final Annotation annotation = TYPES_FACTORY.createAnnotation();
+            scope.setValue(annotation, annotationFacet.getStart());
 
-                final String annotationTypeRef = annotationTuple.ANNOTATION_TYPE_REF().getText();
-                final Scope annotationTypeScope = annotationsScope.with(ANNOTATION__TYPE);
-                final AnyAnnotationType annotationType = (AnyAnnotationType)
-                        annotationTypeScope.getEObjectByName(annotationTypeRef);
+            final String annotationTypeRef = annotationFacet.ANNOTATION_TYPE_REF().getText();
+            final Scope annotationTypeScope = annotationsScope.with(ANNOTATION__TYPE);
+            final AnyAnnotationType annotationType = (AnyAnnotationType)
+                    annotationTypeScope.getEObjectByName(annotationTypeRef);
+            annotation.setType(annotationType);
 
-                final StringInstance value = FACETS_FACTORY.createStringInstance();
-                value.setValue(annotationTuple.value.getText());
-
-                annotation.setType(annotationType);
-                annotation.setValue(value);
-
-            } else {
-                annotation = null;
-            }
-            annotationsScope.setValue(ANNOTATIONS_FACET__ANNOTATIONS, annotation, (CommonToken) annotationFacet.getStart());
+            withinScope(annotationsScope.with(annotation, ANNOTATION__VALUE),
+                    annotationValueScope -> visitInstance(annotationFacet.value));
 
             return annotation;
         });
@@ -458,21 +447,21 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
         // inline type declaration
         final boolean isInlineTypeDeclaration =
                 typedElementMap.attributeFacet().size() > 0 || typedElementMap.propertiesFacet().size() > 0 ||
-                typedElementMap.exampleFacet().size() > 0 || typedElementMap.examplesFacet().size() > 0 ||
-                typedElementMap.defaultFacet().size() > 0;
+                        typedElementMap.exampleFacet().size() > 0 || typedElementMap.examplesFacet().size() > 0 ||
+                        typedElementMap.defaultFacet().size() > 0;
         if (isInlineTypeDeclaration) {
             typedElementType = EcoreUtil.create(typedElementType.eClass());
             scope.addValue(INLINE_TYPE_CONTAINER__INLINE_TYPES, typedElementType);
             withinScope(scope.with(typedElementType),
                     inlineTypeDeclarationScope -> {
-                            typedElementMap.attributeFacet().forEach(this::visitAttributeFacet);
-                            typedElementMap.propertiesFacet().forEach(this::visitPropertiesFacet);
-                            typedElementMap.defaultFacet().forEach(this::visitDefaultFacet);
-                            typedElementMap.exampleFacet().forEach(this::visitExampleFacet);
-                            typedElementMap.examplesFacet().forEach(this::visitExamplesFacet);
+                        typedElementMap.attributeFacet().forEach(this::visitAttributeFacet);
+                        typedElementMap.propertiesFacet().forEach(this::visitPropertiesFacet);
+                        typedElementMap.defaultFacet().forEach(this::visitDefaultFacet);
+                        typedElementMap.exampleFacet().forEach(this::visitExampleFacet);
+                        typedElementMap.examplesFacet().forEach(this::visitExamplesFacet);
 
-                            return inlineTypeDeclarationScope.eObject();
-            });
+                        return inlineTypeDeclarationScope.eObject();
+                    });
         }
 
         typedElementMap.annotationFacet().forEach(this::visitAnnotationFacet);

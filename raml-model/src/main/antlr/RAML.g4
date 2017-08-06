@@ -407,17 +407,5 @@ requiredFacet:
     ;
 
 annotationFacet:
-        annotationTuple
-    |   annotationMap
-    ;
-
-annotationTuple:
-    type=ANNOTATION_TYPE_REF value=SCALAR
-    ;
-
-annotationMap:
-    type=ANNOTATION_TYPE_REF
-        MAP_START
-            propertyValues += attributeFacet*
-        MAP_END
+    type=ANNOTATION_TYPE_REF value=instance
     ;

@@ -6,15 +6,21 @@ usage: Type with an annotation
 annotationTypes:
     PackageName:
         type: string
-    Java-Name:
-        type: string
+    TypeMapping:
+        properties:
+          package:
+            type: string
+          typeName:
+            type: string
+
 
 types:
     AnnotatedType:
         (PackageName): package
+        (TypeMapping):
+          package: java.lang
+          typeName: String
         type: object
         properties:
             default:
                 type: string
-                (Java-Name): _default
-

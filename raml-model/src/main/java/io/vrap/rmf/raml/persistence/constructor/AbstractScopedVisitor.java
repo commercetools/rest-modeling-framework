@@ -21,7 +21,7 @@ abstract class AbstractScopedVisitor<T> extends RAMLBaseVisitor<T> {
     protected <T> T withinScope(final Scope scope, final Function<Scope, T> within) {
         pushScope(scope);
 
-        T value = within.apply(scope);
+        T value = within.apply(this.scope);
 
         this.scope = popScope();
 
