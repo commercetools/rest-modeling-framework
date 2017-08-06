@@ -221,6 +221,13 @@ class ApiConstructorTest extends Specification {
                         type: string
                 queryParameters:
                     clientId:
+                        type: string
+                responses:
+                    409:
+                        description: Conflict
+                        body:
+                            application/json:
+                                type: string
         /user:
             get:
                 is: [ secured ]
@@ -235,6 +242,11 @@ class ApiConstructorTest extends Specification {
         api.traits[0].headers[0].name == 'access_token'
         api.traits[0].queryParameters.size() == 1
         api.traits[0].queryParameters[0].name == 'clientId'
+        api.traits[0].responses.size() == 1
+        api.traits[0].responses[0].statusCode == '409'
+        api.traits[0].responses[0].description == 'Conflict'
+        api.traits[0].responses[0].bodies.size() == 1
+        api.traits[0].responses[0].bodies[0].contentTypes == [ 'application/json' ]
 
         api.resources.size() == 1
         api.resources[0].methods.size() == 1

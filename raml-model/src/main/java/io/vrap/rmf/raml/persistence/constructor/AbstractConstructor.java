@@ -55,6 +55,7 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
             traitFacet.attributeFacet().forEach(this::visitAttributeFacet);
             traitFacet.headersFacet().forEach(this::visitHeadersFacet);
             traitFacet.queryParametersFacet().forEach(this::visitQueryParametersFacet);
+            traitFacet.responsesFacet().forEach(this::visitResponsesFacet);
 
             return trait;
         });

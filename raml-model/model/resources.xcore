@@ -104,6 +104,6 @@ class Method extends DocumentableElement, AnnotationsFacet, ProtocolsFacet, Secu
 }
 
 class Trait extends DocumentableElement, AnnotationsFacet, IdentifiableElement, 
-					HeadersFacet, QueryParametersFacet {
+					HeadersFacet, QueryParametersFacet, ResponsesFacet {
 	String usage
 }
