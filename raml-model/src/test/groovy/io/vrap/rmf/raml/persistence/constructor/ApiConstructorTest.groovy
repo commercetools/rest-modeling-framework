@@ -134,7 +134,7 @@ class ApiConstructorTest extends Specification {
         api.securitySchemes[0].describedBy.headers.size() == 1
         api.securitySchemes[0].describedBy.headers[0].name == 'Authorization'
         api.securitySchemes[0].describedBy.headers[0].type instanceof StringType
-        // TODO: api.securitySchemes[0].describedBy.headers[0].type.name == 'string'
+        api.securitySchemes[0].describedBy.headers[0].type.name == null
         api.securitySchemes[0].describedBy.responses.size() == 1
         api.securitySchemes[0].describedBy.responses[0].statusCode == '401'
         api.securitySchemes[0].describedBy.responses[0].description == 'Unauthorized'
