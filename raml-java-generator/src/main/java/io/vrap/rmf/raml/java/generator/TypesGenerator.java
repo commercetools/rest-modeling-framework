@@ -18,6 +18,7 @@ import org.eclipse.emf.ecore.resource.Resource;
 import javax.lang.model.element.Modifier;
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.util.Collections;
@@ -40,6 +41,8 @@ public class TypesGenerator {
     private TypeMappingVisitor typeMappingVisitor = new TypeMappingVisitor(customTypeMapping);
     private PropertyGeneratingVisitor propertyGeneratingVisitor = new PropertyGeneratingVisitor();
     private TypeGeneratingVisitor typeGeneratingVisitor = new TypeGeneratingVisitor();
+
+    private final static URL apiUrl = TypesGenerator.class.getResource("/commercetools-api-reference-master/api.raml");
 
     /**
      * Creates a new types generator.
@@ -71,9 +74,8 @@ public class TypesGenerator {
     public static void main(String... args) {
         final long startTimeMillis = System.currentTimeMillis();
         final File generateTo = new File("./demo/src/main/java-gen");
-        final File apiFile = new File("/Users/mkoester/Development/commercetools-api-reference/api.raml");
 
-        final URI fileURI = URI.createURI(apiFile.toURI().toString());
+        final URI fileURI = URI.createURI(apiUrl.toString());
 
         final Resource resource = new RamlResourceSet()
                 .getResource(fileURI, true);
