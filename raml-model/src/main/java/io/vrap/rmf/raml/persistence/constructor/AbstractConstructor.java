@@ -300,13 +300,10 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
 
     @Override
     public Object visitSecuredByFacet(RAMLParser.SecuredByFacetContext securedByFacet) {
-        return withinScope(scope.with(SECURED_BY_FACET__SECURED_BY), securedByScope -> {
-            EList<EObject> securedBySchemes = ECollections.asEList(securedByFacet.securitySchemes.stream()
-                    .map(name -> scope.getEObjectByName(name.getText()))
-                    .collect(Collectors.toList()));
-            scope.setValue(securedBySchemes, securedByFacet.getStart());
-            return securedBySchemes;
-        });
+        return withinScope(scope.with(SECURED_BY_FACET__SECURED_BY), securedByScope ->
+            ECollections.asEList(securedByFacet.securedBy().stream()
+                    .map(this::visitSecuredBy)
+                    .collect(Collectors.toList())));
     }
 
     @Override

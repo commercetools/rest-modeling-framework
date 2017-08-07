@@ -12,13 +12,14 @@ import io.vrap.rmf.raml.model.types.HeadersFacet
 import io.vrap.rmf.raml.model.types.QueryParametersFacet
 
 import io.vrap.rmf.raml.model.responses.ResponsesFacet
+import io.vrap.rmf.raml.model.facets.ObjectInstance
 
 interface SecuredByFacet {
 		
 	/*
 	 * The security schemes that applies to this element..
 	 */
-	refers SecurityScheme[] securedBy
+	refers SecuredBy[] securedBy
 }
 
 interface SecuritySchemeContainer {
@@ -115,4 +116,10 @@ class OAuth20Settings extends SecuritySchemeSettings {
 	 * A list of scopes supported by the API as defined in RFC6749 Section 3.3.
 	 */
 	String[] scopes
+}
+
+class SecuredBy {
+	refers SecurityScheme scheme
+	
+	contains ObjectInstance parameters
 }

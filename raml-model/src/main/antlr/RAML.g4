@@ -114,9 +114,14 @@ bodyFacet:
 
 bodyContentTypeFacet:
     contentType=SCALAR
-        MAP_START
+        (
+         SCALAR
+                    |   (
+                            MAP_START
         ( attributeFacet | enumFacet | propertiesFacet | typeFacet | defaultFacet | exampleFacet | examplesFacet | annotationFacet )*
         MAP_END
+        )
+        )
     ;
 
 bodyTypeFacet:
@@ -250,8 +255,17 @@ securitySchemeSettingsFacet:
 securedByFacet:
     'securedBy'
         LIST_START
-            securitySchemes+=SCALAR*
+            securedBy*
         LIST_END
+    ;
+
+securedBy:
+    name=SCALAR |
+        (   MAP_START
+                name=SCALAR?
+                ( SCALAR | parameters=objectInstance)?
+            MAP_END
+        )
     ;
 
 resourceTypesFacet:

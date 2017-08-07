@@ -1,5 +1,6 @@
 package io.vrap.rmf.raml.persistence.constructor
 
+import io.vrap.rmf.raml.model.facets.ArrayInstance
 import io.vrap.rmf.raml.model.facets.ObjectInstance
 import io.vrap.rmf.raml.model.facets.StringInstance
 import io.vrap.rmf.raml.model.modules.Api
@@ -150,6 +151,24 @@ class ApiConstructorTest extends Specification {
         stringInstance1.value == 'John Doe'
     }
 
+    def "secured by null"() {
+        when:
+        Api api = constructApi(
+                '''\
+        securedBy: [ null ]
+        /user:
+            get:
+                securedBy: [ null ]
+        ''')
+        then:
+        api.securedBy.size() == 1
+        api.securedBy[0].scheme.name == 'null'
+        api.resources.size() == 1
+        api.resources[0].methods.size() == 1
+        api.resources[0].methods[0].securedBy.size() == 1
+        api.resources[0].methods[0].securedBy[0].scheme.name == 'null'
+    }
+
     def "security scheme"() {
         when:
         Api api = constructApi(
@@ -178,7 +197,7 @@ class ApiConstructorTest extends Specification {
                     responses:
                         401:
                             description: Unauthorized
-        securedBy: [ oauth_2_0 ]
+        securedBy: [ oauth_2_0: { scopes: [ manage ] } ]
         ''')
 
         then:
@@ -204,7 +223,15 @@ class ApiConstructorTest extends Specification {
         oauth20Settings.scopes == [ 'manage', 'update' ]
 
         api.securedBy.size() == 1
-        api.securedBy[0] == api.securitySchemes[0]
+        api.securedBy[0].scheme == api.securitySchemes[0]
+        api.securedBy[0].parameters.propertyValues.size() == 1
+        api.securedBy[0].parameters.propertyValues[0].name == 'scopes'
+        api.securedBy[0].parameters.propertyValues[0].value instanceof ArrayInstance
+        ArrayInstance scopes = api.securedBy[0].parameters.propertyValues[0].value
+        scopes.values.size() == 1
+        scopes.values[0] instanceof StringInstance
+        StringInstance scope = scopes.values[0]
+        scope.value == 'manage'
     }
 
     def "traits"() {
@@ -326,7 +353,7 @@ class ApiConstructorTest extends Specification {
         resource.description == 'User endpoint'
         resource.displayName == 'Users'
         resource.securedBy.size() == 1
-        resource.securedBy[0] == api.securitySchemes[0]
+        resource.securedBy[0].scheme == api.securitySchemes[0]
     }
 
     def "simple uri parameters"() {
@@ -378,7 +405,7 @@ class ApiConstructorTest extends Specification {
         subResource.uriParameters[0].name == 'userId'
         subResource.uriParameters[0].type.name == 'integer'
         subResource.securedBy.size() == 1
-        subResource.securedBy[0] == api.securitySchemes[0]
+        subResource.securedBy[0].scheme == api.securitySchemes[0]
     }
 
     def "simple.raml (TCK)"() {
@@ -466,7 +493,7 @@ class ApiConstructorTest extends Specification {
         resource.methods[0].description == 'This method retrieves all users.'
         resource.methods[0].protocols == ['https']
         resource.methods[0].securedBy.size() == 1
-        resource.methods[0].securedBy[0] == api.securitySchemes[0]
+        resource.methods[0].securedBy[0].scheme == api.securitySchemes[0]
     }
 
     def "resource with method and headers"() {
