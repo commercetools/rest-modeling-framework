@@ -22,6 +22,8 @@ import java.util.stream.Collectors;
 
 import static io.vrap.rmf.raml.model.elements.ElementsPackage.Literals.IDENTIFIABLE_ELEMENT__NAME;
 import static io.vrap.rmf.raml.model.modules.ModulesPackage.Literals.TRAIT_CONTAINER__TRAITS;
+import static io.vrap.rmf.raml.model.resources.ResourcesPackage.Literals.METHOD__BODIES;
+import static io.vrap.rmf.raml.model.resources.ResourcesPackage.Literals.METHOD__IS;
 import static io.vrap.rmf.raml.model.responses.ResponsesPackage.Literals.RESPONSES_FACET__RESPONSES;
 import static io.vrap.rmf.raml.model.responses.ResponsesPackage.Literals.RESPONSE__BODIES;
 import static io.vrap.rmf.raml.model.security.SecurityPackage.Literals.*;
@@ -53,9 +55,23 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
         trait.setName(traitFacet.name.getText());
         return withinScope(scope.with(trait), traitScope -> {
             traitFacet.attributeFacet().forEach(this::visitAttributeFacet);
+            traitFacet.annotationFacet().forEach(this::visitAnnotationFacet);
+            traitFacet.securedByFacet().forEach(this::visitSecuredByFacet);
             traitFacet.headersFacet().forEach(this::visitHeadersFacet);
             traitFacet.queryParametersFacet().forEach(this::visitQueryParametersFacet);
+
+            withinScope(traitScope.with(METHOD__BODIES), bodiesScope -> {
+                traitFacet.bodyFacet().forEach(this::visitBodyFacet);
+                return null;
+            });
+
             traitFacet.responsesFacet().forEach(this::visitResponsesFacet);
+
+            withinScope(traitScope.with(METHOD__IS), isScope -> {
+                traitFacet.isFacet().forEach(this::visitIsFacet);
+
+                return null;
+            });
 
             return trait;
         });

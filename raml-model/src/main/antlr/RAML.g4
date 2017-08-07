@@ -51,7 +51,10 @@ traitFacet:
             |   (
                     MAP_START
                     (
-                        bodyFacet | attributeFacet | headersFacet | queryParametersFacet | annotationFacet
+                        bodyFacet | attributeFacet
+                        | headersFacet | queryParametersFacet
+                        | isFacet
+                        | annotationFacet
                         | responsesFacet | securedByFacet
                     )*
                     MAP_END
