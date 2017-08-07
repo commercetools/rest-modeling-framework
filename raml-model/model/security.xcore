@@ -19,7 +19,7 @@ interface SecuredByFacet {
 	/*
 	 * The security schemes that applies to this element..
 	 */
-	refers SecuredBy[] securedBy
+	contains SecuredBy[] securedBy
 }
 
 interface SecuritySchemeContainer {
