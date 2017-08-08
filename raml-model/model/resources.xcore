@@ -122,12 +122,12 @@ class Trait extends IdentifiableElement, Method {
 	String usage
 }
 
-class TraitArgument {
+class Argument {
 	String name
 	contains Instance value
 }
 
 class TraitApplication {
 	refers Trait trait
-	contains TraitArgument[] arguments 
+	contains Argument[] arguments 
 }
