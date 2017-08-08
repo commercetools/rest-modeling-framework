@@ -208,7 +208,8 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
         final Scope bodyTypeScope = scope.with(bodyType);
         EObject type = null;
         if (bodyContentType.typeFacet().size() == 1) {
-            type = (EObject) visitTypeFacet(bodyContentType.typeFacet(0));
+            type = (EObject) withinScope(scope.with(TYPED_ELEMENT__TYPE),
+                    bodyTypeTypeScope -> visitTypeFacet(bodyContentType.typeFacet(0)));
         } else if (bodyContentType.propertiesFacet().size() == 1) {
             type = scope.getEObjectByName(BuiltinType.OBJECT.getName());
         }
