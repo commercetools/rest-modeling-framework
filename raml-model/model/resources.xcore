@@ -114,9 +114,19 @@ class Method extends DocumentableElement, AnnotationsFacet, ProtocolsFacet, Secu
 	/*
 	 * A list of the traits to apply to this method.
 	 */
-	refers Trait[] is
+	refers TraitApplication[] is
 }
 
 class Trait extends IdentifiableElement, Method {
 	String usage
+}
+
+class TraitArgument {
+	String name
+	String value
+}
+
+class TraitApplication {
+	refers Trait trait
+	contains TraitArgument[] arguments 
 }

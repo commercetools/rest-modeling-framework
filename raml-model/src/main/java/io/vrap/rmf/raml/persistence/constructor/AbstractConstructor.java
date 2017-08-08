@@ -1,7 +1,10 @@
 package io.vrap.rmf.raml.persistence.constructor;
 
 import io.vrap.rmf.raml.model.facets.FacetsFactory;
+import io.vrap.rmf.raml.model.resources.ResourcesFactory;
 import io.vrap.rmf.raml.model.resources.Trait;
+import io.vrap.rmf.raml.model.resources.TraitApplication;
+import io.vrap.rmf.raml.model.resources.TraitArgument;
 import io.vrap.rmf.raml.model.responses.BodyType;
 import io.vrap.rmf.raml.model.responses.Response;
 import io.vrap.rmf.raml.model.responses.ResponsesFactory;
@@ -10,7 +13,6 @@ import io.vrap.rmf.raml.model.types.*;
 import io.vrap.rmf.raml.persistence.antlr.RAMLParser;
 import org.antlr.v4.runtime.Token;
 import org.eclipse.emf.common.util.ECollections;
-import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EStructuralFeature;
@@ -21,8 +23,7 @@ import java.util.stream.Collectors;
 
 import static io.vrap.rmf.raml.model.elements.ElementsPackage.Literals.IDENTIFIABLE_ELEMENT__NAME;
 import static io.vrap.rmf.raml.model.modules.ModulesPackage.Literals.TRAIT_CONTAINER__TRAITS;
-import static io.vrap.rmf.raml.model.resources.ResourcesPackage.Literals.METHOD__BODIES;
-import static io.vrap.rmf.raml.model.resources.ResourcesPackage.Literals.METHOD__IS;
+import static io.vrap.rmf.raml.model.resources.ResourcesPackage.Literals.*;
 import static io.vrap.rmf.raml.model.responses.ResponsesPackage.Literals.RESPONSES_FACET__RESPONSES;
 import static io.vrap.rmf.raml.model.responses.ResponsesPackage.Literals.RESPONSE__BODIES;
 import static io.vrap.rmf.raml.model.security.SecurityPackage.Literals.*;
@@ -76,18 +77,35 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
 
     @Override
     public Object visitIsFacet(RAMLParser.IsFacetContext isFacet) {
-        if (isFacet.trait == null) {
-            final EList<EObject> traits = ECollections.asEList(isFacet.traits.stream()
-                    .map(traitNameToken -> scope.getEObjectByName(traitNameToken.getText()))
-                    .collect(Collectors.toList()));
-            return scope.setValue(traits, isFacet.getStart());
-        } else {
-            final String traitName = isFacet.trait.getText();
-            final EObject trait = scope.getEObjectByName(traitName);
-            scope.setValue(trait, isFacet.getStart());
+        return withinScope(scope.with(METHOD__IS), isScope ->
+                isFacet.traitApplication().stream()
+                        .map(this::visitTraitApplication)
+                        .collect(Collectors.toList()));
 
-            return ECollections.asEList(trait);
-        }
+    }
+
+    @Override
+    public Object visitTraitApplication(RAMLParser.TraitApplicationContext ctx) {
+        final TraitApplication traitApplication = ResourcesFactory.eINSTANCE.createTraitApplication();
+        scope.setValue(traitApplication, ctx.getStart());
+        final String traitName = ctx.id().getText();
+        final Trait trait = (Trait) scope.with(TRAIT_APPLICATION__TRAIT).getEObjectByName(traitName);
+        traitApplication.setTrait(trait);
+        return withinScope(scope.with(traitApplication, TRAIT_APPLICATION__ARGUMENTS),
+                argumentsScope -> ctx.traitArgument().stream()
+                        .map(this::visitTraitArgument)
+                        .collect(Collectors.toList()));
+    }
+
+    @Override
+    public Object visitTraitArgument(RAMLParser.TraitArgumentContext ctx) {
+        final TraitArgument traitArgument = ResourcesFactory.eINSTANCE.createTraitArgument();
+        scope.setValue(traitArgument, ctx.getStart());
+
+        traitArgument.setName(ctx.name.getText());
+        traitArgument.setValue(ctx.value.getText());
+
+        return traitArgument;
     }
 
     @Override

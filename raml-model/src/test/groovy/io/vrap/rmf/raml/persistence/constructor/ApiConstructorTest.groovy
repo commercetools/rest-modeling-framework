@@ -298,7 +298,36 @@ class ApiConstructorTest extends Specification {
         api.resources.size() == 1
         api.resources[0].methods.size() == 1
         api.resources[0].methods[0].is.size() == 1
-        api.resources[0].methods[0].is[0] == api.traits[0]
+        api.resources[0].methods[0].is[0].trait == api.traits[0]
+    }
+
+    def "trait application with argument"() {
+        when:
+        Api api = constructApi(
+                '''\
+        traits:
+            secured:
+                headers:
+                    <<access_token>>:
+        /user:
+            get:
+                is:
+                    - secured:
+                        access_token: jgggugg
+        ''')
+        then:
+        api.traits.size() == 1
+        api.traits[0].name == 'secured'
+        api.traits[0].headers.size() == 1
+        api.traits[0].headers[0].name == '<<access_token>>'
+
+        api.resources.size() == 1
+        api.resources[0].methods.size() == 1
+        api.resources[0].methods[0].is.size() == 1
+        api.resources[0].methods[0].is[0].trait == api.traits[0]
+        api.resources[0].methods[0].is[0].arguments.size() == 1
+        api.resources[0].methods[0].is[0].arguments[0].name == 'access_token'
+        api.resources[0].methods[0].is[0].arguments[0].value == 'jgggugg'
     }
 
     def "simple api attributes"() {

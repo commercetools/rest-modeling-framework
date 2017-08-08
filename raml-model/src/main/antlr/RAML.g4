@@ -116,10 +116,28 @@ methodFacet:
 
 isFacet:
     'is'
+    (LIST_START traitApplication* LIST_END)?
+    ;
+
+traitApplication:
+    trait=id |
     (
+        MAP_START
             trait=id
-        |   (LIST_START traits+=id* LIST_END)
-    )?
+            (
+                SCALAR |
+                (
+                    MAP_START
+                    traitArgument*
+                    MAP_END
+                )
+            )
+        MAP_END
+    )
+    ;
+
+traitArgument:
+    name=id value=id
     ;
 
 bodyFacet:
