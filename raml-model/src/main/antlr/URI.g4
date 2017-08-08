@@ -39,7 +39,7 @@ OPERATOR:
 fragment VARCHAR:
         ALPHA
     |   DIGIT
-    |   '_'
+    |   '_' | '=' | '-'
     ;
 
 fragment ALPHA:
