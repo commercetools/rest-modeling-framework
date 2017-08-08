@@ -1,6 +1,8 @@
 package io.vrap.rmf.raml.persistence.constructor;
 
 import io.vrap.rmf.raml.model.types.AnyType;
+import io.vrap.rmf.raml.model.types.TypeTemplate;
+import io.vrap.rmf.raml.model.types.TypesFactory;
 import io.vrap.rmf.raml.model.types.UnionType;
 import io.vrap.rmf.raml.persistence.antlr.ParserErrorCollector;
 import io.vrap.rmf.raml.persistence.antlr.TypeExpressionBaseVisitor;
@@ -89,6 +91,13 @@ public class TypeExpressionConstructor {
         @Override
         public EObject visitParens(final TypeExpressionParser.ParensContext ctx) {
             return super.visit(ctx.type_expr());
+        }
+
+        @Override
+        public EObject visitTypeTemplate(TypeExpressionParser.TypeTemplateContext ctx) {
+            final TypeTemplate typeTemplate = TypesFactory.eINSTANCE.createTypeTemplate();
+            typeTemplate.setName(ctx.getText());
+            return typeTemplate;
         }
 
         @Override

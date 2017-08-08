@@ -49,6 +49,12 @@ class AnyType extends AnnotationsFacet, DocumentableElement, IdentifiableElement
 	contains Example[] examples
 }
 
+/*
+ * A type template used by traits and resource types.
+ */
+class TypeTemplate extends AnyType {
+	
+}
 
 interface EnumFacet {
 	/*

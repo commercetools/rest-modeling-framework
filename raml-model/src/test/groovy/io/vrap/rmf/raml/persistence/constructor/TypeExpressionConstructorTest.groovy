@@ -64,6 +64,21 @@ class TypeExpressionConstructorTest extends Specification implements ResourceFix
         unionType.oneOf[1].type.name == 'number'
     }
 
+    def "TypeTemplate"() {
+        when:
+        TypeTemplate typeTemplate = parse('<<resourcePath>>Draft')
+        then:
+        typeTemplate.name == '<<resourcePath>>Draft'
+    }
+
+    def "TypeTemplate array"() {
+        when:
+        ArrayType typeTemplateArray = parse('<<resourcePath>>Draft[]')
+        then:
+        typeTemplateArray.items instanceof TypeTemplate
+        typeTemplateArray.items.name == '<<resourcePath>>Draft'
+    }
+
     def "Parens"() {
         when:
         ArrayType arrayType = parse('(string|number)[]')
