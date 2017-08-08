@@ -313,7 +313,7 @@ class ApiConstructorTest extends Specification {
             get:
                 is:
                     - secured:
-                        access_token: jgggugg
+                        access_token: secret
         ''')
         then:
         api.traits.size() == 1
@@ -327,7 +327,9 @@ class ApiConstructorTest extends Specification {
         api.resources[0].methods[0].is[0].trait == api.traits[0]
         api.resources[0].methods[0].is[0].arguments.size() == 1
         api.resources[0].methods[0].is[0].arguments[0].name == 'access_token'
-        api.resources[0].methods[0].is[0].arguments[0].value == 'jgggugg'
+        api.resources[0].methods[0].is[0].arguments[0].value instanceof StringInstance
+        StringInstance stringInstance = api.resources[0].methods[0].is[0].arguments[0].value
+        stringInstance.value == 'secret'
     }
 
     def "simple api attributes"() {

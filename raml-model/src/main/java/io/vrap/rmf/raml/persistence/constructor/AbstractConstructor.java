@@ -92,18 +92,19 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
         final Trait trait = (Trait) scope.with(TRAIT_APPLICATION__TRAIT).getEObjectByName(traitName);
         traitApplication.setTrait(trait);
         return withinScope(scope.with(traitApplication, TRAIT_APPLICATION__ARGUMENTS),
-                argumentsScope -> ctx.traitArgument().stream()
-                        .map(this::visitTraitArgument)
+                argumentsScope -> ctx.argument().stream()
+                        .map(this::visitArgument)
                         .collect(Collectors.toList()));
     }
 
     @Override
-    public Object visitTraitArgument(RAMLParser.TraitArgumentContext ctx) {
+    public Object visitArgument(RAMLParser.ArgumentContext ctx) {
         final TraitArgument traitArgument = ResourcesFactory.eINSTANCE.createTraitArgument();
         scope.setValue(traitArgument, ctx.getStart());
 
         traitArgument.setName(ctx.name.getText());
-        traitArgument.setValue(ctx.value.getText());
+        withinScope(scope.with(traitArgument, TRAIT_ARGUMENT__VALUE),
+                valueScope ->this.visitInstance(ctx.instance()));
 
         return traitArgument;
     }

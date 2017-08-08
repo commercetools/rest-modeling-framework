@@ -17,6 +17,7 @@ import io.vrap.rmf.raml.model.elements.IdentifiableElement
 
 import io.vrap.rmf.raml.model.responses.BodyType
 import io.vrap.rmf.raml.model.responses.ResponsesFacet
+import io.vrap.rmf.raml.model.facets.Instance
 
 class UriTemplate {
 	contains UriTemplatePart[] parts	
@@ -114,7 +115,7 @@ class Method extends DocumentableElement, AnnotationsFacet, ProtocolsFacet, Secu
 	/*
 	 * A list of the traits to apply to this method.
 	 */
-	refers TraitApplication[] is
+	contains TraitApplication[] is
 }
 
 class Trait extends IdentifiableElement, Method {
@@ -123,7 +124,7 @@ class Trait extends IdentifiableElement, Method {
 
 class TraitArgument {
 	String name
-	String value
+	contains Instance value
 }
 
 class TraitApplication {

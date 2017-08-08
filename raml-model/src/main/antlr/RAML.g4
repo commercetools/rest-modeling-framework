@@ -128,7 +128,7 @@ traitApplication:
                 SCALAR |
                 (
                     MAP_START
-                    traitArgument*
+                    argument*
                     MAP_END
                 )
             )
@@ -136,8 +136,8 @@ traitApplication:
     )
     ;
 
-traitArgument:
-    name=id value=id
+argument:
+    name=id value=instance
     ;
 
 bodyFacet:
