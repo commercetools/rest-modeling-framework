@@ -4,6 +4,9 @@ import io.vrap.rmf.raml.model.modules.Api;
 import io.vrap.rmf.raml.model.modules.Library;
 import io.vrap.rmf.raml.model.modules.LibraryUse;
 import io.vrap.rmf.raml.model.modules.ModulesFactory;
+import io.vrap.rmf.raml.model.resources.ResourceType;
+import io.vrap.rmf.raml.model.resources.ResourcesFactory;
+import io.vrap.rmf.raml.model.resources.Trait;
 import io.vrap.rmf.raml.model.types.BuiltinType;
 import io.vrap.rmf.raml.persistence.antlr.RAMLParser;
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -20,12 +23,13 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static io.vrap.rmf.raml.model.elements.ElementsPackage.Literals.IDENTIFIABLE_ELEMENT__NAME;
-import static io.vrap.rmf.raml.model.modules.ModulesPackage.Literals.TYPE_CONTAINER__TYPES;
-import static io.vrap.rmf.raml.model.modules.ModulesPackage.Literals.TYPE_CONTAINER__USES;
+import static io.vrap.rmf.raml.model.modules.ModulesPackage.Literals.*;
 
 /**
  * Resolves all types and annotation types so that they all have a resolved type.
  * This is necessary because the type defines which facets a type declaration can have.
+ *
+ * Additiopnally it creates all tarits and resource types.
  */
 public class TypeDeclarationResolver {
     private final TypeExpressionConstructor typeExpressionConstructor = new TypeExpressionConstructor();
@@ -117,6 +121,36 @@ public class TypeDeclarationResolver {
             scope.with(TYPE_CONTAINER__USES).setValue(libraryUse, libraryUseFacet.name);
 
             return libraryUse;
+        }
+
+        @Override
+        public Object visitResourceTypesFacet(RAMLParser.ResourceTypesFacetContext resourceTypesFacet) {
+            return withinScope(scope.with(TYPE_CONTAINER__RESOURCE_TYPES), resourceTypesScope ->
+                super.visitResourceTypesFacet(resourceTypesFacet));
+        }
+
+        @Override
+        public Object visitResourceTypeDeclarationFacet(RAMLParser.ResourceTypeDeclarationFacetContext resourceTypeDeclarationFacet) {
+            final ResourceType resourceType = ResourcesFactory.eINSTANCE.createResourceType();
+            scope.setValue(resourceType, resourceTypeDeclarationFacet.getStart());
+            resourceType.setName(resourceTypeDeclarationFacet.name.getText());
+
+            return resourceType;
+        }
+
+        @Override
+        public Object visitTraitsFacet(RAMLParser.TraitsFacetContext ctx) {
+            return withinScope(scope.with(TRAIT_CONTAINER__TRAITS), traitScope ->
+                super.visitTraitsFacet(ctx));
+        }
+
+        @Override
+        public Object visitTraitFacet(RAMLParser.TraitFacetContext traitFacet) {
+            final Trait trait = ResourcesFactory.eINSTANCE.createTrait();
+            scope.setValue(trait, traitFacet.getStart());
+            trait.setName(traitFacet.name.getText());
+
+            return trait;
         }
 
         @Override

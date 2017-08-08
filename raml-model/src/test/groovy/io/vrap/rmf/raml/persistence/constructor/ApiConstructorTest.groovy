@@ -169,6 +169,26 @@ class ApiConstructorTest extends Specification {
         api.resources[0].methods[0].securedBy[0].scheme.name == 'null'
     }
 
+    def "resource with type"() {
+        when:
+        Api api = constructApi(
+                '''\
+        resourceTypes:
+            collection:
+                get?:
+        
+        /users:
+            type: collection
+        ''')
+        then:
+        api.resourceTypes.size() == 1
+        api.resourceTypes[0].name == 'collection'
+        api.resourceTypes[0].methods.size() == 1
+        api.resourceTypes[0].methods[0].method == HttpMethod.GET
+        api.resources.size() == 1
+        api.resources[0].type == api.resourceTypes[0]
+    }
+
     def "security scheme"() {
         when:
         Api api = constructApi(

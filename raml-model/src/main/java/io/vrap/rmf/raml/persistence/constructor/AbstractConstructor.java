@@ -1,7 +1,6 @@
 package io.vrap.rmf.raml.persistence.constructor;
 
 import io.vrap.rmf.raml.model.facets.FacetsFactory;
-import io.vrap.rmf.raml.model.resources.ResourcesFactory;
 import io.vrap.rmf.raml.model.resources.Trait;
 import io.vrap.rmf.raml.model.responses.BodyType;
 import io.vrap.rmf.raml.model.responses.Response;
@@ -50,9 +49,7 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
 
     @Override
     public Object visitTraitFacet(RAMLParser.TraitFacetContext traitFacet) {
-        final Trait trait = ResourcesFactory.eINSTANCE.createTrait();
-        scope.setValue(trait, traitFacet.getStart());
-        trait.setName(traitFacet.name.getText());
+        final Trait trait = (Trait) scope.getEObjectByName(traitFacet.name.getText());
         return withinScope(scope.with(trait), traitScope -> {
             traitFacet.attributeFacet().forEach(this::visitAttributeFacet);
             traitFacet.annotationFacet().forEach(this::visitAnnotationFacet);

@@ -50,6 +50,9 @@ public class ApiConstructor extends BaseConstructor {
             withinScope(scope.with(RESOURCE_CONTAINER__RESOURCES), resourcesScope ->
                     ctx.resourceFacet().stream().map(this::visitResourceFacet).collect(Collectors.toList()));
 
+            withinScope(scope.with(TYPE_CONTAINER__RESOURCE_TYPES), resourceTypesScope ->
+                    ctx.resourceTypesFacet().stream().map(this::visitResourceTypesFacet).collect(Collectors.toList()));
+
             return rootObject;
         });
     }
@@ -115,15 +118,49 @@ public class ApiConstructor extends BaseConstructor {
                             .collect(Collectors.toList())
             );
 
+            resourceFacet.resourceTypeFacet().forEach(this::visitResourceTypeFacet);
+
             return resource;
         });
     }
 
     @Override
+    public Object visitResourceTypeFacet(RAMLParser.ResourceTypeFacetContext resourceTypeFacet) {
+        return withinScope(scope.with(RESOURCE_BASE__TYPE), resourceTypeScope -> {
+            final String type = resourceTypeFacet.type.getText();
+            final EObject resourceType = scope.getEObjectByName(type);
+            resourceTypeScope.setValue(resourceType, resourceTypeFacet.getStart());
+
+            return resourceType;
+        });
+    }
+
+    @Override
+    public Object visitResourceTypeDeclarationFacet(RAMLParser.ResourceTypeDeclarationFacetContext resourceTypeDeclarationFacet) {
+        final String type = resourceTypeDeclarationFacet.name.getText();
+        final EObject resourceType = scope.getEObjectByName(type);
+        return withinScope(scope.with(resourceType), resourceTypeScope -> {
+            resourceTypeDeclarationFacet.attributeFacet().forEach(this::visitAttributeFacet);
+            resourceTypeDeclarationFacet.annotationFacet().forEach(this::visitAnnotationFacet);
+            resourceTypeDeclarationFacet.securedByFacet().forEach(this::visitSecuredByFacet);
+
+            resourceTypeDeclarationFacet.methodFacet().forEach(this::visitMethodFacet);
+            resourceTypeDeclarationFacet.uriParametersFacet().forEach(this::visitUriParametersFacet);
+
+            resourceTypeDeclarationFacet.resourceTypeFacet().forEach(this::visitResourceTypeFacet);
+
+            return resourceType;
+        });
+    }
+
+    @Override
     public Object visitMethodFacet(RAMLParser.MethodFacetContext methodFacet) {
-        return withinScope(scope.with(RESOURCE__METHODS), methodsScope -> {
+        return withinScope(scope.with(RESOURCE_BASE__METHODS), methodsScope -> {
             final Method method = ResourcesFactory.eINSTANCE.createMethod();
-            final String httpMethodText = methodFacet.httpMethod().getText();
+            String httpMethodText = methodFacet.httpMethod().getText();
+            httpMethodText = httpMethodText.endsWith("?") ?
+                    httpMethodText.substring(0, httpMethodText.length() - 1) :
+                    httpMethodText;
             final HttpMethod httpMethod = (HttpMethod) ResourcesFactory.eINSTANCE.createFromString(HTTP_METHOD, httpMethodText);
             method.setMethod(httpMethod);
             methodsScope.setValue(method, methodFacet.getStart());
@@ -156,7 +193,7 @@ public class ApiConstructor extends BaseConstructor {
 
     @Override
     public Object visitUriParametersFacet(RAMLParser.UriParametersFacetContext uriParametersFacet) {
-        return withinScope(scope.with(RESOURCE__URI_PARAMETERS), uriParametersScope -> {
+        return withinScope(scope.with(RESOURCE_BASE__URI_PARAMETERS), uriParametersScope -> {
             final List<Object> uriParameters = ECollections.asEList(uriParametersFacet.uriParameterFacets.stream()
                     .map(this::visitTypedElementFacet)
                     .collect(Collectors.toList()));

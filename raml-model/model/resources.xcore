@@ -45,12 +45,10 @@ interface ResourceContainer {
 	contains Resource[] resources
 }
 
-class Resource extends DocumentableElement, AnnotationsFacet, ResourceContainer, SecuredByFacet {
-	/*
-	 * The reltaive uri of this resource.
-	 */
-	contains UriTemplate relativeUri
-	
+/*
+ * The commonalities between {@link Resource} and {@link ResourceType}
+ */
+interface ResourceBase extends DocumentableElement, AnnotationsFacet, ResourceContainer, SecuredByFacet {
 	/*
 	 * The uri parameters of this resource.
 	 */
@@ -60,6 +58,11 @@ class Resource extends DocumentableElement, AnnotationsFacet, ResourceContainer,
 	 * The methods that this resource provides.
 	 */
 	contains Method[] methods
+		
+	/*
+	 * The resource type that this resource inherits.
+	 */
+	refers ResourceType ^type
 	
 	/*
 	 * Returns the method with the given http method or null if
@@ -72,7 +75,18 @@ class Resource extends DocumentableElement, AnnotationsFacet, ResourceContainer,
 			}
 		}
 		return null
-	}
+	}	
+}
+
+class Resource extends ResourceBase, ResourceContainer {
+	/*
+	 * The reltaive uri of this resource.
+	 */
+	contains UriTemplate relativeUri
+}
+
+class ResourceType extends ResourceBase, IdentifiableElement {
+	String usage
 }
 
 enum HttpMethod {

@@ -11,6 +11,7 @@ import io.vrap.rmf.raml.model.types.AnyAnnotationType
 import io.vrap.rmf.raml.model.types.AnyType
 
 import io.vrap.rmf.raml.model.resources.ResourceContainer
+import io.vrap.rmf.raml.model.resources.ResourceType
 import io.vrap.rmf.raml.model.resources.Trait
 import io.vrap.rmf.raml.model.resources.UriTemplate
 import io.vrap.rmf.raml.model.resources.UriParameter
@@ -83,6 +84,7 @@ interface TypeContainer {
 
     contains AnyType[] types
     contains AnyAnnotationType[] annotationTypes
+    contains ResourceType[] resourceTypes
 }
 
 class Library extends AnnotationsFacet, TypeContainer, SecuritySchemeContainer, TraitContainer {

@@ -70,7 +70,26 @@ resourceFacet:
                     MAP_START
                     (
                         resourceFacet | methodFacet | attributeFacet | uriParametersFacet | annotationFacet
-                        | securedByFacet
+                        | securedByFacet | resourceTypeFacet
+                    )*
+                    MAP_END
+                )
+        )
+    ;
+
+resourceTypeFacet:
+    'type' type=id
+    ;
+
+resourceTypeDeclarationFacet:
+    name=id
+        (
+            SCALAR
+            |   (
+                    MAP_START
+                    (
+                        methodFacet | attributeFacet | uriParametersFacet | annotationFacet
+                        | securedByFacet | resourceTypeFacet
                     )*
                     MAP_END
                 )
@@ -156,7 +175,8 @@ responseFacet:
     ;
 
 httpMethod:
-    'get' | 'patch' | 'put' | 'post' | 'delete' | 'head' | 'options'
+    'get' | 'patch' | 'put' | 'post' | 'delete' | 'head' | 'options' |
+    'get?' | 'patch?' | 'put?' | 'post?' | 'delete?' | 'head?' | 'options?'
     ;
 
 headersFacet:
@@ -274,7 +294,7 @@ securedBy:
 resourceTypesFacet:
     'resourceTypes'
         MAP_START
-            SCALAR*
+            resourceTypeDeclarationFacet*
         MAP_END
     ;
 
