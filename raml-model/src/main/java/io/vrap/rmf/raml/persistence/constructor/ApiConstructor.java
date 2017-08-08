@@ -125,14 +125,21 @@ public class ApiConstructor extends BaseConstructor {
     }
 
     @Override
-    public Object visitResourceTypeFacet(RAMLParser.ResourceTypeFacetContext resourceTypeFacet) {
-        return withinScope(scope.with(RESOURCE_BASE__TYPE), resourceTypeScope -> {
-            final String type = resourceTypeFacet.type.getText();
-            final EObject resourceType = scope.getEObjectByName(type);
-            resourceTypeScope.setValue(resourceType, resourceTypeFacet.getStart());
+    public Object visitResourceTypeFacet(RAMLParser.ResourceTypeFacetContext ctx) {
+        return withinScope(scope.with(RESOURCE_BASE__TYPE), resourceTypeScope ->
+            visitResourceTypeApplication(ctx.resourceTypeApplication()));
+    }
 
-            return resourceType;
-        });
+    @Override
+    public Object visitResourceTypeApplication(RAMLParser.ResourceTypeApplicationContext ctx) {
+        final ResourceTypeApplication resourceTypeApplication = ResourcesFactory.eINSTANCE.createResourceTypeApplication();
+        scope.setValue(resourceTypeApplication, ctx.getStart());
+        final ResourceType resourceType = (ResourceType) scope.with(RESOURCE_TYPE_APPLICATION__TYPE).getEObjectByName(ctx.type.getText());
+        resourceTypeApplication.setType(resourceType);
+        return withinScope(scope.with(resourceTypeApplication, RESOURCE_TYPE_APPLICATION__ARGUMENTS),
+                argumentsScope -> ctx.argument().stream()
+                        .map(this::visitArgument)
+                        .collect(Collectors.toList()));
     }
 
     @Override

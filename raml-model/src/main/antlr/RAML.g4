@@ -78,7 +78,25 @@ resourceFacet:
     ;
 
 resourceTypeFacet:
-    'type' type=id
+    'type' resourceTypeApplication
+    ;
+
+
+resourceTypeApplication:
+    type=id |
+    (
+        MAP_START
+            type=id
+            (
+                SCALAR |
+                (
+                    MAP_START
+                    argument*
+                    MAP_END
+                )
+            )
+        MAP_END
+    )
     ;
 
 resourceTypeDeclarationFacet:

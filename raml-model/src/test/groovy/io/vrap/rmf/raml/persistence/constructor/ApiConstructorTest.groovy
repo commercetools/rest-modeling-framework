@@ -178,7 +178,9 @@ class ApiConstructorTest extends Specification {
                 get?:
         
         /users:
-            type: collection
+            type: 
+                collection:
+                    arg1: value1
         ''')
         then:
         api.resourceTypes.size() == 1
@@ -186,7 +188,10 @@ class ApiConstructorTest extends Specification {
         api.resourceTypes[0].methods.size() == 1
         api.resourceTypes[0].methods[0].method == HttpMethod.GET
         api.resources.size() == 1
-        api.resources[0].type == api.resourceTypes[0]
+        api.resources[0].type.type == api.resourceTypes[0]
+        api.resources[0].type.arguments.size() == 1
+        api.resources[0].type.arguments[0].name == 'arg1'
+        api.resources[0].type.arguments[0].value instanceof StringInstance
     }
 
     def "security scheme"() {

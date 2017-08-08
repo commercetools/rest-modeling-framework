@@ -63,7 +63,7 @@ interface ResourceBase extends DocumentableElement, AnnotationsFacet, ResourceCo
 	/*
 	 * The resource type that this resource inherits.
 	 */
-	refers ResourceType ^type
+	contains ResourceTypeApplication ^type
 	
 	/*
 	 * Returns the method with the given http method or null if
@@ -77,6 +77,12 @@ interface ResourceBase extends DocumentableElement, AnnotationsFacet, ResourceCo
 		}
 		return null
 	}	
+}
+
+
+class ResourceTypeApplication {
+	refers ResourceType ^type
+	contains Argument[] arguments 
 }
 
 class Resource extends ResourceBase, ResourceContainer {

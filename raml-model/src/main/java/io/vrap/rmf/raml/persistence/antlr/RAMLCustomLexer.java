@@ -163,7 +163,7 @@ public class RAMLCustomLexer implements TokenSource {
             currentEvent = eventIterator().next();
             if (currentEvent instanceof ScalarEvent) {
                 final ScalarEvent scalarEvent = (ScalarEvent) currentEvent;
-                if (INCLUDE_TAG.equals(scalarEvent.getTag())) {
+                if (INCLUDE_TAG.equals(scalarEvent.getTag()) && !scalarEvent.getValue().endsWith(".graphql")) {
                     final String importUri = scalarEvent.getValue();
                     final URI uri = resolve(importUri);
                     loadEvents(uri);

@@ -75,7 +75,7 @@ public class TypesGenerator {
         final long startTimeMillis = System.currentTimeMillis();
         final File generateTo = new File("./demo/src/main/java-gen");
 
-        final URI fileURI = URI.createURI(apiUrl.toString());
+        final URI fileURI = URI.createFileURI("/Users/mkoester/Development/commercetools-api-reference/api.raml");
 
         final Resource resource = new RamlResourceSet()
                 .getResource(fileURI, true);
