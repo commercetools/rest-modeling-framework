@@ -1,0 +1,20 @@
+interface(type, package) ::= <<
+\<?php
+
+namespace Ctp\\<package; format="capitalize">;
+
+interface <type.name> {
+
+    <type.properties: { p | <property(p)> }>
+}
+>>
+
+property(property) ::= <<
+
+/**
+ * @JsonField(type="<property.type.name>")
+ * @return <property.type.name>
+ */
+public function get<property.name; format="capitalize">();
+
+>>
