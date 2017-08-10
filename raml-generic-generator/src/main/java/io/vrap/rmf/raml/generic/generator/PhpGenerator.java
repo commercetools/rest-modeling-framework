@@ -2,10 +2,13 @@ package io.vrap.rmf.raml.generic.generator;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.io.Resources;
-import io.vrap.rmf.raml.model.modules.TypeContainer;
-import io.vrap.rmf.raml.model.types.*;
+import io.vrap.rmf.raml.model.modules.Api;
+import io.vrap.rmf.raml.model.types.AnyType;
+import io.vrap.rmf.raml.model.types.ObjectType;
+import io.vrap.rmf.raml.model.types.StringType;
 import io.vrap.rmf.raml.model.types.util.TypesSwitch;
 import org.apache.commons.lang3.StringUtils;
+
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
@@ -15,32 +18,14 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.List;
 
-/**
- * This class generates source files from a type container {@link TypeContainer}.
- * It uses stringtemplate to generate the source code.
- */
-public class TypesGenerator {
+public class PhpGenerator implements Generator {
     private final STGroup interfaceSTGroup;
-    private final File generateTo;
+    private final PhpGenerator.PhpGeneratingVisitor phpGeneratingVisitor;
 
-    private final TypeGeneratingVisitor typeGeneratingVisitor;
-
-    /**
-     * Creates a new types generator.
-     *
-     * @param packageName  the package name
-     * @param genSourceDir the source dir
-     */
-    public TypesGenerator(final String packageName, final File genSourceDir) throws IOException {
-        if (genSourceDir.exists()) {
-            for (File file : genSourceDir.listFiles()) {
-                Files.deleteIfExists(file.toPath());
-            }
-        } else {
-            Files.createDirectories(genSourceDir.toPath());
-        }
-        this.generateTo = genSourceDir.getAbsoluteFile();
+    public PhpGenerator(final String packageName) throws IOException
+    {
         final URL resource = Resources.getResource("./templates/php/interface.stg");
         interfaceSTGroup = new STGroupFile(resource, "UTF-8", '<', '>');
         interfaceSTGroup.load();
@@ -49,14 +34,26 @@ public class TypesGenerator {
                         "capitalize".equals(formatString) ?
                                 StringUtils.capitalize(arg.toString()) :
                                 arg.toString());
-        typeGeneratingVisitor = new TypeGeneratingVisitor(packageName);
+        phpGeneratingVisitor = new PhpGenerator.PhpGeneratingVisitor(packageName);
     }
 
-    public void generate(final TypeContainer typeContainer) throws IOException {
-        for (final AnyType anyType : typeContainer.getTypes()) {
-            final String generate = generate(anyType);
+    public void generate(final Api api, final File outputPath) throws IOException {
+        if (outputPath.exists()) {
+            for (File file : outputPath.listFiles()) {
+                Files.deleteIfExists(file.toPath());
+            }
+        } else {
+            Files.createDirectories(outputPath.toPath());
+        }
+
+        generateTypes(api.getTypes(), outputPath);
+    }
+
+    private void generateTypes(final List<AnyType> types, final File outputPath) throws IOException {
+        for (final AnyType anyType : types) {
+            final String generate = generateFile(anyType);
             if (generate != null) {
-                final File sourceFile = new File(generateTo, anyType.getName().concat(".php"));
+                final File sourceFile = new File(outputPath, anyType.getName().concat(".php"));
                 if (!sourceFile.exists()) {
                     Files.createFile(sourceFile.toPath());
                 }
@@ -66,14 +63,14 @@ public class TypesGenerator {
     }
 
     @VisibleForTesting
-    String generate(final AnyType type) {
-        return typeGeneratingVisitor.doSwitch(type);
+    String generateFile(final AnyType type) {
+        return phpGeneratingVisitor.doSwitch(type);
     }
 
-    private class TypeGeneratingVisitor extends TypesSwitch<String> {
+    private class PhpGeneratingVisitor extends TypesSwitch<String> {
         private final String packageName;
 
-        public TypeGeneratingVisitor(String packageName) {
+        public PhpGeneratingVisitor(String packageName) {
             this.packageName = packageName;
         }
 
@@ -81,7 +78,6 @@ public class TypesGenerator {
         public String caseStringType(final StringType stringType) {
             if (stringType.getEnum().isEmpty()) {
                 return null;
-            } else {
             }
             return null;
         }
