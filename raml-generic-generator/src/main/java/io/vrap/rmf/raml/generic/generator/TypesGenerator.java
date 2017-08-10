@@ -32,7 +32,14 @@ public class TypesGenerator {
      * @param packageName  the package name
      * @param genSourceDir the source dir
      */
-    public TypesGenerator(final String packageName, final File genSourceDir) {
+    public TypesGenerator(final String packageName, final File genSourceDir) throws IOException {
+        if (genSourceDir.exists()) {
+            for (File file : genSourceDir.listFiles()) {
+                Files.deleteIfExists(file.toPath());
+            }
+        } else {
+            Files.createDirectories(genSourceDir.toPath());
+        }
         this.generateTo = genSourceDir.getAbsoluteFile();
         final URL resource = Resources.getResource("./templates/php/interface.stg");
         interfaceSTGroup = new STGroupFile(resource, "UTF-8", '<', '>');
@@ -50,7 +57,9 @@ public class TypesGenerator {
             final String generate = generate(anyType);
             if (generate != null) {
                 final File sourceFile = new File(generateTo, anyType.getName().concat(".php"));
-                Files.createFile(sourceFile.toPath());
+                if (!sourceFile.exists()) {
+                    Files.createFile(sourceFile.toPath());
+                }
                 Files.write(sourceFile.toPath(), generate.getBytes(StandardCharsets.UTF_8));
             }
         }
