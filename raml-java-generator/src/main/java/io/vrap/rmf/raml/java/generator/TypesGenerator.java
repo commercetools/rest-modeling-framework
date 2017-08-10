@@ -9,17 +9,10 @@ import io.vrap.rmf.raml.model.facets.StringInstance;
 import io.vrap.rmf.raml.model.modules.TypeContainer;
 import io.vrap.rmf.raml.model.types.*;
 import io.vrap.rmf.raml.model.types.util.TypesSwitch;
-import io.vrap.rmf.raml.persistence.RamlResourceSet;
-import org.eclipse.emf.common.util.EList;
-import org.eclipse.emf.common.util.URI;
-import org.eclipse.emf.ecore.EObject;
-import org.eclipse.emf.ecore.resource.Resource;
 
 import javax.lang.model.element.Modifier;
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
-import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -41,8 +34,6 @@ public class TypesGenerator {
     private TypeMappingVisitor typeMappingVisitor = new TypeMappingVisitor(customTypeMapping);
     private PropertyGeneratingVisitor propertyGeneratingVisitor = new PropertyGeneratingVisitor();
     private TypeGeneratingVisitor typeGeneratingVisitor = new TypeGeneratingVisitor();
-
-    private final static URL apiUrl = TypesGenerator.class.getResource("/commercetools-api-reference-master/api.raml");
 
     /**
      * Creates a new types generator.
@@ -69,38 +60,6 @@ public class TypesGenerator {
         typeSpecs.stream()
                 .filter(Objects::nonNull)
                 .forEach(this::generateFile);
-    }
-
-    public static void main(String... args) {
-        final long startTimeMillis = System.currentTimeMillis();
-        final File generateTo = new File("./demo/src/main/java-gen");
-
-        final URI fileURI = URI.createFileURI("/Users/mkoester/Development/commercetools-api-reference/api.raml");
-
-        final Resource resource = new RamlResourceSet()
-                .getResource(fileURI, true);
-        final EList<EObject> contents = resource.getContents();
-        final EList<Resource.Diagnostic> errors = resource.getErrors();
-
-        if (errors.isEmpty() && contents.size() == 1) {
-            final EObject rootObject = contents.get(0);
-            if (rootObject instanceof TypeContainer) {
-                final TypeContainer typeContainer = (TypeContainer) rootObject;
-                final TypesGenerator typesGenerator = new TypesGenerator("types", generateTo);
-                typesGenerator.generate(typeContainer);
-                final long endTimeMillis = System.currentTimeMillis();
-
-                final Duration duration = Duration.ofMillis(endTimeMillis - startTimeMillis);
-                System.out.println("Generation took:" + duration);
-            } else {
-                System.err.println("Invalid root object:" + rootObject.eClass().getName());
-            }
-        } else if (contents.isEmpty()) {
-            System.err.println("File '" + fileURI + "' is empty");
-        } else {
-            errors.forEach(diagnostic -> System.err.println(diagnostic.getMessage()));
-        }
-
     }
 
     private void generateFile(final TypeSpec typeSpec) {
@@ -154,6 +113,13 @@ public class TypesGenerator {
                 interfaceBuilder = TypeSpec.interfaceBuilder(objectType.getName());
                 interfaceBuilder.addModifiers(Modifier.PUBLIC);
 
+
+                final List<ObjectType> subTypes = objectType.subTypes().stream()
+                        .filter(ObjectType.class::isInstance)
+                        .map(ObjectType.class::cast)
+                        .filter(subType -> subType.getDiscriminatorValue() != null)
+                        .collect(Collectors.toList());
+
                 if (objectType.getDiscriminator() != null) {
                     interfaceBuilder.addAnnotation(AnnotationSpec.builder(JsonTypeInfo.class)
                             .addMember("use", "$L", "JsonTypeInfo.Id.NAME")
@@ -161,12 +127,6 @@ public class TypesGenerator {
                             .addMember("property", "$S", objectType.getDiscriminator())
                             .addMember("visible", "$L", true)
                             .build());
-
-                    final List<ObjectType> subTypes = objectType.subTypes().stream()
-                            .filter(ObjectType.class::isInstance)
-                            .map(ObjectType.class::cast)
-                            .filter(subType -> subType.getDiscriminatorValue() != null)
-                            .collect(Collectors.toList());
                     final AnnotationSpec.Builder jsonSubTypesBuilder = AnnotationSpec.builder(JsonSubTypes.class);
 
                     for (final ObjectType subType : subTypes) {
@@ -185,6 +145,7 @@ public class TypesGenerator {
                 }
                 final List<MethodSpec> getterMethods = objectType.getProperties().stream()
                         .filter(property -> !property.getName().startsWith("/"))
+                        .filter(property -> !subTypeHasProperty(objectType, property))
                         .map(propertyGeneratingVisitor::caseProperty)
                         .collect(Collectors.toList());
 
@@ -193,6 +154,18 @@ public class TypesGenerator {
 
             return interfaceBuilder.build();
         }
+    }
+
+    private boolean subTypeHasProperty(final ObjectType objectType, final Property property) {
+        final List<ObjectType> subTypes = objectType.subTypes().stream()
+                .filter(ObjectType.class::isInstance).map(ObjectType.class::cast)
+                .collect(Collectors.toList());
+        for (final ObjectType subType : subTypes) {
+            if (subType.getProperty(property.getName()) != null) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private class PropertyGeneratingVisitor extends TypesSwitch<MethodSpec> {

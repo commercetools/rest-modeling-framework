@@ -20,5 +20,7 @@ dependencies {
 
     def jvmSdkVersion = "1.21.0"
     compile "com.commercetools.sdk.jvm.core:commercetools-sdk-base:$jvmSdkVersion"
+    compile "com.commercetools.sdk.jvm.core:commercetools-java-client-core:$jvmSdkVersion"
+    compile "com.commercetools.sdk.jvm.core:sdk-http:$jvmSdkVersion"
     compile 'com.fasterxml.jackson.core:jackson-annotations:2.8.9'
 }
