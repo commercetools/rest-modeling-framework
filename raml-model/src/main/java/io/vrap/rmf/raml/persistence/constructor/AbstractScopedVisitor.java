@@ -72,8 +72,7 @@ abstract class AbstractScopedVisitor<T> extends RAMLBaseVisitor<T> {
     private void setAttribute(final EObject eObject, final EAttribute eAttribute, final List<RAMLParser.IdContext> valueTokens) {
         if (eAttribute.isMany()) {
             final List<Object> values = valueTokens.stream()
-                    .map(RAMLParser.IdContext::getText)
-                    .map(v -> EcoreUtil.createFromString(eAttribute.getEAttributeType(), v))
+                    .map(v -> createFromString(eAttribute, v))
                     .collect(Collectors.toList());
 
             eObject.eSet(eAttribute, values);
@@ -88,15 +87,20 @@ abstract class AbstractScopedVisitor<T> extends RAMLBaseVisitor<T> {
     }
 
     private void setAttribute(final EObject eObject, final EAttribute eAttribute, final RAMLParser.IdContext valueToken) {
+        final Object value = createFromString(eAttribute, valueToken);
+        if (eAttribute.isMany()) {
+            eObject.eSet(eAttribute, Collections.singletonList(value));
+        } else {
+            eObject.eSet(eAttribute, value);
+        }
+    }
+
+    private Object createFromString(final EAttribute eAttribute, final RAMLParser.IdContext valueToken) {
         try {
-            final Object value = EcoreUtil.createFromString(eAttribute.getEAttributeType(), valueToken.getText());
-            if (eAttribute.isMany()) {
-                eObject.eSet(eAttribute, Collections.singletonList(value));
-            } else {
-                eObject.eSet(eAttribute, value);
-            }
+            return EcoreUtil.createFromString(eAttribute.getEAttributeType(), valueToken.getText());
         } catch (IllegalArgumentException e) {
             scope.addError(e.getMessage(), valueToken.getStart());
+            return null;
         }
     }
 }

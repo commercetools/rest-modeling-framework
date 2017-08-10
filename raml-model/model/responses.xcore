@@ -32,7 +32,7 @@ class Response extends AnnotationsFacet, HeadersFacet {
 	contains BodyType[] bodies
 }
 
-class BodyType extends TypedElement {
+class BodyType extends AnnotationsFacet, TypedElement {
 	/*
 	 * The content types that this body supports.
 	 */
