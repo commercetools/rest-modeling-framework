@@ -176,14 +176,14 @@ bodyContentTypeFacet:
          SCALAR
                     |   (
                             MAP_START
-        ( attributeFacet | enumFacet | propertiesFacet | typeFacet | defaultFacet | exampleFacet | examplesFacet | annotationFacet )*
+        ( attributeFacet | enumFacet | propertiesFacet | typeFacet | itemsFacet | defaultFacet | exampleFacet | examplesFacet | annotationFacet )*
         MAP_END
         )
         )
     ;
 
 bodyTypeFacet:
-    ( attributeFacet | enumFacet | propertiesFacet | typeFacet | defaultFacet | exampleFacet | examplesFacet | annotationFacet )*
+    ( attributeFacet | enumFacet | propertiesFacet | typeFacet | itemsFacet | defaultFacet | exampleFacet | examplesFacet | annotationFacet )*
     ;
 
 responsesFacet:
@@ -377,7 +377,7 @@ typeDeclarationTuple:
 typeDeclarationMap:
     name=SCALAR
         MAP_START
-        ( attributeFacet | enumFacet | propertiesFacet | typeFacet | defaultFacet | exampleFacet | examplesFacet | annotationFacet )*
+        ( attributeFacet | enumFacet | propertiesFacet | typeFacet | itemsFacet | defaultFacet | exampleFacet | examplesFacet | annotationFacet )*
         MAP_END
     ;
 
@@ -390,12 +390,16 @@ enumFacet:
 
 typeDeclarationFragment:
     MAP_START
-    ( attributeFacet | enumFacet | propertiesFacet | typeFacet | defaultFacet | exampleFacet | examplesFacet | annotationFacet )*
+    ( attributeFacet | enumFacet | propertiesFacet | typeFacet | itemsFacet| defaultFacet | exampleFacet | examplesFacet | annotationFacet )*
     MAP_END
     ;
 
 typeFacet:
-    facet=( 'type' | 'items') typeExpression=SCALAR
+    'type' typeExpression=SCALAR
+    ;
+
+itemsFacet:
+    'items' typeExpression=SCALAR
     ;
 
 defaultFacet:
@@ -446,7 +450,7 @@ typedElementTuple:
 typedElementMap:
     name=id
         MAP_START
-        ( attributeFacet | enumFacet | propertiesFacet | requiredFacet | typeFacet | annotationFacet | exampleFacet | examplesFacet | defaultFacet )*
+        ( attributeFacet | enumFacet | propertiesFacet | requiredFacet | typeFacet | itemsFacet | annotationFacet | exampleFacet | examplesFacet | defaultFacet )*
         MAP_END
     ;
 

@@ -135,6 +135,23 @@ class TypeDeclarationFragmentConstructorTest extends Specification {
         type.enum.size() == 3
     }
 
+    def "array type"() {
+        when:
+        AnyType type = constructType(
+                '''\
+        type: array
+        items: string
+        minItems: 1
+        uniqueItems: true
+        ''')
+        then:
+        type instanceof ArrayType
+        ArrayType arrayType = type
+        arrayType.items instanceof StringType
+        arrayType.minItems == 1
+        arrayType.uniqueItems == true
+    }
+
     AnyType constructType(String input) {
         RAMLParser parser = parser(input)
         def constructor = new TypeDeclarationFragmentConstructor(TYPE_CONTAINER__TYPES)

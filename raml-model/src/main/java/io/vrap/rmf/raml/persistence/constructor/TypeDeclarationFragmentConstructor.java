@@ -52,6 +52,7 @@ public class TypeDeclarationFragmentConstructor extends BaseConstructor {
             typeDeclarationFragment.exampleFacet().forEach(this::visitExampleFacet);
             typeDeclarationFragment.examplesFacet().forEach(this::visitExamplesFacet);
             typeDeclarationFragment.enumFacet().forEach(this::visitEnumFacet);
+            typeDeclarationFragment.itemsFacet().forEach(this::visitItemsFacet);
 
             return declaredType;
         });
