@@ -1,9 +1,9 @@
-interface(type, package) ::= <<
+interface(type, package, builtInParent) ::= <<
 \<?php
 
 namespace Ctp\\<package; format="capitalize">;
 
-interface <type.name> {
+interface <type.name> <if(!builtInParent)>extends <type.type.name><endif> {
 
     <type.properties: { p | <property(p)> }>
 }

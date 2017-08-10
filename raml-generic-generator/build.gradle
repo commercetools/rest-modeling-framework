@@ -10,6 +10,11 @@ sourceSets {
             srcDirs += "$buildDir/resources/main/raml"
         }
     }
+    test {
+        resources {
+            srcDirs += "$buildDir/php"
+        }
+    }
 }
 
 dependencies {

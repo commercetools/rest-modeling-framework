@@ -1,11 +1,13 @@
 package io.vrap.rmf.raml.generic.generator;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
 import io.vrap.rmf.raml.model.modules.Api;
 import io.vrap.rmf.raml.model.types.AnyType;
 import io.vrap.rmf.raml.model.types.ObjectType;
 import io.vrap.rmf.raml.model.types.StringType;
+import io.vrap.rmf.raml.model.types.impl.NilTypeImpl;
 import io.vrap.rmf.raml.model.types.util.TypesSwitch;
 import org.apache.commons.lang3.StringUtils;
 
@@ -19,6 +21,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.List;
+import java.util.Optional;
 
 public class PhpGenerator implements Generator {
     private final STGroup interfaceSTGroup;
@@ -89,6 +92,9 @@ public class PhpGenerator implements Generator {
             } else {
                 final ST interfaceST = interfaceSTGroup.getInstanceOf("interface");
                 interfaceST.add("type", objectType);
+                final List<String> builtInTypes = Lists.newArrayList("array", "object", "string", "int", "number", "boolean", "datetime", "time-only", "date-only", "datetime-only", "nil", "file");
+                final Boolean builtInParentType = objectType.getType() == null || builtInTypes.contains(objectType.getType().getName());
+                interfaceST.add("builtInParent", builtInParentType);
                 interfaceST.add("package", packageName);
                 return interfaceST.render();
             }
