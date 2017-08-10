@@ -20,6 +20,7 @@ dependencies {
     compile project(':functional-utils')
     compile project(':raml-model')
 
+    compile 'commons-cli:commons-cli:1.4'
     compile 'org.antlr:stringtemplate:4.0.2'
     compile 'com.google.guava:guava:22.0'
     compile 'org.apache.commons:commons-lang3:3.4'
