@@ -1,4 +1,4 @@
-package io.vrap.rmf.raml.java.generator;
+package io.vrap.rmf.raml.generic.generator;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -51,8 +51,8 @@ public class TypesGenerator {
      *
      * @param typeContainer the type container
      */
-    public void generate(final TypeContainer typeContainer) {
-        final List<TypeSpec> typeSpecs = typeContainer.getTypes().stream()
+    public void generate(final List<AnyType> types) {
+        final List<TypeSpec> typeSpecs = types.stream()
                 .filter(anyType -> !customTypeMapping.containsKey(anyType.getName()))
                 .map(typeGeneratingVisitor::doSwitch)
                 .collect(Collectors.toList());

@@ -33,7 +33,7 @@ public class CodeGenerator {
         final EList<Resource.Diagnostic> errors = resource.getErrors();
 
         if (errors.isEmpty() && contents.size() == 1) {
-            Generator generator = of(options.getLanguage(), "types");
+            Generator generator = of(options.getLanguage());
 
             generator.generate((Api)contents.get(0), generateTo);
 
@@ -47,10 +47,12 @@ public class CodeGenerator {
         }
     }
 
-    private static Generator of(String language, String packageName) throws Exception {
+    private static Generator of(String language) throws Exception {
         switch (language) {
             case "php":
-                return new PhpGenerator(packageName);
+                return new PhpGenerator();
+            case "java":
+                return new JavaGenerator();
             default:
                 throw new Exception("unknown language");
         }
@@ -80,7 +82,7 @@ public class CodeGenerator {
             }
 
             language = cmd.getOptionValue(getLangOption().getOpt(), "php");
-            outputPath = Paths.get(cmd.getOptionValue(getOutputPathOption().getOpt(), "build")).toAbsolutePath();
+            outputPath = Paths.get(cmd.getOptionValue(getOutputPathOption().getOpt(), "../demo/src/generated/")).toAbsolutePath();
 
             if (cmd.hasOption(getHelpOption().getOpt())) {
                 printHelp();

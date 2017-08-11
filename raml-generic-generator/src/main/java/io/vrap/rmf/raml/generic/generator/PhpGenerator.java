@@ -27,7 +27,7 @@ public class PhpGenerator implements Generator {
     private final STGroup interfaceSTGroup;
     private final PhpGenerator.PhpGeneratingVisitor phpGeneratingVisitor;
 
-    public PhpGenerator(final String packageName) throws IOException
+    public PhpGenerator() throws IOException
     {
         final URL resource = Resources.getResource("./templates/php/interface.stg");
         interfaceSTGroup = new STGroupFile(resource, "UTF-8", '<', '>');
@@ -37,7 +37,7 @@ public class PhpGenerator implements Generator {
                         "capitalize".equals(formatString) ?
                                 StringUtils.capitalize(arg.toString()) :
                                 arg.toString());
-        phpGeneratingVisitor = new PhpGenerator.PhpGeneratingVisitor(packageName);
+        phpGeneratingVisitor = new PhpGenerator.PhpGeneratingVisitor("types");
     }
 
     public void generate(final Api api, final File outputPath) throws IOException {

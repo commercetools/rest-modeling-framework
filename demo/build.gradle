@@ -1,7 +1,12 @@
 
 sourceSets {
     generated {
-        java.srcDir "/src/java-gen/"
+        java.srcDir "/src/generated/java"
+    }
+    test {
+        resources {
+            srcDirs += "/src/generated/php"
+        }
     }
 }
 
