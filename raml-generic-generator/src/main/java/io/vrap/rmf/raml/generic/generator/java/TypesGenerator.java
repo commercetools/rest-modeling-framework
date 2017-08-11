@@ -1,4 +1,4 @@
-package io.vrap.rmf.raml.generic.generator;
+package io.vrap.rmf.raml.generic.generator.java;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -49,7 +49,7 @@ public class TypesGenerator {
     /**
      * Generates java source code for the types of the given type container.
      *
-     * @param typeContainer the type container
+     * @param types the type container
      */
     public void generate(final List<AnyType> types) {
         final List<TypeSpec> typeSpecs = types.stream()

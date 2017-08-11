@@ -1,5 +1,6 @@
-package io.vrap.rmf.raml.generic.generator
+package io.vrap.rmf.raml.generic.generator.php
 
+import io.vrap.rmf.raml.generic.generator.php.PhpGenerator
 import io.vrap.rmf.raml.model.modules.Api
 import io.vrap.rmf.raml.persistence.RamlResourceSet
 import io.vrap.rmf.raml.persistence.antlr.RAMLCustomLexer

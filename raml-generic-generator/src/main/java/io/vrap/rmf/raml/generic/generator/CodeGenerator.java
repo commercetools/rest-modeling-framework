@@ -1,5 +1,7 @@
 package io.vrap.rmf.raml.generic.generator;
 
+import io.vrap.rmf.raml.generic.generator.java.JavaGenerator;
+import io.vrap.rmf.raml.generic.generator.php.PhpGenerator;
 import io.vrap.rmf.raml.model.modules.Api;
 import io.vrap.rmf.raml.persistence.RamlResourceSet;
 import org.eclipse.emf.common.util.EList;

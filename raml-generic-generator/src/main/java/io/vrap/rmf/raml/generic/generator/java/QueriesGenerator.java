@@ -1,4 +1,4 @@
-package io.vrap.rmf.raml.generic.generator;
+package io.vrap.rmf.raml.generic.generator.java;
 
 import com.squareup.javapoet.*;
 import io.vrap.rmf.raml.model.resources.HttpMethod;

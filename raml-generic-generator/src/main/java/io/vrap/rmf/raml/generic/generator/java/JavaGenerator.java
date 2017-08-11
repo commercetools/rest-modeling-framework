@@ -1,10 +1,10 @@
-package io.vrap.rmf.raml.generic.generator;
+package io.vrap.rmf.raml.generic.generator.java;
 
+import io.vrap.rmf.raml.generic.generator.Generator;
 import io.vrap.rmf.raml.model.modules.Api;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 
 public class JavaGenerator implements Generator {
     @Override
