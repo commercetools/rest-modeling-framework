@@ -1,6 +1,5 @@
 package io.vrap.rmf.raml.generic.generator.php
 
-import io.vrap.rmf.raml.generic.generator.php.PhpGenerator
 import io.vrap.rmf.raml.model.modules.Api
 import io.vrap.rmf.raml.persistence.RamlResourceSet
 import io.vrap.rmf.raml.persistence.antlr.RAMLCustomLexer
@@ -38,7 +37,7 @@ class TypeGeneratorTest extends Specification {
         ''')
         then:
         TypesGenerator generator = new TypesGenerator()
-        String result = generator.generateFile(api.types.get(0));
+        String result = generator.generateType(generator.createVisitor("types", "interface"), api.types.get(0));
         result != null
     }
 

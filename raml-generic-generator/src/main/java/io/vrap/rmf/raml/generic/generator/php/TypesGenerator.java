@@ -21,24 +21,15 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class TypesGenerator {
-    private final InterfaceGeneratingVisitor interfaceGeneratingVisitor;
 
-    public TypesGenerator() throws IOException
-    {
-        final URL resource = Resources.getResource("./templates/php/interface.stg");
-        interfaceGeneratingVisitor = new InterfaceGeneratingVisitor("types", createSTGroup(resource));
-    }
+    public static final URL RESOURCE = Resources.getResource("./templates/php/type.stg");
 
     public void generate(final List<AnyType> types, final File outputPath) throws IOException {
+        final TypeGeneratingVisitor interfaceGeneratingVisitor = createVisitor("types", "interface");
+        final TypeGeneratingVisitor modelGeneratingVisitor =  createVisitor("types", "model");
         for (final AnyType anyType : types) {
-            final String generate = generateFile(anyType);
-            if (generate != null) {
-                final File sourceFile = new File(outputPath, anyType.getName().concat(".php"));
-                if (!sourceFile.exists()) {
-                    Files.createFile(sourceFile.toPath());
-                }
-                Files.write(sourceFile.toPath(), generate.getBytes(StandardCharsets.UTF_8));
-            }
+            generateFile(generateType(interfaceGeneratingVisitor, anyType), new File(outputPath, anyType.getName().concat(".php")));
+            generateFile(generateType(modelGeneratingVisitor, anyType), new File(outputPath, anyType.getName().concat("Model.php")));
         }
     }
 
@@ -53,19 +44,34 @@ public class TypesGenerator {
         return stGroup;
     }
 
-
     @VisibleForTesting
-    String generateFile(final AnyType type) {
-        return interfaceGeneratingVisitor.doSwitch(type);
+    TypeGeneratingVisitor createVisitor(final String packageName, final String type) {
+        return new TypeGeneratingVisitor(packageName, createSTGroup(RESOURCE), type);
     }
 
-    private class InterfaceGeneratingVisitor extends TypesSwitch<String> {
-        private final String packageName;
-        private final STGroupFile interfaceSTGroup;
+    @VisibleForTesting
+    String generateType(final TypeGeneratingVisitor visitor, final AnyType type) {
+        return visitor.doSwitch(type);
+    }
 
-        public InterfaceGeneratingVisitor(final String packageName, final STGroupFile interfaceSTGroup) {
-            this.interfaceSTGroup = interfaceSTGroup;
+    private void generateFile(final String content, final File outputFile) throws IOException {
+        if (content != null) {
+            if (!outputFile.exists()) {
+                Files.createFile(outputFile.toPath());
+            }
+            Files.write(outputFile.toPath(), content.getBytes(StandardCharsets.UTF_8));
+        }
+    }
+
+    private class TypeGeneratingVisitor extends TypesSwitch<String> {
+        private final String packageName;
+        private final STGroupFile stGroup;
+        private final String type;
+
+        public TypeGeneratingVisitor(final String packageName, final STGroupFile stGroup, final String type) {
+            this.stGroup = stGroup;
             this.packageName = packageName;
+            this.type = type;
         }
 
         @Override
@@ -81,13 +87,13 @@ public class TypesGenerator {
             if (objectType.getName() == null) {
                 return null;
             } else {
-                final ST interfaceST = interfaceSTGroup.getInstanceOf("interface");
-                interfaceST.add("type", objectType);
+                final ST st = stGroup.getInstanceOf(type);
+                st.add("type", objectType);
                 final List<String> builtInTypes = Arrays.stream(BuiltinType.values()).map(BuiltinType::getName).collect(Collectors.toList());;
                 final Boolean builtInParentType = objectType.getType() == null || builtInTypes.contains(objectType.getType().getName());
-                interfaceST.add("builtInParent", builtInParentType);
-                interfaceST.add("package", packageName);
-                return interfaceST.render();
+                st.add("builtInParent", builtInParentType);
+                st.add("package", packageName);
+                return st.render();
             }
         }
     }

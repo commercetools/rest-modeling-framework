@@ -1,0 +1,65 @@
+/*
+ * interface template functions
+ */
+
+interface(type, package, builtInParent) ::= <<
+\<?php
+<generatorInfo()>
+
+namespace Ctp\\<package; format="capitalize">;
+
+interface <type.name> <if(!builtInParent)>extends <type.type.name> <endif>{
+    <type.properties: { p | <propertyInterfaceGet(p)> }>
+}
+>>
+
+
+propertyInterfaceGet(property) ::= <<
+
+/**
+ * @return <property.type.name>
+ */
+public function get<property.name; format="capitalize">();
+>>
+
+/*
+ * implementation template functions
+ */
+model(type, package, builtInParent) ::= <<
+\<?php
+<generatorInfo()>
+
+namespace Ctp\\<package; format="capitalize">;
+
+class <type.name>Model <if(!builtInParent)>extends <type.type.name>Model <endif>implements <type.name> {
+    <type.properties: { p | <property(p)> }>
+
+    <type.properties: { p | <propertyGet(p)> }>
+}
+>>
+
+propertyGet(property) ::= <<
+
+/**
+ * @return <property.type.name>
+ */
+public function get<property.name; format="capitalize">() { return $this-><property.name>; }
+>>
+
+property(property) ::= <<
+
+/**
+ * @var <property.type.name>
+ */
+private $<property.name>;
+>>
+
+/*
+ * common template functions
+ */
+generatorInfo() ::= <<
+/**
+ * This file has been auto generated
+ * Do not change it
+ */
+>>
