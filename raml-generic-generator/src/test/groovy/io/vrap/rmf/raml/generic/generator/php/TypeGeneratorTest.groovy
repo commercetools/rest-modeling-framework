@@ -1,6 +1,7 @@
 package io.vrap.rmf.raml.generic.generator.php
 
 import io.vrap.rmf.raml.model.modules.Api
+import io.vrap.rmf.raml.model.types.AnyType
 import io.vrap.rmf.raml.persistence.RamlResourceSet
 import io.vrap.rmf.raml.persistence.antlr.RAMLCustomLexer
 import io.vrap.rmf.raml.persistence.antlr.RAMLParser
@@ -31,8 +32,7 @@ class TypeGeneratorTest extends Specification {
                     name: string
         ''')
         then:
-        TypesGenerator generator = new TypesGenerator()
-        String result = generator.generateType(generator.createVisitor("types", "interface"), api.types.get(0));
+        String result = generate(TypesGenerator.TYPE_INTERFACE, api.types.get(0));
         result == '''<?php
 /**
  * This file has been auto generated
@@ -64,8 +64,7 @@ interface Person {
                     role: string
         ''')
         then:
-        TypesGenerator generator = new TypesGenerator()
-        String result = generator.generateType(generator.createVisitor("types", "interface"), api.types.get(1));
+        String result = generate(TypesGenerator.TYPE_INTERFACE, api.types.get(1));
         result == '''<?php
 /**
  * This file has been auto generated
@@ -97,8 +96,7 @@ interface User extends Person {
                     role: string
         ''')
         then:
-        TypesGenerator generator = new TypesGenerator()
-        String result = generator.generateType(generator.createVisitor("types", "model"), api.types.get(0));
+        String result = generate(TypesGenerator.TYPE_MODEL, api.types.get(0));
         result == '''<?php
 /**
  * This file has been auto generated
@@ -135,8 +133,7 @@ class PersonModel implements Person {
                     role: string
         ''')
         then:
-        TypesGenerator generator = new TypesGenerator()
-        String result = generator.generateType(generator.createVisitor("types", "model"), api.types.get(1));
+        String result = generate(TypesGenerator.TYPE_MODEL, api.types.get(1));
         result == '''<?php
 /**
  * This file has been auto generated
@@ -157,6 +154,78 @@ class UserModel extends PersonModel implements User {
     public function getRole() { return $this->role; }
 }
 '''
+    }
+
+    def "generate interface getter"() {
+        when:
+        Api api = constructApi(
+                '''\
+        types:
+            Person:
+                properties:
+                    address: Address
+            Address:
+                properties:
+                    street: string
+        ''')
+        then:
+        String result = generate(TypesGenerator.TYPE_INTERFACE, api.types.get(0));
+        result == '''<?php
+/**
+ * This file has been auto generated
+ * Do not change it
+ */
+
+namespace Ctp\\Types;
+
+interface Person {
+    /**
+     * @return Address
+     */
+    public function getAddress();
+}
+'''
+    }
+
+    def "generate model getter"() {
+        when:
+        Api api = constructApi(
+                '''\
+        types:
+            Person:
+                properties:
+                    address: Address
+            Address:
+                properties:
+                    street: string
+        ''')
+        then:
+        String result = generate(TypesGenerator.TYPE_MODEL, api.types.get(0));
+        result == '''<?php
+/**
+ * This file has been auto generated
+ * Do not change it
+ */
+
+namespace Ctp\\Types;
+
+class PersonModel implements Person {
+    /**
+     * @var Address
+     */
+    private $address;
+
+    /**
+     * @return Address
+     */
+    public function getAddress() { return $this->address; }
+}
+'''
+    }
+
+    String generate(String generateType, AnyType type) {
+        TypesGenerator generator = new TypesGenerator()
+        return generator.generateType(generator.createVisitor(TypesGenerator.PACKAGE_NAME, generateType), type);
     }
 
     Api constructApi(String input) {

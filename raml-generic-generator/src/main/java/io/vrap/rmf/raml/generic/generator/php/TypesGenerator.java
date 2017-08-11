@@ -23,10 +23,13 @@ import java.util.stream.Collectors;
 public class TypesGenerator {
 
     public static final URL RESOURCE = Resources.getResource("./templates/php/type.stg");
+    public static final String TYPE_MODEL = "model";
+    public static final String TYPE_INTERFACE = "interface";
+    public static final String PACKAGE_NAME = "types";
 
     public void generate(final List<AnyType> types, final File outputPath) throws IOException {
-        final TypeGeneratingVisitor interfaceGeneratingVisitor = createVisitor("types", "interface");
-        final TypeGeneratingVisitor modelGeneratingVisitor =  createVisitor("types", "model");
+        final TypeGeneratingVisitor interfaceGeneratingVisitor = createVisitor(PACKAGE_NAME, TYPE_INTERFACE);
+        final TypeGeneratingVisitor modelGeneratingVisitor =  createVisitor(PACKAGE_NAME, TYPE_MODEL);
         for (final AnyType anyType : types) {
             generateFile(generateType(interfaceGeneratingVisitor, anyType), new File(outputPath, anyType.getName().concat(".php")));
             generateFile(generateType(modelGeneratingVisitor, anyType), new File(outputPath, anyType.getName().concat("Model.php")));
