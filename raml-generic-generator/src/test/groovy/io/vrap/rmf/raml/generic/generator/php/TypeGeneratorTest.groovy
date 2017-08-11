@@ -16,7 +16,7 @@ import org.eclipse.emf.ecore.resource.URIConverter
 import spock.lang.Shared
 import spock.lang.Specification
 
-class PhpGeneratorTest extends Specification {
+class TypeGeneratorTest extends Specification {
     @Shared
     ResourceSet resourceSet = new RamlResourceSet()
     @Shared
@@ -37,7 +37,7 @@ class PhpGeneratorTest extends Specification {
                 example: John Doe        
         ''')
         then:
-        PhpGenerator generator = new PhpGenerator("test")
+        TypesGenerator generator = new TypesGenerator()
         String result = generator.generateFile(api.types.get(0));
         result != null
     }
