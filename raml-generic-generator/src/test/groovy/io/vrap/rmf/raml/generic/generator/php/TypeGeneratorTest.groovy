@@ -21,24 +21,142 @@ class TypeGeneratorTest extends Specification {
     @Shared
     URI uri = URI.createURI("test.raml");
 
-    def "generate php"() {
+    def "generate simple interface"() {
         when:
         Api api = constructApi(
                 '''\
         types:
             Person:
                 properties:
-                    name:
-                example:
-                    name: Mr. X
-            Name:
-                type: string
-                example: John Doe        
+                    name: string
         ''')
         then:
         TypesGenerator generator = new TypesGenerator()
         String result = generator.generateType(generator.createVisitor("types", "interface"), api.types.get(0));
-        result != null
+        result == '''<?php
+/**
+ * This file has been auto generated
+ * Do not change it
+ */
+
+namespace Ctp\\Types;
+
+interface Person {
+    /**
+     * @return string
+     */
+    public function getName();
+}
+'''
+    }
+
+    def "generate extended interface"() {
+        when:
+        Api api = constructApi(
+                '''\
+        types:
+            Person:
+                properties:
+                    name: string
+            User:
+                type: Person
+                properties:
+                    role: string
+        ''')
+        then:
+        TypesGenerator generator = new TypesGenerator()
+        String result = generator.generateType(generator.createVisitor("types", "interface"), api.types.get(1));
+        result == '''<?php
+/**
+ * This file has been auto generated
+ * Do not change it
+ */
+
+namespace Ctp\\Types;
+
+interface User extends Person {
+    /**
+     * @return string
+     */
+    public function getRole();
+}
+'''
+    }
+
+    def "generate simple model"() {
+        when:
+        Api api = constructApi(
+                '''\
+        types:
+            Person:
+                properties:
+                    name: string
+            User:
+                type: Person
+                properties:
+                    role: string
+        ''')
+        then:
+        TypesGenerator generator = new TypesGenerator()
+        String result = generator.generateType(generator.createVisitor("types", "model"), api.types.get(0));
+        result == '''<?php
+/**
+ * This file has been auto generated
+ * Do not change it
+ */
+
+namespace Ctp\\Types;
+
+class PersonModel implements Person {
+    /**
+     * @var string
+     */
+    private $name;
+
+    /**
+     * @return string
+     */
+    public function getName() { return $this->name; }
+}
+'''
+    }
+
+    def "generate extended model"() {
+        when:
+        Api api = constructApi(
+                '''\
+        types:
+            Person:
+                properties:
+                    name: string
+            User:
+                type: Person
+                properties:
+                    role: string
+        ''')
+        then:
+        TypesGenerator generator = new TypesGenerator()
+        String result = generator.generateType(generator.createVisitor("types", "model"), api.types.get(1));
+        result == '''<?php
+/**
+ * This file has been auto generated
+ * Do not change it
+ */
+
+namespace Ctp\\Types;
+
+class UserModel extends PersonModel implements User {
+    /**
+     * @var string
+     */
+    private $role;
+
+    /**
+     * @return string
+     */
+    public function getRole() { return $this->role; }
+}
+'''
     }
 
     Api constructApi(String input) {

@@ -9,8 +9,9 @@ interface(type, package, builtInParent) ::= <<
 namespace Ctp\\<package; format="capitalize">;
 
 interface <type.name> <if(!builtInParent)>extends <type.type.name> <endif>{
-    <type.properties: { p | <propertyInterfaceGet(p)> }>
+    <type.properties: {p|<propertyInterfaceGet(p)>}>
 }
+
 >>
 
 
@@ -32,10 +33,11 @@ model(type, package, builtInParent) ::= <<
 namespace Ctp\\<package; format="capitalize">;
 
 class <type.name>Model <if(!builtInParent)>extends <type.type.name>Model <endif>implements <type.name> {
-    <type.properties: { p | <property(p)> }>
+    <type.properties: {p|<property(p)>}>
 
-    <type.properties: { p | <propertyGet(p)> }>
+    <type.properties: {p|<propertyGet(p)>}>
 }
+
 >>
 
 propertyGet(property) ::= <<
