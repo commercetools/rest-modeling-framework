@@ -33,6 +33,17 @@ model(type, package, builtInParent) ::= <<
 namespace Ctp\\<package; format="capitalize">;
 
 class <type.name>Model <if(!builtInParent)>extends <type.type.name>Model <endif>implements <type.name> {
+    <if(type.discriminator || type.discriminatorValue)>
+    const DISCRIMINATOR_VALUE = '<type.discriminatorValue>';
+
+    <endif>
+    public function __construct() {
+        <if(!builtInParent)>parent::__construct();<endif>
+        <if(type.discriminator)>
+        $this-><type.discriminator> = static::DISCRIMINATOR_VALUE;
+        <endif>
+    }
+
     <type.properties: {p|<property(p)>}>
 
     <type.properties: {p|<propertyGet(p)>}>

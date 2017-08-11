@@ -106,6 +106,9 @@ interface User extends Person {
 namespace Ctp\\Types;
 
 class PersonModel implements Person {
+    public function __construct() {
+    }
+
     /**
      * @var string
      */
@@ -143,6 +146,10 @@ class PersonModel implements Person {
 namespace Ctp\\Types;
 
 class UserModel extends PersonModel implements User {
+    public function __construct() {
+        parent::__construct();
+    }
+
     /**
      * @var string
      */
@@ -210,6 +217,9 @@ interface Person {
 namespace Ctp\\Types;
 
 class PersonModel implements Person {
+    public function __construct() {
+    }
+
     /**
      * @var Address
      */
@@ -219,6 +229,68 @@ class PersonModel implements Person {
      * @return Address
      */
     public function getAddress() { return $this->address; }
+}
+'''
+    }
+
+    def "generate simple discriminator"() {
+        when:
+        Api api = constructApi(
+                '''\
+        types:
+            Person:
+                discriminator: kind
+                properties:
+                    kind: string
+            User:
+                type: Person
+                discriminatorValue: user
+        ''')
+        then:
+        String baseClass = generate(TypesGenerator.TYPE_MODEL, api.types.get(0));
+        baseClass == '''<?php
+/**
+ * This file has been auto generated
+ * Do not change it
+ */
+
+namespace Ctp\\Types;
+
+class PersonModel implements Person {
+    const DISCRIMINATOR_VALUE = '';
+
+    public function __construct() {
+        $this->kind = static::DISCRIMINATOR_VALUE;
+    }
+
+    /**
+     * @var string
+     */
+    private $kind;
+
+    /**
+     * @return string
+     */
+    public function getKind() { return $this->kind; }
+}
+'''
+        String kindClass = generate(TypesGenerator.TYPE_MODEL, api.types.get(1));
+        kindClass == '''<?php
+/**
+ * This file has been auto generated
+ * Do not change it
+ */
+
+namespace Ctp\\Types;
+
+class UserModel extends PersonModel implements User {
+    const DISCRIMINATOR_VALUE = 'user';
+
+    public function __construct() {
+        parent::__construct();
+    }
+
+
 }
 '''
     }

@@ -1,0 +1,15 @@
+{
+  "name": "commercetools/php-sdk",
+  "license": "MIT",
+  "type": "library",
+  "autoload": {
+    "psr-4": {
+      "Ctp\\": [
+        "target/"
+      ]
+    }
+  },
+  "require": {
+    "php": ">=5.6"
+  }
+}

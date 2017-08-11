@@ -60,6 +60,7 @@ public class TypesGenerator {
     private void generateFile(final String content, final File outputFile) throws IOException {
         if (content != null) {
             if (!outputFile.exists()) {
+                Files.createDirectories(outputFile.getParentFile().toPath());
                 Files.createFile(outputFile.toPath());
             }
             Files.write(outputFile.toPath(), content.getBytes(StandardCharsets.UTF_8));
