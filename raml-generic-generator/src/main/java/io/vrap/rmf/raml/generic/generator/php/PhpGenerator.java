@@ -11,8 +11,11 @@ public class PhpGenerator implements Generator {
 
     public void generate(final Api api, final File outputPath) throws IOException {
         if (outputPath.exists()) {
-            for (File file : outputPath.listFiles()) {
-                Files.deleteIfExists(file.toPath());
+            File[] files = outputPath.listFiles();
+            if (files != null) {
+                for (File file : files) {
+                    Files.deleteIfExists(file.toPath());
+                }
             }
         } else {
             Files.createDirectories(outputPath.toPath());
