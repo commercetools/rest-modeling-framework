@@ -9,7 +9,6 @@ import io.vrap.rmf.raml.model.types.StringType;
 import io.vrap.rmf.raml.model.types.util.TypesSwitch;
 import org.apache.commons.lang3.StringUtils;
 import org.stringtemplate.v4.ST;
-import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
 
 import java.io.File;
@@ -22,20 +21,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class TypesGenerator {
-    private final STGroup interfaceSTGroup;
-    private final TypeGeneratingVisitor typeGeneratingVisitor;
+    private final InterfaceGeneratingVisitor interfaceGeneratingVisitor;
 
     public TypesGenerator() throws IOException
     {
         final URL resource = Resources.getResource("./templates/php/interface.stg");
-        interfaceSTGroup = new STGroupFile(resource, "UTF-8", '<', '>');
-        interfaceSTGroup.load();
-        interfaceSTGroup.registerRenderer(String.class,
-                (arg, formatString, locale) ->
-                        "capitalize".equals(formatString) ?
-                                StringUtils.capitalize(arg.toString()) :
-                                arg.toString());
-        typeGeneratingVisitor = new TypeGeneratingVisitor("types");
+        interfaceGeneratingVisitor = new InterfaceGeneratingVisitor("types", createSTGroup(resource));
     }
 
     public void generate(final List<AnyType> types, final File outputPath) throws IOException {
@@ -51,15 +42,29 @@ public class TypesGenerator {
         }
     }
 
-    @VisibleForTesting
-    String generateFile(final AnyType type) {
-        return typeGeneratingVisitor.doSwitch(type);
+    private STGroupFile createSTGroup(final URL resource) {
+        final STGroupFile stGroup = new STGroupFile(resource, "UTF-8", '<', '>');
+        stGroup.load();
+        stGroup.registerRenderer(String.class,
+                (arg, formatString, locale) ->
+                        "capitalize".equals(formatString) ?
+                                StringUtils.capitalize(arg.toString()) :
+                                arg.toString());
+        return stGroup;
     }
 
-    private class TypeGeneratingVisitor extends TypesSwitch<String> {
-        private final String packageName;
 
-        public TypeGeneratingVisitor(String packageName) {
+    @VisibleForTesting
+    String generateFile(final AnyType type) {
+        return interfaceGeneratingVisitor.doSwitch(type);
+    }
+
+    private class InterfaceGeneratingVisitor extends TypesSwitch<String> {
+        private final String packageName;
+        private final STGroupFile interfaceSTGroup;
+
+        public InterfaceGeneratingVisitor(final String packageName, final STGroupFile interfaceSTGroup) {
+            this.interfaceSTGroup = interfaceSTGroup;
             this.packageName = packageName;
         }
 
