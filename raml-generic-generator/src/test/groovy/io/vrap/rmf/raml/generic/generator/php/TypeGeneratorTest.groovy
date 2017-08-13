@@ -1,5 +1,7 @@
 package io.vrap.rmf.raml.generic.generator.php
 
+import com.google.common.io.Resources
+import io.vrap.raml.generic.generator.ResourceFixtures
 import io.vrap.rmf.raml.model.modules.Api
 import io.vrap.rmf.raml.model.types.AnyType
 import io.vrap.rmf.raml.persistence.RamlResourceSet
@@ -10,13 +12,16 @@ import io.vrap.rmf.raml.persistence.constructor.Scope
 import org.antlr.v4.runtime.CommonTokenFactory
 import org.antlr.v4.runtime.CommonTokenStream
 import org.antlr.v4.runtime.TokenStream
+import org.assertj.core.util.Files
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.resource.ResourceSet
 import org.eclipse.emf.ecore.resource.URIConverter
 import spock.lang.Shared
 import spock.lang.Specification
 
-class TypeGeneratorTest extends Specification {
+import java.nio.charset.StandardCharsets
+
+class TypeGeneratorTest extends Specification implements ResourceFixtures {
     @Shared
     ResourceSet resourceSet = new RamlResourceSet()
     @Shared
@@ -33,21 +38,7 @@ class TypeGeneratorTest extends Specification {
         ''')
         then:
         String result = generate(TypesGenerator.TYPE_INTERFACE, api.types.get(0));
-        result == '''<?php
-/**
- * This file has been auto generated
- * Do not change it
- */
-
-namespace Ctp\\Types;
-
-interface Person {
-    /**
-     * @return string
-     */
-    public function getName();
-}
-'''
+        result == fileContent("simple-interface.php")
     }
 
     def "generate extended interface"() {
@@ -65,21 +56,7 @@ interface Person {
         ''')
         then:
         String result = generate(TypesGenerator.TYPE_INTERFACE, api.types.get(1));
-        result == '''<?php
-/**
- * This file has been auto generated
- * Do not change it
- */
-
-namespace Ctp\\Types;
-
-interface User extends Person {
-    /**
-     * @return string
-     */
-    public function getRole();
-}
-'''
+        result == fileContent("extended-interface.php")
     }
 
     def "generate simple model"() {
@@ -97,29 +74,7 @@ interface User extends Person {
         ''')
         then:
         String result = generate(TypesGenerator.TYPE_MODEL, api.types.get(0));
-        result == '''<?php
-/**
- * This file has been auto generated
- * Do not change it
- */
-
-namespace Ctp\\Types;
-
-class PersonModel implements Person {
-    public function __construct() {
-    }
-
-    /**
-     * @var string
-     */
-    private $name;
-
-    /**
-     * @return string
-     */
-    public function getName() { return $this->name; }
-}
-'''
+        result == fileContent("simple-model.php")
     }
 
     def "generate extended model"() {
@@ -137,30 +92,7 @@ class PersonModel implements Person {
         ''')
         then:
         String result = generate(TypesGenerator.TYPE_MODEL, api.types.get(1));
-        result == '''<?php
-/**
- * This file has been auto generated
- * Do not change it
- */
-
-namespace Ctp\\Types;
-
-class UserModel extends PersonModel implements User {
-    public function __construct() {
-        parent::__construct();
-    }
-
-    /**
-     * @var string
-     */
-    private $role;
-
-    /**
-     * @return string
-     */
-    public function getRole() { return $this->role; }
-}
-'''
+        result == fileContent("extended-model.php")
     }
 
     def "generate interface getter"() {
@@ -177,21 +109,7 @@ class UserModel extends PersonModel implements User {
         ''')
         then:
         String result = generate(TypesGenerator.TYPE_INTERFACE, api.types.get(0));
-        result == '''<?php
-/**
- * This file has been auto generated
- * Do not change it
- */
-
-namespace Ctp\\Types;
-
-interface Person {
-    /**
-     * @return Address
-     */
-    public function getAddress();
-}
-'''
+        result == fileContent("interface-getter.php")
     }
 
     def "generate model getter"() {
@@ -208,29 +126,7 @@ interface Person {
         ''')
         then:
         String result = generate(TypesGenerator.TYPE_MODEL, api.types.get(0));
-        result == '''<?php
-/**
- * This file has been auto generated
- * Do not change it
- */
-
-namespace Ctp\\Types;
-
-class PersonModel implements Person {
-    public function __construct() {
-    }
-
-    /**
-     * @var Address
-     */
-    private $address;
-
-    /**
-     * @return Address
-     */
-    public function getAddress() { return $this->address; }
-}
-'''
+        result == fileContent("model-getter.php")
     }
 
     def "generate simple discriminator"() {
@@ -248,71 +144,34 @@ class PersonModel implements Person {
         ''')
         then:
         String baseClass = generate(TypesGenerator.TYPE_MODEL, api.types.get(0));
-        baseClass == '''<?php
-/**
- * This file has been auto generated
- * Do not change it
- */
+        baseClass == fileContent("simple-discriminator-base.php")
 
-namespace Ctp\\Types;
-
-class PersonModel implements Person {
-    const DISCRIMINATOR_VALUE = '';
-
-    public function __construct() {
-        $this->kind = static::DISCRIMINATOR_VALUE;
-    }
-
-    /**
-     * @var string
-     */
-    private $kind;
-
-    /**
-     * @return string
-     */
-    public function getKind() { return $this->kind; }
-}
-'''
         String kindClass = generate(TypesGenerator.TYPE_MODEL, api.types.get(1));
-        kindClass == '''<?php
-/**
- * This file has been auto generated
- * Do not change it
- */
-
-namespace Ctp\\Types;
-
-class UserModel extends PersonModel implements User {
-    const DISCRIMINATOR_VALUE = 'user';
-
-    public function __construct() {
-        parent::__construct();
+        kindClass == fileContent("simple-discriminator-kind.php")
     }
 
-
-}
-'''
-    }
-
-    String generate(String generateType, AnyType type) {
+    String generate(final String generateType, final AnyType type) {
         TypesGenerator generator = new TypesGenerator()
         return generator.generateType(generator.createVisitor(TypesGenerator.PACKAGE_NAME, generateType), type);
     }
 
-    Api constructApi(String input) {
+    Api constructApi(final String input) {
         RAMLParser parser = parser(input)
         def apiConstructor = new ApiConstructor()
         Scope scope = Scope.of(resourceSet.createResource(uri))
         return (Api)apiConstructor.construct(parser, scope)
     }
 
-    RAMLParser parser(String input) {
+    RAMLParser parser(final String input) {
         final URIConverter uriConverter = resourceSet.getURIConverter();
         def strippedInput = input.stripIndent()
         final RAMLCustomLexer lexer = new RAMLCustomLexer(strippedInput, uri, uriConverter);
         final TokenStream tokenStream = new CommonTokenStream(lexer);
         lexer.setTokenFactory(CommonTokenFactory.DEFAULT);
-        new RAMLParser(tokenStream)
+        return new RAMLParser(tokenStream)
+    }
+
+    String fileContent(final String fileName) {
+        return Files.contentOf(new File(Resources.getResource(fileName).toURI()), StandardCharsets.UTF_8)
     }
 }
