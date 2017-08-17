@@ -40,7 +40,7 @@ public class TypesGenerator extends AbstractGenerator {
 
         generateStatics(outputPath);
         generateTypes(outputPath, types);
-        generateMap(outputPath, types);
+        generateMapFile(outputPath, types);
         generateDiscriminatorResolver(outputPath, types);
         generateCollections(outputPath, types);
     }
@@ -109,7 +109,9 @@ public class TypesGenerator extends AbstractGenerator {
             generateFile(st.render(), new File(outputPath, objectType.getName() + "DiscriminatorResolver.php"));
         }
     }
-    private void generateMap(final File outputPath, final List<AnyType> types) throws IOException {
+
+    @VisibleForTesting
+    String generateMap(final List<AnyType> types) {
         final List<String> objectTypes = types.stream().filter(anyType -> anyType instanceof ObjectType).map(AnyType::getName).collect(Collectors.toList());
         for (final AnyType anyType : types) {
             if (anyType instanceof ObjectType) {
@@ -134,7 +136,11 @@ public class TypesGenerator extends AbstractGenerator {
 
         objectTypes.sort(Comparator.naturalOrder());
         st.add("types", objectTypes);
-        generateFile(st.render(), new File(outputPath, "ModelClassMap.php"));
+        return st.render();
+    }
+
+    private void generateMapFile(final File outputPath, final List<AnyType> types) throws IOException {
+        generateFile(generateMap(types), new File(outputPath, "ModelClassMap.php"));
     }
 
     @VisibleForTesting

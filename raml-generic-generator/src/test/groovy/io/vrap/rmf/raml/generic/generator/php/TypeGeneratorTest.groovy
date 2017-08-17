@@ -133,6 +133,24 @@ class TypeGeneratorTest extends Specification implements ResourceFixtures {
         result == fileContent("CustomerModel.php")
     }
 
+    def "generate model class map"() {
+        when:
+        Api api = constructApi(
+                '''\
+        types:
+            Customer:
+                properties:
+                    address: Address
+            Address:
+                properties:
+                    street: string
+        ''')
+        then:
+        TypesGenerator generator = new TypesGenerator("Test")
+        String result = generator.generateMap(api.types);
+        result == fileContent("ModelClassMap.php")
+    }
+
     def "generate simple discriminator"() {
         when:
         Api api = constructApi(
@@ -172,6 +190,7 @@ class TypeGeneratorTest extends Specification implements ResourceFixtures {
         "jsonCollection" | _
         "collection" | _
         "mapIterator" | _
+        "classMap" | _
     }
 
     String generate(final String generateType, final AnyType type) {

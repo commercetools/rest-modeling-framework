@@ -469,6 +469,7 @@ abstract class ClassMap
         return $class;
     }
 }
+
 >>
 
 discriminatorResolver(vendorName, package, type, subTypes) ::= <<
@@ -489,6 +490,7 @@ class <type.name; format="capitalize">DiscriminatorResolver
         return isset($types[$discriminator]) ? $types[$discriminator] : <type.name>::class;
     }
 }
+
 >>
 
 discriminatorMapping(type) ::= <<
@@ -508,6 +510,7 @@ class ModelClassMap extends ClassMap
         <types: {t|<typeMapping(t)>}>
     ];
 }
+
 >>
 
 typeMapping(typeName) ::= <<
@@ -546,4 +549,5 @@ class ResourceClassMap
         return self::getClassMap()->getMappedClass($class);
     }
 }
+
 >>
