@@ -4,11 +4,11 @@
  * Do not change it
  */
 
-namespace Ctp\Types;
+namespace Test\Types;
 
 interface Person {
     /**
-     * @return Address
+     * @return string
      */
-    public function getAddress();
+    public function getName();
 }

@@ -20,6 +20,7 @@ import spock.lang.Shared
 import spock.lang.Specification
 
 import java.nio.charset.StandardCharsets
+import static org.apache.commons.lang3.StringUtils.capitalize;
 
 class TypeGeneratorTest extends Specification implements ResourceFixtures {
     @Shared
@@ -38,7 +39,7 @@ class TypeGeneratorTest extends Specification implements ResourceFixtures {
         ''')
         then:
         String result = generate(TypesGenerator.TYPE_INTERFACE, api.types.get(0));
-        result == fileContent("simple-interface.php")
+        result == fileContent("Person.php")
     }
 
     def "generate extended interface"() {
@@ -56,7 +57,7 @@ class TypeGeneratorTest extends Specification implements ResourceFixtures {
         ''')
         then:
         String result = generate(TypesGenerator.TYPE_INTERFACE, api.types.get(1));
-        result == fileContent("extended-interface.php")
+        result == fileContent("User.php")
     }
 
     def "generate simple model"() {
@@ -74,7 +75,7 @@ class TypeGeneratorTest extends Specification implements ResourceFixtures {
         ''')
         then:
         String result = generate(TypesGenerator.TYPE_MODEL, api.types.get(0));
-        result == fileContent("simple-model.php")
+        result == fileContent("PersonModel.php")
     }
 
     def "generate extended model"() {
@@ -92,7 +93,7 @@ class TypeGeneratorTest extends Specification implements ResourceFixtures {
         ''')
         then:
         String result = generate(TypesGenerator.TYPE_MODEL, api.types.get(1));
-        result == fileContent("extended-model.php")
+        result == fileContent("UserModel.php")
     }
 
     def "generate interface getter"() {
@@ -100,7 +101,7 @@ class TypeGeneratorTest extends Specification implements ResourceFixtures {
         Api api = constructApi(
                 '''\
         types:
-            Person:
+            Customer:
                 properties:
                     address: Address
             Address:
@@ -109,7 +110,10 @@ class TypeGeneratorTest extends Specification implements ResourceFixtures {
         ''')
         then:
         String result = generate(TypesGenerator.TYPE_INTERFACE, api.types.get(0));
-        result == fileContent("interface-getter.php")
+        result == fileContent("Customer.php")
+
+        String address = generate(TypesGenerator.TYPE_INTERFACE, api.types.get(1));
+        address == fileContent("Address.php")
     }
 
     def "generate model getter"() {
@@ -117,7 +121,7 @@ class TypeGeneratorTest extends Specification implements ResourceFixtures {
         Api api = constructApi(
                 '''\
         types:
-            Person:
+            Customer:
                 properties:
                     address: Address
             Address:
@@ -126,7 +130,7 @@ class TypeGeneratorTest extends Specification implements ResourceFixtures {
         ''')
         then:
         String result = generate(TypesGenerator.TYPE_MODEL, api.types.get(0));
-        result == fileContent("model-getter.php")
+        result == fileContent("CustomerModel.php")
     }
 
     def "generate simple discriminator"() {
@@ -134,24 +138,44 @@ class TypeGeneratorTest extends Specification implements ResourceFixtures {
         Api api = constructApi(
                 '''\
         types:
-            Person:
+            Animal:
                 discriminator: kind
                 properties:
                     kind: string
-            User:
-                type: Person
-                discriminatorValue: user
+            Cat:
+                type: Animal
+                discriminatorValue: cat
         ''')
         then:
+        String baseInterface = generate(TypesGenerator.TYPE_INTERFACE, api.types.get(0));
+        baseInterface == fileContent("Animal.php")
+
         String baseClass = generate(TypesGenerator.TYPE_MODEL, api.types.get(0));
-        baseClass == fileContent("simple-discriminator-base.php")
+        baseClass == fileContent("AnimalModel.php")
+
+        String kindInterface = generate(TypesGenerator.TYPE_INTERFACE, api.types.get(1));
+        kindInterface == fileContent("Cat.php")
 
         String kindClass = generate(TypesGenerator.TYPE_MODEL, api.types.get(1));
-        kindClass == fileContent("simple-discriminator-kind.php")
+        kindClass == fileContent("CatModel.php")
+    }
+
+    def "test base class files"(String name) {
+        expect:
+        TypesGenerator generator = new TypesGenerator("Test")
+        String result = generator.generateStatic(name);
+        result == fileContent(capitalize(name) + ".php")
+
+        where:
+        name | _
+        "jsonObject" | _
+        "jsonCollection" | _
+        "collection" | _
+        "mapIterator" | _
     }
 
     String generate(final String generateType, final AnyType type) {
-        TypesGenerator generator = new TypesGenerator()
+        TypesGenerator generator = new TypesGenerator("Test")
         return generator.generateType(generator.createVisitor(TypesGenerator.PACKAGE_NAME, generateType), type);
     }
 

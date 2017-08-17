@@ -4,12 +4,9 @@
  * Do not change it
  */
 
-namespace Ctp\Types;
+namespace Test\Types;
 
-class PersonModel implements Person {
-    public function __construct() {
-    }
-
+class CustomerModel extends JsonObject implements Customer {
     /**
      * @var Address
      */

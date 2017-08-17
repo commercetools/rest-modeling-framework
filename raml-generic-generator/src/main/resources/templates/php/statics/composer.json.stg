@@ -1,10 +1,11 @@
+main(vendorName) ::= <<
 {
-  "name": "commercetools/php-sdk",
+  "name": "<vendorName; format="lowercased">/raml-php-sdk",
   "license": "MIT",
   "type": "library",
   "autoload": {
     "psr-4": {
-      "Ctp\\": [
+      "<vendorName>\\\\": [
         "target/"
       ]
     }
@@ -13,3 +14,4 @@
     "php": ">=5.6"
   }
 }
+>>

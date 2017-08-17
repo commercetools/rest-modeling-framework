@@ -4,12 +4,14 @@
  * Do not change it
  */
 
-namespace Ctp\Types;
+namespace Test\Types;
 
-class PersonModel implements Person {
+class AnimalModel extends JsonObject implements Animal {
     const DISCRIMINATOR_VALUE = '';
 
-    public function __construct() {
+
+    public function __construct(array $data = []) {
+        parent::__construct($data);
         $this->kind = static::DISCRIMINATOR_VALUE;
     }
 

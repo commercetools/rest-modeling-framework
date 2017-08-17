@@ -4,11 +4,11 @@
  * Do not change it
  */
 
-namespace Ctp\Types;
+namespace Test\Types;
 
-interface Person {
+interface Address {
     /**
      * @return string
      */
-    public function getName();
+    public function getStreet();
 }

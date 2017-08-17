@@ -4,11 +4,11 @@
  * Do not change it
  */
 
-namespace Ctp\Types;
+namespace Test\Types;
 
-interface User extends Person {
+interface Animal {
     /**
      * @return string
      */
-    public function getRole();
+    public function getKind();
 }

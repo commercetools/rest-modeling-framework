@@ -2,11 +2,11 @@
  * interface template functions
  */
 
-interface(type, package, builtInParent) ::= <<
+interface(vendorName, type, package, builtInParent) ::= <<
 \<?php
 <generatorInfo()>
 
-namespace Ctp\\<package; format="capitalize">;
+namespace <vendorName>\\<package; format="capitalize">;
 
 interface <type.name> <if(!builtInParent)>extends <type.type.name> <endif>{
     <type.properties: {p|<propertyInterfaceGet(p)>}>
@@ -23,40 +23,141 @@ propertyInterfaceGet(property) ::= <<
 public function get<property.name; format="capitalize">();
 >>
 
-/*
- * implementation template functions
- */
-model(type, package, builtInParent) ::= <<
+collectionInterface(vendorName, type, package, builtInParent) ::= <<
 \<?php
 <generatorInfo()>
 
-namespace Ctp\\<package; format="capitalize">;
+namespace <vendorName>\\<package; format="capitalize">;
 
-class <type.name>Model <if(!builtInParent)>extends <type.type.name>Model <endif>implements <type.name> {
+interface <type.name>Collection extends Collection {
+}
+
+>>
+/*
+ * implementation template functions
+ */
+model(vendorName, type, package, builtInParent, properties, serializers) ::= <<
+\<?php
+<generatorInfo()>
+
+namespace <vendorName>\\<package; format="capitalize">;
+
+class <type.name>Model extends <if(!builtInParent)><type.type.name>Model <else>JsonObject <endif>implements <type.name> {
     <if(type.discriminator || type.discriminatorValue)>
     const DISCRIMINATOR_VALUE = '<type.discriminatorValue>';
 
     <endif>
-    public function __construct() {
-        <if(!builtInParent)>parent::__construct();<endif>
-        <if(type.discriminator)>
+
+    <if(type.discriminator)>
+    public function __construct(array $data = []) {
+        parent::__construct($data);
         $this-><type.discriminator> = static::DISCRIMINATOR_VALUE;
-        <endif>
     }
+    <endif>
 
     <type.properties: {p|<property(p)>}>
 
-    <type.properties: {p|<propertyGet(p)>}>
+    <properties: {p | <p>}>
+
+    <if(serializers)>
+    public function jsonSerialize() {
+        $data = parent::jsonSerialize();
+        <serializers: {s |<s>}>
+        return $data;
+    }
+    <endif>
 }
 
 >>
 
-propertyGet(property) ::= <<
-
+defaultMapper(property) ::= <<
 /**
- * @return <property.type.name>
+ * @return mixed
  */
-public function get<property.name; format="capitalize">() { return $this-><property.name>; }
+public function get<property.name; format="capitalize">()
+{
+    if (is_null($this-><property.name>)) {
+        $value = $this->raw('<property.name>');
+        $this-><property.name> = $value;
+    }
+    return $this-><property.name>;
+}
+
+>>
+
+dateTimeMapper(property, dateTimeFormat) ::= <<
+/**
+ * @return \DateTimeImmutable
+ */
+public function get<property.name; format="capitalize">()
+{
+    if (is_null($this-><property.name>)) {
+        $value = $this->raw('<property.name>');
+        <if(dateTimeFormat)>
+        $dateTime = \DateTimeImmutable::createFromFormat('<dateTimeFormat>', $value);
+        if ($dateTime) {
+            $this-><property.name> = $dateTime;
+        }
+        <else>
+        $this-><property.name> = new \DateTimeImmutable($value);
+        <endif>
+    }
+    return $this-><property.name>;
+}
+
+>>
+
+scalarMapper(property, scalarType) ::= <<
+/**
+ * @return <scalarType>
+ */
+public function get<property.name; format="capitalize">()
+{
+    if (is_null($this-><property.name>)) {
+        $value = $this->raw('<property.name>');
+        $this-><property.name> = (<scalarType>)$value;
+    }
+    return $this-><property.name>;
+}
+
+>>
+
+classMapper(property) ::= <<
+/**
+ * @return <if(property.type.name)><property.type.name><else>mixed<endif>
+ */
+public function get<property.name; format="capitalize">()
+{
+    if (is_null($this-><property.name>)) {
+        $value = $this->raw('<property.name>');
+        $mappedClass = ResourceClassMap::getMappedClass(<property.type.name>::class);
+        if (is_null($value)) {
+            return new $mappedClass([]);
+        }
+        $this-><property.name> = new $mappedClass($value);
+    }
+    return $this-><property.name>;
+}
+
+>>
+
+arrayMapper(property) ::= <<
+/**
+ * @return <if(property.type.items.name)><property.type.items.name>Collection<else>mixed<endif>
+ */
+public function get<property.name; format="capitalize">()
+{
+    if (is_null($this-><property.name>)) {
+        $value = $this->raw('<property.name>');
+        $mappedClass = ResourceClassMap::getMappedClass(<property.type.items.name>Collection::class);
+        if (is_null($value)) {
+            return new $mappedClass([]);
+        }
+        $this-><property.name> = new $mappedClass($value);
+    }
+    return $this-><property.name>;
+}
+
 >>
 
 property(property) ::= <<
@@ -67,6 +168,38 @@ property(property) ::= <<
 private $<property.name>;
 >>
 
+timeSerializer(property, dateTimeFormat) ::= <<
+if (isset($data['<property.name>']) && $data['<property.name>'] instanceof \DateTimeImmutable) {
+    $data['<property.name>'] = $data['<property.name>']->format('<dateTimeFormat>');
+}
+
+>>
+
+dateSerializer(property, dateTimeFormat) ::= <<
+if (isset($data['<property.name>']) && $data['<property.name>'] instanceof \DateTimeImmutable) {
+    $data['<property.name>'] = $data['<property.name>']->format('<dateTimeFormat>');
+}
+
+>>
+
+dateTimeSerializer(property, dateTimeFormat) ::= <<
+if (isset($data['<property.name>']) && $data['<property.name>'] instanceof \DateTimeImmutable) {
+    $data['<property.name>'] = $data['<property.name>']->setTimeZone(new \DateTimeZone('UTC'))->format('<dateTimeFormat>');
+}
+
+>>
+
+collectionModel(vendorName, type, package, builtInParent) ::= <<
+\<?php
+<generatorInfo()>
+
+namespace <vendorName>\\<package; format="capitalize">;
+
+class <type.name>CollectionModel extends JsonCollection implements <type.name>Collection {
+}
+
+>>
+
 /*
  * common template functions
  */
@@ -75,4 +208,341 @@ generatorInfo() ::= <<
  * This file has been auto generated
  * Do not change it
  */
+>>
+
+jsonObject(vendorName, type, package, builtInParent) ::= <<
+\<?php
+<generatorInfo()>
+
+namespace <vendorName>\\<package; format="capitalize">;
+
+class JsonObject implements \\JsonSerializable
+{
+    private $rawData;
+
+    public function __construct(array $data = [])
+    {
+        $this->rawData = $data;
+    }
+
+    protected function raw($field)
+    {
+        if (isset($this->rawData[$field])) {
+            return $this->rawData[$field];
+        }
+        return null;
+    }
+
+    public function jsonSerialize()
+    {
+        return $this->toArray();
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public static function fromArray(array $data)
+    {
+        return new static($data);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    private function toArray()
+    {
+        $data = array_filter(
+            get_object_vars($this),
+            function ($value, $key) {
+                if ($key == 'rawData') {
+                    return false;
+                }
+                return !is_null($value);
+            },
+            ARRAY_FILTER_USE_BOTH
+        );
+        $data = array_merge($this->rawData, $data);
+        return $data;
+    }
+
+    public function __set($name, $value)
+    {
+        throw new \BadMethodCallException('Setting values is not allowed');
+    }
+}
+
+>>
+
+collection(vendorName, type, package, builtInParent) ::= <<
+\<?php
+<generatorInfo()>
+
+namespace <vendorName>\\<package; format="capitalize">;
+
+interface Collection extends \IteratorAggregate
+{
+    public function at($index);
+
+    /**
+     * @return MapIterator
+     */
+    public function getIterator();
+}
+
+>>
+
+
+jsonCollection(vendorName, type, package, builtInParent) ::= <<
+\<?php
+<generatorInfo()>
+
+namespace <vendorName>\\<package; format="capitalize">;
+
+class JsonCollection implements Collection, \\JsonSerializable
+{
+    private $rawData;
+    private $keys;
+    private $indexes = [];
+    private $iterator;
+
+    public function __construct(array $data = [])
+    {
+        $this->keys = array_keys($data);
+        $this->index($data);
+        $this->rawData = $data;
+        $this->iterator = $this->getIterator();
+    }
+
+    public function jsonSerialize()
+    {
+        return $this->toArray();
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public static function fromArray(array $data)
+    {
+        return new static($data);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function toArray()
+    {
+        return $this->rawData;
+    }
+
+    public function __set($name, $value)
+    {
+        throw new \BadMethodCallException('Setting values is not allowed');
+    }
+
+    protected function index($data)
+    {
+    }
+
+    protected function raw($field)
+    {
+        if (isset($this->rawData[$field])) {
+            return $this->rawData[$field];
+        }
+        return null;
+    }
+
+    public function at($index)
+    {
+        return $this->map($this->raw($index), $index);
+    }
+
+    public function map($data, $index)
+    {
+        return $data;
+    }
+
+    protected function addToIndex($index, $key, $value)
+    {
+        $this->indexes[$index][$key] = $value;
+    }
+
+    protected function valueByKey($index, $key)
+    {
+        return isset($this->indexes[$index][$key]) ? $this->at($this->indexes[$index][$key]) : null;
+    }
+
+    /**
+     * @return MapIterator
+     */
+    public function getIterator()
+    {
+        return new MapIterator($this->rawData, [$this, 'map']);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function current()
+    {
+        return $this->iterator->current();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function next()
+    {
+        $this->iterator->next();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function key()
+    {
+        $this->iterator->key();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function valid()
+    {
+        $this->iterator->valid();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function rewind()
+    {
+        $this->iterator->rewind();
+    }
+}
+
+>>
+
+mapIterator(vendorName, type, package, builtInParent) ::= <<
+\<?php
+<generatorInfo()>
+
+namespace <vendorName>\\<package; format="capitalize">;
+
+class MapIterator extends \ArrayIterator
+{
+    /**
+     * @var callable
+     */
+    private $callback;
+
+    public function __construct($value, callable $callback)
+    {
+        parent::__construct($value);
+        $this->callback = $callback;
+    }
+
+    public function current()
+    {
+        $value = parent::current();
+        $key = parent::key();
+        return call_user_func($this->callback, $value, $key);
+    }
+}
+>>
+
+classMap(vendorName, type, package, builtInParent) ::= <<
+\<?php
+<generatorInfo()>
+
+namespace <vendorName>\\<package; format="capitalize">;
+
+abstract class ClassMap
+{
+    protected static $types = [];
+
+    public function getMappedClass($class)
+    {
+        if (isset(static::$types[$class])) {
+            return static::$types[$class];
+        }
+        return $class;
+    }
+}
+>>
+
+discriminatorResolver(vendorName, package, type, subTypes) ::= <<
+\<?php
+<generatorInfo()>
+
+namespace <vendorName>\\<package; format="capitalize">;
+
+class <type.name; format="capitalize">DiscriminatorResolver
+{
+    const TYPES = [
+        <subTypes: {t|<discriminatorMapping(t)>}>
+    ];
+    public static function discriminatorType(array $data, $discriminatorName)
+    {
+        $types = static::TYPES;
+        $discriminator = isset($data[$discriminatorName]) ? $data[$discriminatorName] : '';
+        return isset($types[$discriminator]) ? $types[$discriminator] : <type.name>::class;
+    }
+}
+>>
+
+discriminatorMapping(type) ::= <<
+'<type.discriminatorValue>' => <type.name; format="capitalize">::class,
+
+>>
+
+modelMap(vendorName, package, types) ::= <<
+\<?php
+<generatorInfo()>
+
+namespace <vendorName>\\<package; format="capitalize">;
+
+class ModelClassMap extends ClassMap
+{
+    protected static $types = [
+        <types: {t|<typeMapping(t)>}>
+    ];
+}
+>>
+
+typeMapping(typeName) ::= <<
+<typeName; format="capitalize">::class => <typeName; format="capitalize">Model::class,
+
+>>
+
+resourceClassMap(vendorName, type, package, builtInParent) ::= <<
+\<?php
+<generatorInfo()>
+
+namespace <vendorName>\\<package; format="capitalize">;
+
+class ResourceClassMap
+{
+    /**
+     * @var ClassMap
+     */
+    private static $classMap;
+
+    private static function getClassMap()
+    {
+        if (is_null(self::$classMap)) {
+            self::$classMap = new ModelClassMap();
+        }
+        return self::$classMap;
+    }
+
+    public static function setClassMap(ClassMap $classMap)
+    {
+        self::$classMap = $classMap;
+    }
+
+    public static function getMappedClass($class)
+    {
+        return self::getClassMap()->getMappedClass($class);
+    }
+}
 >>

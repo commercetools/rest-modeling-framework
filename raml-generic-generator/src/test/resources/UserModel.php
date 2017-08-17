@@ -4,13 +4,9 @@
  * Do not change it
  */
 
-namespace Ctp\Types;
+namespace Test\Types;
 
 class UserModel extends PersonModel implements User {
-    public function __construct() {
-        parent::__construct();
-    }
-
     /**
      * @var string
      */

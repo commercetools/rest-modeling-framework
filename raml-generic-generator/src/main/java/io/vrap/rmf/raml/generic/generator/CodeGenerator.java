@@ -17,6 +17,8 @@ import java.time.Duration;
 import org.apache.commons.cli.*;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 
+import javax.annotation.Nullable;
+
 public class CodeGenerator {
     public static void main(String... args) throws Exception {
 
@@ -35,7 +37,7 @@ public class CodeGenerator {
         final EList<Resource.Diagnostic> errors = resource.getErrors();
 
         if (errors.isEmpty() && contents.size() == 1) {
-            Generator generator = of(options.getLanguage());
+            Generator generator = of(options.getLanguage(), options.getVendorName());
 
             generator.generate((Api)contents.get(0), generateTo);
 
@@ -49,10 +51,10 @@ public class CodeGenerator {
         }
     }
 
-    private static Generator of(String language) throws Exception {
+    private static Generator of(String language, String vendorName) throws Exception {
         switch (language) {
             case "php":
-                return new PhpGenerator();
+                return new PhpGenerator(vendorName);
             case "java":
                 return new JavaGenerator();
             default:
@@ -64,9 +66,11 @@ public class CodeGenerator {
         private Path ramlPath;
         private Path outputPath;
         private String language;
+        @Nullable
+        private String vendorName;
         private final Options options;
 
-        public GeneratorOptions(String[] args)
+        GeneratorOptions(String[] args)
         {
             final CommandLine cmd;
             final CommandLineParser parser = new DefaultParser();
@@ -84,6 +88,7 @@ public class CodeGenerator {
             }
 
             language = cmd.getOptionValue(getLangOption().getOpt(), "php");
+            vendorName = cmd.getOptionValue(getLangOption().getOpt());
             outputPath = Paths.get(cmd.getOptionValue(getOutputPathOption().getOpt(), "../demo/src/generated/")).toAbsolutePath();
 
             if (cmd.hasOption(getHelpOption().getOpt())) {
@@ -129,6 +134,17 @@ public class CodeGenerator {
                     .build();
         }
 
+        private Option getNamespaceOption()
+        {
+            return Option.builder("v")
+                    .longOpt("vendor")
+                    .argName("vendorName")
+                    .desc("base vendorName")
+                    .hasArg(true)
+                    .required(false)
+                    .build();
+        }
+
         private Option getHelpOption() {
             return Option.builder("h")
                     .longOpt("help")
@@ -144,14 +160,18 @@ public class CodeGenerator {
             formatter.printHelp("codegen [OPTIONS] <file.raml>", options);
         }
 
-        public Path getRamlPath() {
+        Path getRamlPath() {
             return ramlPath;
         }
-        public Path getOutputPath() {
+        Path getOutputPath() {
             return outputPath;
         }
-        public String getLanguage() {
+        String getLanguage() {
             return language;
+        }
+        @Nullable
+        String getVendorName() {
+            return vendorName;
         }
     }
 }
