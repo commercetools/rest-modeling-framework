@@ -15,5 +15,14 @@ class UserModel extends PersonModel implements User {
     /**
      * @return string
      */
-    public function getRole() { return $this->role; }
+    public function getRole()
+    {
+        if (is_null($this->role)) {
+            $value = $this->raw('role');
+            $this->role = (string)$value;
+        }
+        return $this->role;
+    }
+
+
 }

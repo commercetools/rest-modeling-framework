@@ -448,6 +448,7 @@ class MapIterator extends \ArrayIterator
         return call_user_func($this->callback, $value, $key);
     }
 }
+
 >>
 
 classMap(vendorName, type, package, builtInParent) ::= <<

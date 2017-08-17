@@ -23,5 +23,14 @@ class AnimalModel extends JsonObject implements Animal {
     /**
      * @return string
      */
-    public function getKind() { return $this->kind; }
+    public function getKind()
+    {
+        if (is_null($this->kind)) {
+            $value = $this->raw('kind');
+            $this->kind = (string)$value;
+        }
+        return $this->kind;
+    }
+
+
 }

@@ -15,5 +15,14 @@ class PersonModel extends JsonObject implements Person {
     /**
      * @return string
      */
-    public function getName() { return $this->name; }
+    public function getName()
+    {
+        if (is_null($this->name)) {
+            $value = $this->raw('name');
+            $this->name = (string)$value;
+        }
+        return $this->name;
+    }
+
+
 }

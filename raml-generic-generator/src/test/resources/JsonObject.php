@@ -39,7 +39,7 @@ class JsonObject implements \JsonSerializable
     /**
      * @inheritdoc
      */
-    public function toArray()
+    private function toArray()
     {
         $data = array_filter(
             get_object_vars($this),

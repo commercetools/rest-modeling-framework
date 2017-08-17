@@ -15,5 +15,18 @@ class CustomerModel extends JsonObject implements Customer {
     /**
      * @return Address
      */
-    public function getAddress() { return $this->address; }
+    public function getAddress()
+    {
+        if (is_null($this->address)) {
+            $value = $this->raw('address');
+            $mappedClass = ResourceClassMap::getMappedClass(Address::class);
+            if (is_null($value)) {
+                return new $mappedClass([]);
+            }
+            $this->address = new $mappedClass($value);
+        }
+        return $this->address;
+    }
+
+
 }
