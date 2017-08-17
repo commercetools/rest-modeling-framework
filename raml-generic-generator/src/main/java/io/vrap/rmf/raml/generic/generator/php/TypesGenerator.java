@@ -194,15 +194,7 @@ public class TypesGenerator extends AbstractGenerator {
         }
     }
 
-    private class PropertyGeneratingVisitor extends TypesSwitch<String> {
-        private final STGroupFile stGroup;
-        private final Property property;
-
-        public PropertyGeneratingVisitor(final STGroupFile stGroup, final Property property) {
-            this.stGroup = stGroup;
-            this.property = property;
-        }
-
+    abstract class PropertyVisitor extends TypesSwitch<String> {
         @Override
         public String caseStringType(StringType object) {
             return scalarMapper("string");
@@ -226,6 +218,18 @@ public class TypesGenerator extends AbstractGenerator {
             return scalarMapper("int");
         }
 
+        abstract String scalarMapper(final String scalarType);
+    }
+
+    private class PropertyGetterGeneratingVisitor extends PropertyVisitor {
+        final STGroupFile stGroup;
+        final Property property;
+
+        PropertyGetterGeneratingVisitor(final STGroupFile stGroup, final Property property) {
+            this.stGroup = stGroup;
+            this.property = property;
+        }
+
         @Override
         public String caseTimeOnlyType(TimeOnlyType object) {
             return dateTimeMapper("H:i:s.u");
@@ -241,17 +245,17 @@ public class TypesGenerator extends AbstractGenerator {
             return dateTimeMapper("Y-m-d?H:i:s.uT");
         }
 
-        private String dateTimeMapper(final String dateTimeFormat)
+        String dateTimeMapper(final String dateTimeFormat)
         {
-            final ST st = stGroup.getInstanceOf("dateTimeMapper");
+            final ST st = stGroup.getInstanceOf("dateTimeGetter");
             st.add("property", property);
             st.add("dateTimeFormat", dateTimeFormat);
             return st.render();
         }
 
-        private String scalarMapper(final String scalarType)
+        String scalarMapper(final String scalarType)
         {
-            final ST st = stGroup.getInstanceOf("scalarMapper");
+            final ST st = stGroup.getInstanceOf("scalarGetter");
             st.add("property", property);
             st.add("scalarType", scalarType);
             return st.render();
@@ -262,7 +266,7 @@ public class TypesGenerator extends AbstractGenerator {
             if (arrayType.getItems() == null || arrayType.getItems().getName() == null) {
                 return null;
             } else {
-                final ST st = stGroup.getInstanceOf("arrayMapper");
+                final ST st = stGroup.getInstanceOf("arrayGetter");
                 st.add("property", property);
                 return st.render();
             }
@@ -273,7 +277,7 @@ public class TypesGenerator extends AbstractGenerator {
             if (objectType.getName() == null) {
                 return null;
             } else {
-                final ST st = stGroup.getInstanceOf("classMapper");
+                final ST st = stGroup.getInstanceOf("classGetter");
                 st.add("property", property);
                 return st.render();
             }
@@ -281,11 +285,131 @@ public class TypesGenerator extends AbstractGenerator {
 
         @Override
         public String defaultCase(EObject object) {
-            final ST st = stGroup.getInstanceOf("defaultMapper");
+            final ST st = stGroup.getInstanceOf("defaultGetter");
             st.add("property", property);
             return st.render();
         }
     }
+
+    private class PropertyTypeVisitor extends PropertyVisitor {
+
+        @Override
+        public String caseTimeOnlyType(TimeOnlyType object) {
+            return dateTimeMapper();
+        }
+
+        @Override
+        public String caseDateOnlyType(DateOnlyType object) {
+            return dateTimeMapper();
+        }
+
+        @Override
+        public String caseDateTimeType(DateTimeType object) {
+            return dateTimeMapper();
+        }
+
+        String dateTimeMapper()
+        {
+            return "\\DateTimeImmutable";
+        }
+
+        String scalarMapper(final String scalarType)
+        {
+            return scalarType;
+        }
+
+        @Override
+        public String caseArrayType(final ArrayType arrayType) {
+            if (arrayType.getItems() == null || arrayType.getItems().getName() == null) {
+                return null;
+            } else {
+                return  arrayType.getItems().getName() + "Collection";
+            }
+        }
+
+        @Override
+        public String caseObjectType(final ObjectType objectType) {
+            if (objectType.getName() == null) {
+                return null;
+            } else {
+                return objectType.getName();
+            }
+        }
+
+        @Override
+        public String defaultCase(EObject object) {
+            return "mixed";
+        }
+    }
+
+    private class PropertySetterGeneratingVisitor extends PropertyVisitor {
+        final STGroupFile stGroup;
+        final Property property;
+
+        PropertySetterGeneratingVisitor(final STGroupFile stGroup, final Property property) {
+            this.stGroup = stGroup;
+            this.property = property;
+        }
+        @Override
+        public String caseTimeOnlyType(TimeOnlyType object) {
+            return dateTimeMapper();
+        }
+
+        @Override
+        public String caseDateOnlyType(DateOnlyType object) {
+            return dateTimeMapper();
+        }
+
+        @Override
+        public String caseDateTimeType(DateTimeType object) {
+            return dateTimeMapper();
+        }
+
+        private String dateTimeMapper()
+        {
+            final ST st = stGroup.getInstanceOf("dateTimeSetter");
+            st.add("property", property);
+            return st.render();
+        }
+
+        String scalarMapper(final String scalarType)
+        {
+            final ST st = stGroup.getInstanceOf("scalarSetter");
+            st.add("property", property);
+            st.add("scalarType", scalarType);
+            return st.render();
+        }
+
+        @Override
+        public String caseArrayType(final ArrayType arrayType) {
+            if (arrayType.getItems() == null || arrayType.getItems().getName() == null) {
+                return null;
+            } else {
+                final ST st = stGroup.getInstanceOf("arraySetter");
+                st.add("property", property);
+                return st.render();
+            }
+        }
+
+        @Override
+        public String caseObjectType(final ObjectType objectType) {
+            if (objectType.getName() == null) {
+                return null;
+            } else {
+                final ST st = stGroup.getInstanceOf("classSetter");
+                st.add("property", property);
+                return st.render();
+            }
+        }
+
+        @Override
+        public String defaultCase(EObject object) {
+            final ST st = stGroup.getInstanceOf("defaultSetter");
+            st.add("property", property);
+            return st.render();
+        }
+    }
+
     private class TypeGeneratingVisitor extends TypesSwitch<String> {
         private final String vendorName;
         private final String packageName;
@@ -330,18 +454,31 @@ public class TypesGenerator extends AbstractGenerator {
                 final ST st = stGroup.getInstanceOf(type);
                 st.add("vendorName", vendorName);
                 st.add("type", objectType);
-//                objectType.getProperties().stream().map(property -> property.getType().subTypes().)
                 final Boolean builtInParentType = objectType.getType() == null || BuiltinType.of(objectType.getType().getName()).isPresent();
                 st.add("builtInParent", builtInParentType);
                 st.add("package", packageName);
 
+                if (type.equals(TYPE_MODEL) || type.equals(TYPE_INTERFACE)) {
+                    List<String> propertyTypes = objectType.getProperties().stream().map(property -> {
+                        PropertyTypeVisitor visitor = new PropertyTypeVisitor();
+                        return visitor.doSwitch(property.getType());
+                    }).collect(Collectors.toList());
+                    st.add("propertyTypes", propertyTypes);
+                }
                 if (type.equals(TYPE_MODEL)) {
-                    List<String> properties = objectType.getProperties().stream().map(property -> {
-                        PropertyGeneratingVisitor visitor = new PropertyGeneratingVisitor(stGroup, property);
+                    List<String> propertyGetters = objectType.getProperties().stream().map(property -> {
+                        PropertyGetterGeneratingVisitor visitor = new PropertyGetterGeneratingVisitor(stGroup, property);
                         return visitor.doSwitch(property.getType());
                     }).collect(Collectors.toList());
 
-                    st.add("properties", properties);
+                    st.add("propertyGetters", propertyGetters);
+
+                    List<String> propertySetters = objectType.getProperties().stream().map(property -> {
+                        PropertySetterGeneratingVisitor visitor = new PropertySetterGeneratingVisitor(stGroup, property);
+                        return visitor.doSwitch(property.getType());
+                    }).collect(Collectors.toList());
+
+                    st.add("propertySetters", propertySetters);
 
                     List<String> serializers = objectType.getProperties().stream().map(property -> {
                         SerializerGeneratingVisitor visitor = new SerializerGeneratingVisitor(stGroup, property);
