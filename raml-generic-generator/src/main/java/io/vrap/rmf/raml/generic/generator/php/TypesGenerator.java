@@ -59,7 +59,7 @@ public class TypesGenerator extends AbstractGenerator {
 
     private void generateCollections(final File outputPath, final List<AnyType> types) throws IOException {
         final TypeGeneratingVisitor collectionInterfaceGeneratingVisitor = createVisitor(PACKAGE_NAME, TYPE_COLLECTION_INTERFACE);
-        final TypeGeneratingVisitor collectionModelGeneratingVisitor =  createVisitor(PACKAGE_NAME, TYPE_COLLECTION_MODEL);
+        final TypeGeneratingVisitor collectionModelGeneratingVisitor = createVisitor(PACKAGE_NAME, TYPE_COLLECTION_MODEL);
 
         for (final AnyType anyType : types) {
             if (anyType instanceof ObjectType) {

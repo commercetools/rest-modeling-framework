@@ -39,6 +39,18 @@ collectionInterface(vendorName, type, package, builtInParent) ::= <<
 namespace <vendorName>\\<package; format="capitalize">;
 
 interface <type.name>Collection extends Collection {
+    /**
+     * @param $index
+     * @return <type.name>
+     */
+    public function at($index);
+
+    /**
+     * @param $data
+     * @param $index
+     * @return <type.name>
+     */
+    public function map($data, $index);
 }
 
 >>
@@ -280,6 +292,23 @@ collectionModel(vendorName, type, package, builtInParent) ::= <<
 namespace <vendorName>\\<package; format="capitalize">;
 
 class <type.name>CollectionModel extends JsonCollection implements <type.name>Collection {
+    /**
+     * @return <type.name>
+     */
+    public function map($data, $index)
+    {
+        if (!$data instanceof <type.name>) {
+            <if(type.discriminator)>
+            $resolvedClass = <type.name>DiscriminatorResolver::discriminatorType($data);
+            $mappedClass = ResourceClassMap::getMappedClass($resolvedClass);
+            <else>
+            $mappedClass = ResourceClassMap::getMappedClass(<type.name>::class);
+            <endif>
+            $data = new $mappedClass($data);
+            $this->rawSet($data, $index);
+        }
+        return $data;
+    }
 }
 
 >>
@@ -302,14 +331,16 @@ namespace <vendorName>\\<package; format="capitalize">;
 
 class <type.name; format="capitalize">DiscriminatorResolver
 {
+    const DISCRIMINATOR = '<type.discriminator>';
     const TYPES = [
         <subTypes: {t|<discriminatorMapping(t)>}>
     ];
-    public static function discriminatorType(array $data, $discriminatorName)
+
+    public static function discriminatorType(array $data)
     {
         $types = static::TYPES;
-        $discriminator = isset($data[$discriminatorName]) ? $data[$discriminatorName] : '';
-        return isset($types[$discriminator]) ? $types[$discriminator] : <type.name>::class;
+        $discriminatorValue = isset($data[self::DISCRIMINATOR]) ? $data[self::DISCRIMINATOR] : '';
+        return isset($types[$discriminatorValue]) ? $types[$discriminatorValue] : <type.name>::class;
     }
 }
 
