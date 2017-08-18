@@ -38,26 +38,10 @@ public class TypesGenerator extends AbstractGenerator {
 
     public void generate(final List<AnyType> types, final File outputPath) throws IOException {
 
-        generateStatics(outputPath);
         generateTypes(outputPath, types);
         generateMapFile(outputPath, types);
         generateDiscriminatorResolver(outputPath, types);
         generateCollections(outputPath, types);
-    }
-
-    private void generateStatics(final File outputPath) throws IOException{
-        final List<String> staticFiles = Lists.newArrayList(
-                "jsonObject",
-                "jsonCollection",
-                "collection",
-                "mapIterator",
-                "classMap",
-                "resourceClassMap"
-        );
-
-        for(String staticFile: staticFiles) {
-            generateFile(generateStatic(staticFile), new File(outputPath, capitalize(staticFile) + ".php"));
-        }
     }
 
     private void generateTypes(final File outputPath, List<AnyType> types) throws IOException {

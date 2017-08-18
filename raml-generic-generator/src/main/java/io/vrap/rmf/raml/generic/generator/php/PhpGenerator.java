@@ -3,10 +3,14 @@ package io.vrap.rmf.raml.generic.generator.php;
 import com.google.common.base.CaseFormat;
 import io.vrap.rmf.raml.generic.generator.Generator;
 import io.vrap.rmf.raml.model.modules.Api;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.filefilter.FileFilterUtils;
+import org.apache.commons.io.filefilter.TrueFileFilter;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.Collection;
 import java.util.Optional;
 
 public class PhpGenerator implements Generator {
@@ -20,12 +24,19 @@ public class PhpGenerator implements Generator {
         String title = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, api.getTitle());
         String vendorName = Optional.ofNullable(this.vendorName).orElse(title);
         if (outputPath.exists()) {
-            File[] files = outputPath.listFiles();
-            if (files != null) {
-                for (File file : files) {
-                    if (file.isFile()) {
-                        Files.deleteIfExists(file.toPath());
-                    }
+            Collection<File> files = FileUtils.listFiles(
+                    outputPath,
+                    TrueFileFilter.INSTANCE,
+                    FileFilterUtils.notFileFilter(
+                            FileFilterUtils.and(
+                                    FileFilterUtils.directoryFileFilter(),
+                                    FileFilterUtils.nameFileFilter("vendor")
+                            )
+                    )
+            );
+            for (File file : files) {
+                if (file.isFile()) {
+                    Files.deleteIfExists(file.toPath());
                 }
             }
         } else {
@@ -33,10 +44,10 @@ public class PhpGenerator implements Generator {
         }
 
         TypesGenerator generator = new TypesGenerator(vendorName);
-        generator.generate(api.getTypes(), new File(outputPath, "target") );
+        generator.generate(api.getTypes(), new File(outputPath, "target/Types") );
 
         StaticGenerator staticGenerator = new StaticGenerator(vendorName);
-        staticGenerator.generate(outputPath);
+        staticGenerator.generate(outputPath, api);
 
 //        List<File> files = Lists.newArrayList(
 //        );

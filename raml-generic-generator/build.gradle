@@ -27,6 +27,7 @@ dependencies {
 
     compile 'com.squareup:javapoet:1.9.0'
     compile 'commons-cli:commons-cli:1.4'
+    compile 'commons-io:commons-io:2.5'
     compile 'org.antlr:stringtemplate:4.0.2'
     compile 'com.google.guava:guava:22.0'
     compile 'org.apache.commons:commons-lang3:3.4'

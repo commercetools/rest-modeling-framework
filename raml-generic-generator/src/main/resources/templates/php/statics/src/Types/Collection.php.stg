@@ -1,0 +1,16 @@
+main(vendorName) ::= <<
+\<?php
+
+namespace <vendorName>\\Types;
+
+interface Collection extends \IteratorAggregate
+{
+    public function at($index);
+
+    /**
+     * @return MapIterator
+     */
+    public function getIterator();
+}
+
+>>

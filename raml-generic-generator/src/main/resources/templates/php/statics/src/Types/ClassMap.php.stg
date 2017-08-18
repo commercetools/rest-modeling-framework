@@ -1,0 +1,19 @@
+main(vendorName) ::= <<
+\<?php
+
+namespace <vendorName>\\Types;
+
+abstract class ClassMap
+{
+    protected static $types = [];
+
+    public function getMappedClass($class)
+    {
+        if (isset(static::$types[$class])) {
+            return static::$types[$class];
+        }
+        return $class;
+    }
+}
+
+>>
