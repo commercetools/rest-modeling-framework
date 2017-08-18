@@ -2,7 +2,7 @@
  * interface template functions
  */
 
-interface(vendorName, type, package, builtInParent, propertyTypes) ::= <<
+interface(vendorName, type, package, builtInParent, propertyTypes, propertySetters) ::= <<
 \<?php
 <generatorInfo()>
 
@@ -10,7 +10,7 @@ namespace <vendorName>\\<package; format="capitalize">;
 
 interface <type.name> <if(!builtInParent)>extends <type.type.name> <endif>{
     <type.properties, propertyTypes: {p, pt|<propertyInterfaceGet(p, pt)>}>
-    <type.properties: {p|<propertyInterfaceSet(p)>}>
+    <propertySetters: {p |<p>}>
 }
 
 >>
@@ -23,12 +23,13 @@ propertyInterfaceGet(property, propertyType) ::= <<
 public function get<property.name; format="capitalize">();
 >>
 
-propertyInterfaceSet(property) ::= <<
+propertyInterfaceSet(property, propertyType, paramType) ::= <<
 
 /**
+ * @param <paramType> $<property.name>
  * @return $this
  */
-public function set<property.name; format="capitalize">($<property.name>);
+public function set<property.name; format="capitalize">(<if(propertyType)><propertyType> <endif>$<property.name>);
 >>
 
 collectionInterface(vendorName, type, package, builtInParent) ::= <<

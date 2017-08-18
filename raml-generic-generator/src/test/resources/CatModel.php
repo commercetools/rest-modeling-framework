@@ -9,7 +9,4 @@ namespace Test\Types;
 class CatModel extends AnimalModel implements Cat {
     const DISCRIMINATOR_VALUE = 'cat';
 
-
-
-
 }

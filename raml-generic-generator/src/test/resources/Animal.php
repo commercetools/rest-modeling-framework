@@ -11,4 +11,9 @@ interface Animal {
      * @return string
      */
     public function getKind();
+    /**
+     * @param string $kind
+     * @return $this
+     */
+    public function setKind($kind);
 }

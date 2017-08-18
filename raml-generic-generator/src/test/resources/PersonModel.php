@@ -24,5 +24,15 @@ class PersonModel extends JsonObject implements Person {
         return $this->name;
     }
 
+    /**
+     * @param string $name
+     * @return $this
+     */
+    public function setName($name)
+    {
+        $this->name = (string)$name;
+
+        return $this;
+    }
 
 }

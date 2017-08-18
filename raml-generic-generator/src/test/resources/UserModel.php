@@ -24,5 +24,15 @@ class UserModel extends PersonModel implements User {
         return $this->role;
     }
 
+    /**
+     * @param string $role
+     * @return $this
+     */
+    public function setRole($role)
+    {
+        $this->role = (string)$role;
+
+        return $this;
+    }
 
 }

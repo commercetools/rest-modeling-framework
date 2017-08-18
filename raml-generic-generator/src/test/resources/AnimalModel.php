@@ -9,7 +9,6 @@ namespace Test\Types;
 class AnimalModel extends JsonObject implements Animal {
     const DISCRIMINATOR_VALUE = '';
 
-
     public function __construct(array $data = []) {
         parent::__construct($data);
         $this->kind = static::DISCRIMINATOR_VALUE;
@@ -32,5 +31,15 @@ class AnimalModel extends JsonObject implements Animal {
         return $this->kind;
     }
 
+    /**
+     * @param string $kind
+     * @return $this
+     */
+    public function setKind($kind)
+    {
+        $this->kind = (string)$kind;
+
+        return $this;
+    }
 
 }

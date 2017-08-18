@@ -11,4 +11,9 @@ interface Customer {
      * @return Address
      */
     public function getAddress();
+    /**
+     * @param Address $address
+     * @return $this
+     */
+    public function setAddress(Address $address);
 }

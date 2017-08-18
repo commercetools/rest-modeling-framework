@@ -11,4 +11,9 @@ interface Address {
      * @return string
      */
     public function getStreet();
+    /**
+     * @param string $street
+     * @return $this
+     */
+    public function setStreet($street);
 }

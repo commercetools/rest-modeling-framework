@@ -28,5 +28,15 @@ class CustomerModel extends JsonObject implements Customer {
         return $this->address;
     }
 
+    /**
+     * @param Address address
+     * @return $this
+     */
+    public function setAddress(Address $address)
+    {
+        $this->address = $address;
+
+        return $this;
+    }
 
 }
