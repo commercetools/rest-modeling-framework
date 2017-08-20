@@ -1,5 +1,6 @@
 package io.vrap.rmf.raml.persistence.constructor;
 
+import com.google.common.base.Strings;
 import io.vrap.rmf.raml.model.facets.FacetsFactory;
 import io.vrap.rmf.raml.model.resources.Argument;
 import io.vrap.rmf.raml.model.resources.ResourcesFactory;
@@ -467,7 +468,7 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
         final Token type = typedeElementTuple.type;
         final String name = typedeElementTuple.name.getText();
 
-        final EObject propertyType = type == null ?
+        final EObject propertyType = Strings.isNullOrEmpty(type.getText()) ?
                 scope.getEObjectByName(BuiltinType.STRING.getName()) :
                 typeExpressionConstructor.parse(type.getText(), scope);
         final boolean isRequired = !name.endsWith("?");

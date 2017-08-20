@@ -449,9 +449,14 @@ typedElementTuple:
 
 typedElementMap:
     name=id
-        MAP_START
-        ( attributeFacet | enumFacet | propertiesFacet | requiredFacet | typeFacet | itemsFacet | annotationFacet | exampleFacet | examplesFacet | defaultFacet )*
-        MAP_END
+        (
+            SCALAR
+            |   (
+                    MAP_START
+                    ( attributeFacet | enumFacet | propertiesFacet | requiredFacet | typeFacet | itemsFacet | annotationFacet | exampleFacet | examplesFacet | defaultFacet )*
+                    MAP_END
+                 )
+        )
     ;
 
 instance:

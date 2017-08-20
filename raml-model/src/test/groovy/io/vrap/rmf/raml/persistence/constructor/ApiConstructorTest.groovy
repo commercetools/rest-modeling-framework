@@ -725,6 +725,25 @@ class ApiConstructorTest extends Specification {
         objectType.getProperty('name').type instanceof StringType
     }
 
+    def "default-type-string.raml (TCK)"() {
+        when:
+        Api api = constructApi(
+                '''\
+        #%RAML 1.0
+        title: Default type string
+
+        types:
+            Person:
+                properties:
+                    name: # no type or schema necessary since the default type is `string`''')
+        then:
+        api.types.size() == 1
+        api.types[0] instanceof ObjectType
+        ObjectType objectType = api.types[0]
+        objectType.properties.size() == 1
+        objectType.properties[0].type instanceof StringType
+    }
+
     Api constructApi(String input) {
         RAMLParser parser = parser(input)
         def apiConstructor = new ApiConstructor()
