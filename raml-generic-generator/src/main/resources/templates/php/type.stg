@@ -46,6 +46,11 @@ interface <type.name>Collection extends Collection {
     public function at($index);
 
     /**
+     * @return <type.name>
+     */
+    public function current();
+
+    /**
      * @param $data
      * @param $index
      * @return <type.name>
@@ -292,6 +297,20 @@ collectionModel(vendorName, type, package, builtInParent) ::= <<
 namespace <vendorName>\\<package; format="capitalize">;
 
 class <type.name>CollectionModel extends JsonCollection implements <type.name>Collection {
+
+    /**
+     * @param <type.name> $value
+     * @return <type.name>Collection
+     */
+    public function add($value) {
+        if (!$value instanceof <type.name>) {
+            throw new \InvalidArgumentException();
+        }
+        parent::add($value);
+
+        return $this;
+    }
+
     /**
      * @return <type.name>
      */

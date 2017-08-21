@@ -31,16 +31,11 @@ class JsonCollection implements Collection, \\JsonSerializable
         return new static($data);
     }
 
-    public function __set($name, $value)
-    {
-        throw new \BadMethodCallException('Setting values is not allowed');
-    }
-
     protected function index($data)
     {
     }
 
-    protected function raw($index)
+    final protected function raw($index)
     {
         if (isset($this->rawData[$index])) {
             return $this->rawData[$index];
@@ -48,9 +43,23 @@ class JsonCollection implements Collection, \\JsonSerializable
         return null;
     }
 
-    protected function rawSet($data, $index)
+    final protected function rawSet($data, $index)
     {
-        $this->rawData[$index] = $data;
+        if (is_null($index)) {
+            $this->rawData[] = $data;
+        } else {
+            $this->rawData[$index] = $data;
+        }
+    }
+
+    /**
+     * @param $value
+     * @return Collection
+     */
+    public function add($value) {
+        $this->rawSet($value, null);
+
+        return $this;
     }
 
     public function at($index)
@@ -63,12 +72,12 @@ class JsonCollection implements Collection, \\JsonSerializable
         return $data;
     }
 
-    protected function addToIndex($index, $key, $value)
+    final protected function addToIndex($index, $key, $value)
     {
         $this->indexes[$index][$key] = $value;
     }
 
-    protected function valueByKey($index, $key)
+    final protected function valueByKey($index, $key)
     {
         return isset($this->indexes[$index][$key]) ? $this->at($this->indexes[$index][$key]) : null;
     }
@@ -119,6 +128,38 @@ class JsonCollection implements Collection, \\JsonSerializable
     public function rewind()
     {
         $this->iterator->rewind();
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function offsetExists($offset)
+    {
+        return array_key_exists($offset, $this->rawData);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function offsetGet($offset)
+    {
+        return $this->at($offset);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function offsetSet($offset, $value)
+    {
+        $this->rawSet($value, $offset);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function offsetUnset($offset)
+    {
+        unset($this->rawData[$offset]);
     }
 }
 

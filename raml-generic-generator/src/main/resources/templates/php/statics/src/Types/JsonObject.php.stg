@@ -12,7 +12,7 @@ class JsonObject implements \\JsonSerializable
         $this->rawData = $data;
     }
 
-    protected function raw($field)
+    final protected function raw($field)
     {
         if (isset($this->rawData[$field])) {
             return $this->rawData[$field];
@@ -23,7 +23,7 @@ class JsonObject implements \\JsonSerializable
 
     public function isPresent($field)
     {
-        return isset($this->rawData[$index]) || isset($this->$field);
+        return isset($this->rawData[$field]) || isset($this->$field);
     }
 
     public function jsonSerialize()
@@ -56,11 +56,6 @@ class JsonObject implements \\JsonSerializable
         );
         $data = array_merge($this->rawData, $data);
         return $data;
-    }
-
-    public function __set($name, $value)
-    {
-        throw new \BadMethodCallException('Setting values is not allowed');
     }
 }
 
