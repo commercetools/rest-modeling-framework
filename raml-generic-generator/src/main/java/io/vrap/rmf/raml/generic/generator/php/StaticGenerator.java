@@ -1,8 +1,8 @@
 package io.vrap.rmf.raml.generic.generator.php;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.io.Resources;
+import io.vrap.rmf.raml.generic.generator.AbstractTemplateGenerator;
 import io.vrap.rmf.raml.model.modules.Api;
 import io.vrap.rmf.raml.model.security.OAuth20Settings;
 import org.apache.commons.io.FileUtils;
@@ -12,11 +12,9 @@ import org.stringtemplate.v4.STGroupFile;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 import java.util.*;
-import java.util.stream.Collectors;
 
-public class StaticGenerator extends AbstractGenerator {
+public class StaticGenerator extends AbstractTemplateGenerator {
     private final String vendorName;
 
     StaticGenerator(final String namespace) {
@@ -28,21 +26,7 @@ public class StaticGenerator extends AbstractGenerator {
         Collection<File> files = FileUtils.listFiles(resourcePath, TrueFileFilter.INSTANCE, TrueFileFilter.INSTANCE);
 
         for (File staticFile : files) {
-            final STGroupFile stGroup = createSTGroup(staticFile.toURI().toURL());
-
-            final ST st = stGroup.getInstanceOf("main");
-            st.add("vendorName", vendorName);
-            final String t = staticFile.getName();
-            if (staticFile.getName().equals("Factory.php.stg")) {
-                final String apiUri = api.getBaseUri().toString();
-                final String authUri = api.getSecuritySchemes().stream()
-                        .filter(securityScheme -> securityScheme.getSettings() instanceof OAuth20Settings)
-                        .map(securityScheme -> ((OAuth20Settings)securityScheme.getSettings()).getAccessTokenUri())
-                        .findFirst().orElse("");
-                st.add("apiUri", apiUri);
-                st.add("authUri", authUri);
-            }
-            final String content = st.render();
+            final String content = generateContent(staticFile, api);
             final File outputFile = new File(
                     outputPath,
                     staticFile.toString()
@@ -51,5 +35,24 @@ public class StaticGenerator extends AbstractGenerator {
             );
             generateFile(content, outputFile);
         }
+    }
+
+    @VisibleForTesting
+    String generateContent(File staticFile, Api api) throws IOException {
+        final STGroupFile stGroup = createSTGroup(staticFile.toURI().toURL());
+
+        final ST st = stGroup.getInstanceOf("main");
+        st.add("vendorName", vendorName);
+        final String t = staticFile.getName();
+        if (staticFile.getName().equals("Factory.php.stg")) {
+            final String apiUri = api.getBaseUri().toString();
+            final String authUri = api.getSecuritySchemes().stream()
+                    .filter(securityScheme -> securityScheme.getSettings() instanceof OAuth20Settings)
+                    .map(securityScheme -> ((OAuth20Settings)securityScheme.getSettings()).getAccessTokenUri())
+                    .findFirst().orElse("");
+            st.add("apiUri", apiUri);
+            st.add("authUri", authUri);
+        }
+        return st.render();
     }
 }

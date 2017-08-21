@@ -6,7 +6,7 @@
 
 namespace Test\Types;
 
-class AnimalModel extends JsonObject implements Animal {
+class AnimalModel extends JsonObjectModel implements Animal {
     const DISCRIMINATOR_VALUE = '';
 
     public function __construct(array $data = []) {
@@ -25,7 +25,7 @@ class AnimalModel extends JsonObject implements Animal {
     public function getKind()
     {
         if (is_null($this->kind)) {
-            $value = $this->raw('kind');
+            $value = $this->raw(Animal::FIELD_KIND);
             $this->kind = (string)$value;
         }
         return $this->kind;

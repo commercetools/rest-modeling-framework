@@ -7,6 +7,8 @@
 namespace Test\Types;
 
 interface User extends Person {
+    const FIELD_ROLE = 'role';
+
     /**
      * @return string
      */
@@ -16,4 +18,5 @@ interface User extends Person {
      * @return $this
      */
     public function setRole($role);
+
 }

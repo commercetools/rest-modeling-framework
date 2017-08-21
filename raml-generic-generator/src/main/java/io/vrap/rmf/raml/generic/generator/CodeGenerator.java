@@ -1,6 +1,7 @@
 package io.vrap.rmf.raml.generic.generator;
 
 import io.vrap.rmf.raml.generic.generator.java.JavaGenerator;
+import io.vrap.rmf.raml.generic.generator.md.MdGenerator;
 import io.vrap.rmf.raml.generic.generator.php.PhpGenerator;
 import io.vrap.rmf.raml.model.modules.Api;
 import io.vrap.rmf.raml.persistence.RamlResourceSet;
@@ -55,6 +56,8 @@ public class CodeGenerator {
         switch (language) {
             case "php":
                 return new PhpGenerator(vendorName);
+            case "md":
+                return new MdGenerator();
             case "java":
                 return new JavaGenerator();
             default:

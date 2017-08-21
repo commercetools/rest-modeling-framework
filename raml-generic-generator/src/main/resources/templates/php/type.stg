@@ -2,16 +2,22 @@
  * interface template functions
  */
 
-interface(vendorName, type, package, builtInParent, propertyTypes, propertySetters) ::= <<
+interface(vendorName, type, package, builtInParent, propertyTypes, propertySetters, typeProperties) ::= <<
 \<?php
 <generatorInfo()>
 
 namespace <vendorName>\\<package; format="capitalize">;
 
-interface <type.name> <if(!builtInParent)>extends <type.type.name> <endif>{
+interface <type.name> extends <if(!builtInParent)><type.type.name><else>JsonObject<endif> {
+    <typeProperties: {p |<propertyConstant(p)>}>
     <type.properties, propertyTypes: {p, pt|<propertyInterfaceGet(p, pt)>}>
     <propertySetters: {p |<p>}>
 }
+
+>>
+
+propertyConstant(property) ::=<<
+const FIELD_<property.name; format="upperUnderscore"> = '<property.name>';
 
 >>
 
@@ -30,6 +36,7 @@ propertyInterfaceSet(property, propertyType, paramType) ::= <<
  * @return $this
  */
 public function set<property.name; format="capitalize">(<if(propertyType)><propertyType> <endif>$<property.name>);
+
 >>
 
 collectionInterface(vendorName, type, package, builtInParent) ::= <<
@@ -44,6 +51,11 @@ interface <type.name>Collection extends Collection {
      * @return <type.name>
      */
     public function at($index);
+
+    /**
+     * @return <type.name>
+     */
+    public function current();
 
     /**
      * @param $data
@@ -63,7 +75,7 @@ model(vendorName, type, package, builtInParent, propertyTypes, propertyGetters, 
 
 namespace <vendorName>\\<package; format="capitalize">;
 
-class <type.name>Model extends <if(!builtInParent)><type.type.name>Model <else>JsonObject <endif>implements <type.name> {
+class <type.name>Model extends <if(!builtInParent)><type.type.name>Model<else>JsonObjectModel<endif> implements <type.name> {
     <if(type.discriminator || type.discriminatorValue)>
     const DISCRIMINATOR_VALUE = '<type.discriminatorValue>';
 
@@ -90,14 +102,14 @@ class <type.name>Model extends <if(!builtInParent)><type.type.name>Model <else>J
 
 >>
 
-defaultGetter(property) ::= <<
+defaultGetter(property, parent) ::= <<
 /**
  * @return mixed
  */
 public function get<property.name; format="capitalize">()
 {
     if (is_null($this-><property.name>)) {
-        $value = $this->raw('<property.name>');
+        $value = $this->raw(<parent.name>::FIELD_<property.name; format="upperUnderscore">);
         $this-><property.name> = $value;
     }
     return $this-><property.name>;
@@ -105,14 +117,14 @@ public function get<property.name; format="capitalize">()
 
 >>
 
-dateTimeGetter(property, dateTimeFormat) ::= <<
+dateTimeGetter(property, dateTimeFormat, parent) ::= <<
 /**
  * @return \DateTimeImmutable
  */
 public function get<property.name; format="capitalize">()
 {
     if (is_null($this-><property.name>)) {
-        $value = $this->raw('<property.name>');
+        $value = $this->raw(<parent.name>::FIELD_<property.name; format="upperUnderscore">);
         <if(dateTimeFormat)>
         $dateTime = \DateTimeImmutable::createFromFormat('<dateTimeFormat>', $value);
         if ($dateTime) {
@@ -127,14 +139,14 @@ public function get<property.name; format="capitalize">()
 
 >>
 
-scalarGetter(property, scalarType) ::= <<
+scalarGetter(property, scalarType, parent) ::= <<
 /**
  * @return <scalarType>
  */
 public function get<property.name; format="capitalize">()
 {
     if (is_null($this-><property.name>)) {
-        $value = $this->raw('<property.name>');
+        $value = $this->raw(<parent.name>::FIELD_<property.name; format="upperUnderscore">);
         $this-><property.name> = (<scalarType>)$value;
     }
     return $this-><property.name>;
@@ -142,14 +154,14 @@ public function get<property.name; format="capitalize">()
 
 >>
 
-classGetter(property) ::= <<
+classGetter(property, parent) ::= <<
 /**
  * @return <if(property.type.name)><property.type.name><else>mixed<endif>
  */
 public function get<property.name; format="capitalize">()
 {
     if (is_null($this-><property.name>)) {
-        $value = $this->raw('<property.name>');
+        $value = $this->raw(<parent.name>::FIELD_<property.name; format="upperUnderscore">);
         $mappedClass = ResourceClassMap::getMappedClass(<property.type.name>::class);
         if (is_null($value)) {
             return new $mappedClass([]);
@@ -161,14 +173,14 @@ public function get<property.name; format="capitalize">()
 
 >>
 
-arrayGetter(property) ::= <<
+arrayGetter(property, parent) ::= <<
 /**
  * @return <if(property.type.items.name)><property.type.items.name>Collection<else>mixed<endif>
  */
 public function get<property.name; format="capitalize">()
 {
     if (is_null($this-><property.name>)) {
-        $value = $this->raw('<property.name>');
+        $value = $this->raw(<parent.name>::FIELD_<property.name; format="upperUnderscore">);
         $mappedClass = ResourceClassMap::getMappedClass(<property.type.items.name>Collection::class);
         if (is_null($value)) {
             return new $mappedClass([]);
@@ -187,7 +199,7 @@ defaultSetter(property) ::= <<
  */
 public function set<property.name; format="capitalize">($<property.name>)
 {
-    $this-><property.name> = $<property.name>
+    $this-><property.name> = $<property.name>;
 
     return $this;
 }
@@ -292,12 +304,26 @@ collectionModel(vendorName, type, package, builtInParent) ::= <<
 namespace <vendorName>\\<package; format="capitalize">;
 
 class <type.name>CollectionModel extends JsonCollection implements <type.name>Collection {
+
+    /**
+     * @param <type.name> $value
+     * @return <type.name>Collection
+     */
+    public function add($value) {
+        if (!$value instanceof <type.name>) {
+            throw new \InvalidArgumentException();
+        }
+        parent::add($value);
+
+        return $this;
+    }
+
     /**
      * @return <type.name>
      */
     public function map($data, $index)
     {
-        if (!$data instanceof <type.name>) {
+        if (!is_null($data) && !$data instanceof <type.name>) {
             <if(type.discriminator)>
             $resolvedClass = <type.name>DiscriminatorResolver::discriminatorType($data);
             $mappedClass = ResourceClassMap::getMappedClass($resolvedClass);

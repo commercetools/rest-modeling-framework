@@ -6,7 +6,9 @@
 
 namespace Test\Types;
 
-interface Address {
+interface Address extends JsonObject {
+    const FIELD_STREET = 'street';
+
     /**
      * @return string
      */
@@ -16,4 +18,5 @@ interface Address {
      * @return $this
      */
     public function setStreet($street);
+
 }

@@ -6,7 +6,9 @@
 
 namespace Test\Types;
 
-interface Animal {
+interface Animal extends JsonObject {
+    const FIELD_KIND = 'kind';
+
     /**
      * @return string
      */
@@ -16,4 +18,5 @@ interface Animal {
      * @return $this
      */
     public function setKind($kind);
+
 }

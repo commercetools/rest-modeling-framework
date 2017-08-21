@@ -1,8 +1,4 @@
 <?php
-/**
- * This file has been auto generated
- * Do not change it
- */
 
 namespace Test\Types;
 
@@ -23,7 +19,7 @@ class JsonCollection implements Collection, \JsonSerializable
 
     public function jsonSerialize()
     {
-        return $this->toArray();
+        return $this->rawData;
     }
 
     /**
@@ -34,29 +30,35 @@ class JsonCollection implements Collection, \JsonSerializable
         return new static($data);
     }
 
-    /**
-     * @inheritdoc
-     */
-    public function toArray()
-    {
-        return $this->rawData;
-    }
-
-    public function __set($name, $value)
-    {
-        throw new \BadMethodCallException('Setting values is not allowed');
-    }
-
     protected function index($data)
     {
     }
 
-    protected function raw($field)
+    final protected function raw($index)
     {
-        if (isset($this->rawData[$field])) {
-            return $this->rawData[$field];
+        if (isset($this->rawData[$index])) {
+            return $this->rawData[$index];
         }
         return null;
+    }
+
+    final protected function rawSet($data, $index)
+    {
+        if (is_null($index)) {
+            $this->rawData[] = $data;
+        } else {
+            $this->rawData[$index] = $data;
+        }
+    }
+
+    /**
+     * @param $value
+     * @return Collection
+     */
+    public function add($value) {
+        $this->rawSet($value, null);
+
+        return $this;
     }
 
     public function at($index)
@@ -69,12 +71,12 @@ class JsonCollection implements Collection, \JsonSerializable
         return $data;
     }
 
-    protected function addToIndex($index, $key, $value)
+    final protected function addToIndex($index, $key, $value)
     {
         $this->indexes[$index][$key] = $value;
     }
 
-    protected function valueByKey($index, $key)
+    final protected function valueByKey($index, $key)
     {
         return isset($this->indexes[$index][$key]) ? $this->at($this->indexes[$index][$key]) : null;
     }
@@ -125,5 +127,37 @@ class JsonCollection implements Collection, \JsonSerializable
     public function rewind()
     {
         $this->iterator->rewind();
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function offsetExists($offset)
+    {
+        return array_key_exists($offset, $this->rawData);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function offsetGet($offset)
+    {
+        return $this->at($offset);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function offsetSet($offset, $value)
+    {
+        $this->rawSet($value, $offset);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function offsetUnset($offset)
+    {
+        unset($this->rawData[$offset]);
     }
 }
