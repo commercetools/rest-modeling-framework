@@ -96,6 +96,7 @@ public class TypeExpressionConstructor {
         @Override
         public EObject visitTypeTemplate(TypeExpressionParser.TypeTemplateContext ctx) {
             final TypeTemplate typeTemplate = TypesFactory.eINSTANCE.createTypeTemplate();
+            scope.addValue(INLINE_TYPE_CONTAINER__INLINE_TYPES, typeTemplate);
             typeTemplate.setName(ctx.getText());
             return typeTemplate;
         }

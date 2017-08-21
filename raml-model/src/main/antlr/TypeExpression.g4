@@ -16,7 +16,11 @@ qualified_name:
     ID ('.' ID)?;
 
 stringTemplate:
-    (ID | ('<<' ID '>>'))+
+    (ID | ('<<' ID fnApplication* '>>'))+
+    ;
+
+fnApplication:
+    '|' '!' fn=ID
     ;
 
 ID : [a-zA-Z_]+ [a-zA-Z0-9_-]* ;

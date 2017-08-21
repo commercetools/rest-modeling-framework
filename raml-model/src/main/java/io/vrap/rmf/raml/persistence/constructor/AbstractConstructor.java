@@ -207,45 +207,45 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
             final String contentType = bodyContentType.contentType.getText();
             bodyType.getContentTypes().add(contentType);
         }
-        final Scope bodyTypeScope = scope.with(bodyType);
-        EObject type = null;
-        if (bodyContentType.typeFacet().size() == 1) {
-            type = (EObject) withinScope(scope.with(TYPED_ELEMENT__TYPE),
-                    bodyTypeTypeScope -> visitTypeFacet(bodyContentType.typeFacet(0)));
-        } else if (bodyContentType.propertiesFacet().size() == 1) {
-            type = scope.getEObjectByName(BuiltinType.OBJECT.getName());
-        }
-        if (type == null) {
-            type = scope.getEObjectByName(BuiltinType.ANY.getName());
-        }
-        // inline type declaration
-        final boolean isInlineTypeDeclaration =
-                bodyContentType.attributeFacet().size() > 0 || bodyContentType.propertiesFacet().size() > 0 ||
-                        bodyContentType.exampleFacet().size() > 0 || bodyContentType.examplesFacet().size() > 0 ||
-                        bodyContentType.defaultFacet().size() > 0 || bodyContentType.enumFacet().size() > 0 ||
-                        bodyContentType.itemsFacet().size() > 0;
-        if (isInlineTypeDeclaration) {
-            type = EcoreUtil.create(type.eClass());
-            bodyTypeScope.addValue(INLINE_TYPE_CONTAINER__INLINE_TYPES, type);
-            withinScope(scope.with(type),
-                    inlineTypeDeclarationScope -> {
-                        bodyContentType.attributeFacet().forEach(this::visitAttributeFacet);
-                        bodyContentType.propertiesFacet().forEach(this::visitPropertiesFacet);
-                        bodyContentType.exampleFacet().forEach(this::visitExampleFacet);
-                        bodyContentType.examplesFacet().forEach(this::visitExamplesFacet);
-                        bodyContentType.defaultFacet().forEach(this::visitDefaultFacet);
-                        bodyContentType.enumFacet().forEach(this::visitEnumFacet);
-                        bodyContentType.itemsFacet().forEach(this::visitItemsFacet);
+        return withinScope(scope.with(bodyType), bodyTypeScope -> {
+            EObject type = null;
+            if (bodyContentType.typeFacet().size() == 1) {
+                type = (EObject) visitTypeFacet(bodyContentType.typeFacet(0));
+            } else if (bodyContentType.propertiesFacet().size() == 1) {
+                type = scope.getEObjectByName(BuiltinType.OBJECT.getName());
+            }
+            if (type == null) {
+                type = scope.getEObjectByName(BuiltinType.ANY.getName());
+            }
+            // inline type declaration
+            final boolean isInlineTypeDeclaration =
+                    bodyContentType.attributeFacet().size() > 0 || bodyContentType.propertiesFacet().size() > 0 ||
+                            bodyContentType.exampleFacet().size() > 0 || bodyContentType.examplesFacet().size() > 0 ||
+                            bodyContentType.defaultFacet().size() > 0 || bodyContentType.enumFacet().size() > 0 ||
+                            bodyContentType.itemsFacet().size() > 0;
+            if (isInlineTypeDeclaration) {
+                type = EcoreUtil.create(type.eClass());
+                bodyTypeScope.addValue(INLINE_TYPE_CONTAINER__INLINE_TYPES, type);
+                withinScope(scope.with(type),
+                        inlineTypeDeclarationScope -> {
+                            bodyContentType.attributeFacet().forEach(this::visitAttributeFacet);
+                            bodyContentType.propertiesFacet().forEach(this::visitPropertiesFacet);
+                            bodyContentType.exampleFacet().forEach(this::visitExampleFacet);
+                            bodyContentType.examplesFacet().forEach(this::visitExamplesFacet);
+                            bodyContentType.defaultFacet().forEach(this::visitDefaultFacet);
+                            bodyContentType.enumFacet().forEach(this::visitEnumFacet);
+                            bodyContentType.itemsFacet().forEach(this::visitItemsFacet);
 
-                        return inlineTypeDeclarationScope.eObject();
-                    });
-        }
-        bodyTypeScope.with(TYPED_ELEMENT__TYPE).setValue(type, bodyContentType.getStart());
+                            return inlineTypeDeclarationScope.eObject();
+                        });
+            }
+            bodyTypeScope.with(TYPED_ELEMENT__TYPE).setValue(type, bodyContentType.getStart());
 
-        bodyContentType.annotationFacet().forEach(this::visitAnnotationFacet);
-        bodyContentType.propertiesFacet().forEach(this::visitPropertiesFacet);
+            bodyContentType.annotationFacet().forEach(this::visitAnnotationFacet);
+            bodyContentType.propertiesFacet().forEach(this::visitPropertiesFacet);
 
-        return bodyType;
+            return bodyType;
+        });
     }
 
     @Override

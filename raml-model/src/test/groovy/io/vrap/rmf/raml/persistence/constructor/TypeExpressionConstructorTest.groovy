@@ -14,7 +14,7 @@ import static io.vrap.rmf.raml.model.modules.ModulesPackage.Literals.TYPE_CONTAI
  */
 class TypeExpressionConstructorTest extends Specification implements ResourceFixtures {
     @Shared
-    TypeExpressionConstructor parser = new TypeExpressionConstructor();
+    TypeExpressionConstructor constructor = new TypeExpressionConstructor();
     @Shared
     Resource builtinTypesResource = fromUri(BuiltinType.RESOURCE_URI);
     @Shared
@@ -71,6 +71,13 @@ class TypeExpressionConstructorTest extends Specification implements ResourceFix
         typeTemplate.name == '<<resourcePath>>Draft'
     }
 
+    def "TypeTemplate with transformations"() {
+        when:
+        TypeTemplate typeTemplate = parse('<<resourcePath|!singularize|!uppercase>>Draft')
+        then:
+        typeTemplate.name == '<<resourcePath|!singularize|!uppercase>>Draft'
+    }
+
     def "TypeTemplate array"() {
         when:
         ArrayType typeTemplateArray = parse('<<resourcePath>>Draft[]')
@@ -91,6 +98,6 @@ class TypeExpressionConstructorTest extends Specification implements ResourceFix
     }
 
     EObject parse(String typeExpression) {
-        parser.parse(typeExpression, typedElementScope);
+        constructor.parse(typeExpression, typedElementScope);
     }
 }

@@ -14,6 +14,7 @@ import io.vrap.rmf.raml.model.security.OAuth20Settings
 import io.vrap.rmf.raml.model.types.IntegerType
 import io.vrap.rmf.raml.model.types.ObjectType
 import io.vrap.rmf.raml.model.types.StringType
+import io.vrap.rmf.raml.model.types.TypeTemplate
 import io.vrap.rmf.raml.persistence.RamlResourceSet
 import io.vrap.rmf.raml.persistence.antlr.RAMLCustomLexer
 import io.vrap.rmf.raml.persistence.antlr.RAMLParser
@@ -34,6 +35,25 @@ class ApiConstructorTest extends Specification {
     ResourceSet resourceSet = new RamlResourceSet()
     @Shared
     URI uri = URI.createURI("test.raml");
+
+    def "resource type with type template and transformations"() {
+        when:
+        Api api = constructApi(
+                '''\
+        resourceTypes:
+            collection:
+                post?:
+                    body:
+                        application/json:
+                            type: Post<<resourcePathName | !singularize | !uppercamelcase>>
+        ''')
+        then:
+        api.resourceTypes.size() == 1
+        api.resourceTypes[0].methods.size() == 1
+        api.resourceTypes[0].methods[0].bodies.size() == 1
+        api.resourceTypes[0].methods[0].bodies[0].type instanceof TypeTemplate
+        api.resourceTypes[0].methods[0].bodies[0].inlineTypes == [api.resourceTypes[0].methods[0].bodies[0].type]
+    }
 
     def "type with example"() {
         when:
