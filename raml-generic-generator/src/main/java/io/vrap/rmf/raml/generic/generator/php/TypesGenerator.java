@@ -18,8 +18,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import static org.apache.commons.lang3.StringUtils.capitalize;
-
 public class TypesGenerator extends AbstractGenerator {
 
     private static final URL RESOURCE = Resources.getResource("./templates/php/type.stg");
@@ -233,6 +231,7 @@ public class TypesGenerator extends AbstractGenerator {
         {
             final ST st = stGroup.getInstanceOf("dateTimeGetter");
             st.add("property", property);
+            st.add("parent", property.eContainer());
             st.add("dateTimeFormat", dateTimeFormat);
             return st.render();
         }
@@ -241,6 +240,7 @@ public class TypesGenerator extends AbstractGenerator {
         {
             final ST st = stGroup.getInstanceOf("scalarGetter");
             st.add("property", property);
+            st.add("parent", property.eContainer());
             st.add("scalarType", scalarType);
             return st.render();
         }
@@ -251,6 +251,7 @@ public class TypesGenerator extends AbstractGenerator {
                 return null;
             } else {
                 final ST st = stGroup.getInstanceOf("arrayGetter");
+                st.add("parent", property.eContainer());
                 st.add("property", property);
                 return st.render();
             }
@@ -262,6 +263,7 @@ public class TypesGenerator extends AbstractGenerator {
                 return null;
             } else {
                 final ST st = stGroup.getInstanceOf("classGetter");
+                st.add("parent", property.eContainer());
                 st.add("property", property);
                 return st.render();
             }
@@ -270,6 +272,7 @@ public class TypesGenerator extends AbstractGenerator {
         @Override
         public String defaultCase(EObject object) {
             final ST st = stGroup.getInstanceOf("defaultGetter");
+            st.add("parent", property.eContainer());
             st.add("property", property);
             return st.render();
         }
@@ -520,7 +523,15 @@ public class TypesGenerator extends AbstractGenerator {
                 st.add("package", packageName);
 
                 if (type.equals(TYPE_INTERFACE)) {
-                    List<String> propertySetters = objectType.getProperties().stream().map(property -> {
+                    final List<Property> typeProperties;
+                    if(objectType.getType() instanceof ObjectType) {
+                        ObjectType superType = (ObjectType)objectType.getType();
+                        typeProperties = objectType.getProperties().stream().filter(property -> superType.getProperty(property.getName()) == null).collect(Collectors.toList());
+                    } else {
+                        typeProperties = Lists.newArrayList();
+                    }
+                    st.add("typeProperties", typeProperties);
+                    final List<String> propertySetters = objectType.getProperties().stream().map(property -> {
                         PropertyInterfaceSetterGeneratingVisitor visitor = new PropertyInterfaceSetterGeneratingVisitor(stGroup, property);
                         return visitor.doSwitch(property.getType());
                     }).collect(Collectors.toList());

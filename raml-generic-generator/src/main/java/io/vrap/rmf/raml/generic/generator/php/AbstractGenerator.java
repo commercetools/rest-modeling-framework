@@ -1,5 +1,7 @@
 package io.vrap.rmf.raml.generic.generator.php;
 
+import com.google.common.base.CaseFormat;
+import com.google.common.base.Strings;
 import org.apache.commons.lang3.StringUtils;
 import org.stringtemplate.v4.STGroupFile;
 
@@ -24,10 +26,16 @@ abstract class AbstractGenerator {
         final STGroupFile stGroup = new STGroupFile(resource, "UTF-8", '<', '>');
         stGroup.load();
         stGroup.registerRenderer(String.class,
-                (arg, formatString, locale) ->
-                        "capitalize".equals(formatString) ?
-                                StringUtils.capitalize(arg.toString()) :
-                                arg.toString());
+                (arg, formatString, locale) -> {
+                    switch (Strings.nullToEmpty(formatString)) {
+                        case "capitalize":
+                            return StringUtils.capitalize(arg.toString());
+                        case "upperCase":
+                            return CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, arg.toString());
+                        default:
+                            return arg.toString();
+                    }
+                });
         return stGroup;
     }
 }
