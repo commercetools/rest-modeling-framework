@@ -12,6 +12,7 @@ import io.vrap.rmf.raml.model.facets.Instance
 import io.vrap.rmf.raml.model.facets.NumberTypeFacet
 import io.vrap.rmf.raml.model.facets.ObjectTypeFacet
 import io.vrap.rmf.raml.model.facets.StringTypeFacet
+import io.vrap.rmf.raml.model.util.AllPropertiesCollector
 import io.vrap.rmf.raml.model.util.SuperTypeCrossReferencer
 
 /*
@@ -116,6 +117,16 @@ class ObjectType extends AnyType, ObjectTypeFacet, PropertiesFacet {
 			if(name == property.name) return property
 		}
 		return null
+	}
+	
+	/*
+     * Returns all properties (with inherited) of this object type.
+     *
+     * If an object type specializes the type of an inherited property,
+     * the specialize property will be returned by this method.
+     */
+	refers derived Property[] allProperties get {
+		AllPropertiesCollector.getAllProperties(this)
 	}
 }
 
