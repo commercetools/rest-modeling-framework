@@ -18,7 +18,7 @@ class UserModel extends PersonModel implements User {
     public function getRole()
     {
         if (is_null($this->role)) {
-            $value = $this->raw('role');
+            $value = $this->raw(User::FIELD_ROLE);
             $this->role = (string)$value;
         }
         return $this->role;

@@ -6,7 +6,7 @@
 
 namespace Test\Types;
 
-class CustomerModel extends JsonObject implements Customer {
+class CustomerModel extends JsonObjectModel implements Customer {
     /**
      * @var Address
      */
@@ -18,7 +18,7 @@ class CustomerModel extends JsonObject implements Customer {
     public function getAddress()
     {
         if (is_null($this->address)) {
-            $value = $this->raw('address');
+            $value = $this->raw(Customer::FIELD_ADDRESS);
             $mappedClass = ResourceClassMap::getMappedClass(Address::class);
             if (is_null($value)) {
                 return new $mappedClass([]);

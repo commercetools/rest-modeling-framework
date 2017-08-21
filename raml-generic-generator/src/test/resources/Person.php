@@ -6,7 +6,9 @@
 
 namespace Test\Types;
 
-interface Person {
+interface Person extends JsonObject {
+    const FIELD_NAME = 'name';
+
     /**
      * @return string
      */
@@ -16,4 +18,5 @@ interface Person {
      * @return $this
      */
     public function setName($name);
+
 }

@@ -12,12 +12,15 @@ import io.vrap.rmf.raml.persistence.constructor.Scope
 import org.antlr.v4.runtime.CommonTokenFactory
 import org.antlr.v4.runtime.CommonTokenStream
 import org.antlr.v4.runtime.TokenStream
+import org.apache.commons.io.FileUtils
+import org.apache.commons.io.filefilter.TrueFileFilter
 import org.assertj.core.util.Files
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.resource.ResourceSet
 import org.eclipse.emf.ecore.resource.URIConverter
 import spock.lang.Shared
 import spock.lang.Specification
+import spock.lang.Unroll
 
 import java.nio.charset.StandardCharsets
 import static org.apache.commons.lang3.StringUtils.capitalize;
@@ -27,6 +30,11 @@ class TypeGeneratorTest extends Specification implements ResourceFixtures {
     ResourceSet resourceSet = new RamlResourceSet()
     @Shared
     URI uri = URI.createURI("test.raml");
+
+    @Shared
+    File resourcePath = new File(Resources.getResource("templates/php/statics/").getFile());
+    @Shared
+    Collection<File> files = FileUtils.listFiles(resourcePath, TrueFileFilter.INSTANCE, TrueFileFilter.INSTANCE);
 
     def "generate simple interface"() {
         when:
@@ -178,19 +186,26 @@ class TypeGeneratorTest extends Specification implements ResourceFixtures {
         kindClass == fileContent("CatModel.php")
     }
 
-    def "test base class files"(String name) {
+    @Unroll
+    def "test base class files"(File file) {
+        given:
         expect:
-        TypesGenerator generator = new TypesGenerator("Test")
-        String result = generator.generateStatic(name);
-        result == fileContent(capitalize(name) + ".php")
+        Api api = constructApi(
+                '''\
+        title: Test
+        baseUri: https://api.example.com
+        securitySchemes:
+            oauth_2_0:
+                type: OAuth 2.0
+                settings:
+                    accessTokenUri: https://auth.example.com/oauth/token
+        ''')
+        StaticGenerator generator = new StaticGenerator( "Test")
+        String result = generator.generateContent(file, api);
+        result == fileContent(file.getName().replace(".stg", ""))
 
         where:
-        name | _
-        "jsonObject" | _
-        "jsonCollection" | _
-        "collection" | _
-        "mapIterator" | _
-        "classMap" | _
+        file << files
     }
 
     String generate(final String generateType, final AnyType type) {

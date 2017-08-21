@@ -6,7 +6,9 @@
 
 namespace Test\Types;
 
-interface Customer {
+interface Customer extends JsonObject {
+    const FIELD_ADDRESS = 'address';
+
     /**
      * @return Address
      */
@@ -16,4 +18,5 @@ interface Customer {
      * @return $this
      */
     public function setAddress(Address $address);
+
 }

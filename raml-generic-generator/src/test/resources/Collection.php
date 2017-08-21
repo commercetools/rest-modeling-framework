@@ -1,12 +1,8 @@
 <?php
-/**
- * This file has been auto generated
- * Do not change it
- */
 
 namespace Test\Types;
 
-interface Collection extends \IteratorAggregate
+interface Collection extends \IteratorAggregate, \ArrayAccess
 {
     public function at($index);
 
@@ -14,4 +10,35 @@ interface Collection extends \IteratorAggregate
      * @return MapIterator
      */
     public function getIterator();
+
+    /**
+     * @return mixed
+     */
+    public function current();
+
+    /**
+     * @return void
+     */
+    public function next();
+
+    /**
+     * @return mixed
+     */
+    public function key();
+
+    /**
+     * @return void
+     */
+    public function rewind();
+
+    /**
+     * @return bool
+     */
+    public function valid();
+
+    /**
+     * @param mixed $value
+     * @return Collection
+     */
+    public function add($value);
 }

@@ -1,8 +1,7 @@
-main(vendorName) ::=<<
-\<?php
+<?php
 /**
  * Origin: https://github.com/guzzle/log-subscriber
- * Copyright (c) 2014 Michael Dowling, https://github.com/mtdowling \<mtdowling@gmail.com>
+ * Copyright (c) 2014 Michael Dowling, https://github.com/mtdowling <mtdowling@gmail.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,7 +22,7 @@ main(vendorName) ::=<<
  * THE SOFTWARE.
  */
 
-namespace <vendorName>\Client\Subscriber\Log;
+namespace Test\Client\Subscriber\Log;
 
 use GuzzleHttp\Message\MessageInterface;
 use GuzzleHttp\Message\RequestInterface;
@@ -68,7 +67,7 @@ class Formatter
     /**
      * codingStandardsIgnoreEnd
      */
-    const DEBUG = "\>\>\>\>\>\>\>\>\n{request}\n\<\<\<\<\<\<\<\<\n{response}\n--------\n{error}";
+    const DEBUG = ">>>>>>>>\n{request}\n<<<<<<<<\n{response}\n--------\n{error}";
     const SHORT = '[{ts}] "{method} {resource} {protocol}/{version}" {code}';
 
     /** @var string Template used to format log messages */
@@ -205,5 +204,3 @@ class Formatter
         return trim($result);
     }
 }
-
->>

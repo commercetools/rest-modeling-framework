@@ -6,7 +6,7 @@
 
 namespace Test\Types;
 
-class PersonModel extends JsonObject implements Person {
+class PersonModel extends JsonObjectModel implements Person {
     /**
      * @var string
      */
@@ -18,7 +18,7 @@ class PersonModel extends JsonObject implements Person {
     public function getName()
     {
         if (is_null($this->name)) {
-            $value = $this->raw('name');
+            $value = $this->raw(Person::FIELD_NAME);
             $this->name = (string)$value;
         }
         return $this->name;

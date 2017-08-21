@@ -1,11 +1,10 @@
-main(vendorName) ::= <<
 {
-  "name": "<vendorName; format="lowercased">/raml-php-sdk",
+  "name": "Test/raml-php-sdk",
   "license": "MIT",
   "type": "library",
   "autoload": {
     "psr-4": {
-      "<vendorName>\\\\": [
+      "Test\\": [
         "src/",
         "target/"
       ]
@@ -20,5 +19,3 @@ main(vendorName) ::= <<
     "cache/filesystem-adapter": "^1.0"
   }
 }
-
->>

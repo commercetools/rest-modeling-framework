@@ -1,11 +1,10 @@
-main(vendorName, apiUri, authUri) ::=<<
-\<?php
+<?php
 
-namespace <vendorName>\Client;
+namespace Test\Client;
 
 use Cache\Adapter\Filesystem\FilesystemCachePool;
-use <vendorName>\Client\Subscriber\Log\Formatter;
-use <vendorName>\Client\Subscriber\Log\LogSubscriber;
+use Test\Client\Subscriber\Log\Formatter;
+use Test\Client\Subscriber\Log\LogSubscriber;
 use GuzzleHttp\Client as HttpClient;
 use GuzzleHttp\Event\BeforeEvent;
 use GuzzleHttp\HandlerStack;
@@ -25,7 +24,7 @@ use Psr\Log\LogLevel;
 class Factory
 {
     const API_URI = 'apiUri';
-    const AUTH_URI = '<authUri>';
+    const AUTH_URI = 'https://auth.example.com/oauth/token';
 
     private static $guzzle6;
 
@@ -236,5 +235,3 @@ class Factory
         return self::$guzzle6;
     }
 }
-
->>
