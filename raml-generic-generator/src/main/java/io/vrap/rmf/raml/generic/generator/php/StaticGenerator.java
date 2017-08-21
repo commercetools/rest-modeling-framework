@@ -1,9 +1,8 @@
 package io.vrap.rmf.raml.generic.generator.php;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
+import io.vrap.rmf.raml.generic.generator.AbstractTemplateGenerator;
 import io.vrap.rmf.raml.model.modules.Api;
 import io.vrap.rmf.raml.model.security.OAuth20Settings;
 import org.apache.commons.io.FileUtils;
@@ -13,11 +12,9 @@ import org.stringtemplate.v4.STGroupFile;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 import java.util.*;
-import java.util.stream.Collectors;
 
-public class StaticGenerator extends AbstractGenerator {
+public class StaticGenerator extends AbstractTemplateGenerator {
     private final String vendorName;
 
     StaticGenerator(final String namespace) {

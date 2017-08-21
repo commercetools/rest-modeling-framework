@@ -3,6 +3,7 @@ package io.vrap.rmf.raml.generic.generator.php;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
+import io.vrap.rmf.raml.generic.generator.AbstractTemplateGenerator;
 import io.vrap.rmf.raml.model.types.*;
 import io.vrap.rmf.raml.model.types.impl.TypesFactoryImpl;
 import io.vrap.rmf.raml.model.types.util.TypesSwitch;
@@ -18,7 +19,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-public class TypesGenerator extends AbstractGenerator {
+public class TypesGenerator extends AbstractTemplateGenerator {
 
     private static final URL RESOURCE = Resources.getResource("./templates/php/type.stg");
     static final String TYPE_MODEL = "model";

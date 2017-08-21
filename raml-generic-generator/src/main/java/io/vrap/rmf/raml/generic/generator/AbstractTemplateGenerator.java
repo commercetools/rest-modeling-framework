@@ -1,4 +1,4 @@
-package io.vrap.rmf.raml.generic.generator.php;
+package io.vrap.rmf.raml.generic.generator;
 
 import com.google.common.base.CaseFormat;
 import com.google.common.base.Strings;
@@ -11,8 +11,8 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 
-abstract class AbstractGenerator {
-    void generateFile(final String content, final File outputFile) throws IOException {
+public abstract class AbstractTemplateGenerator {
+    protected void generateFile(final String content, final File outputFile) throws IOException {
         if (content != null) {
             if (!outputFile.exists()) {
                 Files.createDirectories(outputFile.getParentFile().toPath());
@@ -22,7 +22,7 @@ abstract class AbstractGenerator {
         }
     }
 
-    STGroupFile createSTGroup(final URL resource) {
+    protected STGroupFile createSTGroup(final URL resource) {
         final STGroupFile stGroup = new STGroupFile(resource, "UTF-8", '<', '>');
         stGroup.load();
         stGroup.registerRenderer(String.class,
