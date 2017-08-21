@@ -1,6 +1,6 @@
 main(vendorName) ::= <<
 {
-  "name": "<vendorName; format="lowercased">/raml-php-sdk",
+  "name": "<vendorName; format="lowerHyphen">/raml-php-sdk",
   "license": "MIT",
   "type": "library",
   "autoload": {

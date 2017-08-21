@@ -30,8 +30,12 @@ abstract class AbstractGenerator {
                     switch (Strings.nullToEmpty(formatString)) {
                         case "capitalize":
                             return StringUtils.capitalize(arg.toString());
-                        case "upperCase":
+                        case "upperUnderscore":
                             return CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, arg.toString());
+                        case "lowerHyphen":
+                            return CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_HYPHEN, arg.toString());
+                        case "lowercase":
+                            return StringUtils.lowerCase(arg.toString());
                         default:
                             return arg.toString();
                     }

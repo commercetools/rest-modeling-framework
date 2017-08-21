@@ -1,5 +1,5 @@
 {
-  "name": "Test/raml-php-sdk",
+  "name": "test/raml-php-sdk",
   "license": "MIT",
   "type": "library",
   "autoload": {

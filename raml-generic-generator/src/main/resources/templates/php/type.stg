@@ -17,7 +17,7 @@ interface <type.name> extends <if(!builtInParent)><type.type.name><else>JsonObje
 >>
 
 propertyConstant(property) ::=<<
-const FIELD_<property.name; format="upperCase"> = '<property.name>';
+const FIELD_<property.name; format="upperUnderscore"> = '<property.name>';
 
 >>
 
@@ -109,7 +109,7 @@ defaultGetter(property, parent) ::= <<
 public function get<property.name; format="capitalize">()
 {
     if (is_null($this-><property.name>)) {
-        $value = $this->raw(<parent.name>::FIELD_<property.name; format="upperCase">);
+        $value = $this->raw(<parent.name>::FIELD_<property.name; format="upperUnderscore">);
         $this-><property.name> = $value;
     }
     return $this-><property.name>;
@@ -124,7 +124,7 @@ dateTimeGetter(property, dateTimeFormat, parent) ::= <<
 public function get<property.name; format="capitalize">()
 {
     if (is_null($this-><property.name>)) {
-        $value = $this->raw(<parent.name>::FIELD_<property.name; format="upperCase">);
+        $value = $this->raw(<parent.name>::FIELD_<property.name; format="upperUnderscore">);
         <if(dateTimeFormat)>
         $dateTime = \DateTimeImmutable::createFromFormat('<dateTimeFormat>', $value);
         if ($dateTime) {
@@ -146,7 +146,7 @@ scalarGetter(property, scalarType, parent) ::= <<
 public function get<property.name; format="capitalize">()
 {
     if (is_null($this-><property.name>)) {
-        $value = $this->raw(<parent.name>::FIELD_<property.name; format="upperCase">);
+        $value = $this->raw(<parent.name>::FIELD_<property.name; format="upperUnderscore">);
         $this-><property.name> = (<scalarType>)$value;
     }
     return $this-><property.name>;
@@ -161,7 +161,7 @@ classGetter(property, parent) ::= <<
 public function get<property.name; format="capitalize">()
 {
     if (is_null($this-><property.name>)) {
-        $value = $this->raw(<parent.name>::FIELD_<property.name; format="upperCase">);
+        $value = $this->raw(<parent.name>::FIELD_<property.name; format="upperUnderscore">);
         $mappedClass = ResourceClassMap::getMappedClass(<property.type.name>::class);
         if (is_null($value)) {
             return new $mappedClass([]);
@@ -180,7 +180,7 @@ arrayGetter(property, parent) ::= <<
 public function get<property.name; format="capitalize">()
 {
     if (is_null($this-><property.name>)) {
-        $value = $this->raw(<parent.name>::FIELD_<property.name; format="upperCase">);
+        $value = $this->raw(<parent.name>::FIELD_<property.name; format="upperUnderscore">);
         $mappedClass = ResourceClassMap::getMappedClass(<property.type.items.name>Collection::class);
         if (is_null($value)) {
             return new $mappedClass([]);
