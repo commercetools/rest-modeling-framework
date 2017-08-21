@@ -20,6 +20,12 @@ class JsonObject implements \\JsonSerializable
         return null;
     }
 
+
+    public function isPresent($field)
+    {
+        return isset($this->rawData[$index]) || isset($this->$field);
+    }
+
     public function jsonSerialize()
     {
         return $this->toArray();
