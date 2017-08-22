@@ -162,7 +162,12 @@ public function get<property.name; format="capitalize">()
 {
     if (is_null($this-><property.name>)) {
         $value = $this->raw(<parent.name>::FIELD_<property.name; format="upperUnderscore">);
+        <if(property.type.discriminator)>
+        $resolvedClass = <property.type.name>DiscriminatorResolver::discriminatorType($value);
+        $mappedClass = ResourceClassMap::getMappedClass($resolvedClass);
+        <else>
         $mappedClass = ResourceClassMap::getMappedClass(<property.type.name>::class);
+        <endif>
         if (is_null($value)) {
             return new $mappedClass([]);
         }
@@ -242,7 +247,7 @@ public function set<property.name; format="capitalize">($<property.name>)
 
 classSetter(property) ::= <<
 /**
- * @param <if(property.type.name)><property.type.name><else>mixed<endif> <property.name>
+ * @param <if(property.type.name)><property.type.name><else>mixed<endif> $<property.name>
  * @return $this
  */
 public function set<property.name; format="capitalize">(<property.type.name> $<property.name>)
@@ -256,7 +261,7 @@ public function set<property.name; format="capitalize">(<property.type.name> $<p
 
 arraySetter(property) ::= <<
 /**
- * @param <if(property.type.items.name)><property.type.items.name>Collection<else>mixed<endif>
+ * @param <if(property.type.items.name)><property.type.items.name>Collection<else>mixed<endif> $<property.name>
  * @return $this
  */
 public function set<property.name; format="capitalize">(<property.type.items.name>Collection $<property.name>)
