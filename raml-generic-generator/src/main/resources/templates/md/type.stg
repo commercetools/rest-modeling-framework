@@ -1,7 +1,7 @@
 model(type, builtInParent) ::= <<
 ### <type.name>
 
-  <type.properties: {p|<property(p)>}>
+  <type.allProperties: {p|<property(p)>}>
 >>
 
 property(property) ::= <<

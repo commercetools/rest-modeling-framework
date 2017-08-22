@@ -7,7 +7,7 @@ import org.eclipse.emf.common.util.ECollections;
 import org.eclipse.emf.common.util.EList;
 
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -21,7 +21,7 @@ public class AllPropertiesCollector {
     }
 
     private static Map<String, Property> getAllPropertiesAsMap(final ObjectType objectType) {
-        final Map<String, Property> allPropertiesAsMap = new HashMap<>();
+        final Map<String, Property> allPropertiesAsMap = new LinkedHashMap<>();
         if (objectType != null) {
             if (!BuiltinType.OBJECT.getName().equals(objectType.getName())) {
                 final ObjectType parent = (ObjectType) objectType.getType();
