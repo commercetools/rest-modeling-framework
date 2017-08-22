@@ -277,12 +277,12 @@ public function set<property.name; format="capitalize">(<property.type.name> $<p
 
 >>
 
-arraySetter(property) ::= <<
+arraySetter(property, propertyType, paramType) ::= <<
 /**
- * @param <if(property.type.items.name)><property.type.items.name>Collection<else>mixed<endif> $<property.name>
+ * @param <if(paramType)><paramType><else>mixed<endif> $<property.name>
  * @return $this
  */
-public function set<property.name; format="capitalize">(<property.type.items.name>Collection $<property.name>)
+public function set<property.name; format="capitalize">(<if(propertyType)><propertyType> <endif>$<property.name>)
 {
     $this-><property.name> = $<property.name>;
 
@@ -376,17 +376,21 @@ generatorInfo() ::= <<
  */
 >>
 
-discriminatorResolver(vendorName, package, type, subTypes, typePackage) ::= <<
+discriminatorResolver(vendorName, package, type, subTypes, typePackage, subTypePackages) ::= <<
 \<?php
 <generatorInfo()>
 
 namespace <vendorName>\\<package; format="capitalize"><if(typePackage)>\\<typePackage.value.value><endif>;
 
+<if(typePackage)>
+use <vendorName>\\<package; format="capitalize">;
+<endif>
+
 class <type.name; format="capitalize">DiscriminatorResolver
 {
     const DISCRIMINATOR = '<type.discriminator>';
     const TYPES = [
-        <subTypes: {t|<discriminatorMapping(t)>}>
+        <subTypes, subTypePackages: {t,tp|<discriminatorMapping(package, t,tp)>}>
     ];
 
     public static function discriminatorType(array $data)
@@ -399,8 +403,8 @@ class <type.name; format="capitalize">DiscriminatorResolver
 
 >>
 
-discriminatorMapping(type) ::= <<
-'<type.discriminatorValue>' => <type.name; format="capitalize">::class,
+discriminatorMapping(package, type, typePackage) ::= <<
+'<type.discriminatorValue>' => <package; format="capitalize">\\<typePackage><type.name; format="capitalize">::class,
 
 >>
 

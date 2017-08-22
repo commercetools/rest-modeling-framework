@@ -103,7 +103,10 @@ public class TypesGenerator extends AbstractTemplateGenerator {
             st.add("package", PACKAGE_NAME);
             st.add("vendorName", vendorName);
             st.add("type", objectType);
+            Annotation packageAnnotation = objectType.getAnnotations().stream().filter(annotation -> annotation.getType().equals(packageAnnotationType)).findFirst().orElse(null);
+            st.add("typePackage", packageAnnotation);
             st.add("subTypes", objectType.subTypes());
+            st.add("subTypePackages", objectType.subTypes().stream().map(anyType -> getPackageFolder(anyType, "\\")).collect(Collectors.toList()));
             final String packageFolder = getPackageFolder(objectType);
 
             generateFile(st.render(), new File(outputPath, packageFolder + objectType.getName() + "DiscriminatorResolver.php"));
@@ -328,8 +331,8 @@ public class TypesGenerator extends AbstractTemplateGenerator {
 
         @Override
         public String caseArrayType(final ArrayType arrayType) {
-            if (arrayType.getItems() == null || arrayType.getItems().getName() == null) {
-                return null;
+            if (arrayType.getItems() == null || arrayType.getItems().getName() == null || BuiltinType.of(arrayType.getItems().getName()).isPresent()) {
+                return "array";
             } else {
                 return  arrayType.getItems().getName() + "Collection";
             }
@@ -398,8 +401,13 @@ public class TypesGenerator extends AbstractTemplateGenerator {
             } else {
                 final ST st = stGroup.getInstanceOf("propertyInterfaceSet");
                 st.add("property", property);
-                st.add("propertyType", arrayType.getItems().getName() + "Collection");
-                st.add("paramType", arrayType.getItems().getName() + "Collection");
+                if (BuiltinType.of(arrayType.getItems().getName()).isPresent()) {
+                    st.add("propertyType", "array");
+                    st.add("paramType", "array");
+                } else {
+                    st.add("propertyType", arrayType.getItems().getName() + "Collection");
+                    st.add("paramType", arrayType.getItems().getName() + "Collection");
+                }
                 return st.render();
             }
         }
@@ -472,6 +480,13 @@ public class TypesGenerator extends AbstractTemplateGenerator {
             } else {
                 final ST st = stGroup.getInstanceOf("arraySetter");
                 st.add("property", property);
+                if (BuiltinType.of(arrayType.getItems().getName()).isPresent()) {
+                    st.add("propertyType", "array");
+                    st.add("paramType", "array");
+                } else {
+                    st.add("propertyType", arrayType.getItems().getName() + "Collection");
+                    st.add("paramType", arrayType.getItems().getName() + "Collection");
+                }
                 return st.render();
             }
         }
