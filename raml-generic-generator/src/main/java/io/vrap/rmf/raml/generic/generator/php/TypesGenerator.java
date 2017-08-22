@@ -274,15 +274,15 @@ public class TypesGenerator extends AbstractTemplateGenerator {
             if (arrayType.getItems() == null || arrayType.getItems().getName() == null) {
                 return null;
             } else {
+                if (BuiltinType.of(arrayType.getItems().getName()).isPresent()) {
+                    return scalarMapper("array");
+                }
                 final ST st = stGroup.getInstanceOf("arrayGetter");
                 st.add("parent", property.eContainer());
                 st.add("property", property);
-                if (BuiltinType.of(arrayType.getItems().getName()).isPresent()) {
-                    return scalarMapper("array");
-                } else {
-                    st.add("propertyType", arrayType.getItems().getName() + "Collection");
-                    st.add("paramType", arrayType.getItems().getName() + "Collection");
-                }
+                st.add("propertyType", arrayType.getItems().getName() + "Collection");
+                st.add("paramType", arrayType.getItems().getName() + "Collection");
+
                 return st.render();
             }
         }
