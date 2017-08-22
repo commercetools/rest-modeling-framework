@@ -375,6 +375,17 @@ interface AnnotationsFacet {
 	 * The annotations of this element.
 	 */
 	contains Annotation[] annotations
+	
+	/*
+	 * Returns the annotation with the given type or null if no such
+	 * annotation exists.
+	 */
+	op Annotation getAnnotation(AnyAnnotationType annotationType) {
+		for (Annotation anno : annotations) {
+			if (anno.^type == annotationType) return anno
+		}
+		return null
+	} 
 }
 
 class Annotation {
