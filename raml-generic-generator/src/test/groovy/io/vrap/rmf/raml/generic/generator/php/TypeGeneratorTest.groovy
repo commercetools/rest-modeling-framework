@@ -18,6 +18,7 @@ import org.assertj.core.util.Files
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.resource.ResourceSet
 import org.eclipse.emf.ecore.resource.URIConverter
+import spock.lang.Ignore
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -25,6 +26,7 @@ import spock.lang.Unroll
 import java.nio.charset.StandardCharsets
 import static org.apache.commons.lang3.StringUtils.capitalize;
 
+@Ignore
 class TypeGeneratorTest extends Specification implements ResourceFixtures {
     @Shared
     ResourceSet resourceSet = new RamlResourceSet()

@@ -4,6 +4,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
 import io.vrap.rmf.raml.generic.generator.AbstractTemplateGenerator;
+import io.vrap.rmf.raml.model.facets.StringInstance;
 import io.vrap.rmf.raml.model.types.*;
 import io.vrap.rmf.raml.model.types.impl.TypesFactoryImpl;
 import io.vrap.rmf.raml.model.types.util.TypesSwitch;
@@ -14,10 +15,10 @@ import org.stringtemplate.v4.STGroupFile;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
+
+import static org.apache.commons.lang3.StringUtils.capitalize;
 
 public class TypesGenerator extends AbstractTemplateGenerator {
 
@@ -29,10 +30,13 @@ public class TypesGenerator extends AbstractTemplateGenerator {
     static final String TYPE_MODEL_MAP = "modelMap";
     static final String TYPE_DISCRIMINATOR_RESOLVER = "discriminatorResolver";
     static final String PACKAGE_NAME = "types";
-    public final String vendorName;
+    private final String vendorName;
+    private final AnyAnnotationType packageAnnotationType;
 
-    TypesGenerator(final String vendorName) {
+    TypesGenerator(final String vendorName, final AnyAnnotationType packageAnnotationType)
+    {
         this.vendorName = vendorName;
+        this.packageAnnotationType = packageAnnotationType;
     }
 
     public void generate(final List<AnyType> types, final File outputPath) throws IOException {
@@ -48,12 +52,22 @@ public class TypesGenerator extends AbstractTemplateGenerator {
         final TypeGeneratingVisitor modelGeneratingVisitor =  createVisitor(PACKAGE_NAME, TYPE_MODEL);
 
         for (final AnyType anyType : types) {
-            final File interfaceFile = new File(outputPath, anyType.getName().concat(".php"));
-            final File modelFile = new File(outputPath, anyType.getName().concat("Model.php"));
+            final String packageFolder = getPackageFolder(anyType);
+            final File interfaceFile = new File(outputPath, packageFolder + anyType.getName().concat(".php"));
+            final File modelFile = new File(outputPath, packageFolder + anyType.getName().concat("Model.php"));
 
             generateFile(generateType(interfaceGeneratingVisitor, anyType), interfaceFile);
             generateFile(generateType(modelGeneratingVisitor, anyType), modelFile);
         }
+    }
+
+    private String getPackageFolder(AnyType anyType) {
+        return getPackageFolder(anyType, "/");
+    }
+
+    private String getPackageFolder(AnyType anyType, final String glue) {
+        return anyType.getAnnotations().stream().filter(annotation -> annotation.getType().equals(packageAnnotationType))
+                .map(annotation -> ((StringInstance)annotation.getValue()).getValue() + glue).findFirst().orElse("");
     }
 
     private void generateCollections(final File outputPath, final List<AnyType> types) throws IOException {
@@ -66,8 +80,9 @@ public class TypesGenerator extends AbstractTemplateGenerator {
                     if (property.getType() instanceof ArrayType) {
                         ArrayType arrayType = (ArrayType)property.getType();
                         if (arrayType.getItems() != null && arrayType.getItems() instanceof ObjectType && arrayType.getItems().getName() != null) {
-                            final File interfaceFile = new File(outputPath, arrayType.getItems().getName().concat("Collection.php"));
-                            final File modelFile = new File(outputPath, arrayType.getItems().getName().concat("CollectionModel.php"));
+                            final String packageFolder = getPackageFolder(arrayType.getItems());
+                            final File interfaceFile = new File(outputPath, packageFolder + arrayType.getItems().getName().concat("Collection.php"));
+                            final File modelFile = new File(outputPath, packageFolder + arrayType.getItems().getName().concat("CollectionModel.php"));
 
                             generateFile(generateType(collectionInterfaceGeneratingVisitor, arrayType), interfaceFile);
                             generateFile(generateType(collectionModelGeneratingVisitor, arrayType), modelFile);
@@ -89,20 +104,25 @@ public class TypesGenerator extends AbstractTemplateGenerator {
             st.add("vendorName", vendorName);
             st.add("type", objectType);
             st.add("subTypes", objectType.subTypes());
-            generateFile(st.render(), new File(outputPath, objectType.getName() + "DiscriminatorResolver.php"));
+            final String packageFolder = getPackageFolder(objectType);
+
+            generateFile(st.render(), new File(outputPath, packageFolder + objectType.getName() + "DiscriminatorResolver.php"));
         }
     }
 
     @VisibleForTesting
     String generateMap(final List<AnyType> types) {
-        final List<String> objectTypes = types.stream().filter(anyType -> anyType instanceof ObjectType).map(AnyType::getName).collect(Collectors.toList());
+        final List<String> objectTypes = types.stream()
+                .filter(anyType -> anyType instanceof ObjectType)
+                .map(anyType -> getPackageFolder(anyType, "\\") + anyType.getName())
+                .collect(Collectors.toList());
         for (final AnyType anyType : types) {
             if (anyType instanceof ObjectType) {
                 for (final Property property : ((ObjectType) anyType).getProperties()) {
                     if (property.getType() instanceof ArrayType) {
                         ArrayType arrayType = (ArrayType) property.getType();
                         if (arrayType.getItems() != null && arrayType.getItems() instanceof ObjectType && arrayType.getItems().getName() != null) {
-                            String collectionName = arrayType.getItems().getName() + "Collection";
+                            String collectionName = getPackageFolder(arrayType.getItems(), "\\") + arrayType.getItems().getName() + "Collection";
                             if (!objectTypes.contains(collectionName)) {
                                 objectTypes.add(collectionName);
                             }
@@ -508,6 +528,9 @@ public class TypesGenerator extends AbstractTemplateGenerator {
             final Boolean builtInParentType = items.getType() == null || BuiltinType.of(items.getName()).isPresent();
             st.add("builtInParent", builtInParentType);
             st.add("package", packageName);
+            Annotation packageAnnotation = items.getAnnotations().stream().filter(annotation -> annotation.getType().equals(packageAnnotationType)).findFirst().orElse(null);
+            st.add("typePackage", packageAnnotation);
+
             return st.render();
         }
 
@@ -522,7 +545,37 @@ public class TypesGenerator extends AbstractTemplateGenerator {
                 final Boolean builtInParentType = objectType.getType() == null || BuiltinType.of(objectType.getType().getName()).isPresent();
                 st.add("builtInParent", builtInParentType);
                 st.add("package", packageName);
-
+                Annotation packageAnnotation = objectType.getAnnotations().stream().filter(annotation -> annotation.getType().equals(packageAnnotationType)).findFirst().orElse(null);
+                st.add("typePackage", packageAnnotation);
+                final String typeFolder = getPackageFolder(objectType, "\\");
+                final Set<String> uses = objectType.getProperties().stream()
+                        .filter(property -> property.getType() instanceof ObjectType)
+                        .filter(property -> property.getType().getAnnotations().stream().anyMatch(annotation -> annotation.getType().equals(packageAnnotationType)))
+                        .filter(property -> !getPackageFolder(property.getType(), "\\").equals(typeFolder))
+                        .map(property -> {
+                            final String typePackage = getPackageFolder(property.getType(), "\\");
+                            return vendorName + "\\" + capitalize(packageName) + "\\" + typePackage + property.getType().getName();
+                        })
+                        .collect(Collectors.toSet());
+                uses.addAll(
+                        objectType.getProperties().stream()
+                                .filter(property -> property.getType() instanceof ArrayType)
+                                .map(property -> ((ArrayType)property.getType()).getItems())
+                                .filter(anyType -> anyType instanceof ObjectType)
+                                .filter(anyType -> anyType.getAnnotations().stream().anyMatch(annotation -> annotation.getType().equals(packageAnnotationType)))
+                                .filter(anyType -> !getPackageFolder(anyType, "\\").equals(typeFolder))
+                                .map(anyType -> {
+                                    final String typePackage = getPackageFolder(anyType, "\\");
+                                    return vendorName + "\\" + capitalize(packageName) + "\\" + typePackage + anyType.getName() + "Collection";
+                                })
+                                .collect(Collectors.toSet())
+                );
+                final String typePackageFolder = getPackageFolder(objectType.getType(), "\\");
+                if (!builtInParentType && !typePackageFolder.equals(getPackageFolder(objectType, "\\"))) {
+                    final String suffix = type.equals(TYPE_MODEL) ? "Model" : "";
+                    uses.add(vendorName + "\\" + capitalize(packageName) + "\\" + typePackageFolder + objectType.getType().getName() + suffix);
+                }
+                st.add("uses", uses);
                 if (type.equals(TYPE_INTERFACE)) {
                     final List<Property> typeProperties;
                     if(objectType.getType() instanceof ObjectType) {

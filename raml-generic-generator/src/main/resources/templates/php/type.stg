@@ -2,17 +2,27 @@
  * interface template functions
  */
 
-interface(vendorName, type, package, builtInParent, propertyTypes, propertySetters, typeProperties) ::= <<
+interface(vendorName, type, package, builtInParent, propertyTypes, propertySetters, typeProperties, typePackage, uses) ::= <<
 \<?php
 <generatorInfo()>
 
-namespace <vendorName>\\<package; format="capitalize">;
+namespace <vendorName>\\<package; format="capitalize"><if(typePackage)>\\<typePackage.value.value><endif>;
+
+<if(builtInParent)>
+use <vendorName>\\<package; format="capitalize">\\JsonObject;
+<endif>
+<uses: {c |<useImport(c)>}>
 
 interface <type.name> extends <if(!builtInParent)><type.type.name><else>JsonObject<endif> {
     <typeProperties: {p |<propertyConstant(p)>}>
     <type.properties, propertyTypes: {p, pt|<propertyInterfaceGet(p, pt)>}>
     <propertySetters: {p |<p>}>
 }
+
+>>
+
+useImport(class) ::=<<
+use <class>;
 
 >>
 
@@ -39,11 +49,13 @@ public function set<property.name; format="capitalize">(<if(propertyType)><prope
 
 >>
 
-collectionInterface(vendorName, type, package, builtInParent) ::= <<
+collectionInterface(vendorName, type, package, builtInParent, typePackage, uses) ::= <<
 \<?php
 <generatorInfo()>
 
-namespace <vendorName>\\<package; format="capitalize">;
+namespace <vendorName>\\<package; format="capitalize"><if(typePackage)>\\<typePackage.value.value><endif>;
+
+use <vendorName>\\<package; format="capitalize">\\Collection;
 
 interface <type.name>Collection extends Collection {
     /**
@@ -69,11 +81,17 @@ interface <type.name>Collection extends Collection {
 /*
  * implementation template functions
  */
-model(vendorName, type, package, builtInParent, propertyTypes, propertyGetters, propertySetters, serializers) ::= <<
+model(vendorName, type, package, builtInParent, propertyTypes, propertyGetters, propertySetters, serializers, typePackage, uses) ::= <<
 \<?php
 <generatorInfo()>
 
-namespace <vendorName>\\<package; format="capitalize">;
+namespace <vendorName>\\<package; format="capitalize"><if(typePackage)>\\<typePackage.value.value><endif>;
+
+<if(builtInParent)>
+use <vendorName>\\<package; format="capitalize">\\JsonObjectModel;
+<endif>
+use <vendorName>\\<package; format="capitalize">\\ResourceClassMap;
+<uses: {c |<useImport(c)>}>
 
 class <type.name>Model extends <if(!builtInParent)><type.type.name>Model<else>JsonObjectModel<endif> implements <type.name> {
     <if(type.discriminator || type.discriminatorValue)>
@@ -83,7 +101,7 @@ class <type.name>Model extends <if(!builtInParent)><type.type.name>Model<else>Js
     <if(type.discriminator)>
     public function __construct(array $data = []) {
         parent::__construct($data);
-        $this-><type.discriminator> = static::DISCRIMINATOR_VALUE;
+        $this->set<type.discriminator; format="capitalize">(static::DISCRIMINATOR_VALUE);
     }
 
     <endif>
@@ -302,11 +320,15 @@ if (isset($data['<property.name>']) && $data['<property.name>'] instanceof \Date
 
 >>
 
-collectionModel(vendorName, type, package, builtInParent) ::= <<
+collectionModel(vendorName, type, package, builtInParent, typePackage, uses) ::= <<
 \<?php
 <generatorInfo()>
 
-namespace <vendorName>\\<package; format="capitalize">;
+namespace <vendorName>\\<package; format="capitalize"><if(typePackage)>\\<typePackage.value.value><endif>;
+
+use <vendorName>\\<package; format="capitalize">\\JsonCollection;
+use <vendorName>\\<package; format="capitalize">\\Collection;
+use <vendorName>\\<package; format="capitalize">\\ResourceClassMap;
 
 class <type.name>CollectionModel extends JsonCollection implements <type.name>Collection {
 
@@ -354,11 +376,11 @@ generatorInfo() ::= <<
  */
 >>
 
-discriminatorResolver(vendorName, package, type, subTypes) ::= <<
+discriminatorResolver(vendorName, package, type, subTypes, typePackage) ::= <<
 \<?php
 <generatorInfo()>
 
-namespace <vendorName>\\<package; format="capitalize">;
+namespace <vendorName>\\<package; format="capitalize"><if(typePackage)>\\<typePackage.value.value><endif>;
 
 class <type.name; format="capitalize">DiscriminatorResolver
 {

@@ -3,6 +3,7 @@ package io.vrap.rmf.raml.generic.generator.php;
 import com.google.common.base.CaseFormat;
 import io.vrap.rmf.raml.generic.generator.Generator;
 import io.vrap.rmf.raml.model.modules.Api;
+import io.vrap.rmf.raml.model.types.AnyAnnotationType;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.apache.commons.io.filefilter.TrueFileFilter;
@@ -43,7 +44,8 @@ public class PhpGenerator implements Generator {
             Files.createDirectories(outputPath.toPath());
         }
 
-        TypesGenerator generator = new TypesGenerator(vendorName);
+        AnyAnnotationType packageAnnotation = api.getAnnotationTypes().stream().filter(anyAnnotationType -> anyAnnotationType.getName().equals("package")).findFirst().orElse(null);
+        TypesGenerator generator = new TypesGenerator(vendorName, packageAnnotation);
         generator.generate(api.getTypes(), new File(outputPath, "target/Types") );
 
         StaticGenerator staticGenerator = new StaticGenerator(vendorName);
