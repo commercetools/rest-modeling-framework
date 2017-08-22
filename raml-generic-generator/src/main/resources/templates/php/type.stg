@@ -196,15 +196,15 @@ public function get<property.name; format="capitalize">()
 
 >>
 
-arrayGetter(property, parent) ::= <<
+arrayGetter(property, parent, propertyType, paramType) ::= <<
 /**
- * @return <if(property.type.items.name)><property.type.items.name>Collection<else>mixed<endif>
+ * @return <if(paramType)><paramType><else>array<endif>
  */
 public function get<property.name; format="capitalize">()
 {
     if (is_null($this-><property.name>)) {
         $value = $this->raw(<parent.name>::FIELD_<property.name; format="upperUnderscore">);
-        $mappedClass = ResourceClassMap::getMappedClass(<property.type.items.name>Collection::class);
+        $mappedClass = ResourceClassMap::getMappedClass(<propertyType>::class);
         if (is_null($value)) {
             return new $mappedClass([]);
         }
