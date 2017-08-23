@@ -47,8 +47,7 @@ public class ApiConstructor extends BaseConstructor {
             // 2. resolve secured by
 
             ctx.securedByFacet().forEach(this::visitSecuredByFacet);
-            withinScope(scope.with(RESOURCE_CONTAINER__RESOURCES), resourcesScope ->
-                    ctx.resourceFacet().stream().map(this::visitResourceFacet).collect(Collectors.toList()));
+            ctx.resourceFacet().forEach(this::visitResourceFacet);
 
             withinScope(scope.with(TYPE_CONTAINER__RESOURCE_TYPES), resourceTypesScope ->
                     ctx.resourceTypesFacet().stream().map(this::visitResourceTypesFacet).collect(Collectors.toList()));
@@ -99,29 +98,26 @@ public class ApiConstructor extends BaseConstructor {
 
     @Override
     public Object visitResourceFacet(RAMLParser.ResourceFacetContext resourceFacet) {
-        final Resource resource = ResourcesFactory.eINSTANCE.createResource();
-        scope.setValue(resource, resourceFacet.getStart());
+        return withinScope(scope.with(RESOURCE_CONTAINER__RESOURCES), resourcesScope -> {
+            final Resource resource = ResourcesFactory.eINSTANCE.createResource();
+            resourcesScope.setValue(resource, resourceFacet.getStart());
 
-        final UriTemplate relativeUri = uriTemplateConstructor.parse(resourceFacet.relativeUri.getText(), scope);
-        resource.setRelativeUri(relativeUri);
-        return withinScope(scope.with(resource), resourceScope -> {
-            resourceFacet.attributeFacet().forEach(this::visitAttributeFacet);
-            resourceFacet.annotationFacet().forEach(this::visitAnnotationFacet);
-            resourceFacet.securedByFacet().forEach(this::visitSecuredByFacet);
+            final UriTemplate relativeUri = uriTemplateConstructor.parse(resourceFacet.relativeUri.getText(), resourcesScope);
+            resource.setRelativeUri(relativeUri);
+            return withinScope(resourcesScope.with(resource), resourceScope -> {
+                resourceFacet.attributeFacet().forEach(this::visitAttributeFacet);
+                resourceFacet.annotationFacet().forEach(this::visitAnnotationFacet);
+                resourceFacet.securedByFacet().forEach(this::visitSecuredByFacet);
 
-            resourceFacet.methodFacet().forEach(this::visitMethodFacet);
-            resourceFacet.uriParametersFacet().forEach(this::visitUriParametersFacet);
+                resourceFacet.methodFacet().forEach(this::visitMethodFacet);
+                resourceFacet.uriParametersFacet().forEach(this::visitUriParametersFacet);
+                resourceFacet.resourceFacet().forEach(this::visitResourceFacet);
 
-            withinScope(scope.with(RESOURCE_CONTAINER__RESOURCES), resoureResourcesScope ->
-                    resourceFacet.resourceFacet().stream()
-                            .map(this::visitResourceFacet)
-                            .collect(Collectors.toList())
-            );
+                resourceFacet.isFacet().forEach(this::visitIsFacet);
+                resourceFacet.resourceTypeFacet().forEach(this::visitResourceTypeFacet);
 
-            resourceFacet.isFacet().forEach(this::visitIsFacet);
-            resourceFacet.resourceTypeFacet().forEach(this::visitResourceTypeFacet);
-
-            return resource;
+                return resource;
+            });
         });
     }
 
