@@ -118,6 +118,7 @@ public class ApiConstructor extends BaseConstructor {
                             .collect(Collectors.toList())
             );
 
+            resourceFacet.isFacet().forEach(this::visitIsFacet);
             resourceFacet.resourceTypeFacet().forEach(this::visitResourceTypeFacet);
 
             return resource;
@@ -185,12 +186,8 @@ public class ApiConstructor extends BaseConstructor {
                         });
 
                         methodFacet.responsesFacet().forEach(this::visitResponsesFacet);
+                        methodFacet.isFacet().forEach(this::visitIsFacet);
 
-                        withinScope(methodScope.with(METHOD__IS), isScope -> {
-                           methodFacet.isFacet().forEach(this::visitIsFacet);
-
-                           return null;
-                        });
                         return methodScope.eObject();
                     });
 

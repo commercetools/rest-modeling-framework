@@ -722,11 +722,14 @@ class ApiConstructorTest extends Specification {
         objectType.getProperty('name').type instanceof StringType
     }
 
-    def "resource with method, body, content type and properties"() {
+    def "resource with trait, method, body, content type and properties"() {
         when:
         Api api = constructApi(
                 '''\
+        traits:
+            private:
         /user:
+            is: [ private ]
             get:
                 body:
                     application/json:
@@ -734,7 +737,10 @@ class ApiConstructorTest extends Specification {
                             name?: string
         ''')
         then:
+        api.traits.size() == 1
         api.resources.size() == 1
+        api.resources[0].is.size() == 1
+        api.resources[0].is[0].trait == api.traits[0]
         api.resources[0].methods.size() == 1
         api.resources[0].methods[0].bodies.size() == 1
         BodyType bodyType = api.resources[0].methods[0].bodies[0]

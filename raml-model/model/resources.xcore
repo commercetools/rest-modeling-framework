@@ -85,7 +85,7 @@ class ResourceTypeApplication {
 	contains Argument[] arguments 
 }
 
-class Resource extends ResourceBase, ResourceContainer {
+class Resource extends ResourceBase, ResourceContainer, ApplyTraitsFacet {
 	/*
 	 * The reltaive uri of this resource.
 	 */
@@ -106,8 +106,15 @@ enum HttpMethod {
 	options 
 }
 
+interface ApplyTraitsFacet {
+	/*
+	 * A list of the traits to apply to this element.
+	 */
+	contains TraitApplication[] is	
+}
+
 class Method extends DocumentableElement, AnnotationsFacet, ProtocolsFacet, SecuredByFacet, 
-					 HeadersFacet, QueryParametersFacet, ResponsesFacet {
+					 HeadersFacet, QueryParametersFacet, ResponsesFacet, ApplyTraitsFacet {
 	/*
 	 * The HTTP method.
 	 */
@@ -117,11 +124,6 @@ class Method extends DocumentableElement, AnnotationsFacet, ProtocolsFacet, Secu
 	 * The body types of this method.
 	 */
 	contains BodyType[] bodies
-	
-	/*
-	 * A list of the traits to apply to this method.
-	 */
-	contains TraitApplication[] is
 }
 
 class Trait extends IdentifiableElement, Method {

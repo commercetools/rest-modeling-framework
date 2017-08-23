@@ -66,11 +66,7 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
 
             traitFacet.responsesFacet().forEach(this::visitResponsesFacet);
 
-            withinScope(traitScope.with(METHOD__IS), isScope -> {
-                traitFacet.isFacet().forEach(this::visitIsFacet);
-
-                return null;
-            });
+            traitFacet.isFacet().forEach(this::visitIsFacet);
 
             return trait;
         });
@@ -78,7 +74,7 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
 
     @Override
     public Object visitIsFacet(RAMLParser.IsFacetContext isFacet) {
-        return withinScope(scope.with(METHOD__IS), isScope ->
+        return withinScope(scope.with(APPLY_TRAITS_FACET__IS), isScope ->
                 isFacet.traitApplication().stream()
                         .map(this::visitTraitApplication)
                         .collect(Collectors.toList()));

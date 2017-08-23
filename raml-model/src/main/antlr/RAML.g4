@@ -70,7 +70,7 @@ resourceFacet:
                     MAP_START
                     (
                         resourceFacet | methodFacet | attributeFacet | uriParametersFacet | annotationFacet
-                        | securedByFacet | resourceTypeFacet
+                        | securedByFacet | resourceTypeFacet | isFacet
                     )*
                     MAP_END
                 )
