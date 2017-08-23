@@ -345,7 +345,7 @@ facetValue:
 
 library:
     MAP_START
-    ( usesFacet | attributeFacet | typesFacet | annotationFacet | securitySchemesFacet )*
+    ( usesFacet | attributeFacet | typesFacet | traitsFacet | resourceTypesFacet | annotationFacet | securitySchemesFacet )*
     MAP_END
     ;
 

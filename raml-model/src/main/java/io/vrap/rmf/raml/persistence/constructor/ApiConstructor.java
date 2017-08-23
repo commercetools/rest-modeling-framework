@@ -48,9 +48,7 @@ public class ApiConstructor extends BaseConstructor {
 
             ctx.securedByFacet().forEach(this::visitSecuredByFacet);
             ctx.resourceFacet().forEach(this::visitResourceFacet);
-
-            withinScope(scope.with(TYPE_CONTAINER__RESOURCE_TYPES), resourceTypesScope ->
-                    ctx.resourceTypesFacet().stream().map(this::visitResourceTypesFacet).collect(Collectors.toList()));
+            ctx.resourceTypesFacet().forEach(this::visitResourceTypesFacet);
 
             return rootObject;
         });
@@ -118,76 +116,6 @@ public class ApiConstructor extends BaseConstructor {
 
                 return resource;
             });
-        });
-    }
-
-    @Override
-    public Object visitResourceTypeFacet(RAMLParser.ResourceTypeFacetContext ctx) {
-        return withinScope(scope.with(RESOURCE_BASE__TYPE), resourceTypeScope ->
-            visitResourceTypeApplication(ctx.resourceTypeApplication()));
-    }
-
-    @Override
-    public Object visitResourceTypeApplication(RAMLParser.ResourceTypeApplicationContext ctx) {
-        final ResourceTypeApplication resourceTypeApplication = ResourcesFactory.eINSTANCE.createResourceTypeApplication();
-        scope.setValue(resourceTypeApplication, ctx.getStart());
-        final ResourceType resourceType = (ResourceType) scope.with(RESOURCE_TYPE_APPLICATION__TYPE).getEObjectByName(ctx.type.getText());
-        resourceTypeApplication.setType(resourceType);
-        return withinScope(scope.with(resourceTypeApplication, RESOURCE_TYPE_APPLICATION__ARGUMENTS),
-                argumentsScope -> ctx.argument().stream()
-                        .map(this::visitArgument)
-                        .collect(Collectors.toList()));
-    }
-
-    @Override
-    public Object visitResourceTypeDeclarationFacet(RAMLParser.ResourceTypeDeclarationFacetContext resourceTypeDeclarationFacet) {
-        final String type = resourceTypeDeclarationFacet.name.getText();
-        final EObject resourceType = scope.getEObjectByName(type);
-        return withinScope(scope.with(resourceType), resourceTypeScope -> {
-            resourceTypeDeclarationFacet.attributeFacet().forEach(this::visitAttributeFacet);
-            resourceTypeDeclarationFacet.annotationFacet().forEach(this::visitAnnotationFacet);
-            resourceTypeDeclarationFacet.securedByFacet().forEach(this::visitSecuredByFacet);
-
-            resourceTypeDeclarationFacet.methodFacet().forEach(this::visitMethodFacet);
-            resourceTypeDeclarationFacet.uriParametersFacet().forEach(this::visitUriParametersFacet);
-
-            resourceTypeDeclarationFacet.resourceTypeFacet().forEach(this::visitResourceTypeFacet);
-
-            return resourceType;
-        });
-    }
-
-    @Override
-    public Object visitMethodFacet(RAMLParser.MethodFacetContext methodFacet) {
-        return withinScope(scope.with(RESOURCE_BASE__METHODS), methodsScope -> {
-            final Method method = ResourcesFactory.eINSTANCE.createMethod();
-            String httpMethodText = methodFacet.httpMethod().getText();
-            httpMethodText = httpMethodText.endsWith("?") ?
-                    httpMethodText.substring(0, httpMethodText.length() - 1) :
-                    httpMethodText;
-            final HttpMethod httpMethod = (HttpMethod) ResourcesFactory.eINSTANCE.createFromString(HTTP_METHOD, httpMethodText);
-            method.setMethod(httpMethod);
-            methodsScope.setValue(method, methodFacet.getStart());
-
-            withinScope(methodsScope.with(method), methodScope -> {
-                        methodFacet.attributeFacet().forEach(this::visitAttributeFacet);
-                        methodFacet.annotationFacet().forEach(this::visitAnnotationFacet);
-                        methodFacet.securedByFacet().forEach(this::visitSecuredByFacet);
-                        methodFacet.headersFacet().forEach(this::visitHeadersFacet);
-                        methodFacet.queryParametersFacet().forEach(this::visitQueryParametersFacet);
-
-                        withinScope(methodScope.with(METHOD__BODIES), bodiesScope -> {
-                            methodFacet.bodyFacet().forEach(this::visitBodyFacet);
-                            return null;
-                        });
-
-                        methodFacet.responsesFacet().forEach(this::visitResponsesFacet);
-                        methodFacet.isFacet().forEach(this::visitIsFacet);
-
-                        return methodScope.eObject();
-                    });
-
-            return method;
         });
     }
 

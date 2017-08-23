@@ -2,10 +2,7 @@ package io.vrap.rmf.raml.persistence.constructor;
 
 import com.google.common.base.Strings;
 import io.vrap.rmf.raml.model.facets.FacetsFactory;
-import io.vrap.rmf.raml.model.resources.Argument;
-import io.vrap.rmf.raml.model.resources.ResourcesFactory;
-import io.vrap.rmf.raml.model.resources.Trait;
-import io.vrap.rmf.raml.model.resources.TraitApplication;
+import io.vrap.rmf.raml.model.resources.*;
 import io.vrap.rmf.raml.model.responses.BodyType;
 import io.vrap.rmf.raml.model.responses.Response;
 import io.vrap.rmf.raml.model.responses.ResponsesFactory;
@@ -24,6 +21,7 @@ import java.util.stream.Collectors;
 
 import static io.vrap.rmf.raml.model.elements.ElementsPackage.Literals.IDENTIFIABLE_ELEMENT__NAME;
 import static io.vrap.rmf.raml.model.modules.ModulesPackage.Literals.TRAIT_CONTAINER__TRAITS;
+import static io.vrap.rmf.raml.model.modules.ModulesPackage.Literals.TYPE_CONTAINER__RESOURCE_TYPES;
 import static io.vrap.rmf.raml.model.resources.ResourcesPackage.Literals.*;
 import static io.vrap.rmf.raml.model.responses.ResponsesPackage.Literals.RESPONSES_FACET__RESPONSES;
 import static io.vrap.rmf.raml.model.responses.ResponsesPackage.Literals.RESPONSE__BODIES;
@@ -541,5 +539,81 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
     public Object visitAttributeFacet(final RAMLParser.AttributeFacetContext attributeFacet) {
         final Object value = setAttribute(attributeFacet, scope.eObject());
         return value;
+    }
+
+    @Override
+    public Object visitResourceTypesFacet(RAMLParser.ResourceTypesFacetContext ctx) {
+        return withinScope(scope.with(TYPE_CONTAINER__RESOURCE_TYPES),
+                resourceTypeesScope -> super.visitResourceTypesFacet(ctx));
+    }
+
+    @Override
+    public Object visitResourceTypeFacet(RAMLParser.ResourceTypeFacetContext ctx) {
+        return withinScope(scope.with(RESOURCE_BASE__TYPE), resourceTypeScope ->
+            visitResourceTypeApplication(ctx.resourceTypeApplication()));
+    }
+
+    @Override
+    public Object visitResourceTypeApplication(RAMLParser.ResourceTypeApplicationContext ctx) {
+        final ResourceTypeApplication resourceTypeApplication = ResourcesFactory.eINSTANCE.createResourceTypeApplication();
+        scope.setValue(resourceTypeApplication, ctx.getStart());
+        final ResourceType resourceType = (ResourceType) scope.with(RESOURCE_TYPE_APPLICATION__TYPE).getEObjectByName(ctx.type.getText());
+        resourceTypeApplication.setType(resourceType);
+        return withinScope(scope.with(resourceTypeApplication, RESOURCE_TYPE_APPLICATION__ARGUMENTS),
+                argumentsScope -> ctx.argument().stream()
+                        .map(this::visitArgument)
+                        .collect(Collectors.toList()));
+    }
+
+    @Override
+    public Object visitResourceTypeDeclarationFacet(RAMLParser.ResourceTypeDeclarationFacetContext resourceTypeDeclarationFacet) {
+        final String type = resourceTypeDeclarationFacet.name.getText();
+        final EObject resourceType = scope.getEObjectByName(type);
+        return withinScope(scope.with(resourceType), resourceTypeScope -> {
+            resourceTypeDeclarationFacet.attributeFacet().forEach(this::visitAttributeFacet);
+            resourceTypeDeclarationFacet.annotationFacet().forEach(this::visitAnnotationFacet);
+            resourceTypeDeclarationFacet.securedByFacet().forEach(this::visitSecuredByFacet);
+
+            resourceTypeDeclarationFacet.methodFacet().forEach(this::visitMethodFacet);
+            resourceTypeDeclarationFacet.uriParametersFacet().forEach(this::visitUriParametersFacet);
+
+            resourceTypeDeclarationFacet.resourceTypeFacet().forEach(this::visitResourceTypeFacet);
+
+            return resourceType;
+        });
+    }
+
+    @Override
+    public Object visitMethodFacet(RAMLParser.MethodFacetContext methodFacet) {
+        return withinScope(scope.with(RESOURCE_BASE__METHODS), methodsScope -> {
+            final Method method = ResourcesFactory.eINSTANCE.createMethod();
+            String httpMethodText = methodFacet.httpMethod().getText();
+            httpMethodText = httpMethodText.endsWith("?") ?
+                    httpMethodText.substring(0, httpMethodText.length() - 1) :
+                    httpMethodText;
+            final HttpMethod httpMethod = (HttpMethod) ResourcesFactory.eINSTANCE.createFromString(HTTP_METHOD, httpMethodText);
+            method.setMethod(httpMethod);
+            methodsScope.setValue(method, methodFacet.getStart());
+
+            withinScope(methodsScope.with(method), methodScope -> {
+                        methodFacet.attributeFacet().forEach(this::visitAttributeFacet);
+                        methodFacet.annotationFacet().forEach(this::visitAnnotationFacet);
+                        methodFacet.securedByFacet().forEach(this::visitSecuredByFacet);
+                        methodFacet.headersFacet().forEach(this::visitHeadersFacet);
+                        methodFacet.queryParametersFacet().forEach(this::visitQueryParametersFacet);
+
+                        withinScope(methodScope.with(METHOD__BODIES), bodiesScope -> {
+                            methodFacet.bodyFacet().forEach(this::visitBodyFacet);
+                            return null;
+                        });
+
+                        methodFacet.responsesFacet().forEach(this::visitResponsesFacet);
+                        methodFacet.isFacet().forEach(this::visitIsFacet);
+
+                        return methodScope.eObject();
+                    });
+
+            return method;
+        });
     }
 }

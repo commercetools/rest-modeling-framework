@@ -32,6 +32,8 @@ public class LibraryConstructor extends BaseConstructor {
             ctx.attributeFacet().forEach(this::visitAttributeFacet);
             ctx.typesFacet().forEach(this::visitTypesFacet);
             ctx.securitySchemesFacet().forEach(this::visitSecuritySchemesFacet);
+            ctx.traitsFacet().forEach(this::visitTraitsFacet);
+            ctx.resourceTypesFacet().forEach(this::visitResourceTypesFacet);
 
             return rootObject;
         });
