@@ -4,6 +4,7 @@ import io.vrap.rmf.raml.model.RamlError;
 import io.vrap.rmf.raml.model.modules.Library;
 import io.vrap.rmf.raml.model.modules.LibraryUse;
 import io.vrap.rmf.raml.model.types.BuiltinType;
+import io.vrap.rmf.raml.persistence.antlr.RamlToken;
 import org.antlr.v4.runtime.CommonToken;
 import org.antlr.v4.runtime.Token;
 import org.eclipse.emf.common.util.EList;
@@ -223,14 +224,14 @@ public class Scope {
     public void addError(final String messagePattern, final Object... arguments) {
         final String message = MessageFormat.format(messagePattern, arguments);
 
-        final Optional<CommonToken> optionalToken = Stream.of(arguments)
-                .filter(CommonToken.class::isInstance)
-                .map(CommonToken.class::cast)
+        final Optional<RamlToken> optionalToken = Stream.of(arguments)
+                .filter(RamlToken.class::isInstance)
+                .map(RamlToken.class::cast)
                 .findFirst();
 
         final int line = optionalToken.map(CommonToken::getLine).orElse(-1);
         final int column = optionalToken.map(CommonToken::getCharPositionInLine).orElse(-1);
-        final String location = "<UNKOWN SOURCE>";
+        final String location = optionalToken.map(RamlToken::getLocation).orElse("<UNKNOWN>");
 
         resource.getErrors()
                 .add(RamlError.of(message, location, line, column));

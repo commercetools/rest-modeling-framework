@@ -30,8 +30,6 @@ public class TypeDeclarationResolverTest implements RAMLParserFixtures, Resource
         final URI apiUri = URI.createURI(apiFile.toURI().toString());
         final URIConverter uriConverter = new RamlResourceSet().getURIConverter();
         final RAMLCustomLexer lexer = new RAMLCustomLexer(apiUri, uriConverter);
-        lexer.setTokenFactory(CommonTokenFactory.DEFAULT);
-
         final TokenStream tokenStream = new CommonTokenStream(lexer);
 
         final RAMLParser parser = new RAMLParser(tokenStream);

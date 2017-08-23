@@ -175,7 +175,6 @@ class LibraryConstructorTest extends Specification {
         def strippedInput = input.stripIndent()
         final RAMLCustomLexer lexer = new RAMLCustomLexer(strippedInput, uri, uriConverter);
         final TokenStream tokenStream = new CommonTokenStream(lexer);
-        lexer.setTokenFactory(CommonTokenFactory.DEFAULT);
         new RAMLParser(tokenStream)
     }
 }

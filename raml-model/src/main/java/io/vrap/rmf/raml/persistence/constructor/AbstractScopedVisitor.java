@@ -53,7 +53,7 @@ abstract class AbstractScopedVisitor<T> extends RAMLBaseVisitor<T> {
 
         final Object value;
         if (eAttribute == null) {
-            scope.addError("Unknown attribute {0}", attributeName);
+            scope.addError("Unknown attribute {0} at {1}", attributeName, attributeFacet.getStart());
             value = null;
         } else {
             value = attributeFacet.facetValue().value == null ?
@@ -99,7 +99,7 @@ abstract class AbstractScopedVisitor<T> extends RAMLBaseVisitor<T> {
         try {
             return EcoreUtil.createFromString(eAttribute.getEAttributeType(), valueToken.getText());
         } catch (IllegalArgumentException e) {
-            scope.addError(e.getMessage(), valueToken.getStart());
+            scope.addError("{0} at {1}", e.getMessage(), valueToken.getStart());
             return null;
         }
     }

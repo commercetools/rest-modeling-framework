@@ -114,7 +114,7 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
     public Object visitSecuritySchemeFacet(RAMLParser.SecuritySchemeFacetContext securitySchemeFacet) {
         final SecurityScheme securityScheme;
         if (securitySchemeFacet.securitySchemeTypeFacet() == null) {
-            scope.addError("Missing type for security scheme", securitySchemeFacet.getStart());
+            scope.addError("Missing type for security scheme at {0}", securitySchemeFacet.getStart());
             securityScheme = null;
         } else {
             securityScheme = SecurityFactory.eINSTANCE.createSecurityScheme();
@@ -138,7 +138,8 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
                         break;
                     default:
                         if (securitySchemeFacet.securitySchemeSettingsFacet() != null) {
-                            scope.addError("Settings not supported for type {0}", securityScheme.getType());
+                            scope.addError("Settings not supported for type {0} at {0}",
+                                    securityScheme.getType(), securitySchemeFacet.getStart());
                         }
                 }
                 if (securitySchemeSettings != null) {
@@ -332,7 +333,7 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
             scope.setValue(securitySchemeType, securitySchemeTypeFacet.getStart());
             return securitySchemeType;
         } catch (IllegalArgumentException e) {
-            scope.addError(e.getMessage(), securitySchemeTypeFacet.getStart());
+            scope.addError("{0} at {1}", e.getMessage(), securitySchemeTypeFacet.getStart());
             return null;
         }
     }

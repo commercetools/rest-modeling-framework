@@ -4,6 +4,7 @@ import io.vrap.rmf.raml.model.RamlError;
 import io.vrap.rmf.raml.persistence.antlr.ParserErrorCollector;
 import io.vrap.rmf.raml.persistence.antlr.RAMLCustomLexer;
 import io.vrap.rmf.raml.persistence.antlr.RAMLParser;
+import io.vrap.rmf.raml.persistence.antlr.RamlTokenFactory;
 import io.vrap.rmf.raml.persistence.constructor.*;
 import org.antlr.v4.runtime.CommonTokenFactory;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -46,7 +47,6 @@ public class RamlResource extends ResourceImpl {
         if (optionalRootConstructor.isPresent()) {
             final AbstractConstructor rootConstructor = optionalRootConstructor.get();
             final RAMLCustomLexer lexer = new RAMLCustomLexer(uri, getURIConverter());
-            lexer.setTokenFactory(CommonTokenFactory.DEFAULT);
             final TokenStream tokenStream = new CommonTokenStream(lexer);
             final RAMLParser parser = new RAMLParser(tokenStream);
 

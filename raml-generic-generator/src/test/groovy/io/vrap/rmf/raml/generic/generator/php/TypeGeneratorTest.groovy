@@ -7,6 +7,7 @@ import io.vrap.rmf.raml.model.types.AnyType
 import io.vrap.rmf.raml.persistence.RamlResourceSet
 import io.vrap.rmf.raml.persistence.antlr.RAMLCustomLexer
 import io.vrap.rmf.raml.persistence.antlr.RAMLParser
+import io.vrap.rmf.raml.persistence.antlr.RamlTokenFactory
 import io.vrap.rmf.raml.persistence.constructor.ApiConstructor
 import io.vrap.rmf.raml.persistence.constructor.Scope
 import org.antlr.v4.runtime.CommonTokenFactory
@@ -227,7 +228,6 @@ class TypeGeneratorTest extends Specification implements ResourceFixtures {
         def strippedInput = input.stripIndent()
         final RAMLCustomLexer lexer = new RAMLCustomLexer(strippedInput, uri, uriConverter);
         final TokenStream tokenStream = new CommonTokenStream(lexer);
-        lexer.setTokenFactory(CommonTokenFactory.DEFAULT);
         return new RAMLParser(tokenStream)
     }
 

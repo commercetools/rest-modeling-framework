@@ -37,8 +37,6 @@ public interface RAMLParserFixtures {
     default RAMLCustomLexer lexer(final URL url) {
         final URIConverter uriConverter = new RamlResourceSet().getURIConverter();
         final RAMLCustomLexer lexer = new RAMLCustomLexer(URI.createURI(url.toString()), uriConverter);
-        lexer.setTokenFactory(CommonTokenFactory.DEFAULT);
-
         return lexer;
     }
 }

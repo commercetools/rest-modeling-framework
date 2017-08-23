@@ -7,6 +7,7 @@ import io.vrap.rmf.raml.model.facets.StringInstance
 import io.vrap.rmf.raml.persistence.RamlResourceSet
 import io.vrap.rmf.raml.persistence.antlr.RAMLCustomLexer
 import io.vrap.rmf.raml.persistence.antlr.RAMLParser
+import io.vrap.rmf.raml.persistence.antlr.RamlTokenFactory
 import org.antlr.v4.runtime.CommonTokenFactory
 import org.antlr.v4.runtime.CommonTokenStream
 import org.antlr.v4.runtime.TokenStream
@@ -126,7 +127,6 @@ class InstanceConstructorTest extends Specification {
         def strippedInput = input.stripIndent()
         final RAMLCustomLexer lexer = new RAMLCustomLexer(strippedInput, uri, uriConverter);
         final TokenStream tokenStream = new CommonTokenStream(lexer);
-        lexer.setTokenFactory(CommonTokenFactory.DEFAULT);
         new RAMLParser(tokenStream)
     }
 }

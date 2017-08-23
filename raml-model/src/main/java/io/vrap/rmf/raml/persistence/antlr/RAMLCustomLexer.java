@@ -38,7 +38,7 @@ public class RAMLCustomLexer implements TokenSource {
     private Map<String, Integer> literalTokenTypes = new HashMap<>();
     private final TypeSwitch<Event, Token> eventSwitch;
 
-    private TokenFactory<?> factory;
+    private RamlTokenFactory factory;
     private Event currentEvent;
 
     private final int mapStart  = RAMLParser.MAP_START;
@@ -67,6 +67,7 @@ public class RAMLCustomLexer implements TokenSource {
 
     private RAMLCustomLexer(URIConverter uriConverter) {
         initTokens();
+        setTokenFactory(RamlTokenFactory.DEFAULT);
         this.uriConverter = uriConverter;
         eventSwitch = new TypeSwitch<Event, Token>()
                 .on(MappingStartEvent.class, this::mapStart)
@@ -199,7 +200,7 @@ public class RAMLCustomLexer implements TokenSource {
 
     @Override
     public int getCharPositionInLine() {
-        return currentEvent.getStartMark().getIndex();
+        return currentEvent.getStartMark().getColumn();
     }
 
     @Override
@@ -214,7 +215,7 @@ public class RAMLCustomLexer implements TokenSource {
 
     @Override
     public void setTokenFactory(final TokenFactory<?> factory) {
-        this.factory = factory;
+        this.factory = (RamlTokenFactory) factory;
     }
 
     @Override
@@ -225,8 +226,12 @@ public class RAMLCustomLexer implements TokenSource {
     private Token createToken(final int type, final String text) {
         final Pair<TokenSource, CharStream> source = new Pair<>(this, null);
 
-        return factory.create(source, type, text, Token.DEFAULT_CHANNEL,
+        final RamlToken ramlToken = factory.create(source, type, text, Token.DEFAULT_CHANNEL,
                 0, 0,
                 getLine(), getCharPositionInLine());
+        if (uri.size() > 0) {
+            ramlToken.setLocation(uri.peek().toString());
+        }
+        return ramlToken;
     }
 }
