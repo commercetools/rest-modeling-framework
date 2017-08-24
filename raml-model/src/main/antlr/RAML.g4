@@ -399,7 +399,15 @@ typeFacet:
     ;
 
 itemsFacet:
-    'items' typeExpression=SCALAR
+    'items'
+    (
+        typeExpression=SCALAR |
+        (
+            MAP_START
+            ( attributeFacet | enumFacet | propertiesFacet | typeFacet | itemsFacet | defaultFacet | exampleFacet | examplesFacet | annotationFacet )*
+            MAP_END
+        )
+    )
     ;
 
 defaultFacet:

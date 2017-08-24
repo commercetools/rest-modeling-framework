@@ -99,7 +99,7 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
 
         traitArgument.setName(ctx.name.getText());
         withinScope(scope.with(traitArgument, ARGUMENT__VALUE),
-                valueScope ->this.visitInstance(ctx.instance()));
+                valueScope -> this.visitInstance(ctx.instance()));
 
         return traitArgument;
     }
@@ -131,7 +131,7 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
                         securitySchemeSettings = SecurityFactory.eINSTANCE.createOAuth20Settings();
                         break;
                     default:
-                        if (securitySchemeFacet.securitySchemeSettingsFacet() != null) {
+                        if (securitySchemeFacet.securitySchemeSettingsFacet().size() > 0) {
                             scope.addError("Settings not supported for type {0} at {0}",
                                     securityScheme.getType(), securitySchemeFacet.getStart());
                         }
@@ -335,9 +335,9 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
     @Override
     public Object visitSecuredByFacet(RAMLParser.SecuredByFacetContext securedByFacet) {
         return withinScope(scope.with(SECURED_BY_FACET__SECURED_BY), securedByScope ->
-            ECollections.asEList(securedByFacet.securedBy().stream()
-                    .map(this::visitSecuredBy)
-                    .collect(Collectors.toList())));
+                ECollections.asEList(securedByFacet.securedBy().stream()
+                        .map(this::visitSecuredBy)
+                        .collect(Collectors.toList())));
     }
 
     @Override
@@ -391,12 +391,48 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
     }
 
     @Override
-    public Object visitItemsFacet(RAMLParser.ItemsFacetContext ctx) {
+    public Object visitItemsFacet(RAMLParser.ItemsFacetContext itemsFacet) {
         return withinScope(scope.with(ITEMS_FACET__ITEMS), itemsScope -> {
-            final String typeExpression = ctx.SCALAR().getText();
+            final EObject itemsType;
+            if (itemsFacet.typeExpression != null) {
+                final String typeExpression = itemsFacet.typeExpression.getText();
+                itemsType = typeExpressionConstructor.parse(typeExpression, scope);
+            } else {
+                EObject typedElementType;
+                if (itemsFacet.typeFacet().size() > 0) {
+                    final RAMLParser.TypeFacetContext typeFacet = itemsFacet.typeFacet().get(0);
+                    typedElementType = (EObject) withinScope(scope.with(TYPED_ELEMENT__TYPE),
+                            propertyTypeScope -> visitTypeFacet(typeFacet));
+                } else if (itemsFacet.propertiesFacet().size() == 1) {
+                    typedElementType = scope.getEObjectByName(BuiltinType.OBJECT.getName());
+                } else {
+                    typedElementType = scope.getEObjectByName(BuiltinType.STRING.getName());
+                }
+                // inline type declaration
+                final boolean isInlineTypeDeclaration =
+                        itemsFacet.attributeFacet().size() > 0 || itemsFacet.propertiesFacet().size() > 0 ||
+                                itemsFacet.exampleFacet().size() > 0 || itemsFacet.examplesFacet().size() > 0 ||
+                                itemsFacet.defaultFacet().size() > 0 || itemsFacet.enumFacet().size() > 0 ||
+                                itemsFacet.itemsFacet().size() > 0;
+                if (isInlineTypeDeclaration) {
+                    typedElementType = EcoreUtil.create(typedElementType.eClass());
+                    scope.addValue(INLINE_TYPE_CONTAINER__INLINE_TYPES, typedElementType);
+                    withinScope(scope.with(typedElementType),
+                            inlineTypeDeclarationScope -> {
+                                itemsFacet.attributeFacet().forEach(this::visitAttributeFacet);
+                                itemsFacet.propertiesFacet().forEach(this::visitPropertiesFacet);
+                                itemsFacet.defaultFacet().forEach(this::visitDefaultFacet);
+                                itemsFacet.exampleFacet().forEach(this::visitExampleFacet);
+                                itemsFacet.examplesFacet().forEach(this::visitExamplesFacet);
+                                itemsFacet.enumFacet().forEach(this::visitEnumFacet);
+                                itemsFacet.itemsFacet().forEach(this::visitItemsFacet);
 
-            final EObject itemsType = typeExpressionConstructor.parse(typeExpression, scope);
-            scope.setValue(itemsType, ctx.getStart());
+                                return inlineTypeDeclarationScope.eObject();
+                            });
+                }
+                itemsType = typedElementType;
+            }
+            scope.setValue(itemsType, itemsFacet.getStart());
 
             return itemsType;
         });
@@ -509,9 +545,9 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
         // inline type declaration
         final boolean isInlineTypeDeclaration =
                 typedElementMap.attributeFacet().size() > 0 || typedElementMap.propertiesFacet().size() > 0 ||
-                typedElementMap.exampleFacet().size() > 0 || typedElementMap.examplesFacet().size() > 0 ||
-                typedElementMap.defaultFacet().size() > 0 || typedElementMap.enumFacet().size() > 0 ||
-                typedElementMap.itemsFacet().size() > 0;
+                        typedElementMap.exampleFacet().size() > 0 || typedElementMap.examplesFacet().size() > 0 ||
+                        typedElementMap.defaultFacet().size() > 0 || typedElementMap.enumFacet().size() > 0 ||
+                        typedElementMap.itemsFacet().size() > 0;
         if (isInlineTypeDeclaration) {
             typedElementType = EcoreUtil.create(typedElementType.eClass());
             scope.addValue(INLINE_TYPE_CONTAINER__INLINE_TYPES, typedElementType);
@@ -550,7 +586,7 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
     @Override
     public Object visitResourceTypeFacet(RAMLParser.ResourceTypeFacetContext ctx) {
         return withinScope(scope.with(RESOURCE_BASE__TYPE), resourceTypeScope ->
-            visitResourceTypeApplication(ctx.resourceTypeApplication()));
+                visitResourceTypeApplication(ctx.resourceTypeApplication()));
     }
 
     @Override
@@ -596,22 +632,22 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
             methodsScope.setValue(method, methodFacet.getStart());
 
             withinScope(methodsScope.with(method), methodScope -> {
-                        methodFacet.attributeFacet().forEach(this::visitAttributeFacet);
-                        methodFacet.annotationFacet().forEach(this::visitAnnotationFacet);
-                        methodFacet.securedByFacet().forEach(this::visitSecuredByFacet);
-                        methodFacet.headersFacet().forEach(this::visitHeadersFacet);
-                        methodFacet.queryParametersFacet().forEach(this::visitQueryParametersFacet);
+                methodFacet.attributeFacet().forEach(this::visitAttributeFacet);
+                methodFacet.annotationFacet().forEach(this::visitAnnotationFacet);
+                methodFacet.securedByFacet().forEach(this::visitSecuredByFacet);
+                methodFacet.headersFacet().forEach(this::visitHeadersFacet);
+                methodFacet.queryParametersFacet().forEach(this::visitQueryParametersFacet);
 
-                        withinScope(methodScope.with(METHOD__BODIES), bodiesScope -> {
-                            methodFacet.bodyFacet().forEach(this::visitBodyFacet);
-                            return null;
-                        });
+                withinScope(methodScope.with(METHOD__BODIES), bodiesScope -> {
+                    methodFacet.bodyFacet().forEach(this::visitBodyFacet);
+                    return null;
+                });
 
-                        methodFacet.responsesFacet().forEach(this::visitResponsesFacet);
-                        methodFacet.isFacet().forEach(this::visitIsFacet);
+                methodFacet.responsesFacet().forEach(this::visitResponsesFacet);
+                methodFacet.isFacet().forEach(this::visitIsFacet);
 
-                        return methodScope.eObject();
-                    });
+                return methodScope.eObject();
+            });
 
             return method;
         });

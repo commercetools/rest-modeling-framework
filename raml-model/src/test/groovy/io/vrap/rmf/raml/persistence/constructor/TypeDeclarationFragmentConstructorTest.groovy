@@ -152,6 +152,46 @@ class TypeDeclarationFragmentConstructorTest extends Specification {
         arrayType.uniqueItems == true
     }
 
+    def "array type with items declaration"() {
+        when:
+        AnyType type = constructType(
+                '''\
+        type: array
+        items:
+            type: string
+        minItems: 1
+        uniqueItems: true
+        ''')
+        then:
+        type instanceof ArrayType
+        ArrayType arrayType = type
+        arrayType.items instanceof StringType
+        arrayType.minItems == 1
+        arrayType.uniqueItems == true
+    }
+
+    def "array type with inline items declaration"() {
+        when:
+        AnyType type = constructType(
+                '''\
+        type: array
+        items:
+            type: string
+            minLength: 12
+        minItems: 1
+        uniqueItems: true
+        ''')
+        then:
+        type instanceof ArrayType
+        ArrayType arrayType = type
+        arrayType.minItems == 1
+        arrayType.uniqueItems == true
+        arrayType.items instanceof StringType
+        StringType itemsType = arrayType.items
+        itemsType.name == null
+        itemsType.minLength == 12
+    }
+
     AnyType constructType(String input) {
         RAMLParser parser = parser(input)
         def constructor = new TypeDeclarationFragmentConstructor(TYPE_CONTAINER__TYPES)
