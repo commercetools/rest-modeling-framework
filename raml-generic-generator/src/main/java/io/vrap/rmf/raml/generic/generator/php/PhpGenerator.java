@@ -12,7 +12,9 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class PhpGenerator implements Generator {
     private final String vendorName;
@@ -24,42 +26,32 @@ public class PhpGenerator implements Generator {
     public void generate(final Api api, final File outputPath) throws IOException {
         String title = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, api.getTitle());
         String vendorName = Optional.ofNullable(this.vendorName).orElse(title);
-        if (outputPath.exists()) {
-            Collection<File> files = FileUtils.listFiles(
-                    outputPath,
-                    TrueFileFilter.INSTANCE,
-                    FileFilterUtils.notFileFilter(
-                            FileFilterUtils.and(
-                                    FileFilterUtils.directoryFileFilter(),
-                                    FileFilterUtils.nameFileFilter("vendor")
-                            )
-                    )
-            );
-            for (File file : files) {
-                if (file.isFile()) {
-                    Files.deleteIfExists(file.toPath());
-                }
-            }
-        } else {
+        if (!outputPath.exists()) {
             Files.createDirectories(outputPath.toPath());
         }
 
         AnyAnnotationType packageAnnotation = api.getAnnotationTypes().stream().filter(anyAnnotationType -> anyAnnotationType.getName().equals("package")).findFirst().orElse(null);
         TypesGenerator generator = new TypesGenerator(vendorName, packageAnnotation);
-        generator.generate(api.getTypes(), new File(outputPath, "target/Types") );
+        List<File> f = generator.generate(api.getTypes(), new File(outputPath, "target/Types"));
 
         StaticGenerator staticGenerator = new StaticGenerator(vendorName);
-        staticGenerator.generate(outputPath, api);
+        f.addAll(staticGenerator.generate(outputPath, api));
 
-//        List<File> files = Lists.newArrayList(
-//        );
-//
-//        files.forEach(file -> {
-//            try {
-//                Files.copy(file.toPath(), new File(outputPath, file.getName()).toPath());
-//            } catch (IOException e) {
-//                System.out.println(e.toString());
-//            }
-//        });
+        Collection<File> files = FileUtils.listFiles(
+                outputPath,
+                TrueFileFilter.INSTANCE,
+                FileFilterUtils.notFileFilter(
+                        FileFilterUtils.and(
+                                FileFilterUtils.directoryFileFilter(),
+                                FileFilterUtils.nameFileFilter("vendor")
+                        )
+                )
+        ).stream().filter(file -> !f.contains(file)).collect(Collectors.toSet());
+
+        for (File file : files) {
+            if (file.isFile()) {
+                Files.deleteIfExists(file.toPath());
+            }
+        }
     }
 }

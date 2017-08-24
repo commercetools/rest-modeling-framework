@@ -263,13 +263,18 @@ public function set<property.name; format="capitalize">($<property.name>)
 
 >>
 
-classSetter(property) ::= <<
+classSetter(property, propertyType, paramType, paramCheck) ::= <<
 /**
- * @param <if(property.type.name)><property.type.name><else>mixed<endif> $<property.name>
+ * @param <if(paramType)><paramType><else>mixed<endif> $<property.name>
  * @return $this
  */
-public function set<property.name; format="capitalize">(<property.type.name> $<property.name>)
+public function set<property.name; format="capitalize">(<if(propertyType)><propertyType> <endif> $<property.name>)
 {
+    <if(paramCheck)>
+    if (!$<property.name> instanceof <paramType>) {
+        throw new \InvalidArgumentException();
+    }
+    <endif>
     $this-><property.name> = $<property.name>;
 
     return $this;
@@ -277,13 +282,18 @@ public function set<property.name; format="capitalize">(<property.type.name> $<p
 
 >>
 
-arraySetter(property, propertyType, paramType) ::= <<
+arraySetter(property, propertyType, paramType, paramCheck) ::= <<
 /**
  * @param <if(paramType)><paramType><else>mixed<endif> $<property.name>
  * @return $this
  */
 public function set<property.name; format="capitalize">(<if(propertyType)><propertyType> <endif>$<property.name>)
 {
+    <if(paramCheck)>
+    if (!$<property.name> instanceof <paramType>) {
+        throw new \InvalidArgumentException();
+    }
+    <endif>
     $this-><property.name> = $<property.name>;
 
     return $this;

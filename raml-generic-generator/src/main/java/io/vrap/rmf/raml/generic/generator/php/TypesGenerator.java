@@ -39,26 +39,31 @@ public class TypesGenerator extends AbstractTemplateGenerator {
         this.packageAnnotationType = packageAnnotationType;
     }
 
-    public void generate(final List<AnyType> types, final File outputPath) throws IOException {
+    public List<File> generate(final List<AnyType> types, final File outputPath) throws IOException {
 
-        generateTypes(outputPath, types);
-        generateMapFile(outputPath, types);
-        generateDiscriminatorResolver(outputPath, types);
-        generateCollections(outputPath, types);
+        final List<File> f = Lists.newArrayList();
+        f.addAll(generateTypes(outputPath, types));
+        f.addAll(generateMapFile(outputPath, types));
+        f.addAll(generateDiscriminatorResolver(outputPath, types));
+        f.addAll(generateCollections(outputPath, types));
+
+        return f;
     }
 
-    private void generateTypes(final File outputPath, List<AnyType> types) throws IOException {
+    private List<File> generateTypes(final File outputPath, List<AnyType> types) throws IOException {
         final TypeGeneratingVisitor interfaceGeneratingVisitor = createVisitor(PACKAGE_NAME, TYPE_INTERFACE);
         final TypeGeneratingVisitor modelGeneratingVisitor =  createVisitor(PACKAGE_NAME, TYPE_MODEL);
 
+        final List<File> f = Lists.newArrayList();
         for (final AnyType anyType : types) {
             final String packageFolder = getPackageFolder(anyType);
             final File interfaceFile = new File(outputPath, packageFolder + anyType.getName().concat(".php"));
             final File modelFile = new File(outputPath, packageFolder + anyType.getName().concat("Model.php"));
 
-            generateFile(generateType(interfaceGeneratingVisitor, anyType), interfaceFile);
-            generateFile(generateType(modelGeneratingVisitor, anyType), modelFile);
+            f.add(generateFile(generateType(interfaceGeneratingVisitor, anyType), interfaceFile));
+            f.add(generateFile(generateType(modelGeneratingVisitor, anyType), modelFile));
         }
+        return f;
     }
 
     private String getPackageFolder(AnyType anyType) {
@@ -70,10 +75,11 @@ public class TypesGenerator extends AbstractTemplateGenerator {
                 .map(annotation -> ((StringInstance)annotation.getValue()).getValue() + glue).findFirst().orElse("");
     }
 
-    private void generateCollections(final File outputPath, final List<AnyType> types) throws IOException {
+    private List<File> generateCollections(final File outputPath, final List<AnyType> types) throws IOException {
         final TypeGeneratingVisitor collectionInterfaceGeneratingVisitor = createVisitor(PACKAGE_NAME, TYPE_COLLECTION_INTERFACE);
         final TypeGeneratingVisitor collectionModelGeneratingVisitor = createVisitor(PACKAGE_NAME, TYPE_COLLECTION_MODEL);
 
+        final List<File> f = Lists.newArrayList();
         for (final AnyType anyType : types) {
             if (anyType instanceof ObjectType) {
                 for( final Property property : ((ObjectType) anyType).getProperties()) {
@@ -84,20 +90,22 @@ public class TypesGenerator extends AbstractTemplateGenerator {
                             final File interfaceFile = new File(outputPath, packageFolder + arrayType.getItems().getName().concat("Collection.php"));
                             final File modelFile = new File(outputPath, packageFolder + arrayType.getItems().getName().concat("CollectionModel.php"));
 
-                            generateFile(generateType(collectionInterfaceGeneratingVisitor, arrayType), interfaceFile);
-                            generateFile(generateType(collectionModelGeneratingVisitor, arrayType), modelFile);
+                            f.add(generateFile(generateType(collectionInterfaceGeneratingVisitor, arrayType), interfaceFile));
+                            f.add(generateFile(generateType(collectionModelGeneratingVisitor, arrayType), modelFile));
                         }
                     }
                 }
             }
         }
+        return f;
     }
 
-    private void generateDiscriminatorResolver(final File outputPath, final List<AnyType> types) throws IOException {
+    private List<File> generateDiscriminatorResolver(final File outputPath, final List<AnyType> types) throws IOException {
         final List<ObjectType> discriminatorTypes = types.stream().filter(anyType -> anyType instanceof ObjectType && ((ObjectType) anyType).getDiscriminator() != null)
                 .map(anyType -> (ObjectType)anyType)
                 .collect(Collectors.toList());
         final STGroupFile stGroup = createSTGroup(RESOURCE);
+        final List<File> f = Lists.newArrayList();
         for (final ObjectType objectType : discriminatorTypes) {
             final ST st = stGroup.getInstanceOf(TYPE_DISCRIMINATOR_RESOLVER);
             st.add("package", PACKAGE_NAME);
@@ -109,8 +117,9 @@ public class TypesGenerator extends AbstractTemplateGenerator {
             st.add("subTypePackages", objectType.subTypes().stream().map(anyType -> getPackageFolder(anyType, "\\")).collect(Collectors.toList()));
             final String packageFolder = getPackageFolder(objectType);
 
-            generateFile(st.render(), new File(outputPath, packageFolder + objectType.getName() + "DiscriminatorResolver.php"));
+            f.add(generateFile(st.render(), new File(outputPath, packageFolder + objectType.getName() + "DiscriminatorResolver.php")));
         }
+        return f;
     }
 
     @VisibleForTesting
@@ -145,8 +154,8 @@ public class TypesGenerator extends AbstractTemplateGenerator {
         return st.render();
     }
 
-    private void generateMapFile(final File outputPath, final List<AnyType> types) throws IOException {
-        generateFile(generateMap(types), new File(outputPath, "ModelClassMap.php"));
+    private List<File> generateMapFile(final File outputPath, final List<AnyType> types) throws IOException {
+        return Lists.newArrayList(generateFile(generateMap(types), new File(outputPath, "ModelClassMap.php")));
     }
 
     @VisibleForTesting
@@ -271,7 +280,7 @@ public class TypesGenerator extends AbstractTemplateGenerator {
 
         @Override
         public String caseArrayType(final ArrayType arrayType) {
-            if (arrayType.getItems() == null || arrayType.getItems().getName() == null) {
+            if (arrayType.getItems() == null || BuiltinType.of(arrayType.getItems().getName()).isPresent()) {
                 return null;
             } else {
                 if (BuiltinType.of(arrayType.getItems().getName()).isPresent()) {
@@ -289,7 +298,7 @@ public class TypesGenerator extends AbstractTemplateGenerator {
 
         @Override
         public String caseObjectType(final ObjectType objectType) {
-            if (objectType.getName() == null) {
+            if (BuiltinType.of(objectType.getName()).isPresent()) {
                 return null;
             } else {
                 final ST st = stGroup.getInstanceOf("classGetter");
@@ -402,17 +411,19 @@ public class TypesGenerator extends AbstractTemplateGenerator {
 
         @Override
         public String caseArrayType(final ArrayType arrayType) {
-            if (arrayType.getItems() == null || arrayType.getItems().getName() == null) {
+            if (arrayType.getItems() == null || BuiltinType.of(arrayType.getItems().getName()).isPresent()) {
                 return null;
             } else {
                 final ST st = stGroup.getInstanceOf("propertyInterfaceSet");
+
                 st.add("property", property);
                 if (BuiltinType.of(arrayType.getItems().getName()).isPresent()) {
                     st.add("propertyType", "array");
                     st.add("paramType", "array");
                 } else {
-                    st.add("propertyType", arrayType.getItems().getName() + "Collection");
-                    st.add("paramType", arrayType.getItems().getName() + "Collection");
+                    final Property t = getBaseProperty(property);
+                    st.add("propertyType", (new PropertyTypeVisitor()).doSwitch(t.getType()));
+                    st.add("paramType", (new PropertyTypeVisitor()).doSwitch(arrayType));
                 }
                 return st.render();
             }
@@ -420,13 +431,14 @@ public class TypesGenerator extends AbstractTemplateGenerator {
 
         @Override
         public String caseObjectType(final ObjectType objectType) {
-            if (objectType.getName() == null) {
+            if (BuiltinType.of(objectType.getName()).isPresent()) {
                 return null;
             } else {
                 final ST st = stGroup.getInstanceOf("propertyInterfaceSet");
                 st.add("property", property);
-                st.add("propertyType", objectType.getName());
-                st.add("paramType", objectType.getName());
+                final Property t = getBaseProperty(property);
+                st.add("propertyType", (new PropertyTypeVisitor()).doSwitch(t.getType()));
+                st.add("paramType", (new PropertyTypeVisitor()).doSwitch(objectType));
                 return st.render();
             }
         }
@@ -481,7 +493,7 @@ public class TypesGenerator extends AbstractTemplateGenerator {
 
         @Override
         public String caseArrayType(final ArrayType arrayType) {
-            if (arrayType.getItems() == null || arrayType.getItems().getName() == null) {
+            if (arrayType.getItems() == null || BuiltinType.of(arrayType.getItems().getName()).isPresent()) {
                 return null;
             } else {
                 final ST st = stGroup.getInstanceOf("arraySetter");
@@ -490,8 +502,10 @@ public class TypesGenerator extends AbstractTemplateGenerator {
                     st.add("propertyType", "array");
                     st.add("paramType", "array");
                 } else {
-                    st.add("propertyType", arrayType.getItems().getName() + "Collection");
-                    st.add("paramType", arrayType.getItems().getName() + "Collection");
+                    final Property t = getBaseProperty(property);
+                    st.add("propertyType", (new PropertyTypeVisitor()).doSwitch(t.getType()));
+                    st.add("paramCheck", !arrayType.equals(t.getType()));
+                    st.add("paramType", (new PropertyTypeVisitor()).doSwitch(arrayType));
                 }
                 return st.render();
             }
@@ -499,11 +513,15 @@ public class TypesGenerator extends AbstractTemplateGenerator {
 
         @Override
         public String caseObjectType(final ObjectType objectType) {
-            if (objectType.getName() == null) {
+            if (BuiltinType.of(objectType.getName()).isPresent()) {
                 return null;
             } else {
                 final ST st = stGroup.getInstanceOf("classSetter");
                 st.add("property", property);
+                final Property t = getBaseProperty(property);
+                st.add("propertyType", (new PropertyTypeVisitor()).doSwitch(t.getType()));
+                st.add("paramCheck", !objectType.equals(t.getType()));
+                st.add("paramType", (new PropertyTypeVisitor()).doSwitch(objectType));
                 return st.render();
             }
         }
@@ -570,24 +588,30 @@ public class TypesGenerator extends AbstractTemplateGenerator {
                 st.add("typePackage", packageAnnotation);
                 final String typeFolder = getPackageFolder(objectType, "\\");
                 final Set<String> uses = objectType.getProperties().stream()
-                        .filter(property -> property.getType() instanceof ObjectType)
-                        .filter(property -> property.getType().getAnnotations().stream().anyMatch(annotation -> annotation.getType().equals(packageAnnotationType)))
-                        .filter(property -> !getPackageFolder(property.getType(), "\\").equals(typeFolder))
+                        .filter(property -> property.getType() instanceof ObjectType || property.getType() instanceof ArrayType && ((ArrayType) property.getType()).getItems() instanceof ObjectType)
+                        .filter(property -> {
+                            AnyType t = property.getType() instanceof ArrayType ? ((ArrayType) property.getType()).getItems() : property.getType();
+                            return !getPackageFolder(t, "\\").equals(typeFolder);
+                        })
                         .map(property -> {
-                            final String typePackage = getPackageFolder(property.getType(), "\\");
-                            return vendorName + "\\" + capitalize(packageName) + "\\" + typePackage + property.getType().getName();
+                            AnyType t = property.getType() instanceof ArrayType ? ((ArrayType) property.getType()).getItems() : property.getType();
+                            final String typePackage = getPackageFolder(t , "\\");
+                            return vendorName + "\\" + capitalize(packageName) + "\\" + typePackage + (new PropertyTypeVisitor()).doSwitch(property.getType());
                         })
                         .collect(Collectors.toSet());
+
                 uses.addAll(
                         objectType.getProperties().stream()
-                                .filter(property -> property.getType() instanceof ArrayType)
-                                .map(property -> ((ArrayType)property.getType()).getItems())
-                                .filter(anyType -> anyType instanceof ObjectType)
-                                .filter(anyType -> anyType.getAnnotations().stream().anyMatch(annotation -> annotation.getType().equals(packageAnnotationType)))
-                                .filter(anyType -> !getPackageFolder(anyType, "\\").equals(typeFolder))
-                                .map(anyType -> {
-                                    final String typePackage = getPackageFolder(anyType, "\\");
-                                    return vendorName + "\\" + capitalize(packageName) + "\\" + typePackage + anyType.getName() + "Collection";
+                                .map(property -> getBaseProperty(property))
+                                .filter(property -> property.getType() instanceof ObjectType || property.getType() instanceof ArrayType && ((ArrayType) property.getType()).getItems() instanceof ObjectType)
+                                .filter(property -> {
+                                    AnyType t = property.getType() instanceof ArrayType ? ((ArrayType) property.getType()).getItems() : property.getType();
+                                    return !getPackageFolder(t, "\\").equals(typeFolder);
+                                })
+                                .map(property -> {
+                                    AnyType t = property.getType() instanceof ArrayType ? ((ArrayType) property.getType()).getItems() : property.getType();
+                                    final String typePackage = getPackageFolder(t , "\\");
+                                    return vendorName + "\\" + capitalize(packageName) + "\\" + typePackage + (new PropertyTypeVisitor()).doSwitch(property.getType());
                                 })
                                 .collect(Collectors.toSet())
                 );

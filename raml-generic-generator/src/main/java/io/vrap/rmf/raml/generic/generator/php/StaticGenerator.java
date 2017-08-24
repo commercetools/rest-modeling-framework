@@ -1,6 +1,7 @@
 package io.vrap.rmf.raml.generic.generator.php;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
 import io.vrap.rmf.raml.generic.generator.AbstractTemplateGenerator;
 import io.vrap.rmf.raml.model.modules.Api;
@@ -21,10 +22,11 @@ public class StaticGenerator extends AbstractTemplateGenerator {
         this.vendorName = namespace;
     }
 
-    public void generate(final File outputPath, Api api) throws IOException {
+    public List<File> generate(final File outputPath, Api api) throws IOException {
         File resourcePath = new File(Resources.getResource("templates/php/statics/").getFile());
         Collection<File> files = FileUtils.listFiles(resourcePath, TrueFileFilter.INSTANCE, TrueFileFilter.INSTANCE);
 
+        final List<File> f = Lists.newArrayList();
         for (File staticFile : files) {
             final String content = generateContent(staticFile, api);
             final File outputFile = new File(
@@ -33,8 +35,10 @@ public class StaticGenerator extends AbstractTemplateGenerator {
                             .replace(".stg", "")
                             .replace(resourcePath.toString(), "")
             );
-            generateFile(content, outputFile);
+            f.add(generateFile(content, outputFile));
         }
+
+        return f;
     }
 
     @VisibleForTesting
