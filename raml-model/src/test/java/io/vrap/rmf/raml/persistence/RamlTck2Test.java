@@ -33,20 +33,38 @@ public class RamlTck2Test implements ResourceFixtures {
     private final static URL tckURL = RamlTck2Test.class.getResource("/raml-tck-wip-2.0.0/tests");
 
     @Test
-    @UseDataProvider("tckSemanticFiles")
-    public void semantic(final File f, final Boolean valid, final String description) throws IOException, TckParseException {
+    @UseDataProvider("tckValidSemanticFiles")
+    public void validSemantic(final File f, final Boolean valid, final String description) throws IOException, TckParseException {
         tckParse(f, valid, description);
     }
 
     @Test
-    @UseDataProvider("tckSpecExampleFiles")
-    public void specExamples(final File f, final Boolean valid, final String description) throws IOException, TckParseException {
+    @UseDataProvider("tckValidSpecExampleFiles")
+    public void validSpecExamples(final File f, final Boolean valid, final String description) throws IOException, TckParseException {
         tckParse(f, valid, description);
     }
 
     @Test
-    @UseDataProvider("tckSyntaxFiles")
-    public void syntax(final File f, final Boolean valid, final String description) throws IOException, TckParseException {
+    @UseDataProvider("tckValidSyntaxFiles")
+    public void validSyntax(final File f, final Boolean valid, final String description) throws IOException, TckParseException {
+        tckParse(f, valid, description);
+    }
+
+    @Test
+    @UseDataProvider("tckInvalidSemanticFiles")
+    public void invalidSemantic(final File f, final Boolean valid, final String description) throws IOException, TckParseException {
+        tckParse(f, valid, description);
+    }
+
+    @Test
+    @UseDataProvider("tckInvalidSpecExampleFiles")
+    public void invalidSpecExamples(final File f, final Boolean valid, final String description) throws IOException, TckParseException {
+        tckParse(f, valid, description);
+    }
+
+    @Test
+    @UseDataProvider("tckInvalidSyntaxFiles")
+    public void invalidSyntax(final File f, final Boolean valid, final String description) throws IOException, TckParseException {
         tckParse(f, valid, description);
     }
 
@@ -66,22 +84,37 @@ public class RamlTck2Test implements ResourceFixtures {
     }
 
     @DataProvider
-    public static List<List<Object>> tckSemanticFiles() throws IOException {
-        return testFiles("semantic");
+    public static List<List<Object>> tckValidSemanticFiles() throws IOException {
+        return testFiles("semantic", true);
     }
 
     @DataProvider
-    public static List<List<Object>> tckSpecExampleFiles() throws IOException {
-        return testFiles("spec-examples");
+    public static List<List<Object>> tckValidSpecExampleFiles() throws IOException {
+        return testFiles("spec-examples", true);
     }
 
     @DataProvider
-    public static List<List<Object>> tckSyntaxFiles() throws IOException {
-        return testFiles("syntax");
+    public static List<List<Object>> tckValidSyntaxFiles() throws IOException {
+        return testFiles("syntax", true);
     }
 
     @DataProvider
-    public static List<List<Object>> testFiles(final String testSuite) throws IOException {
+    public static List<List<Object>> tckInvalidSemanticFiles() throws IOException {
+        return testFiles("semantic", false);
+    }
+
+    @DataProvider
+    public static List<List<Object>> tckInvalidSpecExampleFiles() throws IOException {
+        return testFiles("spec-examples", false);
+    }
+
+    @DataProvider
+    public static List<List<Object>> tckInvalidSyntaxFiles() throws IOException {
+        return testFiles("syntax", false);
+    }
+
+    @DataProvider
+    public static List<List<Object>> testFiles(final String testSuite, final Boolean valid) throws IOException {
         final List<File> files = Files.walk(Paths.get(tckURL.getPath()))
                 .filter(Files::isRegularFile)
                 .filter(path -> path.toString().contains("/" + testSuite + "/"))
@@ -93,6 +126,9 @@ public class RamlTck2Test implements ResourceFixtures {
                 final TestConfig testConfig = mapper.readValue(file, TestConfig.class);
                 if (testConfig.getTests() != null) {
                     testConfig.getTests().forEach(testDescription -> {
+                        if (testDescription.getValid() != valid) {
+                            return;
+                        }
                         final File testRamlFile = new File(file.getParentFile().getPath() + "/" + testDescription.getInput() + ".raml");
                         if (testRamlFile.exists()) {
                             List<Object> a = Lists.newArrayList(
