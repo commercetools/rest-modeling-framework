@@ -37,7 +37,11 @@ public enum RamlFragmentKind {
     /**
      * A single trait declaration.
      */
-    TRAIT("Trait", ResourcesPackage.Literals.TRAIT);
+    TRAIT("Trait", ResourcesPackage.Literals.TRAIT),
+    /**
+     * A single resource type declaration.
+     */
+    RESOURCE_TYPE("ResourceType", ResourcesPackage.Literals.RESOURCE_TYPE);
 
     private final static Pattern HEADER_PATTERN = Pattern.compile("(#%RAML 1.0)(\\s(\\w+))?");
 
