@@ -26,8 +26,6 @@ public class LibraryConstructor extends BaseConstructor {
         final EObject rootObject = scope.getResource().getContents().get(0);
 
         return withinScope(scope.with(rootObject), rootScope -> {
-            ctx.usesFacet().forEach(this::visitUsesFacet);
-
             ctx.annotationFacet().forEach(this::visitAnnotationFacet);
             ctx.attributeFacet().forEach(this::visitAttributeFacet);
             ctx.typesFacet().forEach(this::visitTypesFacet);

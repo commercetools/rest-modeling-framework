@@ -3,6 +3,7 @@ package io.vrap.rmf.raml.persistence.constructor;
 import io.vrap.rmf.raml.model.RamlError;
 import io.vrap.rmf.raml.model.modules.Library;
 import io.vrap.rmf.raml.model.modules.LibraryUse;
+import io.vrap.rmf.raml.model.modules.TypeContainer;
 import io.vrap.rmf.raml.model.types.BuiltinType;
 import io.vrap.rmf.raml.persistence.antlr.RamlToken;
 import org.antlr.v4.runtime.CommonToken;
@@ -51,9 +52,9 @@ public class Scope {
 
     public Library getUsedLibrary(final String name) {
         final Optional<LibraryUse> libraryUse = resource.getContents().stream()
-                .filter(Library.class::isInstance)
-                .map(Library.class::cast)
-                .flatMap(library -> library.getUses().stream())
+                .filter(TypeContainer.class::isInstance)
+                .map(TypeContainer.class::cast)
+                .flatMap(typeContainer -> typeContainer.getUses().stream())
                 .filter(LibraryUse.class::isInstance)
                 .map(LibraryUse.class::cast)
                 .filter(use -> use.getName().equals(name))
