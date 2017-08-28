@@ -3,14 +3,13 @@ package io.vrap.rmf.raml.generic.generator.php
 import com.google.common.io.Resources
 import io.vrap.raml.generic.generator.ResourceFixtures
 import io.vrap.rmf.raml.model.modules.Api
+import io.vrap.rmf.raml.model.types.AnyAnnotationType
 import io.vrap.rmf.raml.model.types.AnyType
 import io.vrap.rmf.raml.persistence.RamlResourceSet
 import io.vrap.rmf.raml.persistence.antlr.RAMLCustomLexer
 import io.vrap.rmf.raml.persistence.antlr.RAMLParser
-import io.vrap.rmf.raml.persistence.antlr.RamlTokenFactory
 import io.vrap.rmf.raml.persistence.constructor.ApiConstructor
 import io.vrap.rmf.raml.persistence.constructor.Scope
-import org.antlr.v4.runtime.CommonTokenFactory
 import org.antlr.v4.runtime.CommonTokenStream
 import org.antlr.v4.runtime.TokenStream
 import org.apache.commons.io.FileUtils
@@ -27,7 +26,7 @@ import spock.lang.Unroll
 import java.nio.charset.StandardCharsets
 import static org.apache.commons.lang3.StringUtils.capitalize;
 
-@Ignore
+//@Ignore
 class TypeGeneratorTest extends Specification implements ResourceFixtures {
     @Shared
     ResourceSet resourceSet = new RamlResourceSet()
@@ -157,7 +156,7 @@ class TypeGeneratorTest extends Specification implements ResourceFixtures {
                     street: string
         ''')
         then:
-        TypesGenerator generator = new TypesGenerator("Test")
+        TypesGenerator generator = new TypesGenerator("Test", packageAnnotation)
         String result = generator.generateMap(api.types);
         result == fileContent("ModelClassMap.php")
     }
@@ -212,8 +211,19 @@ class TypeGeneratorTest extends Specification implements ResourceFixtures {
     }
 
     String generate(final String generateType, final AnyType type) {
-        TypesGenerator generator = new TypesGenerator("Test")
+        TypesGenerator generator = new TypesGenerator("Test", packageAnnotation)
         return generator.generateType(generator.createVisitor(TypesGenerator.PACKAGE_NAME, generateType), type);
+    }
+
+    AnyAnnotationType getPackageAnnotation() {
+        Api api = constructApi('''
+        annotationTypes:
+            package:
+                type: string
+                allowedTargets: TypeDeclaration
+        ''')
+        AnyAnnotationType packageAnnotation = api.getAnnotationTypes().stream().filter{anyAnnotationType -> anyAnnotationType.getName().equals("package") }.findFirst().orElse(null);
+        return packageAnnotation;
     }
 
     Api constructApi(final String input) {

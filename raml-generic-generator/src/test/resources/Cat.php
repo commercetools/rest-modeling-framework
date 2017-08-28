@@ -6,5 +6,6 @@
 
 namespace Test\Types;
 
+
 interface Cat extends Animal {
 }

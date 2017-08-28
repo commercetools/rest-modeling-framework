@@ -6,6 +6,9 @@
 
 namespace Test\Types;
 
+use Test\Types\JsonObjectModel;
+use Test\Types\ResourceClassMap;
+
 class PersonModel extends JsonObjectModel implements Person {
     /**
      * @var string

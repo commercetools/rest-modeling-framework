@@ -6,6 +6,8 @@
 
 namespace Test\Types;
 
+use Test\Types\ResourceClassMap;
+
 class UserModel extends PersonModel implements User {
     /**
      * @var string

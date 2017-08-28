@@ -6,12 +6,15 @@
 
 namespace Test\Types;
 
+use Test\Types\JsonObjectModel;
+use Test\Types\ResourceClassMap;
+
 class AnimalModel extends JsonObjectModel implements Animal {
     const DISCRIMINATOR_VALUE = '';
 
     public function __construct(array $data = []) {
         parent::__construct($data);
-        $this->kind = static::DISCRIMINATOR_VALUE;
+        $this->setKind(static::DISCRIMINATOR_VALUE);
     }
 
     /**

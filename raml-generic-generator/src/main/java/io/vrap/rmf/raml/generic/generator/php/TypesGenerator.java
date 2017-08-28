@@ -282,6 +282,14 @@ public class TypesGenerator extends AbstractTemplateGenerator {
         public String caseArrayType(final ArrayType arrayType) {
             if (arrayType.getItems() == null || BuiltinType.of(arrayType.getItems().getName()).isPresent()) {
                 return null;
+            } else if (arrayType.getItems() instanceof UnionType) {
+                final ST st = stGroup.getInstanceOf("arrayGetter");
+                st.add("parent", property.eContainer());
+                st.add("property", property);
+                final Property t = getBaseProperty(property);
+                st.add("propertyType", (new PropertyTypeVisitor()).doSwitch(t.getType()));
+                st.add("paramType", (new PropertyTypeVisitor()).doSwitch(t.getType()));
+                return st.render();
             } else {
                 if (BuiltinType.of(arrayType.getItems().getName()).isPresent()) {
                     return scalarMapper("array");
@@ -495,6 +503,13 @@ public class TypesGenerator extends AbstractTemplateGenerator {
         public String caseArrayType(final ArrayType arrayType) {
             if (arrayType.getItems() == null || BuiltinType.of(arrayType.getItems().getName()).isPresent()) {
                 return null;
+            } else if (arrayType.getItems() instanceof UnionType) {
+                final ST st = stGroup.getInstanceOf("arraySetter");
+                st.add("property", property);
+                final Property t = getBaseProperty(property);
+                st.add("propertyType", (new PropertyTypeVisitor()).doSwitch(t.getType()));
+                st.add("paramType", (new PropertyTypeVisitor()).doSwitch(t.getType()));
+                return st.render();
             } else {
                 final ST st = stGroup.getInstanceOf("arraySetter");
                 st.add("property", property);

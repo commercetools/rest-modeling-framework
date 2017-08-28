@@ -6,6 +6,9 @@
 
 namespace Test\Types;
 
+use Test\Types\JsonObjectModel;
+use Test\Types\ResourceClassMap;
+
 class CustomerModel extends JsonObjectModel implements Customer {
     /**
      * @var Address
@@ -29,10 +32,10 @@ class CustomerModel extends JsonObjectModel implements Customer {
     }
 
     /**
-     * @param Address address
+     * @param Address $address
      * @return $this
      */
-    public function setAddress(Address $address)
+    public function setAddress(Address  $address)
     {
         $this->address = $address;
 
