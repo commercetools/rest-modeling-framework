@@ -6,9 +6,9 @@ collectionModel(vendorName, type, package, builtInParent, typePackage, uses) ::=
 
 namespace <vendorName>\\<package; format="capitalize"><if(typePackage)>\\<typePackage.value.value><endif>;
 
-use <vendorName>\\<package; format="capitalize">\\JsonCollection;
-use <vendorName>\\<package; format="capitalize">\\Collection;
-use <vendorName>\\<package; format="capitalize">\\ResourceClassMap;
+use <vendorName>\\Base\\JsonCollection;
+use <vendorName>\\Base\\Collection;
+use <vendorName>\\Base\\ResourceClassMap;
 
 class <type.name>CollectionModel extends JsonCollection implements <type.name>Collection {
 

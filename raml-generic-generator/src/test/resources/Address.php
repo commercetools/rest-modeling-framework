@@ -6,7 +6,7 @@
 
 namespace Test\Types;
 
-use Test\Types\JsonObject;
+use Test\Base\JsonObject;
 
 interface Address extends JsonObject {
     const FIELD_STREET = 'street';

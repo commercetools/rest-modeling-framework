@@ -4,7 +4,7 @@ main(vendorName) ::=<<
 \<?php
 <generatorInfo()>
 
-namespace <vendorName>\\Types;
+namespace <vendorName>\\Base;
 
 abstract class ClassMap
 {

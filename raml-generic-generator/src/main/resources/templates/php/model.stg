@@ -10,9 +10,9 @@ model(vendorName, type, package, builtInParent, propertyTypes, propertyGetters, 
 namespace <vendorName>\\<package; format="capitalize"><if(typePackage)>\\<typePackage.value.value><endif>;
 
 <if(builtInParent)>
-use <vendorName>\\<package; format="capitalize">\\JsonObjectModel;
+use <vendorName>\\Base\\JsonObjectModel;
 <endif>
-use <vendorName>\\<package; format="capitalize">\\ResourceClassMap;
+use <vendorName>\\Base\\ResourceClassMap;
 <uses: {c |<useImport(c)>}>
 
 class <type.name>Model extends <if(!builtInParent)><type.type.name>Model<else>JsonObjectModel<endif> implements <type.name> {

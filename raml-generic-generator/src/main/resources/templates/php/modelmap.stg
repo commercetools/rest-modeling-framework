@@ -6,6 +6,8 @@ modelMap(vendorName, package, types) ::= <<
 
 namespace <vendorName>\\<package; format="capitalize">;
 
+use <vendorName>\\Base\\ClassMap;
+
 class ModelClassMap extends ClassMap
 {
     protected static $types = [

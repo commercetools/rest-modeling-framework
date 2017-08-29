@@ -6,8 +6,8 @@
 
 namespace Test\Types;
 
-use Test\Types\JsonObjectModel;
-use Test\Types\ResourceClassMap;
+use Test\Base\JsonObjectModel;
+use Test\Base\ResourceClassMap;
 
 class AnimalModel extends JsonObjectModel implements Animal {
     const DISCRIMINATOR_VALUE = '';

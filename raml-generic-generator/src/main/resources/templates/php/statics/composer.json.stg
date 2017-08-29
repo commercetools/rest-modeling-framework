@@ -6,8 +6,7 @@ main(vendorName) ::= <<
   "autoload": {
     "psr-4": {
       "<vendorName>\\\\": [
-        "src/",
-        "target/"
+        "src/"
       ]
     }
   },

@@ -6,8 +6,8 @@
 
 namespace Test\Types;
 
-use Test\Types\JsonObjectModel;
-use Test\Types\ResourceClassMap;
+use Test\Base\JsonObjectModel;
+use Test\Base\ResourceClassMap;
 
 class CustomerModel extends JsonObjectModel implements Customer {
     /**

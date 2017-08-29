@@ -6,8 +6,8 @@ main(vendorName) ::=<<
 
 namespace <vendorName>\Client;
 
-use <vendorName>\Types\JsonObject;
-use <vendorName>\Types\ResultMapper;
+use <vendorName>\Base\JsonObject;
+use <vendorName>\Base\ResultMapper;
 use GuzzleHttp\Psr7\Request;
 use Psr\Http\Message\ResponseInterface;
 use GuzzleHttp\Psr7;

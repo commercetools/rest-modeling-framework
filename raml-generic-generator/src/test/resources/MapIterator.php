@@ -4,7 +4,7 @@
  * Do not change it
  */
 
-namespace Test\Types;
+namespace Test\Base;
 
 class MapIterator extends \ArrayIterator
 {

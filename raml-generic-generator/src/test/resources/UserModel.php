@@ -6,7 +6,7 @@
 
 namespace Test\Types;
 
-use Test\Types\ResourceClassMap;
+use Test\Base\ResourceClassMap;
 
 class UserModel extends PersonModel implements User {
     /**

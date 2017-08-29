@@ -4,7 +4,7 @@ main(vendorName) ::=<<
 \<?php
 <generatorInfo()>
 
-namespace <vendorName>\\Types;
+namespace <vendorName>\\Base;
 
 use <vendorName>\Client\ApiRequest;
 use Psr\Http\Message\ResponseInterface;

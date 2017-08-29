@@ -6,6 +6,8 @@
 
 namespace Test\Types;
 
+use Test\Base\ClassMap;
+
 class ModelClassMap extends ClassMap
 {
     protected static $types = [

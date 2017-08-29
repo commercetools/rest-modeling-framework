@@ -6,7 +6,7 @@
 
 namespace Test\Types;
 
-use Test\Types\JsonObject;
+use Test\Base\JsonObject;
 
 interface Customer extends JsonObject {
     const FIELD_ADDRESS = 'address';

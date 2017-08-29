@@ -6,7 +6,7 @@
 
 namespace Test\Types;
 
-use Test\Types\JsonObject;
+use Test\Base\JsonObject;
 
 interface Animal extends JsonObject {
     const FIELD_KIND = 'kind';
