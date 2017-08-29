@@ -1,5 +1,9 @@
 <?php
 /**
+ * This file has been auto generated
+ * Do not change it
+ */
+/**
  * Origin: https://github.com/guzzle/log-subscriber
  * Copyright (c) 2014 Michael Dowling, https://github.com/mtdowling <mtdowling@gmail.com>
  *
