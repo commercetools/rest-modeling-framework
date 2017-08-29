@@ -1,10 +1,12 @@
 import "../../../generic.stg"
 
-main(vendorName) ::=<<
+main(vendorName, package) ::=<<
 \<?php
 <generatorInfo()>
 
 namespace <vendorName>\\Base;
+
+use <vendorName>\\<package; format="capitalize">\\ModelClassMap;
 
 class ResourceClassMap
 {

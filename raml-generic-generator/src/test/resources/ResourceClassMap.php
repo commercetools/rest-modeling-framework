@@ -6,6 +6,8 @@
 
 namespace Test\Base;
 
+use Test\Types\ModelClassMap;
+
 class ResourceClassMap
 {
     /**
