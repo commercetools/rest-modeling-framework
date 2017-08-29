@@ -225,7 +225,7 @@ class Factory
     private function getHandler($credentials, $accessTokenUrl, $cache = null, $provider = null)
     {
         if (is_null($provider)) {
-            $provider = new TokenProvider(
+            $provider = new CredentialTokenProvider(
                 new HttpClient(),
                 $accessTokenUrl,
                 $credentials
