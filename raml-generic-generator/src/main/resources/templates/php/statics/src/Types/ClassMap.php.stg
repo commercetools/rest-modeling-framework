@@ -1,5 +1,8 @@
-main(vendorName) ::= <<
+import "../../../generic.stg"
+
+main(vendorName) ::=<<
 \<?php
+<generatorInfo()>
 
 namespace <vendorName>\\Types;
 

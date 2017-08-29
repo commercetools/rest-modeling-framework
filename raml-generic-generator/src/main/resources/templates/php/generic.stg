@@ -1,0 +1,14 @@
+/*
+ * common template functions
+ */
+generatorInfo() ::= <<
+/**
+ * This file has been auto generated
+ * Do not change it
+ */
+>>
+
+useImport(class) ::=<<
+use <class>;
+
+>>

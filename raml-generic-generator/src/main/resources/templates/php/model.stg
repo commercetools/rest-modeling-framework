@@ -1,7 +1,4 @@
-useImport(class) ::=<<
-use <class>;
-
->>
+import "generic.stg"
 
 /*
  * implementation template functions
@@ -253,14 +250,4 @@ if (isset($data['<property.name>']) && $data['<property.name>'] instanceof \Date
     $data['<property.name>'] = $data['<property.name>']->setTimeZone(new \DateTimeZone('UTC'))->format('<dateTimeFormat>');
 }
 
->>
-
-/*
- * common template functions
- */
-generatorInfo() ::= <<
-/**
- * This file has been auto generated
- * Do not change it
- */
 >>

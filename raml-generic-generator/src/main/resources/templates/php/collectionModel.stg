@@ -1,3 +1,5 @@
+import "generic.stg"
+
 collectionModel(vendorName, type, package, builtInParent, typePackage, uses) ::= <<
 \<?php
 <generatorInfo()>
@@ -42,14 +44,4 @@ class <type.name>CollectionModel extends JsonCollection implements <type.name>Co
     }
 }
 
->>
-
-/*
- * common template functions
- */
-generatorInfo() ::= <<
-/**
- * This file has been auto generated
- * Do not change it
- */
 >>

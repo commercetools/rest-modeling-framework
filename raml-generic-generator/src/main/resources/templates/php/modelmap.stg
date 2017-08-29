@@ -1,9 +1,4 @@
-generatorInfo() ::= <<
-/**
- * This file has been auto generated
- * Do not change it
- */
->>
+import "generic.stg"
 
 modelMap(vendorName, package, types) ::= <<
 \<?php

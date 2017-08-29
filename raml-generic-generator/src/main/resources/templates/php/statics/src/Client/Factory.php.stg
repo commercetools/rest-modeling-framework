@@ -1,5 +1,8 @@
+import "../../../generic.stg"
+
 main(vendorName, apiUri, authUri) ::=<<
 \<?php
+<generatorInfo()>
 
 namespace <vendorName>\Client;
 

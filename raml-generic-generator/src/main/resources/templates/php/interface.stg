@@ -1,3 +1,5 @@
+import "generic.stg"
+
 interface(vendorName, type, package, builtInParent, propertyTypes, propertySetters, propertyGetters, typeProperties, typePackage, uses, patternProperties) ::= <<
 \<?php
 <generatorInfo()>
@@ -18,11 +20,6 @@ interface <type.name> extends <if(!builtInParent)><type.type.name><else>JsonObje
     public function set($key, $value);
     <endif>
 }
-
->>
-
-useImport(class) ::=<<
-use <class>;
 
 >>
 
@@ -47,14 +44,4 @@ propertyInterfaceSet(property, propertyType, paramType) ::= <<
  */
 public function set<property.name; format="capitalize">(<if(propertyType)><propertyType> <endif>$<property.name>);
 
->>
-
-/*
- * common template functions
- */
-generatorInfo() ::= <<
-/**
- * This file has been auto generated
- * Do not change it
- */
 >>

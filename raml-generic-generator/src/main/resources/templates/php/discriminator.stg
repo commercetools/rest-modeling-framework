@@ -1,9 +1,4 @@
-generatorInfo() ::= <<
-/**
- * This file has been auto generated
- * Do not change it
- */
->>
+import "generic.stg"
 
 discriminatorResolver(vendorName, package, type, subTypes, typePackage, subTypePackages) ::= <<
 \<?php
