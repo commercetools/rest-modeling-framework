@@ -1,0 +1,38 @@
+generatorInfo() ::= <<
+/**
+ * This file has been auto generated
+ * Do not change it
+ */
+>>
+
+discriminatorResolver(vendorName, package, type, subTypes, typePackage, subTypePackages) ::= <<
+\<?php
+<generatorInfo()>
+
+namespace <vendorName>\\<package; format="capitalize"><if(typePackage)>\\<typePackage.value.value><endif>;
+
+<if(typePackage)>
+use <vendorName>\\<package; format="capitalize">;
+<endif>
+
+class <type.name; format="capitalize">DiscriminatorResolver
+{
+    const DISCRIMINATOR = '<type.discriminator>';
+    const TYPES = [
+        <subTypes, subTypePackages: {t,tp|<discriminatorMapping(package, t,tp)>}>
+    ];
+
+    public static function discriminatorType(array $data)
+    {
+        $types = static::TYPES;
+        $discriminatorValue = isset($data[self::DISCRIMINATOR]) ? $data[self::DISCRIMINATOR] : '';
+        return isset($types[$discriminatorValue]) ? $types[$discriminatorValue] : <type.name>::class;
+    }
+}
+
+>>
+
+discriminatorMapping(package, type, typePackage) ::= <<
+'<type.discriminatorValue>' => <package; format="capitalize">\\<typePackage><type.name; format="capitalize">::class,
+
+>>

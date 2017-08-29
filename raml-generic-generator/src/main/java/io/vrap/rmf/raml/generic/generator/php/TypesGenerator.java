@@ -2,6 +2,7 @@ package io.vrap.rmf.raml.generic.generator.php;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.io.Resources;
 import io.vrap.rmf.raml.generic.generator.AbstractTemplateGenerator;
 import io.vrap.rmf.raml.model.facets.StringInstance;
@@ -21,8 +22,7 @@ import java.util.stream.Collectors;
 import static org.apache.commons.lang3.StringUtils.capitalize;
 
 public class TypesGenerator extends AbstractTemplateGenerator {
-
-    private static final URL RESOURCE = Resources.getResource("./templates/php/type.stg");
+    private static final String resourcesPath = "./templates/php/";
     static final String TYPE_MODEL = "model";
     static final String TYPE_INTERFACE = "interface";
     static final String TYPE_COLLECTION_MODEL = "collectionModel";
@@ -104,7 +104,7 @@ public class TypesGenerator extends AbstractTemplateGenerator {
         final List<ObjectType> discriminatorTypes = types.stream().filter(anyType -> anyType instanceof ObjectType && ((ObjectType) anyType).getDiscriminator() != null)
                 .map(anyType -> (ObjectType)anyType)
                 .collect(Collectors.toList());
-        final STGroupFile stGroup = createSTGroup(RESOURCE);
+        final STGroupFile stGroup = createSTGroup(Resources.getResource(resourcesPath + "discriminator.stg"));
         final List<File> f = Lists.newArrayList();
         for (final ObjectType objectType : discriminatorTypes) {
             final ST st = stGroup.getInstanceOf(TYPE_DISCRIMINATOR_RESOLVER);
@@ -144,7 +144,7 @@ public class TypesGenerator extends AbstractTemplateGenerator {
             }
         }
 
-        final STGroupFile stGroup = createSTGroup(RESOURCE);
+        final STGroupFile stGroup = createSTGroup(Resources.getResource(resourcesPath + "modelmap.stg"));
         final ST st = stGroup.getInstanceOf(TYPE_MODEL_MAP);
         st.add("vendorName", vendorName);
         st.add("package", PACKAGE_NAME);
@@ -168,7 +168,7 @@ public class TypesGenerator extends AbstractTemplateGenerator {
 
     @VisibleForTesting
     TypeGeneratingVisitor createVisitor(final String packageName, final String type) {
-        return new TypeGeneratingVisitor(vendorName, packageName, createSTGroup(RESOURCE), type);
+        return new TypeGeneratingVisitor(vendorName, packageName, createSTGroup(Resources.getResource(resourcesPath + type + ".stg")), type);
     }
 
     @VisibleForTesting
@@ -385,6 +385,20 @@ public class TypesGenerator extends AbstractTemplateGenerator {
             this.stGroup = stGroup;
             this.property = property;
         }
+
+        @Override
+        public String doSwitch(EObject eObject) {
+            if (property.getName().startsWith("/") && property.getName().endsWith("/")) {
+                return patternProperty();
+            }
+            return super.doSwitch(eObject);
+        }
+
+        private String patternProperty()
+        {
+            return "";
+        }
+
         @Override
         public String caseTimeOnlyType(TimeOnlyType object) {
             return dateTimeMapper();
@@ -638,49 +652,70 @@ public class TypesGenerator extends AbstractTemplateGenerator {
                     uses.add(vendorName + "\\" + capitalize(packageName) + "\\" + typePackageFolder + objectType.getType().getName() + suffix);
                 }
                 st.add("uses", uses);
+                final List<Property> nonPatternProperties = objectType.getProperties().stream()
+                        .filter(property -> !(property.getName().startsWith("/") && property.getName().endsWith("/")))
+                        .collect(Collectors.toList());
+                final List<Property> patternProperties = objectType.getProperties().stream()
+                        .filter(property -> property.getName().startsWith("/") && property.getName().endsWith("/"))
+                        .collect(Collectors.toList());
+
                 if (type.equals(TYPE_INTERFACE)) {
-                    final List<Property> typeProperties;
+                    final Map<String, String> typeProperties;
                     if(objectType.getType() instanceof ObjectType) {
                         ObjectType superType = (ObjectType)objectType.getType();
-                        typeProperties = objectType.getProperties().stream().filter(property -> superType.getProperty(property.getName()) == null).collect(Collectors.toList());
+                        typeProperties = objectType.getProperties().stream()
+                                .filter(property -> superType.getProperty(property.getName()) == null)
+                                .collect(Collectors.toMap(
+                                        property ->
+                                            property.getName().startsWith("/") && property.getName().endsWith("/") ?
+                                                    "pattern" + property.hashCode() :
+                                                    property.getName(),
+                                        Property::getName
+                                ));
                     } else {
-                        typeProperties = Lists.newArrayList();
+                        typeProperties = Maps.newHashMap();
                     }
-                    st.add("typeProperties", typeProperties);
-                    final List<String> propertySetters = objectType.getProperties().stream().map(property -> {
-                        PropertyInterfaceSetterGeneratingVisitor visitor = new PropertyInterfaceSetterGeneratingVisitor(stGroup, property);
-                        return visitor.doSwitch(property.getType());
-                    }).collect(Collectors.toList());
+                    final List<String> propertySetters = nonPatternProperties.stream()
+                            .map(property -> {
+                                PropertyInterfaceSetterGeneratingVisitor visitor = new PropertyInterfaceSetterGeneratingVisitor(stGroup, property);
+                                return visitor.doSwitch(property.getType());
+                            }).collect(Collectors.toList());
+                    final List<Property> propertyGetters = objectType.getProperties().stream()
+                            .filter(property -> !(property.getName().startsWith("/") && property.getName().endsWith("/")))
+                            .collect(Collectors.toList());
+                    st.add("patternProperties", patternProperties.size() > 0);
+                    st.add("typeProperties", typeProperties.entrySet());
+                    st.add("propertyGetters", propertyGetters);
                     st.add("propertySetters", propertySetters);
                 }
                 if (type.equals(TYPE_MODEL) || type.equals(TYPE_INTERFACE)) {
-                    List<String> propertyTypes = objectType.getProperties().stream().map(property -> {
-                        PropertyTypeVisitor visitor = new PropertyTypeVisitor();
-                        return visitor.doSwitch(property.getType());
-                    }).collect(Collectors.toList());
+                    List<String> propertyTypes = nonPatternProperties.stream()
+                            .map(property -> {
+                                PropertyTypeVisitor visitor = new PropertyTypeVisitor();
+                                return visitor.doSwitch(property.getType());
+                            }).collect(Collectors.toList());
                     st.add("propertyTypes", propertyTypes);
                 }
                 if (type.equals(TYPE_MODEL)) {
-                    List<String> propertyGetters = objectType.getProperties().stream().map(property -> {
-                        PropertyGetterGeneratingVisitor visitor = new PropertyGetterGeneratingVisitor(stGroup, property);
-                        return visitor.doSwitch(property.getType());
-                    }).collect(Collectors.toList());
-
-                    st.add("propertyGetters", propertyGetters);
-
-                    List<String> propertySetters = objectType.getProperties().stream().map(property -> {
-                        PropertySetterGeneratingVisitor visitor = new PropertySetterGeneratingVisitor(stGroup, property);
-                        return visitor.doSwitch(property.getType());
-                    }).collect(Collectors.toList());
-
-                    st.add("propertySetters", propertySetters);
+                    List<String> propertyGetters =nonPatternProperties.stream()
+                            .map(property -> {
+                                PropertyGetterGeneratingVisitor visitor = new PropertyGetterGeneratingVisitor(stGroup, property);
+                                return visitor.doSwitch(property.getType());
+                            }).collect(Collectors.toList());
+                    List<String> propertySetters = nonPatternProperties.stream()
+                            .map(property -> {
+                                PropertySetterGeneratingVisitor visitor = new PropertySetterGeneratingVisitor(stGroup, property);
+                                return visitor.doSwitch(property.getType());
+                            }).collect(Collectors.toList());
 
                     List<String> serializers = objectType.getProperties().stream().map(property -> {
                         SerializerGeneratingVisitor visitor = new SerializerGeneratingVisitor(stGroup, property);
                         return visitor.doSwitch(property.getType());
                     }).filter(Objects::nonNull).collect(Collectors.toList());
-                    st.add("serializers", serializers);
 
+                    st.add("propertyGetters", propertyGetters);
+                    st.add("propertySetters", propertySetters);
+                    st.add("serializers", serializers);
                 }
                 return st.render();
             }

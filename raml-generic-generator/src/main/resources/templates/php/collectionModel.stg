@@ -1,0 +1,55 @@
+collectionModel(vendorName, type, package, builtInParent, typePackage, uses) ::= <<
+\<?php
+<generatorInfo()>
+
+namespace <vendorName>\\<package; format="capitalize"><if(typePackage)>\\<typePackage.value.value><endif>;
+
+use <vendorName>\\<package; format="capitalize">\\JsonCollection;
+use <vendorName>\\<package; format="capitalize">\\Collection;
+use <vendorName>\\<package; format="capitalize">\\ResourceClassMap;
+
+class <type.name>CollectionModel extends JsonCollection implements <type.name>Collection {
+
+    /**
+     * @param <type.name> $value
+     * @return <type.name>Collection
+     */
+    public function add($value) {
+        if (!$value instanceof <type.name>) {
+            throw new \InvalidArgumentException();
+        }
+        parent::add($value);
+
+        return $this;
+    }
+
+    /**
+     * @return <type.name>
+     */
+    public function map($data, $index)
+    {
+        if (!is_null($data) && !$data instanceof <type.name>) {
+            <if(type.discriminator)>
+            $resolvedClass = <type.name>DiscriminatorResolver::discriminatorType($data);
+            $mappedClass = ResourceClassMap::getMappedClass($resolvedClass);
+            <else>
+            $mappedClass = ResourceClassMap::getMappedClass(<type.name>::class);
+            <endif>
+            $data = new $mappedClass($data);
+            $this->rawSet($data, $index);
+        }
+        return $data;
+    }
+}
+
+>>
+
+/*
+ * common template functions
+ */
+generatorInfo() ::= <<
+/**
+ * This file has been auto generated
+ * Do not change it
+ */
+>>

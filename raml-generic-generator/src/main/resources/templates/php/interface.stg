@@ -1,0 +1,60 @@
+interface(vendorName, type, package, builtInParent, propertyTypes, propertySetters, propertyGetters, typeProperties, typePackage, uses, patternProperties) ::= <<
+\<?php
+<generatorInfo()>
+
+namespace <vendorName>\\<package; format="capitalize"><if(typePackage)>\\<typePackage.value.value><endif>;
+
+<if(builtInParent)>
+use <vendorName>\\<package; format="capitalize">\\JsonObject;
+<endif>
+<uses: {c |<useImport(c)>}>
+
+interface <type.name> extends <if(!builtInParent)><type.type.name><else>JsonObject<endif> {
+    <typeProperties: {p |<propertyConstant(p)>}>
+    <propertyGetters, propertyTypes: {p, pt|<propertyInterfaceGet(p, pt)>}>
+    <propertySetters: {p |<p>}>
+    <if(patternProperties)>
+    public function get($key);
+    public function set($key, $value);
+    <endif>
+}
+
+>>
+
+useImport(class) ::=<<
+use <class>;
+
+>>
+
+propertyConstant(entry) ::=<<
+const FIELD_<entry.key; format="upperUnderscore"> = '<entry.value>';
+
+>>
+
+propertyInterfaceGet(property, propertyType) ::= <<
+
+/**
+ * @return <propertyType>
+ */
+public function get<property.name; format="capitalize">();
+>>
+
+propertyInterfaceSet(property, propertyType, paramType) ::= <<
+
+/**
+ * @param <paramType> $<property.name>
+ * @return $this
+ */
+public function set<property.name; format="capitalize">(<if(propertyType)><propertyType> <endif>$<property.name>);
+
+>>
+
+/*
+ * common template functions
+ */
+generatorInfo() ::= <<
+/**
+ * This file has been auto generated
+ * Do not change it
+ */
+>>

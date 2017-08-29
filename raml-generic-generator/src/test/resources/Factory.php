@@ -23,10 +23,13 @@ use Psr\Log\LogLevel;
 
 class Factory
 {
-    const API_URI = 'apiUri';
+    const API_URI = 'https://api.example.com';
     const AUTH_URI = 'https://auth.example.com/oauth/token';
 
-    private static $guzzle6;
+    /**
+     * @var bool
+     */
+    private static $isGuzzle6;
 
     /**
      * @param $options
@@ -225,13 +228,13 @@ class Factory
     }
 
     private static function isGuzzle6() {
-        if (is_null(self::$guzzle6)) {
+        if (is_null(self::$isGuzzle6)) {
             if (version_compare(HttpClient::VERSION, '6.0.0', '>=')) {
-                self::$guzzle6 = true;
+                self::$isGuzzle6 = true;
             } else {
-                self::$guzzle6 = false;
+                self::$isGuzzle6 = false;
             }
         }
-        return self::$guzzle6;
+        return self::$isGuzzle6;
     }
 }
