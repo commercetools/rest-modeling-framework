@@ -1,12 +1,15 @@
 package io.vrap.rmf.raml.persistence.antlr;
 
+import com.google.common.collect.ImmutableSet;
 import io.vrap.functional.utils.TypeSwitch;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.misc.Pair;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.URIConverter;
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.error.Mark;
 import org.yaml.snakeyaml.events.*;
+import org.yaml.snakeyaml.nodes.NodeId;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -16,22 +19,19 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * An antlr lexer that uses snakeyaml events {@link Event} to
  * generate antlr tokens.
  */
 public class RAMLCustomLexer implements TokenSource {
-    private static final String MAP_START = "MAP_START";
-    private static final String MAP_END = "MAP_END";
-    private static final String LIST_START = "LIST_START";
-    private static final String LIST_END = "LIST_END";
-    private static final String SCALAR = "SCALAR";
-    private static final String ANNOTATION_TYPE_REF = "ANNOTATION_TYPE_REF";
-    private static final String RELATIVE_URI = "RELATIVE_URI";
     private static final String INCLUDE_TAG = "!include";
-
+    private static final Set<Event.ID> RELEVANT_EVENT_IDS =
+            ImmutableSet.of(Event.ID.MappingEnd, Event.ID.MappingStart, Event.ID.SequenceEnd, Event.ID.SequenceStart, Event.ID.Scalar);
     private static final Pattern ANNOTATION_TYPE_REF_PATTERN = Pattern.compile("\\(([^\\)]*)\\)");
+    public static final Mark EMPTY_FILE_MARK = new Mark(null, 0, 0, 0, "", 0);
+    public static final ScalarEvent EMPTY_SCALAR_EVENT = new ScalarEvent(null, null, null, "", EMPTY_FILE_MARK, EMPTY_FILE_MARK, null);
 
     private final Yaml yaml = new Yaml();
     private final Stack<Iterator<Event>> eventIteratorStack = new Stack<>();
@@ -110,7 +110,13 @@ public class RAMLCustomLexer implements TokenSource {
 
             final List<Event> eagerLoadedEvents = new ArrayList<>();
             eventIterable.forEach(eagerLoadedEvents::add);
-            eventIterator = eagerLoadedEvents.iterator();
+            final List<Event> filteredEvents = eagerLoadedEvents.stream()
+                    .filter(event -> RELEVANT_EVENT_IDS.stream().anyMatch(id -> event.is(id)))
+                    .collect(Collectors.toList());
+            final List<Event> events = filteredEvents.isEmpty() ?
+                    Collections.singletonList(EMPTY_SCALAR_EVENT) :
+                    filteredEvents;
+            eventIterator = events.iterator();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
