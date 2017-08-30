@@ -29,7 +29,7 @@ public class TypesGenerator extends AbstractTemplateGenerator {
     static final String TYPE_COLLECTION_INTERFACE = "collectionInterface";
     static final String TYPE_MODEL_MAP = "modelMap";
     static final String TYPE_DISCRIMINATOR_RESOLVER = "discriminatorResolver";
-    static final String PACKAGE_NAME = "types";
+    static final String PACKAGE_NAME = "type";
     private final String vendorName;
     private final AnyAnnotationType packageAnnotationType;
 

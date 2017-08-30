@@ -3,6 +3,11 @@ package io.vrap.rmf.raml.generic.generator;
 import com.google.common.base.CaseFormat;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import io.vrap.rmf.raml.model.resources.UriTemplate;
+import io.vrap.rmf.raml.model.resources.UriTemplateExpression;
+import io.vrap.rmf.raml.model.resources.UriTemplateLiteral;
+import io.vrap.rmf.raml.model.resources.UriTemplatePart;
 import io.vrap.rmf.raml.model.types.AnyType;
 import io.vrap.rmf.raml.model.types.BuiltinType;
 import io.vrap.rmf.raml.model.types.ObjectType;
@@ -16,6 +21,8 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.List;
+import java.util.Map;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public abstract class AbstractTemplateGenerator {
@@ -33,6 +40,48 @@ public abstract class AbstractTemplateGenerator {
     protected STGroupFile createSTGroup(final URL resource) {
         final STGroupFile stGroup = new STGroupFile(resource, "UTF-8", '<', '>');
         stGroup.load();
+        stGroup.registerRenderer(UriTemplate.class,
+                (arg, formatString, locale) -> {
+                    final List<UriTemplateExpression> parts = ((UriTemplate)arg).getParts().stream()
+                            .filter(uriTemplatePart -> uriTemplatePart instanceof UriTemplateExpression)
+                            .map(uriTemplatePart -> (UriTemplateExpression)uriTemplatePart)
+                            .collect(Collectors.toList());
+                    switch (Strings.nullToEmpty(formatString)) {
+                        case "methodName":
+                            if (parts.size() > 0) {
+                                return parts.stream().map(
+                                        uriTemplateExpression -> uriTemplateExpression.getVariables().stream()
+                                                .map(StringUtils::capitalize).collect(Collectors.joining("And"))
+                                ).collect(Collectors.joining("And"));
+                            }
+
+                            final String uri = arg.toString();
+                            return CaseFormat.LOWER_HYPHEN.to(CaseFormat.LOWER_CAMEL, uri.replaceFirst("/", ""));
+                        case "params":
+                            if (parts.size() > 0) {
+                                return parts.stream().map(
+                                        uriTemplateExpression -> uriTemplateExpression.getVariables().stream().collect(Collectors.joining(", $"))
+                                ).collect(Collectors.joining(", $"));
+                            }
+                            return "";
+                        case "uri":
+                            if (parts.size() > 0) {
+                                return ((UriTemplate)arg).getParts().stream().map(uriTemplatePart -> {
+                                    if (uriTemplatePart instanceof UriTemplateExpression) {
+                                        Map<String, Object> t = Maps.newHashMap();
+                                        ((UriTemplateExpression) uriTemplatePart).getVariables().forEach(s -> {
+                                            t.put(s, "' . $" + s + " . '");
+                                        });
+                                        return uriTemplatePart.toString(t);
+                                    }
+                                    return uriTemplatePart.toString();
+                                }).collect(Collectors.joining());
+                            }
+                            return arg.toString();
+                        default:
+                            return arg.toString();
+                    }
+                });
         stGroup.registerRenderer(String.class,
                 (arg, formatString, locale) -> {
                     switch (Strings.nullToEmpty(formatString)) {

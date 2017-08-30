@@ -1,0 +1,55 @@
+import "../../../generic.stg"
+
+main(vendorName) ::=<<
+\<?php
+<generatorInfo()>
+
+namespace <vendorName>\Client;
+
+use GuzzleHttp\Psr7;
+use Psr\Http\Message\RequestInterface;
+
+class Resource
+{
+    private $uri;
+
+    public function __construct($uri)
+    {
+        $this->uri = $uri;
+    }
+
+    /**
+     * @return string
+     */
+    final public function getUri()
+    {
+        return $this->uri;
+    }
+
+    /**
+     * @param $method
+     * @param $uri
+     * @param mixed $body
+     * @param array $options
+     * @param string $requestClass
+     * @return ApiRequest
+     */
+    final protected function buildRequest($method, $uri, $body = null, array $options = [], $requestClass = ApiRequest::class)
+    {
+        $headers = isset($options['headers']) ? $options['headers'] : [];
+        /**
+         * @var ApiRequest $request
+         */
+        $request = new $requestClass($method, $uri, $headers, $body);
+
+        if (isset($options['query'])) {
+            ksort($options['query']);
+            $uri = $request->getUri()->withQuery(Psr7\build_query($options['query']));
+            $request = $request->withUri($uri);
+        }
+
+
+        return $request;
+    }
+}
+>>

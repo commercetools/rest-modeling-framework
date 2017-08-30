@@ -32,11 +32,13 @@ public class PhpGenerator implements Generator {
 
         AnyAnnotationType packageAnnotation = api.getAnnotationTypes().stream().filter(anyAnnotationType -> anyAnnotationType.getName().equals("package")).findFirst().orElse(null);
         TypesGenerator generator = new TypesGenerator(vendorName, packageAnnotation);
-        List<File> f = generator.generate(api.getTypes(), new File(outputPath, "src/Types"));
+        List<File> f = generator.generate(api.getTypes(), new File(outputPath, "src/Type"));
 
         StaticGenerator staticGenerator = new StaticGenerator(vendorName);
         f.addAll(staticGenerator.generate(outputPath, api));
 
+        RequestGenerator requestGenerator = new RequestGenerator(vendorName);
+        f.addAll(requestGenerator.generate(api.getResources(), new File(outputPath, "src/Request")));
         Collection<File> files = FileUtils.listFiles(
                 outputPath,
                 TrueFileFilter.INSTANCE,

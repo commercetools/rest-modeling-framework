@@ -1,0 +1,104 @@
+import "generic.stg"
+
+builder(vendorName, package, resources, resourcesIndex, resourcesWithParams, resourcesWithParamsIndex) ::=<<
+\<?php
+<generatorInfo()>
+
+namespace <vendorName>\\<package; format="capitalize">;
+
+use <vendorName>\\Client\\Resource;
+use <vendorName>\\Client\\ApiRequest;
+
+class RequestBuilder extends Resource
+{
+    public function __construct()
+    {
+        parent::__construct('');
+    }
+
+    <if(resources)>
+    <resources, resourcesIndex: {r, ri|<resourceMethod(r, ri)>}>
+    <endif>
+    <if(resourcesWithParams)>
+    <resourcesWithParams, resourcesWithParamsIndex: {r, ri|<resourceMethodWithParams(r, ri)>}>
+    <endif>
+
+    /**
+     * @param string $method
+     * @param string $uri
+     * @param array $headers
+     * @param $body
+     * @param string $version
+     * @return ApiRequest
+     */
+    final public function buildCustom($method, $uri, array $headers = [], $body = null, $version = '1.1')
+    {
+        return new ApiRequest($method, $uri, $headers, $body, $version);
+    }
+
+}
+
+>>
+
+resource(vendorName, package, resource, index, resources, resourcesIndex, resourcesWithParams, resourcesWithParamsIndex) ::=<<
+\<?php
+<generatorInfo()>
+
+namespace <vendorName>\\<package; format="capitalize">;
+
+use <vendorName>\\Client\\Resource;
+
+class Resource<index> extends Resource
+{
+    <if(resources)>
+    <resources, resourcesIndex: {r, ri|<resourceMethod(r, ri)>}>
+    <endif>
+    <if(resourcesWithParams)>
+    <resourcesWithParams, resourcesWithParamsIndex: {r, ri|<resourceMethodWithParams(r, ri)>}>
+    <endif>
+
+    <resource.methods: {m |<(m.method)(m)>}>
+}
+
+>>
+
+resourceMethod(resource, index) ::=<<
+/**
+ * @return Resource<index>
+ */
+public function <resource.relativeUri; format="methodName">() {
+    return new Resource<index>($this->getUri() . '<resource.relativeUri>');
+}
+
+>>
+
+resourceMethodWithParams(resource, index) ::=<<
+/**
+ * @return Resource<index>
+ */
+public function with<resource.relativeUri; format="methodName">($<resource.relativeUri; format="params">) {
+    return new Resource<index>($this->getUri() . '<resource.relativeUri; format="uri">');
+}
+
+>>
+
+get(method) ::=<<
+public function <method.method>() {
+    return $this->buildRequest('<method.method; format="lowercase">', $this->getUri());
+}
+
+>>
+
+post(method) ::=<<
+public function <method.method>($body) {
+    return $this->buildRequest('<method.method; format="lowercase">', $this->getUri(), $body);
+}
+
+>>
+
+delete(method) ::=<<
+public function <method.method>() {
+    return $this->buildRequest('<method.method; format="lowercase">', $this->getUri());
+}
+
+>>
