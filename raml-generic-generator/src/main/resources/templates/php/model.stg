@@ -109,7 +109,7 @@ public function get<property.name; format="capitalize">()
         $mappedClass = ResourceClassMap::getMappedClass(<property.type.name>::class);
         <endif>
         if (is_null($value)) {
-            return new $mappedClass([]);
+            return new $mappedClass();
         }
         $this-><property.name> = new $mappedClass($value);
     }
@@ -128,7 +128,7 @@ public function get<property.name; format="capitalize">()
         $value = $this->raw(<parent.name>::FIELD_<property.name; format="upperUnderscore">);
         $mappedClass = ResourceClassMap::getMappedClass(<propertyType>::class);
         if (is_null($value)) {
-            return new $mappedClass([]);
+            return new $mappedClass();
         }
         $this-><property.name> = new $mappedClass($value);
     }

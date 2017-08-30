@@ -26,7 +26,7 @@ import spock.lang.Unroll
 import java.nio.charset.StandardCharsets
 import static org.apache.commons.lang3.StringUtils.capitalize;
 
-//@Ignore
+@Ignore
 class PHPGeneratorTest extends Specification implements ResourceFixtures {
     @Shared
     ResourceSet resourceSet = new RamlResourceSet()

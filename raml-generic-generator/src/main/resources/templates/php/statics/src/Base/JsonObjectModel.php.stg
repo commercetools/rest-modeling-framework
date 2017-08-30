@@ -10,7 +10,7 @@ class JsonObjectModel implements JsonObject
 {
     private $rawData;
 
-    public function __construct(array $data = [])
+    public function __construct(array $data = null)
     {
         $this->rawData = $data;
     }
@@ -24,9 +24,9 @@ class JsonObjectModel implements JsonObject
     }
 
 
-    public function isPresent($field)
+    public function isPresent()
     {
-        return isset($this->rawData[$field]) || isset($this->$field);
+        return !is_null($this->rawData);
     }
 
     public function jsonSerialize()
@@ -50,7 +50,7 @@ class JsonObjectModel implements JsonObject
         $data = array_filter(
             get_object_vars($this),
             function ($value, $key) {
-                if ($key == 'rawData') {
+                if ($key == 'rawData' || $key == 'isPresent') {
                     return false;
                 }
                 return !is_null($value);
