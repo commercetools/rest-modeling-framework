@@ -63,6 +63,7 @@ dependencies {
     compile project(':functional-utils')
     compile 'org.yaml:snakeyaml:1.18'
 
+    compile 'org.eclipse.platform:org.eclipse.equinox.common:3.8.0'
     compile 'org.eclipse.emf:org.eclipse.emf.common:2.11+'
     compile 'org.eclipse.emf:org.eclipse.emf.ecore:2.11+'
     compile 'org.eclipse.emf:org.eclipse.emf.ecore.xcore.lib:1.1.100'

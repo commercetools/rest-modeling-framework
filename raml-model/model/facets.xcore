@@ -184,15 +184,10 @@ class PropertyValue {
 	contains Instance value
 }
 
-enum Protocol {
-	http
-	https	
-}
-
 interface ProtocolsFacet {
 
 	/*
 	 * The protocols supported by this element.
 	 */
-	Protocol[] protocols
+	String[] protocols	
 }

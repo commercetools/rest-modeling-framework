@@ -5,6 +5,11 @@
 )
 package io.vrap.rmf.raml.model.modules
 
+import org.eclipse.emf.ecore.EDiagnosticChain
+import org.eclipse.emf.ecore.EMap
+import org.eclipse.emf.common.util.Diagnostic
+import org.eclipse.emf.common.util.BasicDiagnostic
+
 import io.vrap.rmf.raml.model.facets.ProtocolsFacet
 import io.vrap.rmf.raml.model.types.AnnotationsFacet
 import io.vrap.rmf.raml.model.types.AnyAnnotationType
@@ -57,6 +62,13 @@ class Api extends AnnotationsFacet, TypeContainer, ResourceContainer, ProtocolsF
 	 * Additional overall documentation for the API.
 	 */
 	contains Document[] documentation
+			
+	@Ecore(invariant="true")	
+	op boolean hasValidProtocols(EDiagnosticChain diagnostics,EMap<Object,Object> context) {
+		val invalidValues = protocols.map[it.toLowerCase].filter[it != 'http' && it != 'https']
+		invalidValues.forEach[diagnostics.add(new BasicDiagnostic(Diagnostic.ERROR, null, -1, "Invalid protocol " + it, null))]
+		invalidValues.empty
+	}
 }
 
 class Document {

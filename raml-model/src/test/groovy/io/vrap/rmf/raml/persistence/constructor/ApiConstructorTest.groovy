@@ -2,7 +2,6 @@ package io.vrap.rmf.raml.persistence.constructor
 
 import io.vrap.rmf.raml.model.facets.ArrayInstance
 import io.vrap.rmf.raml.model.facets.ObjectInstance
-import io.vrap.rmf.raml.model.facets.Protocol
 import io.vrap.rmf.raml.model.facets.StringInstance
 import io.vrap.rmf.raml.model.modules.Api
 import io.vrap.rmf.raml.model.resources.HttpMethod
@@ -373,7 +372,7 @@ class ApiConstructorTest extends Specification {
 
         then:
         api.title == 'Simple API'
-        api.protocols == [ Protocol.HTTP, Protocol.HTTPS ]
+        api.protocols == [ 'http', 'https' ]
         api.mediaType == ['application/json']
     }
 
@@ -569,7 +568,7 @@ class ApiConstructorTest extends Specification {
         resource.methods[0].method == HttpMethod.GET
         resource.methods[0].displayName == 'Get users'
         resource.methods[0].description == 'This method retrieves all users.'
-        resource.methods[0].protocols == [ Protocol.HTTPS ]
+        resource.methods[0].protocols == [ 'https' ]
         resource.methods[0].securedBy.size() == 1
         resource.methods[0].securedBy[0].scheme == api.securitySchemes[0]
     }
