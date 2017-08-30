@@ -3,6 +3,9 @@
     complianceLevel="8.0")
 package io.vrap.rmf.raml.model.types
 
+import org.eclipse.emf.ecore.EDiagnosticChain
+import org.eclipse.emf.ecore.EMap
+
 import io.vrap.rmf.raml.model.elements.DocumentableElement
 import io.vrap.rmf.raml.model.elements.IdentifiableElement
 import io.vrap.rmf.raml.model.facets.ArrayTypeFacet
@@ -98,6 +101,15 @@ interface TypedElement extends IdentifiableElement, InlineTypeContainer {
 }
 
 class Property extends AnnotationsFacet, TypedElement {
+}
+
+class PatternProperty {
+	String pattern
+	
+	@Ecore(invariant="true")	
+	op boolean patternIsValid(EDiagnosticChain diagnostics,EMap<Object,Object> context) {
+		pattern != null && pattern.length > 0
+	}
 }
 
 interface PropertiesFacet {
