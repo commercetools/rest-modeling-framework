@@ -40,7 +40,7 @@ class RequestBuilder extends Resource
 
 >>
 
-request(vendorName, package, requestName) ::=<<
+request(vendorName, package, requestName, method) ::=<<
 \<?php
 <generatorInfo()>
 
@@ -52,6 +52,13 @@ use Psr\Http\Message\ResponseInterface;
 
 class <requestName> extends ApiRequest
 {
+    const RESULT_TYPE = JsonObject::class;
+
+    public function __construct($uri, $body = null, array $headers = [])
+    {
+        parent::__construct('<method.method>', $uri, $headers, $body);
+    }
+
     /**
      * @return JsonObject
      */
@@ -109,7 +116,7 @@ get(method) ::=<<
  * @return <method; format="requestName">
  */
 public function <method.method>() {
-    return $this->buildRequest('<method.method; format="lowercase">', $this->getUri(), null, [], <method; format="requestName">::class);
+    return new <method; format="requestName">($this->getUri());
 }
 
 >>
@@ -119,7 +126,7 @@ post(method) ::=<<
  * @return <method; format="requestName">
  */
 public function <method.method>($body) {
-    return $this->buildRequest('<method.method; format="lowercase">', $this->getUri(), $body, [], <method; format="requestName">::class);
+    return new <method; format="requestName">($this->getUri(), $body);
 }
 
 >>
@@ -129,7 +136,7 @@ delete(method) ::=<<
  * @return <method; format="requestName">
  */
 public function <method.method>() {
-    return $this->buildRequest('<method.method; format="lowercase">', $this->getUri(), null, [], <method; format="requestName">::class);
+    return new <method; format="requestName">($this->getUri());
 }
 
 >>

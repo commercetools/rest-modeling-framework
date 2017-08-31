@@ -125,6 +125,7 @@ public class RequestGenerator extends AbstractTemplateGenerator {
         st.add("vendorName", vendorName);
         st.add("package", PACKAGE_NAME);
         st.add("requestName", requestName);
+        st.add("method", method);
         return st.render();
     }
 

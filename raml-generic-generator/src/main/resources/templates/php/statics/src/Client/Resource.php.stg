@@ -21,7 +21,7 @@ class Resource
     /**
      * @return string
      */
-    final public function getUri()
+    final protected function getUri()
     {
         return $this->uri;
     }
