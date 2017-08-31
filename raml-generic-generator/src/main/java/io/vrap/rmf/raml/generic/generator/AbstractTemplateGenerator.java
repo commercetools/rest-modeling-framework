@@ -40,48 +40,6 @@ public abstract class AbstractTemplateGenerator {
     protected STGroupFile createSTGroup(final URL resource) {
         final STGroupFile stGroup = new STGroupFile(resource, "UTF-8", '<', '>');
         stGroup.load();
-        stGroup.registerRenderer(UriTemplate.class,
-                (arg, formatString, locale) -> {
-                    final List<UriTemplateExpression> parts = ((UriTemplate)arg).getParts().stream()
-                            .filter(uriTemplatePart -> uriTemplatePart instanceof UriTemplateExpression)
-                            .map(uriTemplatePart -> (UriTemplateExpression)uriTemplatePart)
-                            .collect(Collectors.toList());
-                    switch (Strings.nullToEmpty(formatString)) {
-                        case "methodName":
-                            if (parts.size() > 0) {
-                                return parts.stream().map(
-                                        uriTemplateExpression -> uriTemplateExpression.getVariables().stream()
-                                                .map(StringUtils::capitalize).collect(Collectors.joining("And"))
-                                ).collect(Collectors.joining("And"));
-                            }
-
-                            final String uri = arg.toString();
-                            return CaseFormat.LOWER_HYPHEN.to(CaseFormat.LOWER_CAMEL, uri.replaceFirst("/", ""));
-                        case "params":
-                            if (parts.size() > 0) {
-                                return parts.stream().map(
-                                        uriTemplateExpression -> uriTemplateExpression.getVariables().stream().collect(Collectors.joining(", $"))
-                                ).collect(Collectors.joining(", $"));
-                            }
-                            return "";
-                        case "uri":
-                            if (parts.size() > 0) {
-                                return ((UriTemplate)arg).getParts().stream().map(uriTemplatePart -> {
-                                    if (uriTemplatePart instanceof UriTemplateExpression) {
-                                        Map<String, Object> t = Maps.newHashMap();
-                                        ((UriTemplateExpression) uriTemplatePart).getVariables().forEach(s -> {
-                                            t.put(s, "' . $" + s + " . '");
-                                        });
-                                        return uriTemplatePart.toString(t);
-                                    }
-                                    return uriTemplatePart.toString();
-                                }).collect(Collectors.joining());
-                            }
-                            return arg.toString();
-                        default:
-                            return arg.toString();
-                    }
-                });
         stGroup.registerRenderer(String.class,
                 (arg, formatString, locale) -> {
                     switch (Strings.nullToEmpty(formatString)) {
