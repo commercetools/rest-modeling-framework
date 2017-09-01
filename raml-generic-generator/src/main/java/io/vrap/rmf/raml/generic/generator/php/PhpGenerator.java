@@ -38,7 +38,7 @@ public class PhpGenerator implements Generator {
         StaticGenerator staticGenerator = new StaticGenerator(vendorName);
         f.addAll(staticGenerator.generate(outputPath, api));
 
-        RequestGenerator requestGenerator = new RequestGenerator(vendorName);
+        RequestGenerator requestGenerator = new RequestGenerator(vendorName, packageAnnotation);
         f.addAll(requestGenerator.generate(api.getResources(), new File(outputPath, "src/Request")));
         Collection<File> files = FileUtils.listFiles(
                 outputPath,

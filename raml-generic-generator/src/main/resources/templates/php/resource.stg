@@ -40,19 +40,24 @@ class RequestBuilder extends Resource
 
 >>
 
-request(vendorName, package, requestName, method) ::=<<
+request(vendorName, package, requestName, method, returnType, returnPackage) ::=<<
 \<?php
 <generatorInfo()>
 
 namespace <vendorName>\\<package; format="capitalize">;
 
 use <vendorName>\\Client\\ApiRequest;
+<if(returnType)>
+use <vendorName>\\Type\\<returnPackage><returnType.name>;
+<else>
 use <vendorName>\\Base\\JsonObject;
+<endif>
+
 use Psr\Http\Message\ResponseInterface;
 
 class <requestName> extends ApiRequest
 {
-    const RESULT_TYPE = JsonObject::class;
+    const RESULT_TYPE = <if(returnType)><returnType.name><else>JsonObject<endif>::class;
 
     public function __construct($uri, $body = null, array $headers = [])
     {
@@ -60,7 +65,7 @@ class <requestName> extends ApiRequest
     }
 
     /**
-     * @return JsonObject
+     * @return <if(returnType)><returnType.name><else>JsonObject<endif>
      */
     public function map(ResponseInterface $response)
     {

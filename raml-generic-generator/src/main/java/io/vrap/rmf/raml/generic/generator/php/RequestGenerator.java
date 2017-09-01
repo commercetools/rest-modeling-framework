@@ -7,8 +7,15 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.io.Resources;
 import io.vrap.rmf.raml.generic.generator.AbstractTemplateGenerator;
+import io.vrap.rmf.raml.model.facets.StringInstance;
 import io.vrap.rmf.raml.model.resources.*;
 import io.vrap.rmf.raml.model.resources.util.ResourcesSwitch;
+import io.vrap.rmf.raml.model.responses.BodyType;
+import io.vrap.rmf.raml.model.responses.Response;
+import io.vrap.rmf.raml.model.types.AnyAnnotationType;
+import io.vrap.rmf.raml.model.types.AnyType;
+import io.vrap.rmf.raml.model.types.BuiltinType;
+import io.vrap.rmf.raml.model.types.ObjectType;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.stringtemplate.v4.ST;
@@ -26,10 +33,12 @@ public class RequestGenerator extends AbstractTemplateGenerator {
     static final String TYPE_RESOURCE = "resource";
     static final String PACKAGE_NAME = "request";
     private final String vendorName;
+    private final AnyAnnotationType packageAnnotationType;
 
-    RequestGenerator(final String vendorName)
+    RequestGenerator(final String vendorName, final AnyAnnotationType packageAnnotationType)
     {
         this.vendorName = vendorName;
+        this.packageAnnotationType = packageAnnotationType;
     }
 
     public List<File> generate(final List<Resource> resources, final File outputPath) throws IOException {
@@ -126,7 +135,31 @@ public class RequestGenerator extends AbstractTemplateGenerator {
         st.add("package", PACKAGE_NAME);
         st.add("requestName", requestName);
         st.add("method", method);
+
+        Response response = method.getResponses().stream().filter(response1 -> response1.getStatusCode().matches("^2[0-9]{2}$")).findFirst().orElse(null);
+        if (response != null) {
+            BodyType bodyType = response.getBodies().stream()
+                    .filter(bodyType1 -> bodyType1.getContentTypes().size() == 0 || bodyType1.getContentTypes().contains("application/json"))
+                    .findFirst().orElse(null);
+            final AnyType returnType;
+            if (bodyType != null && bodyType.getInlineTypes().isEmpty() && !BuiltinType.of(bodyType.getType().getName()).isPresent()) {
+                returnType = bodyType.getType();
+            } else if (bodyType != null && !bodyType.getInlineTypes().isEmpty() && bodyType.getType().getType() != null && !BuiltinType.of(bodyType.getType().getType().getName()).isPresent()) {
+                returnType = bodyType.getType().getType();
+            } else {
+                returnType = null;
+            }
+            if (returnType instanceof ObjectType) {
+                st.add("returnType", returnType);
+                st.add("returnPackage", getPackageFolder(returnType, "\\"));
+            }
+        }
         return st.render();
+    }
+
+    private String getPackageFolder(AnyType anyType, final String glue) {
+        return anyType.getAnnotations().stream().filter(annotation -> annotation.getType().equals(packageAnnotationType))
+                .map(annotation -> ((StringInstance)annotation.getValue()).getValue() + glue).findFirst().orElse("");
     }
 
     String generateResource(final ResourceGeneratingVisitor requestGeneratingVisitor, final Resource resource) {
