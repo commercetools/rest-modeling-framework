@@ -1,6 +1,6 @@
 import "generic.stg"
 
-collectionModel(vendorName, type, package, builtInParent, typePackage, uses) ::= <<
+collectionModel(vendorName, type, package, builtInParent, typePackage, uses, identifiers) ::= <<
 \<?php
 <generatorInfo()>
 
@@ -8,7 +8,7 @@ namespace <vendorName>\\<package; format="capitalize"><if(typePackage)>\\<typePa
 
 use <vendorName>\\Base\\JsonCollection;
 use <vendorName>\\Base\\Collection;
-use <vendorName>\\Base\\ResourceClassMap;
+use <vendorName>\\Base\\ResultMapper;
 
 class <type.name>CollectionModel extends JsonCollection implements <type.name>Collection {
 
@@ -33,15 +33,44 @@ class <type.name>CollectionModel extends JsonCollection implements <type.name>Co
         if (!is_null($data) && !$data instanceof <type.name>) {
             <if(type.discriminator)>
             $resolvedClass = <type.name>DiscriminatorResolver::discriminatorType($data);
-            $mappedClass = ResourceClassMap::getMappedClass($resolvedClass);
+            $mappedClass = ResultMapper::getMappedClass($resolvedClass);
             <else>
-            $mappedClass = ResourceClassMap::getMappedClass(<type.name>::class);
+            $mappedClass = ResultMapper::getMappedClass(<type.name>::class);
             <endif>
             $data = new $mappedClass($data);
             $this->rawSet($data, $index);
         }
         return $data;
     }
+    <if(identifiers)>
+
+    protected function index($data)
+    {
+        foreach ($data as $key => $value) {
+            <identifiers: {id |<index(id)>}>
+        }
+    }
+
+    <identifiers: {id |<indexGetter(type, id)>}>
+    <endif>
 }
 
+>>
+
+index(identifier) ::=<<
+
+if (isset($value['<identifier>'])) {
+    $this->addToIndex('<identifier>', $value['<identifier>'], $key);
+}
+>>
+
+indexGetter(type, identifier) ::=<<
+
+/**
+ * @return <type.name>
+ */
+public function by<identifier; format="capitalize">($<identifier>)
+{
+    return $this->valueByKey('<identifier>', $<identifier>);
+}
 >>

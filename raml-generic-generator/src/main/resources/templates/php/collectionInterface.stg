@@ -1,6 +1,6 @@
 import "generic.stg"
 
-collectionInterface(vendorName, type, package, builtInParent, typePackage, uses) ::= <<
+collectionInterface(vendorName, type, package, builtInParent, typePackage, uses, identifiers) ::= <<
 \<?php
 <generatorInfo()>
 
@@ -26,6 +26,18 @@ interface <type.name>Collection extends Collection {
      * @return <type.name>
      */
     public function map($data, $index);
+    <if(identifiers)>
+
+    <identifiers: {id |<indexGetter(type, id)>}>
+    <endif>
 }
 
+>>
+
+indexGetter(type, identifier) ::=<<
+
+/**
+ * @return <type.name>
+ */
+public function by<identifier; format="capitalize">($<identifier>);
 >>

@@ -12,7 +12,7 @@ namespace <vendorName>\\<package; format="capitalize"><if(typePackage)>\\<typePa
 <if(builtInParent)>
 use <vendorName>\\Base\\JsonObjectModel;
 <endif>
-use <vendorName>\\Base\\ResourceClassMap;
+use <vendorName>\\Base\\ResultMapper;
 <uses: {c |<useImport(c)>}>
 
 class <type.name>Model extends <if(!builtInParent)><type.type.name>Model<else>JsonObjectModel<endif> implements <type.name> {
@@ -104,9 +104,9 @@ public function get<property.name; format="capitalize">()
         $value = $this->raw(<parent.name>::FIELD_<property.name; format="upperUnderscore">);
         <if(property.type.discriminator)>
         $resolvedClass = <property.type.name>DiscriminatorResolver::discriminatorType($value);
-        $mappedClass = ResourceClassMap::getMappedClass($resolvedClass);
+        $mappedClass = ResultMapper::getMappedClass($resolvedClass);
         <else>
-        $mappedClass = ResourceClassMap::getMappedClass(<property.type.name>::class);
+        $mappedClass = ResultMapper::getMappedClass(<property.type.name>::class);
         <endif>
         if (is_null($value)) {
             return new $mappedClass();
@@ -126,7 +126,7 @@ public function get<property.name; format="capitalize">()
 {
     if (is_null($this-><property.name>)) {
         $value = $this->raw(<parent.name>::FIELD_<property.name; format="upperUnderscore">);
-        $mappedClass = ResourceClassMap::getMappedClass(<propertyType>::class);
+        $mappedClass = ResultMapper::getMappedClass(<propertyType>::class);
         if (is_null($value)) {
             return new $mappedClass();
         }

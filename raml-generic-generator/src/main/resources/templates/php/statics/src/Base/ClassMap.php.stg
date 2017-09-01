@@ -6,17 +6,9 @@ main(vendorName) ::=<<
 
 namespace <vendorName>\\Base;
 
-abstract class ClassMap
+interface ClassMap
 {
-    protected static $types = [];
-
-    public function getMappedClass($class)
-    {
-        if (isset(static::$types[$class])) {
-            return static::$types[$class];
-        }
-        return $class;
-    }
+    public function getMappedClass($class);
 }
 
 >>

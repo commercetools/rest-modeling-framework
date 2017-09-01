@@ -19,13 +19,23 @@ public class InstanceConstructor extends AbstractConstructor {
 
     @Override
     public Object visitSimpleInstance(RAMLParser.SimpleInstanceContext simpleInstance) {
-        final StringInstance stringInstance = FacetsFactory.eINSTANCE.createStringInstance();
-        scope.setValue(stringInstance, simpleInstance.getStart());
+        final String text = simpleInstance.value.getText();
 
-        final String value = simpleInstance.value.getText();
-        stringInstance.setValue(value);
-
-        return stringInstance;
+        final Instance instance;
+        switch (text) {
+            case "true":
+            case "false":
+                final BooleanInstance typeInstance = FacetsFactory.eINSTANCE.createBooleanInstance();
+                typeInstance.setValue(Boolean.valueOf(text));
+                instance = typeInstance;
+                break;
+            default:
+                final StringInstance stringInstance = FacetsFactory.eINSTANCE.createStringInstance();
+                stringInstance.setValue(text);
+                instance = stringInstance;
+        }
+        scope.setValue(instance, simpleInstance.getStart());
+        return instance;
     }
 
     @Override

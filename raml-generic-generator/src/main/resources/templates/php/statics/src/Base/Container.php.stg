@@ -1,0 +1,76 @@
+import "../../../generic.stg"
+
+main(vendorName) ::=<<
+\<?php
+<generatorInfo()>
+
+namespace <vendorName>\\Base;
+
+use Psr\Container\ContainerInterface;
+use Psr\Container\NotFoundExceptionInterface;
+use <vendorName>\\Type\\ModelClassMap;
+
+class Container implements ContainerInterface
+{
+    private static $container;
+    private $classMap;
+    private $resultMapper;
+
+    /**
+     * @return Container|ContainerInterface
+     */
+    public static function getInstance()
+    {
+        if (is_null(self::$container)) {
+            self::$container = new self();
+        }
+        return self::$container;
+    }
+
+    public static function setInstance(ContainerInterface $container)
+    {
+        self::$container = $container;
+    }
+
+    public function get($id)
+    {
+        switch ($id) {
+            case ResultMapper::class :
+                return $this->getResultMapper();
+            case ClassMap::class :
+                return $this->getClassMap();
+            default:
+                throw new NotFoundException();
+        }
+    }
+
+    public function has($id)
+    {
+        switch ($id) {
+            case ClassMap::class :
+            case ResultMapper::class :
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    private function getClassMap()
+    {
+        if (is_null($this->classMap)) {
+            $this->classMap = new ModelClassMap();
+        }
+        return $this->classMap;
+    }
+
+    private function getResultMapper()
+    {
+        if (is_null($this->resultMapper)) {
+            $this->resultMapper = new ResultMapper($this->getClassMap());
+        }
+        return $this->resultMapper;
+    }
+
+
+}
+>>

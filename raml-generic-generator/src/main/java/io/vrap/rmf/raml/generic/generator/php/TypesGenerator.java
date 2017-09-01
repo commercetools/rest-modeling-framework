@@ -5,6 +5,8 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.io.Resources;
 import io.vrap.rmf.raml.generic.generator.AbstractTemplateGenerator;
+import io.vrap.rmf.raml.model.elements.IdentifiableElement;
+import io.vrap.rmf.raml.model.facets.BooleanInstance;
 import io.vrap.rmf.raml.model.facets.StringInstance;
 import io.vrap.rmf.raml.model.types.*;
 import io.vrap.rmf.raml.model.types.impl.TypesFactoryImpl;
@@ -15,7 +17,6 @@ import org.stringtemplate.v4.STGroupFile;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -32,11 +33,13 @@ public class TypesGenerator extends AbstractTemplateGenerator {
     static final String PACKAGE_NAME = "type";
     private final String vendorName;
     private final AnyAnnotationType packageAnnotationType;
+    private final AnyAnnotationType identifierAnnotationType;
 
-    TypesGenerator(final String vendorName, final AnyAnnotationType packageAnnotationType)
+    TypesGenerator(final String vendorName, final AnyAnnotationType packageAnnotationType, final AnyAnnotationType identifierAnnotationType)
     {
         this.vendorName = vendorName;
         this.packageAnnotationType = packageAnnotationType;
+        this.identifierAnnotationType = identifierAnnotationType;
     }
 
     public List<File> generate(final List<AnyType> types, final File outputPath) throws IOException {
@@ -600,7 +603,20 @@ public class TypesGenerator extends AbstractTemplateGenerator {
             st.add("package", packageName);
             Annotation packageAnnotation = items.getAnnotations().stream().filter(annotation -> annotation.getType().equals(packageAnnotationType)).findFirst().orElse(null);
             st.add("typePackage", packageAnnotation);
-
+            if (items instanceof ObjectType && (type.equals(TYPE_COLLECTION_MODEL) || type.equals(TYPE_COLLECTION_INTERFACE))) {
+                final List<String> identifiers = ((ObjectType)items).getAllProperties().stream()
+                        .filter(property -> {
+                            Annotation identifier = property.getAnnotation(identifierAnnotationType);
+                            if (identifier != null) {
+                                BooleanInstance t = (BooleanInstance)identifier.getValue();
+                                return t.getValue();
+                            }
+                            return false;
+                        })
+                        .map(IdentifiableElement::getName)
+                        .collect(Collectors.toList());
+                st.add("identifiers", identifiers);
+            }
             return st.render();
         }
 
@@ -659,6 +675,20 @@ public class TypesGenerator extends AbstractTemplateGenerator {
                         .filter(property -> property.getName().startsWith("/") && property.getName().endsWith("/"))
                         .collect(Collectors.toList());
 
+                if (type.equals(TYPE_COLLECTION_MODEL) || type.equals(TYPE_COLLECTION_INTERFACE)) {
+                    final List<String> identifiers = objectType.getAllProperties().stream()
+                            .filter(property -> {
+                                Annotation identifier = property.getAnnotation(identifierAnnotationType);
+                                if (identifier != null) {
+                                    BooleanInstance t = (BooleanInstance)identifier.getValue();
+                                    return t.getValue();
+                                }
+                                return false;
+                            })
+                            .map(IdentifiableElement::getName)
+                            .collect(Collectors.toList());
+                    st.add("identifiers", identifiers);
+                }
                 if (type.equals(TYPE_INTERFACE)) {
                     final Map<String, String> typeProperties;
                     if(objectType.getType() instanceof ObjectType) {

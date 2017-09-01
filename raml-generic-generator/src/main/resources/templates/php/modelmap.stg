@@ -6,13 +6,13 @@ modelMap(vendorName, package, types) ::= <<
 
 namespace <vendorName>\\<package; format="capitalize">;
 
-use <vendorName>\\Base\\ClassMap;
+use <vendorName>\\Base\\ClassMapModel;
 use <vendorName>\\Base\\Collection;
 use <vendorName>\\Base\\JsonCollection;
 use <vendorName>\\Base\\JsonObject;
 use <vendorName>\\Base\\JsonObjectModel;
 
-class ModelClassMap extends ClassMap
+class ModelClassMap extends ClassMapModel
 {
     protected static $types = [
         JsonObject::class => JsonObjectModel::class,
