@@ -86,7 +86,7 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
         final String traitName = ctx.id().getText();
         final Trait trait = (Trait) scope.with(TRAIT_APPLICATION__TRAIT).getEObjectByName(traitName);
         traitApplication.setTrait(trait);
-        return withinScope(scope.with(traitApplication, TRAIT_APPLICATION__ARGUMENTS),
+        return withinScope(scope.with(traitApplication, TRAIT_APPLICATION__PARAMETERS),
                 argumentsScope -> ctx.argument().stream()
                         .map(this::visitArgument)
                         .collect(Collectors.toList()));
@@ -94,14 +94,14 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
 
     @Override
     public Object visitArgument(RAMLParser.ArgumentContext ctx) {
-        final Argument traitArgument = ResourcesFactory.eINSTANCE.createArgument();
-        scope.setValue(traitArgument, ctx.getStart());
+        final Parameter traitParameter = ResourcesFactory.eINSTANCE.createParameter();
+        scope.setValue(traitParameter, ctx.getStart());
 
-        traitArgument.setName(ctx.name.getText());
-        withinScope(scope.with(traitArgument, ARGUMENT__VALUE),
+        traitParameter.setName(ctx.name.getText());
+        withinScope(scope.with(traitParameter, PARAMETER__VALUE),
                 valueScope -> this.visitInstance(ctx.instance()));
 
-        return traitArgument;
+        return traitParameter;
     }
 
     @Override
@@ -595,7 +595,7 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
         scope.setValue(resourceTypeApplication, ctx.getStart());
         final ResourceType resourceType = (ResourceType) scope.with(RESOURCE_TYPE_APPLICATION__TYPE).getEObjectByName(ctx.type.getText());
         resourceTypeApplication.setType(resourceType);
-        return withinScope(scope.with(resourceTypeApplication, RESOURCE_TYPE_APPLICATION__ARGUMENTS),
+        return withinScope(scope.with(resourceTypeApplication, RESOURCE_TYPE_APPLICATION__PARAMETERS),
                 argumentsScope -> ctx.argument().stream()
                         .map(this::visitArgument)
                         .collect(Collectors.toList()));

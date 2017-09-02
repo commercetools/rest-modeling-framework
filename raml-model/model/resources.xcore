@@ -128,7 +128,7 @@ interface ResourceBase extends DocumentableElement, AnnotationsFacet, ResourceCo
 
 class ResourceTypeApplication {
 	refers ResourceType ^type
-	contains Argument[] arguments 
+	contains Parameter[] parameters 
 }
 
 class Resource extends ResourceBase, ResourceContainer, ApplyTraitsFacet {
@@ -184,12 +184,12 @@ class Trait extends IdentifiableElement, Method {
 	String usage
 }
 
-class Argument {
+class Parameter {
 	String name
 	contains Instance value
 }
 
 class TraitApplication {
 	refers Trait trait
-	contains Argument[] arguments 
+	contains Parameter[] parameters 
 }

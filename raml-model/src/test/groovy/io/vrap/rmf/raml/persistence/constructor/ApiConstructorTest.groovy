@@ -210,9 +210,9 @@ class ApiConstructorTest extends Specification {
         api.resourceTypes[0].methods[0].method == HttpMethod.GET
         api.resources.size() == 1
         api.resources[0].type.type == api.resourceTypes[0]
-        api.resources[0].type.arguments.size() == 1
-        api.resources[0].type.arguments[0].name == 'arg1'
-        api.resources[0].type.arguments[0].value instanceof StringInstance
+        api.resources[0].type.parameters.size() == 1
+        api.resources[0].type.parameters[0].name == 'arg1'
+        api.resources[0].type.parameters[0].value instanceof StringInstance
     }
 
     def "security scheme"() {
@@ -351,10 +351,10 @@ class ApiConstructorTest extends Specification {
         api.resources[0].methods.size() == 1
         api.resources[0].methods[0].is.size() == 1
         api.resources[0].methods[0].is[0].trait == api.traits[0]
-        api.resources[0].methods[0].is[0].arguments.size() == 1
-        api.resources[0].methods[0].is[0].arguments[0].name == 'access_token'
-        api.resources[0].methods[0].is[0].arguments[0].value instanceof StringInstance
-        StringInstance stringInstance = api.resources[0].methods[0].is[0].arguments[0].value
+        api.resources[0].methods[0].is[0].parameters.size() == 1
+        api.resources[0].methods[0].is[0].parameters[0].name == 'access_token'
+        api.resources[0].methods[0].is[0].parameters[0].value instanceof StringInstance
+        StringInstance stringInstance = api.resources[0].methods[0].is[0].parameters[0].value
         stringInstance.value == 'secret'
     }
 
