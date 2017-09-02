@@ -22,7 +22,7 @@ import io.vrap.rmf.raml.model.types.TypedElement
 import io.vrap.rmf.raml.model.security.SecuredByFacet
 import io.vrap.rmf.raml.model.elements.IdentifiableElement
 
-import io.vrap.rmf.raml.model.responses.BodyType
+import io.vrap.rmf.raml.model.responses.BodyContainer
 import io.vrap.rmf.raml.model.responses.ResponsesFacet
 import io.vrap.rmf.raml.model.facets.Instance
 
@@ -69,7 +69,7 @@ class UriTemplateExpression extends UriTemplatePart {
 	String[] variables
 	
 	op String toString() {
-		val opStr = if (operator == null) "" else operator
+		val opStr = if (operator === null) "" else operator
 		"{" + opStr  + variables.join(",") + "}"
 	} 	
 	
@@ -160,17 +160,11 @@ interface ApplyTraitsFacet {
 }
 
 class Method extends DocumentableElement, AnnotationsFacet, ProtocolsFacet, SecuredByFacet, 
-					 HeadersFacet, QueryParametersFacet, ResponsesFacet, ApplyTraitsFacet {
+					 HeadersFacet, QueryParametersFacet, ResponsesFacet, ApplyTraitsFacet, BodyContainer {
 	/*
 	 * The HTTP method.
 	 */
 	HttpMethod method
-	
-	/*
-	 * The body types of this method.
-	 */
-	contains BodyType[] bodies
-	
 				
 	@Ecore(invariant="true")	
 	op boolean hasValidProtocols(EDiagnosticChain diagnostics,EMap<Object,Object> context) {

@@ -15,7 +15,7 @@ interface ResponsesFacet {
 	contains Response[] responses	
 }
 
-class Response extends AnnotationsFacet, HeadersFacet {
+class Response extends AnnotationsFacet, HeadersFacet, BodyContainer {
 	/*
 	 * A possible HTTP status codes for that method on that resource.
 	 */
@@ -25,11 +25,6 @@ class Response extends AnnotationsFacet, HeadersFacet {
 	 * A substantial, human-friendly description of the type. Its value is a string and MAY be formatted using markdown.
 	 */
 	String description
-	
-		/*
-	 * The body types of this response.
-	 */
-	contains BodyType[] bodies
 }
 
 class BodyType extends AnnotationsFacet, TypedElement {
@@ -37,4 +32,19 @@ class BodyType extends AnnotationsFacet, TypedElement {
 	 * The content types that this body supports.
 	 */
 	String[] contentTypes
+}
+
+interface BodyContainer {
+	
+	/*
+	 * The body types of this element.
+	 */
+	contains BodyType[] bodies
+		
+	/*
+	 * Returns the first body with the given content type or null.
+	 */
+	op BodyType getBody(String contentType) {
+		bodies.findFirst[it.contentTypes.contains(contentType)]
+	}	
 }

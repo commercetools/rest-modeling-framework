@@ -23,8 +23,8 @@ import static io.vrap.rmf.raml.model.elements.ElementsPackage.Literals.IDENTIFIA
 import static io.vrap.rmf.raml.model.modules.ModulesPackage.Literals.TRAIT_CONTAINER__TRAITS;
 import static io.vrap.rmf.raml.model.modules.ModulesPackage.Literals.TYPE_CONTAINER__RESOURCE_TYPES;
 import static io.vrap.rmf.raml.model.resources.ResourcesPackage.Literals.*;
+import static io.vrap.rmf.raml.model.responses.ResponsesPackage.Literals.BODY_CONTAINER__BODIES;
 import static io.vrap.rmf.raml.model.responses.ResponsesPackage.Literals.RESPONSES_FACET__RESPONSES;
-import static io.vrap.rmf.raml.model.responses.ResponsesPackage.Literals.RESPONSE__BODIES;
 import static io.vrap.rmf.raml.model.security.SecurityPackage.Literals.*;
 import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.*;
 
@@ -57,11 +57,7 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
             traitFacet.headersFacet().forEach(this::visitHeadersFacet);
             traitFacet.queryParametersFacet().forEach(this::visitQueryParametersFacet);
 
-            withinScope(traitScope.with(METHOD__BODIES), bodiesScope -> {
-                traitFacet.bodyFacet().forEach(this::visitBodyFacet);
-                return null;
-            });
-
+            traitFacet.bodyFacet().forEach(this::visitBodyFacet);
             traitFacet.responsesFacet().forEach(this::visitResponsesFacet);
 
             traitFacet.isFacet().forEach(this::visitIsFacet);
@@ -184,14 +180,16 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
             responseFacet.attributeFacet().forEach(this::visitAttributeFacet);
             responseFacet.headersFacet().forEach(this::visitHeadersFacet);
 
-            withinScope(responseScope.with(RESPONSE__BODIES), bodiesScope -> {
-                responseFacet.bodyFacet().forEach(this::visitBodyFacet);
-
-                return null;
-            });
+            responseFacet.bodyFacet().forEach(this::visitBodyFacet);
 
             return response;
         });
+    }
+
+    @Override
+    public Object visitBodyFacet(final RAMLParser.BodyFacetContext ctx) {
+        return withinScope(scope.with(BODY_CONTAINER__BODIES),
+                bodiesScope -> super.visitBodyFacet(ctx));
     }
 
     @Override
@@ -638,10 +636,7 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
                 methodFacet.headersFacet().forEach(this::visitHeadersFacet);
                 methodFacet.queryParametersFacet().forEach(this::visitQueryParametersFacet);
 
-                withinScope(methodScope.with(METHOD__BODIES), bodiesScope -> {
-                    methodFacet.bodyFacet().forEach(this::visitBodyFacet);
-                    return null;
-                });
+                methodFacet.bodyFacet().forEach(this::visitBodyFacet);
 
                 methodFacet.responsesFacet().forEach(this::visitResponsesFacet);
                 methodFacet.isFacet().forEach(this::visitIsFacet);
