@@ -133,9 +133,17 @@ class ResourceTypeApplication {
 
 class Resource extends ResourceBase, ResourceContainer, ApplyTraitsFacet {
 	/*
-	 * The reltaive uri of this resource.
+	 * The relative uri of this resource.
 	 */
 	contains UriTemplate relativeUri
+	
+	@Ecore(invariant = "true")
+	op boolean methodsMustBeRequired(EDiagnosticChain diagnostics,EMap<Object,Object> context) {
+		val optionalMethods = methods.filter[!it.required].toList
+		optionalMethods.forEach[diagnostics.add(new BasicDiagnostic(Diagnostic.ERROR, null, -1, 
+			"Optional method not allowed in resource declaration " + it, null))]
+		optionalMethods.isEmpty
+	}
 }
 
 class ResourceType extends ResourceBase, IdentifiableElement {
@@ -165,6 +173,12 @@ class Method extends DocumentableElement, AnnotationsFacet, ProtocolsFacet, Secu
 	 * The HTTP method.
 	 */
 	HttpMethod method
+	
+	/*
+	 * Methods defined in a resource are always required,
+	 * but methods defined in a resource type can be optional. 
+	 */
+	boolean required = "true"
 				
 	@Ecore(invariant="true")	
 	op boolean hasValidProtocols(EDiagnosticChain diagnostics,EMap<Object,Object> context) {
