@@ -163,6 +163,22 @@ class LibraryConstructorTest extends Specification {
         oauth20Settings.authorizationUri == 'https://www.example.com/1/oauth2/authorize'
     }
 
+    def "resource types"() {
+        when:
+        Library library = constructLibrary(
+                '''\
+        resourceTypes:
+            update:
+                post?:
+                get:
+        ''')
+        then:
+        library.resourceTypes.size() == 1
+        library.resourceTypes[0].methods.size() == 2
+        library.resourceTypes[0].methods[0].required == false
+        library.resourceTypes[0].methods[1].required == true
+    }
+    
     Library constructLibrary(String input) {
         RAMLParser parser = parser(input)
         def libraryConstructor = new LibraryConstructor()

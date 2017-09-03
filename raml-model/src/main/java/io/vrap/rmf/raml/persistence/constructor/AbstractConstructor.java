@@ -622,9 +622,11 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
         return withinScope(scope.with(RESOURCE_BASE__METHODS), methodsScope -> {
             final Method method = ResourcesFactory.eINSTANCE.createMethod();
             String httpMethodText = methodFacet.httpMethod().getText();
-            httpMethodText = httpMethodText.endsWith("?") ?
-                    httpMethodText.substring(0, httpMethodText.length() - 1) :
-                    httpMethodText;
+            final boolean required = !httpMethodText.endsWith("?");
+            method.setRequired(required);
+            httpMethodText = required ?
+                    httpMethodText :
+                    httpMethodText.substring(0, httpMethodText.length() - 1) ;
             final HttpMethod httpMethod = (HttpMethod) ResourcesFactory.eINSTANCE.createFromString(HTTP_METHOD, httpMethodText);
             method.setMethod(httpMethod);
             methodsScope.setValue(method, methodFacet.getStart());
