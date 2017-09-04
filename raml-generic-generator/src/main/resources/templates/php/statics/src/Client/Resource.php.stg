@@ -12,10 +12,12 @@ use Psr\Http\Message\RequestInterface;
 class Resource
 {
     private $uri;
+    private $args = [];
 
-    public function __construct($uri)
+    public function __construct($uri, array $args = [])
     {
         $this->uri = $uri;
+        $this->args = $args;
     }
 
     /**
@@ -24,6 +26,14 @@ class Resource
     final protected function getUri()
     {
         return $this->uri;
+    }
+
+    /**
+     * @return array
+     */
+    final protected function getArgs()
+    {
+        return $this->args;
     }
 
     /**

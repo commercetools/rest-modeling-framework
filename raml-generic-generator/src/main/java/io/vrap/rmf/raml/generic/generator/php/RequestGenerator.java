@@ -133,7 +133,14 @@ public class RequestGenerator extends AbstractTemplateGenerator {
         final ST st = stGroup.getInstanceOf("request");
         st.add("vendorName", vendorName);
         st.add("package", PACKAGE_NAME);
+        final UriTemplate uri = absoluteUri(resource);
         st.add("requestName", requestName);
+        final Map<String, Object> params = uri.getParts().stream()
+                .filter(uriTemplatePart -> uriTemplatePart instanceof UriTemplateExpression)
+                .flatMap(uriTemplatePart -> ((UriTemplateExpression)uriTemplatePart).getVariables().stream())
+                .collect(Collectors.toMap(o -> o, o -> "%s"));
+
+        st.add("absoluteUri", uri.toString(params));
         st.add("method", method);
 
         Response response = method.getResponses().stream().filter(response1 -> response1.getStatusCode().matches("^2[0-9]{2}$")).findFirst().orElse(null);
