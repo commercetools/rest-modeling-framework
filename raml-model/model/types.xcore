@@ -51,6 +51,8 @@ class AnyType extends AnnotationsFacet, DocumentableElement, IdentifiableElement
 	 * This can be used, for example, by documentation generators to generate sample values for an object of this type.  
 	 */
 	contains Example[] examples
+
+    
 }
 
 /*
@@ -88,7 +90,7 @@ interface InlineTypeContainer {
 	contains AnyType[] inlineTypes	
 }
 
-interface TypedElement extends IdentifiableElement, InlineTypeContainer {
+interface TypedElement extends IdentifiableElement, InlineTypeContainer, AnnotationsFacet {
 	/*
 	 * The type of this element.
 	 */
