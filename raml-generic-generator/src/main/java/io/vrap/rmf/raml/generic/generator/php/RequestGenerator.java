@@ -12,10 +12,7 @@ import io.vrap.rmf.raml.model.resources.*;
 import io.vrap.rmf.raml.model.resources.util.ResourcesSwitch;
 import io.vrap.rmf.raml.model.responses.BodyType;
 import io.vrap.rmf.raml.model.responses.Response;
-import io.vrap.rmf.raml.model.types.AnyAnnotationType;
-import io.vrap.rmf.raml.model.types.AnyType;
-import io.vrap.rmf.raml.model.types.BuiltinType;
-import io.vrap.rmf.raml.model.types.ObjectType;
+import io.vrap.rmf.raml.model.types.*;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.stringtemplate.v4.ST;
@@ -142,11 +139,14 @@ public class RequestGenerator extends AbstractTemplateGenerator {
         st.add("absoluteUri", uri);
         st.add("params", params.entrySet());
         st.add("method", method);
-//        final BodyType firstBodyType = method.getBodies().stream().findFirst().orElse(null);
-//        if (firstBodyType != null) {
-//            final List<AnyType> parentTypes = getParentTypes(firstBodyType.getType());
-//            final AnyType t = parentTypes.size() > 0 ? parentTypes.get(0) : firstBodyType.getType();
-//        }
+        final BodyType firstBodyType = method.getBodies().stream().findFirst().orElse(null);
+        if (firstBodyType != null) {
+            final List<AnyType> parentTypes = getParentTypes(firstBodyType.getType());
+            final AnyType t = parentTypes.size() > 0 ? parentTypes.get(0) : firstBodyType.getType();
+            if (t instanceof FileType) {
+                st.add("fileBody", t);
+            }
+        }
 
         Response response = method.getResponses().stream().filter(response1 -> response1.getStatusCode().matches("^2[0-9]{2}$")).findFirst().orElse(null);
         if (response != null) {
@@ -200,9 +200,19 @@ public class RequestGenerator extends AbstractTemplateGenerator {
         final STGroupFile stGroup = super.createSTGroup(resource);
         stGroup.registerRenderer(Method.class,
                 (arg, formatString, locale) -> {
+                    final Method method = (Method)arg;
                     switch (Strings.nullToEmpty(formatString)) {
+                        case "bodyType":
+                            final BodyType firstBodyType = method.getBodies().stream().findFirst().orElse(null);
+                            if (firstBodyType != null) {
+                                final List<AnyType> parentTypes = getParentTypes(firstBodyType.getType());
+                                final AnyType t = parentTypes.size() > 0 ? parentTypes.get(0) : firstBodyType.getType();
+                                if (t instanceof FileType) {
+                                    return "UploadedFileInterface ";
+                                }
+                            }
+                            return "";
                         case "requestName":
-                            final Method method = (Method)arg;
                             return toRequestName(absoluteUri((Resource)method.eContainer()), method);
                         default:
                             return arg.toString();

@@ -63,6 +63,9 @@ public abstract class AbstractTemplateGenerator {
     }
 
     protected List<AnyType> getParentTypes(AnyType anyType) {
+        if (anyType == null) {
+            return Lists.newArrayList();
+        }
         if (BuiltinType.of(anyType.getName()).isPresent()) {
             return Lists.newArrayList();
         }

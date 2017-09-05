@@ -29,7 +29,7 @@ class ApiRequest extends Request
         parent::__construct($method, $uri, $headers, $body, $version);
     }
 
-    private function ensureHeader(array $headers, $header, $defaultValue)
+    protected function ensureHeader(array $headers, $header, $defaultValue)
     {
         $normalizedHeader = strtolower($header);
         foreach ($headers as $header => $value) {

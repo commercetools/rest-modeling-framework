@@ -40,7 +40,7 @@ class RequestBuilder extends Resource
 
 >>
 
-request(vendorName, package, requestName, method, returnType, returnPackage, absoluteUri, params, bodyType) ::=<<
+request(vendorName, package, requestName, method, returnType, returnPackage, absoluteUri, params, fileBody) ::=<<
 \<?php
 <generatorInfo()>
 
@@ -54,6 +54,7 @@ use <vendorName>\\Base\\JsonObject;
 <endif>
 
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\UploadedFileInterface;
 
 class <requestName> extends ApiRequest
 {
@@ -64,10 +65,13 @@ class <requestName> extends ApiRequest
      * @param $body
      * @param array $headers
      */
-    public function __construct(<params: {p |$<p.key>, }>$body = null, array $headers = [])
+    public function __construct(<params: {p |$<p.key>, }><method; format="bodyType">$body = null, array $headers = [])
     {
         $uri = sprintf('<absoluteUri; format="sprintf">'<params: {p |, $<p.key>}>);
-        parent::__construct('<method.method>', $uri, $headers, $body);
+        <if(fileBody)>
+        $headers = $this->ensureHeader($headers, 'Content-Type', $body->getClientMediaType());
+        <endif>
+        parent::__construct('<method.method>', $uri, $headers, <if(fileBody)>$body->getStream()<else>$body<endif>);
     }
 
     /**
@@ -91,14 +95,15 @@ paramBlock(param) ::=<<
 * @param $<param.key>
 >>
 withParam(requestName, parameter) ::=<<
-    /**
-     * @param $<parameter.name; format="lowercamel">
-     * @return <requestName>
-     */
-    public function with<parameter.name; format="uppercamel">($<parameter.name; format="lowercamel">)
-    {
-        return $this->withQueryParam('<parameter.name>', $<parameter.name; format="lowercamel">);
-    }
+/**
+ * @param $<parameter.name; format="lowercamel">
+ * @return <requestName>
+ */
+public function with<parameter.name; format="uppercamel">($<parameter.name; format="lowercamel">)
+{
+    return $this->withQueryParam('<parameter.name>', $<parameter.name; format="lowercamel">);
+}
+
 >>
 
 resource(vendorName, package, resource, index, resources, params, resourcesIndex, resourcesWithParams, resourcesWithParamsIndex) ::=<<
@@ -108,6 +113,7 @@ resource(vendorName, package, resource, index, resources, params, resourcesIndex
 namespace <vendorName>\\<package; format="capitalize">;
 
 use <vendorName>\\Client\\Resource;
+use Psr\Http\Message\UploadedFileInterface;
 
 class Resource<index> extends Resource
 {
@@ -157,9 +163,10 @@ public function <method.method>() {
 
 post(method, params) ::=<<
 /**
+ * @param <method; format="bodyType">$body
  * @return <method; format="requestName">
  */
-public function <method.method>($body) {
+public function <method.method>(<method; format="bodyType">$body) {
     $args = $this->getArgs();
     return new <method; format="requestName">(<trunc(params): {p|$args['<p.key>'], }><last(params): {p|$args['<p.key>']}>, $body);
 }
