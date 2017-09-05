@@ -40,7 +40,7 @@ class RequestBuilder extends Resource
 
 >>
 
-request(vendorName, package, requestName, method, returnType, returnPackage, absoluteUri) ::=<<
+request(vendorName, package, requestName, method, returnType, returnPackage, absoluteUri, params, bodyType) ::=<<
 \<?php
 <generatorInfo()>
 
@@ -60,17 +60,18 @@ class <requestName> extends ApiRequest
     const RESULT_TYPE = <if(returnType)><returnType.name><else>JsonObject<endif>::class;
 
     /**
-     * @param array $args
+     <params: {p |<paramBlock(p)>}>
      * @param $body
      * @param array $headers
      */
-    public function __construct(array $args, $body = null, array $headers = [])
+    public function __construct(<params: {p |$<p.key>, }>$body = null, array $headers = [])
     {
-        $uri = sprintf('<absoluteUri>', ...$args);
+        $uri = sprintf('<absoluteUri; format="sprintf">'<params: {p |, $<p.key>}>);
         parent::__construct('<method.method>', $uri, $headers, $body);
     }
 
     /**
+     * @param ResponseInterface $response
      * @return <if(returnType)><returnType.name><else>JsonObject<endif>
      */
     public function map(ResponseInterface $response)
@@ -84,6 +85,11 @@ class <requestName> extends ApiRequest
 }
 
 >>
+
+paramBlock(param) ::=<<
+
+* @param $<param.key>
+>>
 withParam(requestName, parameter) ::=<<
     /**
      * @param $<parameter.name; format="lowercamel">
@@ -95,7 +101,7 @@ withParam(requestName, parameter) ::=<<
     }
 >>
 
-resource(vendorName, package, resource, index, resources, resourcesIndex, resourcesWithParams, resourcesWithParamsIndex) ::=<<
+resource(vendorName, package, resource, index, resources, params, resourcesIndex, resourcesWithParams, resourcesWithParamsIndex) ::=<<
 \<?php
 <generatorInfo()>
 
@@ -112,7 +118,7 @@ class Resource<index> extends Resource
     <resourcesWithParams, resourcesWithParamsIndex: {r, ri|<resourceMethodWithParams(r, ri)>}>
     <endif>
 
-    <resource.methods: {m |<(m.method)(m)>}>
+    <resource.methods: {m |<(m.method)(m, params)>}>
 }
 
 >>
@@ -132,38 +138,41 @@ resourceMethodWithParams(resource, index) ::=<<
  * @return Resource<index>
  */
 public function with<resource.relativeUri; format="methodName">($<resource.relativeUri; format="params">) {
-    $args = array_merge($this->getArgs(), [$<resource.relativeUri; format="params">]);
+    $args = array_merge($this->getArgs(), [<resource.relativeUri; format="paramArray">]);
     return new Resource<index>($this->getUri() . '<resource.relativeUri; format="uri">', $args);
 }
 
 >>
 
-get(method) ::=<<
+get(method, params) ::=<<
 /**
  * @return <method; format="requestName">
  */
 public function <method.method>() {
-    return new <method; format="requestName">($this->getArgs());
+    $args = $this->getArgs();
+    return new <method; format="requestName">(<trunc(params): {p|$args['<p.key>'], }><last(params): {p|$args['<p.key>']}>);
 }
 
 >>
 
-post(method) ::=<<
+post(method, params) ::=<<
 /**
  * @return <method; format="requestName">
  */
 public function <method.method>($body) {
-    return new <method; format="requestName">($this->getArgs(), $body);
+    $args = $this->getArgs();
+    return new <method; format="requestName">(<trunc(params): {p|$args['<p.key>'], }><last(params): {p|$args['<p.key>']}>, $body);
 }
 
 >>
 
-delete(method) ::=<<
+delete(method, params) ::=<<
 /**
  * @return <method; format="requestName">
  */
 public function <method.method>() {
-    return new <method; format="requestName">($this->getArgs());
+    $args = $this->getArgs();
+    return new <method; format="requestName">(<trunc(params): {p|$args['<p.key>'], }><last(params): {p|$args['<p.key>']}>);
 }
 
 >>

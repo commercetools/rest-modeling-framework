@@ -133,15 +133,20 @@ public class RequestGenerator extends AbstractTemplateGenerator {
         final ST st = stGroup.getInstanceOf("request");
         st.add("vendorName", vendorName);
         st.add("package", PACKAGE_NAME);
-        final UriTemplate uri = absoluteUri(resource);
         st.add("requestName", requestName);
+        final UriTemplate uri = absoluteUri(resource);
         final Map<String, Object> params = uri.getParts().stream()
                 .filter(uriTemplatePart -> uriTemplatePart instanceof UriTemplateExpression)
                 .flatMap(uriTemplatePart -> ((UriTemplateExpression)uriTemplatePart).getVariables().stream())
                 .collect(Collectors.toMap(o -> o, o -> "%s"));
-
-        st.add("absoluteUri", uri.toString(params));
+        st.add("absoluteUri", uri);
+        st.add("params", params.entrySet());
         st.add("method", method);
+//        final BodyType firstBodyType = method.getBodies().stream().findFirst().orElse(null);
+//        if (firstBodyType != null) {
+//            final List<AnyType> parentTypes = getParentTypes(firstBodyType.getType());
+//            final AnyType t = parentTypes.size() > 0 ? parentTypes.get(0) : firstBodyType.getType();
+//        }
 
         Response response = method.getResponses().stream().filter(response1 -> response1.getStatusCode().matches("^2[0-9]{2}$")).findFirst().orElse(null);
         if (response != null) {
@@ -228,6 +233,18 @@ public class RequestGenerator extends AbstractTemplateGenerator {
                                 ).collect(Collectors.joining(", $"));
                             }
                             return "";
+                        case "paramArray":
+                            if (parts.size() > 0) {
+                                return parts.stream().map(
+                                        uriTemplateExpression -> uriTemplateExpression.getVariables().stream().map(s -> "'" + s + "' => $" + s).collect(Collectors.joining(", "))
+                                ).collect(Collectors.joining(", "));
+                            }
+                            return "";
+                        case "sprintf":
+                            final Map<String, Object> params = parts.stream()
+                                    .flatMap(uriTemplatePart -> uriTemplatePart.getVariables().stream())
+                                    .collect(Collectors.toMap(o -> o, o -> "%s"));
+                            return ((UriTemplate)arg).toString(params);
                         case "uri":
                             if (parts.size() > 0) {
                                 return ((UriTemplate)arg).getParts().stream().map(uriTemplatePart -> {
@@ -271,6 +288,12 @@ public class RequestGenerator extends AbstractTemplateGenerator {
             st.add("package", packageName);
             st.add("resource", resource);
             st.add("index", resources.indexOf(resource));
+            final UriTemplate uri = absoluteUri(resource);
+            final Map<String, Object> params = uri.getParts().stream()
+                    .filter(uriTemplatePart -> uriTemplatePart instanceof UriTemplateExpression)
+                    .flatMap(uriTemplatePart -> ((UriTemplateExpression)uriTemplatePart).getVariables().stream())
+                    .collect(Collectors.toMap(o -> o, o -> "%s"));
+            st.add("params", params.entrySet());
             if (resource.getResources() != null) {
                 final List<Resource> nonParamResources = resource.getResources().stream()
                         .filter(resource1 -> resource1.getRelativeUri().getParts().size() == 1).collect(Collectors.toList());
