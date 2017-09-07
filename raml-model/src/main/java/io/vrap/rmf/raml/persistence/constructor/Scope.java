@@ -106,7 +106,7 @@ public class Scope {
                 SECURED_BY.isSuperTypeOf(type) ?
                         SECURITY_SCHEME_CONTAINER__SECURITY_SCHEMES.getName() :
                         TRAIT.isSuperTypeOf(type) ?
-                                TRAIT_CONTAINER__TRAITS.getName() :
+                                TYPE_CONTAINER__TRAITS.getName() :
                                     RESOURCE_TYPE.isSuperTypeOf(type) ?
                                             TYPE_CONTAINER__RESOURCE_TYPES.getName() :
                                             TYPE_CONTAINER__TYPES.getName();

@@ -110,12 +110,12 @@ interface TypedElement extends IdentifiableElement, InlineTypeContainer, Annotat
 class Property extends AnnotationsFacet, TypedElement {
 }
 
-class PatternProperty {
+class PatternProperty extends Property {
 	String pattern
 	
 	@Ecore(invariant="true")	
 	op boolean patternIsValid(EDiagnosticChain diagnostics,EMap<Object,Object> context) {
-		pattern != null && pattern.length > 0
+		pattern !== null && pattern.length > 0
 	}
 }
 

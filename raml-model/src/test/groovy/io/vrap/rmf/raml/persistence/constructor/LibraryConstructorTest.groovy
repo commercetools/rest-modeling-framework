@@ -2,6 +2,7 @@ package io.vrap.rmf.raml.persistence.constructor
 
 import io.vrap.rmf.raml.model.facets.StringInstance
 import io.vrap.rmf.raml.model.modules.Library
+import io.vrap.rmf.raml.model.resources.Trait
 import io.vrap.rmf.raml.model.security.OAuth20Settings
 import io.vrap.rmf.raml.model.types.AnnotationTarget
 import io.vrap.rmf.raml.model.types.ObjectType
@@ -182,6 +183,27 @@ class LibraryConstructorTest extends Specification {
         library.resourceTypes[0].methods.size() == 2
         library.resourceTypes[0].methods[0].required == false
         library.resourceTypes[0].methods[1].required == true
+    }
+
+    def "resource type with applied trait"() {
+        when:
+        Library library = constructLibrary(
+                '''\
+        traits:
+            queryable:
+                queryParameters:
+                    id:
+        resourceTypes:
+            base:
+                is: 
+                    - queryable
+        ''')
+        then:
+        Trait queryable = library.getTrait('queryable')
+        queryable != null
+        library.resourceTypes.size() == 1
+        library.resourceTypes[0].is.size() == 1
+        library.resourceTypes[0].is[0].trait == queryable
     }
 
     def "resource type with inline type"() {
