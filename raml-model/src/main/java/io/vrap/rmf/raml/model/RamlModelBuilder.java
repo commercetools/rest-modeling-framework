@@ -104,7 +104,7 @@ public class RamlModelBuilder {
         public TypedElement caseTypedElement(final TypedElement typedElement) {
             final AnyType type = typedElement.getType();
             if (type instanceof TypeTemplate) {
-                final String template = type.getName() == null && type.getType() != null ? type.getType().getName() : type.getName();
+                final String template = type.getName();
                 final String typeName = StringTemplate.of(template).render(parameters);
                 final String uriFragment = "/types/" + typeName;
                 final Resource resource = typedElement.eResource();

@@ -31,10 +31,13 @@ import spock.lang.Specification
  * Unit tests for {@link ApiConstructor}
  */
 class ApiConstructorTest extends Specification {
-    @Shared
-    ResourceSet resourceSet = new RamlResourceSet()
+    ResourceSet resourceSet
     @Shared
     URI uri = URI.createURI("test.raml");
+
+    def setup() {
+        resourceSet = new RamlResourceSet()
+    }
 
     def "resource type with type template and transformations"() {
         when:

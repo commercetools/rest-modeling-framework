@@ -24,10 +24,13 @@ import spock.lang.Specification
  * Unit tests for {@link ApiConstructor}
  */
 class LibraryConstructorTest extends Specification {
-    @Shared
-    ResourceSet resourceSet = new RamlResourceSet()
+    ResourceSet resourceSet
     @Shared
     URI uri = URI.createURI("test.raml");
+
+    def setup() {
+        resourceSet = new RamlResourceSet()
+    }
 
     def "library"() {
         when:
@@ -140,6 +143,7 @@ class LibraryConstructorTest extends Specification {
         inlineStringType.name == null
         inlineStringType.minLength == 10
     }
+
     def "security scheme"() {
         when:
         Library library = constructLibrary(
@@ -201,9 +205,8 @@ class LibraryConstructorTest extends Specification {
         library.resourceTypes[0].methods[0].responses.size() == 1
         library.resourceTypes[0].methods[0].responses[0].bodies.size() == 1
         library.resourceTypes[0].methods[0].responses[0].bodies[0].type instanceof TypeTemplate
-        library.resourceTypes[0].methods[0].responses[0].bodies[0].inlineTypes.size() == 2
-        library.resourceTypes[0].methods[0].responses[0].bodies[0].type.name == null
-        library.resourceTypes[0].methods[0].responses[0].bodies[0].type.type.name == '<<resourceQueryType>>'
+        library.resourceTypes[0].methods[0].responses[0].bodies[0].inlineTypes.size() == 1
+        library.resourceTypes[0].methods[0].responses[0].bodies[0].type.name == '<<resourceQueryType>>'
     }
 
     Library constructLibrary(String input) {

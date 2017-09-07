@@ -20,12 +20,15 @@ import static io.vrap.rmf.raml.model.modules.ModulesPackage.Literals.TYPE_CONTAI
  * Unit tests for {@link TypeDeclarationFragmentConstructor}.
  */
 class TypeDeclarationFragmentConstructorTest extends Specification {
-    @Shared
-    ResourceSet resourceSet = new RamlResourceSet()
-            .getResource(BuiltinType.RESOURCE_URI, true)
-            .getResourceSet()
+    ResourceSet resourceSet
     @Shared
     URI uri = URI.createURI("test.raml");
+
+    def setup() {
+        resourceSet = new RamlResourceSet()
+                .getResource(BuiltinType.RESOURCE_URI, true)
+                .getResourceSet()
+    }
 
     def "simple attributes"() {
         when:

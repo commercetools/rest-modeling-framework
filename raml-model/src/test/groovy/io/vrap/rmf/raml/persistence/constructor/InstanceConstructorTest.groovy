@@ -21,10 +21,13 @@ import spock.lang.Specification
  * Unit tests for {@link InstanceConstructor}.
  */
 class InstanceConstructorTest extends Specification {
-    @Shared
-    ResourceSet resourceSet = new RamlResourceSet()
+    ResourceSet resourceSet
     @Shared
     URI uri = URI.createURI("test.raml");
+
+    def setup() {
+        resourceSet = new RamlResourceSet()
+    }
 
     def "string instance"() {
         when:

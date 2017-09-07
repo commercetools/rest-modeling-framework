@@ -11,12 +11,14 @@ import io.vrap.rmf.raml.model.types.*;
 import io.vrap.rmf.raml.persistence.antlr.RAMLParser;
 import org.antlr.v4.runtime.Token;
 import org.eclipse.emf.common.util.ECollections;
+import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static io.vrap.rmf.raml.model.elements.ElementsPackage.Literals.IDENTIFIABLE_ELEMENT__NAME;
@@ -201,15 +203,19 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
             bodyType.getContentTypes().add(contentType);
         }
         return withinScope(scope.with(bodyType), bodyTypeScope -> {
-            EObject type = null;
-            if (bodyContentType.typeFacet().size() == 1) {
-                type = (EObject) visitTypeFacet(bodyContentType.typeFacet(0));
-            } else if (bodyContentType.propertiesFacet().size() == 1) {
-                type = scope.getEObjectByName(BuiltinType.OBJECT.getName());
-            }
-            if (type == null) {
-                type = scope.getEObjectByName(BuiltinType.ANY.getName());
-            }
+            AnyType type = withinScope(scope.with(TYPED_ELEMENT__TYPE),
+                    typedElementTypeScope -> {
+                        AnyType anyType = null;
+                        if (bodyContentType.typeFacet().size() == 1) {
+                            anyType = (AnyType) visitTypeFacet(bodyContentType.typeFacet(0));
+                        } else if (bodyContentType.propertiesFacet().size() == 1) {
+                            anyType = (AnyType) scope.getEObjectByName(BuiltinType.OBJECT.getName());
+                        }
+                        if (anyType == null) {
+                            anyType = (AnyType) scope.getEObjectByName(BuiltinType.ANY.getName());
+                        }
+                        return anyType;
+                    });
             // inline type declaration
             final boolean isInlineTypeDeclaration =
                     bodyContentType.attributeFacet().size() > 0 || bodyContentType.propertiesFacet().size() > 0 ||
@@ -217,10 +223,7 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
                             bodyContentType.defaultFacet().size() > 0 || bodyContentType.enumFacet().size() > 0 ||
                             bodyContentType.itemsFacet().size() > 0;
             if (isInlineTypeDeclaration) {
-                EObject inlinedType = type;
-                type = EcoreUtil.create(type.eClass());
-                bodyTypeScope.with(type, ANY_TYPE__TYPE).setValue(inlinedType, bodyContentType.getStart());
-                bodyTypeScope.addValue(INLINE_TYPE_CONTAINER__INLINE_TYPES, type);
+                type = inlineTypeDeclaration(type, bodyTypeScope, bodyContentType.getStart());
                 withinScope(scope.with(type),
                         inlineTypeDeclarationScope -> {
                             bodyContentType.attributeFacet().forEach(this::visitAttributeFacet);
@@ -249,14 +252,19 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
         scope.setValue(bodyType, bodyTypeFacet.getStart());
 
         return withinScope(scope.with(bodyType), bodyTypeScope -> {
-            EObject type;
-            if (bodyTypeFacet.typeFacet().size() == 1) {
-                type = (EObject) visitTypeFacet(bodyTypeFacet.typeFacet(0));
-            } else if (bodyTypeFacet.propertiesFacet().size() == 1) {
-                type = scope.getEObjectByName(BuiltinType.OBJECT.getName());
-            } else {
-                type = scope.getEObjectByName(BuiltinType.ANY.getName());
-            }
+            AnyType type = withinScope(scope.with(TYPED_ELEMENT__TYPE),
+                    typedElementTypeScope -> {
+                        AnyType anyType = null;
+                        if (bodyTypeFacet.typeFacet().size() == 1) {
+                            anyType = (AnyType) visitTypeFacet(bodyTypeFacet.typeFacet(0));
+                        } else if (bodyTypeFacet.propertiesFacet().size() == 1) {
+                            anyType = (AnyType) scope.getEObjectByName(BuiltinType.OBJECT.getName());
+                        }
+                        if (anyType == null) {
+                            anyType = (AnyType) scope.getEObjectByName(BuiltinType.ANY.getName());
+                        }
+                        return anyType;
+                    });
             // inline type declaration
             final boolean isInlineTypeDeclaration =
                     bodyTypeFacet.attributeFacet().size() > 0 || bodyTypeFacet.propertiesFacet().size() > 0 ||
@@ -264,10 +272,8 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
                             bodyTypeFacet.defaultFacet().size() > 0 || bodyTypeFacet.enumFacet().size() > 0 ||
                             bodyTypeFacet.itemsFacet().size() > 0;
             if (isInlineTypeDeclaration) {
-                EObject inlinedType = type;
-                type = EcoreUtil.create(type.eClass());
-                bodyTypeScope.with(type, ANY_TYPE__TYPE).setValue(inlinedType, bodyTypeFacet.getStart());
-                bodyTypeScope.addValue(INLINE_TYPE_CONTAINER__INLINE_TYPES, type);
+                final Token token = bodyTypeFacet.getStart();
+                type = inlineTypeDeclaration(type, bodyTypeScope, token);
                 withinScope(scope.with(type),
                         inlineTypeDeclarationScope -> {
                             bodyTypeFacet.attributeFacet().forEach(this::visitAttributeFacet);
@@ -287,6 +293,26 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
 
             return bodyType;
         });
+    }
+
+    private AnyType inlineTypeDeclaration(final AnyType type, final Scope scope, final Token token) {
+        if (type.isInlineType()) {
+            return type;
+        } else {
+            final AnyType inlinedType = (AnyType) createAndCopyAttributes(type);
+            scope.with(inlinedType, ANY_TYPE__TYPE).setValue(type, token);
+            scope.addValue(INLINE_TYPE_CONTAINER__INLINE_TYPES, type);
+            return inlinedType;
+        }
+    }
+
+    protected EObject createAndCopyAttributes(final EObject eObject) {
+        final EClass eClass = eObject.eClass();
+        final EObject newEObject = EcoreUtil.create(eClass);
+        final Consumer<EAttribute> copyAttribute = attribute -> newEObject.eSet(attribute, eObject.eGet(attribute));
+        eClass.getEAllAttributes().forEach(copyAttribute);
+
+        return newEObject;
     }
 
     @Override
@@ -387,7 +413,8 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
     public Object visitTypeFacet(final RAMLParser.TypeFacetContext ctx) {
         final String typeExpression = ctx.SCALAR().getText();
 
-        return typeExpressionConstructor.parse(typeExpression, scope);
+        final EObject parsedTypeExpression = typeExpressionConstructor.parse(typeExpression, scope);
+        return parsedTypeExpression;
     }
 
     @Override
