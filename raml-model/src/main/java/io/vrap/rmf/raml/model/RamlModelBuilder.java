@@ -4,9 +4,7 @@ import io.vrap.rmf.raml.model.facets.StringInstance;
 import io.vrap.rmf.raml.model.modules.Api;
 import io.vrap.rmf.raml.model.resources.*;
 import io.vrap.rmf.raml.model.resources.util.ResourcesSwitch;
-import io.vrap.rmf.raml.model.types.AnyType;
-import io.vrap.rmf.raml.model.types.TypeTemplate;
-import io.vrap.rmf.raml.model.types.TypedElement;
+import io.vrap.rmf.raml.model.types.*;
 import io.vrap.rmf.raml.model.types.util.TypesSwitch;
 import io.vrap.rmf.raml.model.util.StringTemplate;
 import io.vrap.rmf.raml.persistence.RamlResourceSet;
@@ -55,40 +53,38 @@ public class RamlModelBuilder {
             final ResourceTypeApplication resourceTypeApplication = resource.getType();
             if (resourceTypeApplication != null) {
                 final ResourceTypeResolver resourceTypeResolver = new ResourceTypeResolver(resource, resourceTypeApplication.getParameters());
-                resourceTypeResolver.doSwitch(resourceTypeApplication.getType());
+                resourceTypeResolver.resolve(resourceTypeApplication.getType());
             }
             return resource;
         }
     }
 
-    private static class ResourceTypeResolver extends ResourcesSwitch<io.vrap.rmf.raml.model.resources.Resource> {
+    private static class ResourceTypeResolver  {
         private final io.vrap.rmf.raml.model.resources.Resource resource;
         private final Map<String, String> parameters;
-        private final TypeTemplateResolver typeTemplateResolver;
+        private final TypedElementResolver typedElementResolver;
 
         public ResourceTypeResolver(final io.vrap.rmf.raml.model.resources.Resource resource, final List<Parameter> parameters) {
             this.resource = resource;
             this.parameters = parameters.stream()
                     .filter(p -> p.getValue() instanceof StringInstance)
                     .collect(Collectors.toMap(Parameter::getName, p -> ((StringInstance) p.getValue()).getValue()));
-            typeTemplateResolver = new TypeTemplateResolver(resource.eResource(), this.parameters);
+            typedElementResolver = new TypedElementResolver(resource.eResource(), this.parameters);
         }
 
-        @Override
-        public io.vrap.rmf.raml.model.resources.Resource caseResourceType(final ResourceType resourceType) {
+        public io.vrap.rmf.raml.model.resources.Resource resolve(final ResourceType resourceType) {
             for (final Method method : resourceType.getMethods()) {
                 final Method resolvedMethod = EcoreUtil.copy(method);
-                final TreeIterator<EObject> allContents = EcoreUtil.getAllContents(resolvedMethod, true);
-                while (allContents.hasNext()) {
-                    final EObject next = allContents.next();
-                    if (next instanceof TypedElement) {
-                        typeTemplateResolver.caseTypedElement((TypedElement) next);
-                    }
+                typedElementResolver.resolveAll(resolvedMethod);
+                for (final TraitApplication traitApplication : resourceType.getIs()) {
+                    new TraitResolver(method, traitApplication.getParameters()).resolve(traitApplication.getTrait());
                 }
+
                 mergeMethod(resolvedMethod);
             }
             return resource;
         }
+
 
         private void mergeMethod(final Method resolvedMethod) {
             final Method existingMethod = resource.getMethod(resolvedMethod.getMethod());
@@ -124,17 +120,55 @@ public class RamlModelBuilder {
         }
     }
 
-    private static class TypeTemplateResolver extends TypesSwitch<TypedElement> {
+    private static class TraitResolver extends ResourcesSwitch<Method> {
+        private final Method method;
+        private final Map<String, String> parameters;
+        private final TypedElementResolver typedElementResolver;
+
+        public TraitResolver(final Method method, final List<Parameter> parameters) {
+            this.method = method;
+            this.parameters = parameters.stream()
+                    .filter(p -> p.getValue() instanceof StringInstance)
+                    .collect(Collectors.toMap(Parameter::getName, p -> ((StringInstance) p.getValue()).getValue()));
+            typedElementResolver = new TypedElementResolver(method.eResource(), this.parameters);
+        }
+
+        public Method resolve(final Trait trait) {
+            for (final Header header : trait.getHeaders()) {
+                final Header resolvedHeader = EcoreUtil.copy(header);
+                typedElementResolver.resolveAll(resolvedHeader);
+                method.getHeaders().add(resolvedHeader);
+            }
+            for (final QueryParameter queryParameter : trait.getQueryParameters()) {
+                final QueryParameter resolvedQueryParameter = EcoreUtil.copy(queryParameter);
+                typedElementResolver.resolveAll(resolvedQueryParameter);
+                method.getQueryParameters().add(resolvedQueryParameter);
+            }
+
+            return method;
+        }
+    }
+
+    private static class TypedElementResolver {
         private final Resource resource;
         private final Map<String, String> parameters;
 
-        public TypeTemplateResolver(final Resource resource, final Map<String, String> parameters) {
+        public TypedElementResolver(final Resource resource, final Map<String, String> parameters) {
             this.parameters = parameters;
             this.resource = resource;
         }
 
-        @Override
-        public TypedElement caseTypedElement(final TypedElement typedElement) {
+        public void resolveAll(final EObject eObject) {
+            final TreeIterator<EObject> allContents = EcoreUtil.getAllContents(eObject, true);
+            while (allContents.hasNext()) {
+                final EObject next = allContents.next();
+                if (next instanceof TypedElement) {
+                    resolve((TypedElement) next);
+                }
+            }
+        }
+
+        private TypedElement resolve(final TypedElement typedElement) {
             final AnyType type = typedElement.getType();
             if (type instanceof TypeTemplate) {
                 final String template = type.getName();

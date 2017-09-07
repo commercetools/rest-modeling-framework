@@ -95,7 +95,7 @@ interface ResourceContainer {
 /*
  * The commonalities between {@link Resource} and {@link ResourceType}
  */
-interface ResourceBase extends DocumentableElement, AnnotationsFacet, ResourceContainer, SecuredByFacet {
+interface ResourceBase extends DocumentableElement, AnnotationsFacet, SecuredByFacet, ApplyTraitsFacet {
 	/*
 	 * The uri parameters of this resource.
 	 */
@@ -167,8 +167,14 @@ interface ApplyTraitsFacet {
 	contains TraitApplication[] is	
 }
 
-class Method extends DocumentableElement, AnnotationsFacet, ProtocolsFacet, SecuredByFacet, 
+/*
+ * The commonalities between {@link Method} and {@link Trait}
+ */
+interface MethodBase extends DocumentableElement, AnnotationsFacet, ProtocolsFacet, SecuredByFacet, 
 					 HeadersFacet, QueryParametersFacet, ResponsesFacet, ApplyTraitsFacet, BodyContainer {
+}
+ 
+class Method extends MethodBase {
 	/*
 	 * The HTTP method.
 	 */
@@ -188,7 +194,7 @@ class Method extends DocumentableElement, AnnotationsFacet, ProtocolsFacet, Secu
 	}
 }
 
-class Trait extends IdentifiableElement, Method {
+class Trait extends IdentifiableElement, MethodBase {
 	String usage
 }
 
