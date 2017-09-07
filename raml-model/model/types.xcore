@@ -52,7 +52,12 @@ class AnyType extends AnnotationsFacet, DocumentableElement, IdentifiableElement
 	 */
 	contains Example[] examples
 
-    
+	/*
+	 * Returns true iff. this type is declared inline.
+	 */
+    op boolean isInlineType() {
+    	eContainer instanceof InlineTypeContainer
+    }
 }
 
 /*
