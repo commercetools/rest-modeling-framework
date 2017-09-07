@@ -212,7 +212,7 @@ public class TypesGenerator extends AbstractTemplateGenerator {
         }
     }
 
-    abstract class PropertyVisitor extends TypesSwitch<String> {
+    static abstract class PropertyVisitor extends TypesSwitch<String> {
         @Override
         public String caseStringType(StringType object) {
             return scalarMapper("string");
@@ -329,7 +329,7 @@ public class TypesGenerator extends AbstractTemplateGenerator {
         }
     }
 
-    private class PropertyTypeVisitor extends PropertyVisitor {
+    static class PropertyTypeVisitor extends PropertyVisitor {
 
         @Override
         public String caseTimeOnlyType(TimeOnlyType object) {
