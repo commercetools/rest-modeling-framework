@@ -93,9 +93,25 @@ interface TraitContainer {
 
 interface TypeContainer {
 	contains LibraryUse[] uses
-
+    
     contains AnyType[] types
+    
+    /*
+     * Returns the type with the given name or null.
+     */
+    op AnyType getType(String name) {
+    	types.findFirst[it.name == name]
+    }
+    
     contains AnyAnnotationType[] annotationTypes
+    
+    /*
+     * Returns the annotation type with the given name or null. 
+     */
+    op AnyAnnotationType getAnnotationType(String name) {
+    	annotationTypes.findFirst[it.name == name]
+    }
+    
     contains ResourceType[] resourceTypes
 }
 

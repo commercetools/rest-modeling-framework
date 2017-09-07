@@ -2,10 +2,7 @@ package io.vrap.rmf.raml.model;
 
 import io.vrap.rmf.raml.model.facets.StringInstance;
 import io.vrap.rmf.raml.model.modules.Api;
-import io.vrap.rmf.raml.model.resources.Method;
-import io.vrap.rmf.raml.model.resources.Parameter;
-import io.vrap.rmf.raml.model.resources.ResourceType;
-import io.vrap.rmf.raml.model.resources.ResourceTypeApplication;
+import io.vrap.rmf.raml.model.resources.*;
 import io.vrap.rmf.raml.model.resources.util.ResourcesSwitch;
 import io.vrap.rmf.raml.model.types.AnyType;
 import io.vrap.rmf.raml.model.types.TypeTemplate;
@@ -16,13 +13,15 @@ import io.vrap.rmf.raml.persistence.RamlResourceSet;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.common.util.URI;
+import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
@@ -72,32 +71,66 @@ public class RamlModelBuilder {
             this.parameters = parameters.stream()
                     .filter(p -> p.getValue() instanceof StringInstance)
                     .collect(Collectors.toMap(Parameter::getName, p -> ((StringInstance) p.getValue()).getValue()));
-            typeTemplateResolver = new TypeTemplateResolver(this.parameters);
+            typeTemplateResolver = new TypeTemplateResolver(resource.eResource(), this.parameters);
         }
 
         @Override
         public io.vrap.rmf.raml.model.resources.Resource caseResourceType(final ResourceType resourceType) {
-            final EList<Method> methods = resource.getMethods();
             for (final Method method : resourceType.getMethods()) {
-                final Method methodToResolve = EcoreUtil.copy(method);
-                methods.add(methodToResolve);
-                final TreeIterator<EObject> allContents = EcoreUtil.getAllContents(methodToResolve, true);
+                final Method resolvedMethod = EcoreUtil.copy(method);
+                final TreeIterator<EObject> allContents = EcoreUtil.getAllContents(resolvedMethod, true);
                 while (allContents.hasNext()) {
                     final EObject next = allContents.next();
                     if (next instanceof TypedElement) {
                         typeTemplateResolver.caseTypedElement((TypedElement) next);
                     }
                 }
+                mergeMethod(resolvedMethod);
             }
             return resource;
+        }
+
+        private void mergeMethod(final Method resolvedMethod) {
+            final Method existingMethod = resource.getMethod(resolvedMethod.getMethod());
+            if (existingMethod == null) {
+                if (resolvedMethod.isRequired()) {
+                    resource.getMethods().add(resolvedMethod);
+                }
+            } else {
+                final EList<EAttribute> allAttributes = ResourcesPackage.Literals.METHOD.getEAllAttributes();
+                final Consumer<EAttribute> copyAttribute = attribute -> existingMethod.eSet(attribute, resolvedMethod.eGet(attribute));
+                allAttributes.stream()
+                        .filter(attribute -> !existingMethod.eIsSet(attribute))
+                        .filter(attribute -> resolvedMethod.eIsSet(attribute))
+                        .forEach(copyAttribute);
+                final Consumer<EReference> copyReference = eReference -> {
+                    final Object value;
+                    if (eReference.isContainment()) {
+                        if (eReference.isMany()) {
+                            value = EcoreUtil.copyAll((List) resolvedMethod.eGet(eReference));
+                        } else {
+                            value = EcoreUtil.copy((EObject) resolvedMethod.eGet(eReference));
+                        }
+                    } else {
+                        value = resolvedMethod.eGet(eReference);
+                    }
+                    existingMethod.eSet(eReference, value);
+                };
+                ResourcesPackage.Literals.METHOD.getEAllReferences().stream()
+                        .filter(reference -> !existingMethod.eIsSet(reference))
+                        .filter(reference -> resolvedMethod.eIsSet(reference))
+                        .forEach(copyReference);
+            }
         }
     }
 
     private static class TypeTemplateResolver extends TypesSwitch<TypedElement> {
+        private final Resource resource;
         private final Map<String, String> parameters;
 
-        public TypeTemplateResolver(final Map<String, String> parameters) {
+        public TypeTemplateResolver(final Resource resource, final Map<String, String> parameters) {
             this.parameters = parameters;
+            this.resource = resource;
         }
 
         @Override
@@ -107,7 +140,6 @@ public class RamlModelBuilder {
                 final String template = type.getName();
                 final String typeName = StringTemplate.of(template).render(parameters);
                 final String uriFragment = "/types/" + typeName;
-                final Resource resource = typedElement.eResource();
                 final AnyType resolvedType = (AnyType) resource.getEObject(uriFragment);
                 typedElement.setType(resolvedType);
             }

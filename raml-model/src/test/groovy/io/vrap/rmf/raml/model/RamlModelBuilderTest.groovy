@@ -2,6 +2,7 @@ package io.vrap.rmf.raml.model
 
 import io.vrap.rmf.raml.model.modules.Api
 import io.vrap.rmf.raml.model.resources.HttpMethod
+import io.vrap.rmf.raml.model.resources.Method
 import io.vrap.rmf.raml.model.types.AnyType
 import io.vrap.rmf.raml.persistence.ResourceFixtures
 import spock.lang.PendingFeature
@@ -21,15 +22,26 @@ class RamlModelBuilderTest extends Specification implements ResourceFixtures {
         URI uri = uriFromClasspath("/resourcetypes/api-with-resource-types.raml")
         Api api = modelBuilder.buildApi(uri)
         then:
-        api.types.size() == 1
-        AnyType userDraft = api.types[0]
+        AnyType user = api.getType('User')
+        AnyType userDraft = api.getType('UserDraft')
         api.resources.size() == 1
-        api.resources[0].methods.size() == 1
-        api.resources[0].methods[0].method == HttpMethod.GET
-        api.resources[0].methods[0].responses.size() == 1
-        api.resources[0].methods[0].responses[0].statusCode == "200"
-        api.resources[0].methods[0].responses[0].bodies.size() == 1
-        api.resources[0].methods[0].responses[0].bodies[0].type == userDraft
+        api.resources[0].methods.size() == 2
+
+        Method getMethod = api.resources[0].getMethod(HttpMethod.GET)
+        getMethod != null
+        getMethod.responses.size() == 1
+        getMethod.responses[0].statusCode == "200"
+        getMethod.responses[0].bodies.size() == 1
+        getMethod.responses[0].bodies[0].type == user
+
+        Method postMethod = api.resources[0].getMethod(HttpMethod.POST)
+        postMethod != null
+        postMethod.bodies.size() == 1
+        postMethod.bodies[0].type == userDraft
+        postMethod.responses.size() == 1
+        postMethod.responses[0].statusCode == "201"
+        postMethod.responses[0].bodies.size() == 1
+        postMethod.responses[0].bodies[0].type == user
     }
 
     def "should resolve ct api"() {
