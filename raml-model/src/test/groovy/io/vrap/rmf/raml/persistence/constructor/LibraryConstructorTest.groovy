@@ -7,6 +7,7 @@ import io.vrap.rmf.raml.model.types.AnnotationTarget
 import io.vrap.rmf.raml.model.types.ObjectType
 import io.vrap.rmf.raml.model.types.StringAnnotationType
 import io.vrap.rmf.raml.model.types.StringType
+import io.vrap.rmf.raml.model.types.TypeTemplate
 import io.vrap.rmf.raml.persistence.RamlResourceSet
 import io.vrap.rmf.raml.persistence.antlr.RAMLCustomLexer
 import io.vrap.rmf.raml.persistence.antlr.RAMLParser
@@ -178,7 +179,33 @@ class LibraryConstructorTest extends Specification {
         library.resourceTypes[0].methods[0].required == false
         library.resourceTypes[0].methods[1].required == true
     }
-    
+
+    def "resource type with inline type"() {
+        when:
+        Library library = constructLibrary(
+                '''\
+        resourceTypes:
+            baseDomain:
+                get:
+                    responses:
+                        200:
+                            body:
+                                application/json:
+                                    example: <<resourceQueryExample>>
+                                    type: <<resourceQueryType>>
+
+        ''')
+        then:
+        library.resourceTypes.size() == 1
+        library.resourceTypes[0].methods.size() == 1
+        library.resourceTypes[0].methods[0].responses.size() == 1
+        library.resourceTypes[0].methods[0].responses[0].bodies.size() == 1
+        library.resourceTypes[0].methods[0].responses[0].bodies[0].type instanceof TypeTemplate
+        library.resourceTypes[0].methods[0].responses[0].bodies[0].inlineTypes.size() == 2
+        library.resourceTypes[0].methods[0].responses[0].bodies[0].type.name == null
+        library.resourceTypes[0].methods[0].responses[0].bodies[0].type.type.name == '<<resourceQueryType>>'
+    }
+
     Library constructLibrary(String input) {
         RAMLParser parser = parser(input)
         def libraryConstructor = new LibraryConstructor()

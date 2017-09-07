@@ -32,7 +32,6 @@ class RamlModelBuilderTest extends Specification implements ResourceFixtures {
         api.resources[0].methods[0].responses[0].bodies[0].type == userDraft
     }
 
-    @PendingFeature
     def "should resolve ct api"() {
         when:
         URI uri = uriFromClasspath("/commercetools-api-reference-master/api.raml")

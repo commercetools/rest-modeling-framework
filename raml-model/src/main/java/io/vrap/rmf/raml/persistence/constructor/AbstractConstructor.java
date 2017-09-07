@@ -217,7 +217,9 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
                             bodyContentType.defaultFacet().size() > 0 || bodyContentType.enumFacet().size() > 0 ||
                             bodyContentType.itemsFacet().size() > 0;
             if (isInlineTypeDeclaration) {
+                EObject inlinedType = type;
                 type = EcoreUtil.create(type.eClass());
+                bodyTypeScope.with(type, ANY_TYPE__TYPE).setValue(inlinedType, bodyContentType.getStart());
                 bodyTypeScope.addValue(INLINE_TYPE_CONTAINER__INLINE_TYPES, type);
                 withinScope(scope.with(type),
                         inlineTypeDeclarationScope -> {
