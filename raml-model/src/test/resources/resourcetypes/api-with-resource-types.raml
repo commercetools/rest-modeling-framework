@@ -1,0 +1,19 @@
+#%RAML 1.0
+title: An example API with an applied resource type
+
+types:
+  UserDraft:
+    properties:
+      email:
+
+resourceTypes:
+  collection:
+    get:
+      responses:
+        200:
+          body:
+            application/json:
+              type: <<resourceName>>Draft
+
+/user:
+  type: { collection: { resourceName: User} }
