@@ -76,8 +76,11 @@ public class RamlModelBuilder {
             for (final Method method : resourceType.getMethods()) {
                 final Method resolvedMethod = EcoreUtil.copy(method);
                 typedElementResolver.resolveAll(resolvedMethod);
+                for (final TraitApplication traitApplication : method.getIs()) {
+                    new TraitResolver(resolvedMethod, traitApplication.getParameters()).resolve(traitApplication.getTrait());
+                }
                 for (final TraitApplication traitApplication : resourceType.getIs()) {
-                    new TraitResolver(method, traitApplication.getParameters()).resolve(traitApplication.getTrait());
+                    new TraitResolver(resolvedMethod, traitApplication.getParameters()).resolve(traitApplication.getTrait());
                 }
 
                 mergeMethod(resolvedMethod);

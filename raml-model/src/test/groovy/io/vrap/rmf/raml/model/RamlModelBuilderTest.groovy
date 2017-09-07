@@ -29,6 +29,10 @@ class RamlModelBuilderTest extends Specification implements ResourceFixtures {
 
         Method getMethod = api.resources[0].getMethod(HttpMethod.GET)
         getMethod != null
+        getMethod.headers.size() == 1
+        getMethod.headers[0].name == 'X-Correlation-Id'
+        getMethod.queryParameters.size() == 1
+        getMethod.queryParameters[0].name == 'id'
         getMethod.responses.size() == 1
         getMethod.responses[0].statusCode == "200"
         getMethod.responses[0].bodies.size() == 1
@@ -36,6 +40,8 @@ class RamlModelBuilderTest extends Specification implements ResourceFixtures {
 
         Method postMethod = api.resources[0].getMethod(HttpMethod.POST)
         postMethod != null
+        postMethod.headers.size() == 1
+        postMethod.headers[0].name == 'X-Correlation-Id'
         postMethod.bodies.size() == 1
         postMethod.bodies[0].type == userDraft
         postMethod.responses.size() == 1
