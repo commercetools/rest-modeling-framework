@@ -3,11 +3,6 @@ package io.vrap.rmf.raml.generic.generator;
 import com.google.common.base.CaseFormat;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import io.vrap.rmf.raml.model.resources.UriTemplate;
-import io.vrap.rmf.raml.model.resources.UriTemplateExpression;
-import io.vrap.rmf.raml.model.resources.UriTemplateLiteral;
-import io.vrap.rmf.raml.model.resources.UriTemplatePart;
 import io.vrap.rmf.raml.model.types.AnyType;
 import io.vrap.rmf.raml.model.types.BuiltinType;
 import io.vrap.rmf.raml.model.types.ObjectType;
@@ -21,8 +16,6 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.List;
-import java.util.Map;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public abstract class AbstractTemplateGenerator {

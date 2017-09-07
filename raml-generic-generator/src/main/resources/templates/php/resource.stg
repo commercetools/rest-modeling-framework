@@ -54,7 +54,7 @@ use <vendorName>\\Base\\JsonObject;
 <endif>
 
 use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\UploadedFileInterface;
+<method; format="useBody">
 
 class <requestName> extends ApiRequest
 {
@@ -65,13 +65,11 @@ class <requestName> extends ApiRequest
      * @param $body
      * @param array $headers
      */
-    public function __construct(<params: {p |$<p.key>, }><method; format="bodyType">$body = null, array $headers = [])
+    public function __construct(<params: {p |$<p.key>, }><method; format="bodyType">$body<method; format="optionalBody">, array $headers = [])
     {
         $uri = sprintf('<absoluteUri; format="sprintf">'<params: {p |, $<p.key>}>);
-        <if(fileBody)>
-        $headers = $this->ensureHeader($headers, 'Content-Type', $body->getClientMediaType());
-        <endif>
-        parent::__construct('<method.method>', $uri, $headers, <if(fileBody)>$body->getStream()<else>$body<endif>);
+        <method; format="ensureHeader">
+        parent::__construct('<method.method>', $uri, $headers, <method; format="serialize">);
     }
 
     /**
@@ -113,7 +111,7 @@ resource(vendorName, package, resource, index, resources, params, resourcesIndex
 namespace <vendorName>\\<package; format="capitalize">;
 
 use <vendorName>\\Client\\Resource;
-use Psr\Http\Message\UploadedFileInterface;
+<resource.methods: {m |<methodUse(m)>}>
 
 class Resource<index> extends Resource
 {
@@ -127,6 +125,11 @@ class Resource<index> extends Resource
     <resource.methods: {m |<(m.method)(m, params)>}>
 }
 
+>>
+
+methodUse(method) ::=<<
+
+<method; format="useBody">
 >>
 
 resourceMethod(resource, index) ::=<<

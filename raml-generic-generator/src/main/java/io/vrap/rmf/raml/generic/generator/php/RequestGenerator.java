@@ -24,6 +24,8 @@ import java.net.URL;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static org.apache.commons.lang3.StringUtils.capitalize;
+
 public class RequestGenerator extends AbstractTemplateGenerator {
     private static final String resourcesPath = "./templates/php/";
     static final String TYPE_REQUEST = "request";
@@ -141,10 +143,8 @@ public class RequestGenerator extends AbstractTemplateGenerator {
         st.add("method", method);
         final BodyType firstBodyType = method.getBodies().stream().findFirst().orElse(null);
         if (firstBodyType != null) {
-            final List<AnyType> parentTypes = getParentTypes(firstBodyType.getType());
-            final AnyType t = parentTypes.size() > 0 ? parentTypes.get(0) : firstBodyType.getType();
-            if (t instanceof FileType) {
-                st.add("fileBody", t);
+            if (firstBodyType.getType() instanceof FileType) {
+                st.add("fileBody", firstBodyType.getType());
             }
         }
 
@@ -201,17 +201,56 @@ public class RequestGenerator extends AbstractTemplateGenerator {
         stGroup.registerRenderer(Method.class,
                 (arg, formatString, locale) -> {
                     final Method method = (Method)arg;
+                    final BodyType firstBodyType = method.getBodies().stream().findFirst().orElse(null);
                     switch (Strings.nullToEmpty(formatString)) {
                         case "bodyType":
-                            final BodyType firstBodyType = method.getBodies().stream().findFirst().orElse(null);
                             if (firstBodyType != null) {
-                                final List<AnyType> parentTypes = getParentTypes(firstBodyType.getType());
-                                final AnyType t = parentTypes.size() > 0 ? parentTypes.get(0) : firstBodyType.getType();
-                                if (t instanceof FileType) {
+                                if (firstBodyType.getType() instanceof FileType) {
                                     return "UploadedFileInterface ";
+                                }
+                                if (!BuiltinType.of(firstBodyType.getType().getName()).isPresent()) {
+                                    final String t = (new TypesGenerator.PropertyTypeVisitor()).doSwitch(firstBodyType.getType());
+                                    if (!Lists.newArrayList("mixed", "null", "bool", "string", "float", "int").contains(t)) {
+                                        return t + " ";
+                                    }
                                 }
                             }
                             return "";
+                        case "optionalBody":
+                            if (method.getMethod().equals(HttpMethod.POST)) {
+                                return "";
+                            }
+                            return " = null";
+                        case "ensureHeader":
+                            if (firstBodyType != null) {
+                                if (firstBodyType.getType() instanceof FileType) {
+                                    return "$headers = $this->ensureHeader($headers, 'Content-Type', $body->getClientMediaType());";
+                                }
+                            }
+                            return "";
+                        case "useBody":
+                            if (firstBodyType != null) {
+                                if (firstBodyType.getType() instanceof FileType) {
+                                    return "use Psr\\Http\\Message\\UploadedFileInterface;";
+                                }
+                                if (!BuiltinType.of(firstBodyType.getType().getName()).isPresent()) {
+                                    final String typePackage = getPackageFolder(firstBodyType.getType() , "\\");
+                                    final String t = (new TypesGenerator.PropertyTypeVisitor()).doSwitch(firstBodyType.getType());
+                                    if (!Lists.newArrayList("mixed", "null", "bool", "array", "string", "float", "int").contains(t)) {
+                                        return "use " + vendorName + "\\" +
+                                                capitalize(TypesGenerator.PACKAGE_NAME) + "\\" +
+                                                typePackage + t + ";";
+                                    }
+                                }
+                            }
+                            return "";
+                        case "serialize":
+                            if (firstBodyType != null) {
+                                if (firstBodyType.getType() instanceof FileType) {
+                                    return "$body->getStream()";
+                                }
+                            }
+                            return "!is_null($body) ? json_encode($body) : null";
                         case "requestName":
                             return toRequestName(absoluteUri((Resource)method.eContainer()), method);
                         default:
