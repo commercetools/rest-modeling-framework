@@ -8,6 +8,7 @@ import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -124,13 +125,23 @@ public class StringTemplate {
         }
     }
 
+    private static final Map<String, Function<String, String>> TRANSFORMATIONS = new HashMap<>();
+    {
+        final Function<String, String> capitalize = s -> s.substring(0, 1).toUpperCase() + s.substring(1);
+        TRANSFORMATIONS.put("uppercamelcase", capitalize);
+    }
+
     private static class Expression implements Part {
         private final String param;
         private final List<String> transformations;
+        private final Function<String, String> transformation;
 
         private Expression(final String param, final List<String> transformations) {
             this.param = param;
             this.transformations = transformations;
+            this.transformation = transformations.stream()
+                    .map(TRANSFORMATIONS::get)
+                    .collect(Collectors.reducing(Function.identity(), Function::compose));
         }
 
         public String getParam() {
@@ -140,7 +151,7 @@ public class StringTemplate {
         @Override
         public String render(final Map<String, String> values) {
             final String value = values.get(param);
-            return value;
+            return transformation.apply(value);
         }
 
         @Override
@@ -166,7 +177,9 @@ public class StringTemplate {
 
         @Override
         public List<StringTemplate.Part> visitExpression(StringTemplateParser.ExpressionContext ctx) {
-            return Lists.newArrayList(StringTemplate.Expression.of(ctx.ID().getText(), Collections.emptyList()));
+            final List<String> transformations = ctx.fnApplication().stream()
+                    .map(c -> c.fn.getText()).collect(Collectors.toList());
+            return Lists.newArrayList(StringTemplate.Expression.of(ctx.ID().getText(), transformations));
         }
 
         @Override

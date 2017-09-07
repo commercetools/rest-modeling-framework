@@ -22,10 +22,11 @@ class StringTemplateTest extends Specification {
         then:
         stringTemplate.render(values) == result
         where:
-        template                    | values                       || result
-        '<<resourcePathName>>Draft' | ['resourcePathName': 'User'] || 'UserDraft'
-        'Name<<name>>'              | ['name': 'Hello']            || 'NameHello'
-        'Name<<name>>Impl'          | ['name': 'Hello']            || 'NameHelloImpl'
+        template                                    | values                       || result
+        '<<resourcePathName>>Draft'                 | ['resourcePathName': 'User'] || 'UserDraft'
+        '<<resourcePathName|!uppercamelcase>>Draft' | ['resourcePathName': 'user'] || 'UserDraft'
+        'Name<<name>>'                              | ['name': 'Hello']            || 'NameHello'
+        'Name<<name>>Impl'                          | ['name': 'Hello']            || 'NameHelloImpl'
     }
 
     def "getParameters()"() {
