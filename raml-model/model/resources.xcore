@@ -102,27 +102,29 @@ interface ResourceBase extends DocumentableElement, AnnotationsFacet, SecuredByF
 	contains UriParameter[] uriParameters
 	
 	/*
+	 * Returns the uri parameter with the given name or null.
+	 */
+	op UriParameter getUriParameter(String name) {
+		uriParameters.findFirst[it.name == name]	
+	}
+	
+	/*
 	 * The methods that this resource provides.
 	 */
 	contains Method[] methods
-		
-	/*
-	 * The resource type that this resource inherits.
-	 */
-	contains ResourceTypeApplication ^type
 	
 	/*
 	 * Returns the method with the given http method or null if
 	 * no method with the given http method exists.
 	 */
 	op Method getMethod(HttpMethod httpMethod) {
-		for (Method method : methods) {
-			if (method.method == httpMethod) {
-				return method
-			}
-		}
-		return null
+		methods.findFirst[it.method == httpMethod]
 	}	
+		
+	/*
+	 * The resource type that this resource inherits.
+	 */
+	contains ResourceTypeApplication ^type
 }
 
 

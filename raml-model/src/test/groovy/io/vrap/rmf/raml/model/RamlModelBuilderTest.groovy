@@ -3,6 +3,7 @@ package io.vrap.rmf.raml.model
 import io.vrap.rmf.raml.model.modules.Api
 import io.vrap.rmf.raml.model.resources.HttpMethod
 import io.vrap.rmf.raml.model.resources.Method
+import io.vrap.rmf.raml.model.resources.Resource
 import io.vrap.rmf.raml.model.types.AnyType
 import io.vrap.rmf.raml.persistence.ResourceFixtures
 import spock.lang.PendingFeature
@@ -25,20 +26,21 @@ class RamlModelBuilderTest extends Specification implements ResourceFixtures {
         AnyType user = api.getType('User')
         AnyType userDraft = api.getType('UserDraft')
         api.resources.size() == 1
-        api.resources[0].methods.size() == 2
+        Resource userResource = api.resources[0]
+        userResource.methods.size() == 2
 
-        Method getMethod = api.resources[0].getMethod(HttpMethod.GET)
+        Method getMethod = userResource.getMethod(HttpMethod.GET)
         getMethod != null
         getMethod.headers.size() == 1
         getMethod.headers[0].name == 'X-Correlation-Id'
         getMethod.queryParameters.size() == 1
-        getMethod.queryParameters[0].name == 'id'
+        getMethod.queryParameters[0].name == 'expand'
         getMethod.responses.size() == 1
         getMethod.responses[0].statusCode == "200"
         getMethod.responses[0].bodies.size() == 1
         getMethod.responses[0].bodies[0].type == user
 
-        Method postMethod = api.resources[0].getMethod(HttpMethod.POST)
+        Method postMethod = userResource.getMethod(HttpMethod.POST)
         postMethod != null
         postMethod.headers.size() == 1
         postMethod.headers[0].name == 'X-Correlation-Id'
@@ -48,6 +50,11 @@ class RamlModelBuilderTest extends Specification implements ResourceFixtures {
         postMethod.responses[0].statusCode == "201"
         postMethod.responses[0].bodies.size() == 1
         postMethod.responses[0].bodies[0].type == user
+
+        userResource.resources.size() == 1
+        Resource singleUserResource = userResource.resources[0]
+        singleUserResource.uriParameters.size() == 1
+        singleUserResource.uriParameters[0].name == 'ID'
     }
 
     def "should resolve ct api"() {

@@ -73,6 +73,11 @@ public class RamlModelBuilder {
         }
 
         public io.vrap.rmf.raml.model.resources.Resource resolve(final ResourceType resourceType) {
+            for (final UriParameter uriParameter : resourceType.getUriParameters()) {
+                final UriParameter resolvedUriParameter = EcoreUtil.copy(uriParameter);
+                typedElementResolver.resolve(resolvedUriParameter);
+                resource.getUriParameters().add(resolvedUriParameter);
+            }
             for (final Method method : resourceType.getMethods()) {
                 final Method resolvedMethod = EcoreUtil.copy(method);
                 typedElementResolver.resolveAll(resolvedMethod);
@@ -171,7 +176,7 @@ public class RamlModelBuilder {
             }
         }
 
-        private TypedElement resolve(final TypedElement typedElement) {
+        public TypedElement resolve(final TypedElement typedElement) {
             final AnyType type = typedElement.getType();
             if (type instanceof TypeTemplate) {
                 final String template = type.getName();

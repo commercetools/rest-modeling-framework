@@ -427,7 +427,14 @@ interface HeadersFacet {
 	/*
 	 * Detailed information about any request headers needed by this method.
 	 */
-	contains Header[] headers	
+	contains Header[] headers
+	
+	/*
+	 * Returns the header with the given name or null.
+	 */
+	op Header getHeader(String name) {
+		headers.findFirst[it.name == name]
+	}
 }
 
 class QueryParameter extends TypedElement {
@@ -440,5 +447,12 @@ interface QueryParametersFacet {
 	 * Mutually exclusive with queryString.
 	 */
 	contains QueryParameter[] queryParameters
+	
+	/*
+	 * Returns the query parameter with the given name or null.
+	 */
+	op QueryParameter getQueryParameter(String name) {
+		queryParameters.findFirst[it.name == name]
+	}
 }
 
