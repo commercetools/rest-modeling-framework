@@ -156,7 +156,7 @@ public class RequestGenerator extends AbstractTemplateGenerator {
             final AnyType returnType;
             if (bodyType != null && bodyType.getInlineTypes().isEmpty() && !BuiltinType.of(bodyType.getType().getName()).isPresent()) {
                 returnType = bodyType.getType();
-            } else if (bodyType != null && !bodyType.getInlineTypes().isEmpty() && bodyType.getType().getType() != null && !BuiltinType.of(bodyType.getType().getType().getName()).isPresent()) {
+            } else if (bodyType != null && !bodyType.getInlineTypes().isEmpty() && !BuiltinType.of(bodyType.getType().getName()).isPresent()) {
                 returnType = bodyType.getType().getType();
             } else {
                 returnType = null;
