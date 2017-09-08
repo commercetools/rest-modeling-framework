@@ -25,7 +25,7 @@ import io.vrap.rmf.raml.model.security.SecuritySchemeContainer
 import io.vrap.rmf.raml.model.security.SecuredByFacet
 
 class Api extends AnnotationsFacet, TypeContainer, ResourceContainer, ProtocolsFacet, 
-		SecuritySchemeContainer, SecuredByFacet, TraitContainer {
+		SecuritySchemeContainer, SecuredByFacet {
 	/*
 	 * A short, plain-text label for the API. Its value is a string.
 	 */
@@ -84,13 +84,6 @@ class Document {
 	String content
 }
 
-interface TraitContainer {
-	/*
-	 * Declarations of traits for use within this element.
-	 */
-	contains Trait[] traits	
-}
-
 interface TypeContainer {
 	contains LibraryUse[] uses
     
@@ -113,9 +106,28 @@ interface TypeContainer {
     }
     
     contains ResourceType[] resourceTypes
+    
+    /*
+     * Returns the resource type with the given name or null. 
+     */
+    op ResourceType getResourceType(String name) {
+    	resourceTypes.findFirst[it.name == name]	
+    }
+    
+    /*
+	 * Declarations of traits for use within this element.
+	 */
+	contains Trait[] traits	
+    
+    /*
+     * Returns the trait with the given name or null. 
+     */
+    op Trait getTrait(String name) {
+    	traits.findFirst[it.name == name]
+    }
 }
 
-class Library extends AnnotationsFacet, TypeContainer, SecuritySchemeContainer, TraitContainer {
+class Library extends AnnotationsFacet, TypeContainer, SecuritySchemeContainer {
     String usage
 }
 

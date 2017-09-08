@@ -9,9 +9,21 @@ types:
     properties:
       email:
 
+traits:
+    hasCorrelationId:
+        headers:
+            X-Correlation-Id:
+    queryable:
+        queryParameters:
+            id:
+
 resourceTypes:
   collection:
+    is:
+        - hasCorrelationId
     get:
+      is:
+        - queryable
       responses:
         200:
           body:

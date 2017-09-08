@@ -22,8 +22,8 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static io.vrap.rmf.raml.model.elements.ElementsPackage.Literals.IDENTIFIABLE_ELEMENT__NAME;
-import static io.vrap.rmf.raml.model.modules.ModulesPackage.Literals.TRAIT_CONTAINER__TRAITS;
 import static io.vrap.rmf.raml.model.modules.ModulesPackage.Literals.TYPE_CONTAINER__RESOURCE_TYPES;
+import static io.vrap.rmf.raml.model.modules.ModulesPackage.Literals.TYPE_CONTAINER__TRAITS;
 import static io.vrap.rmf.raml.model.resources.ResourcesPackage.Literals.*;
 import static io.vrap.rmf.raml.model.responses.ResponsesPackage.Literals.BODY_CONTAINER__BODIES;
 import static io.vrap.rmf.raml.model.responses.ResponsesPackage.Literals.RESPONSES_FACET__RESPONSES;
@@ -42,7 +42,7 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
 
     @Override
     public Object visitTraitsFacet(RAMLParser.TraitsFacetContext traitsFacet) {
-        return withinScope(scope.with(TRAIT_CONTAINER__TRAITS), traitsScope ->
+        return withinScope(scope.with(TYPE_CONTAINER__TRAITS), traitsScope ->
                 traitsFacet.traitFacet().stream()
                         .map(this::visitTraitFacet)
                         .collect(Collectors.toList())
@@ -636,7 +636,7 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
             resourceTypeDeclarationFacet.attributeFacet().forEach(this::visitAttributeFacet);
             resourceTypeDeclarationFacet.annotationFacet().forEach(this::visitAnnotationFacet);
             resourceTypeDeclarationFacet.securedByFacet().forEach(this::visitSecuredByFacet);
-
+            resourceTypeDeclarationFacet.isFacet().forEach(this::visitIsFacet);
             resourceTypeDeclarationFacet.methodFacet().forEach(this::visitMethodFacet);
             resourceTypeDeclarationFacet.uriParametersFacet().forEach(this::visitUriParametersFacet);
 

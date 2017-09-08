@@ -140,7 +140,7 @@ public class TypeDeclarationResolver {
 
         @Override
         public Object visitTraitsFacet(RAMLParser.TraitsFacetContext ctx) {
-            return withinScope(scope.with(TRAIT_CONTAINER__TRAITS), traitScope ->
+            return withinScope(scope.with(TYPE_CONTAINER__TRAITS), traitScope ->
                 super.visitTraitsFacet(ctx));
         }
 
