@@ -147,11 +147,8 @@ public class RamlResourceTest implements ResourceFixtures {
     @Ignore
     @Test
     public void api() {
-        final File apiFile = new File("/Users/mkoester/Development/commercetools-api-reference/api.raml");
-        assumeTrue(apiFile.exists());
-
-        final URI fileURI = URI.createURI(apiFile.toURI().toString());
-        final Resource resource = fromUri(fileURI);
+        final URI apiUri = uriFromClasspath("/commercetools-api-reference-master/api.raml");
+        final Resource resource = fromUri(apiUri);
         assertThat(resource).isNotNull();
         assertThat(resource.getErrors()).isEmpty();
 
