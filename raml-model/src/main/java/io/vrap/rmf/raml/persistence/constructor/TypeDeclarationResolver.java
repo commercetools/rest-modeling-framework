@@ -91,7 +91,7 @@ public class TypeDeclarationResolver {
 
         @Override
         public Object visitLibrary(final RAMLParser.LibraryContext ctx) {
-            final Library library = create(LIBRARY, ctx.getStart());
+            final Library library = create(LIBRARY, ctx);
             scope.getResource().getContents().add(library);
 
             withinScope(scope.with(library), libraryScope ->
@@ -102,7 +102,7 @@ public class TypeDeclarationResolver {
 
         @Override
         public Object visitApi(final RAMLParser.ApiContext ctx) {
-            final Api api = create(API, ctx.getStart());
+            final Api api = create(API, ctx);
             scope.getResource().getContents().add(api);
 
             withinScope(scope.with(api), apiScope ->
@@ -115,7 +115,7 @@ public class TypeDeclarationResolver {
         public Object visitLibraryUse(final RAMLParser.LibraryUseContext libraryUseFacet) {
             final Resource libraryResource = scope.getResource(libraryUseFacet.libraryUri.getText());
             final EList<EObject> contents = libraryResource.getContents();
-            final LibraryUse libraryUse = create(LIBRARY_USE, libraryUseFacet.getStart());
+            final LibraryUse libraryUse = create(LIBRARY_USE, libraryUseFacet);
 
             libraryUse.setName(libraryUseFacet.name.getText());
             libraryUse.setLibrary((Library) contents.get(0));
@@ -133,7 +133,7 @@ public class TypeDeclarationResolver {
 
         @Override
         public Object visitResourceTypeDeclarationFacet(RAMLParser.ResourceTypeDeclarationFacetContext resourceTypeDeclarationFacet) {
-            final ResourceType resourceType = create(RESOURCE_TYPE, resourceTypeDeclarationFacet.getStart());
+            final ResourceType resourceType = create(RESOURCE_TYPE, resourceTypeDeclarationFacet);
             scope.setValue(resourceType, resourceTypeDeclarationFacet.getStart());
             resourceType.setName(resourceTypeDeclarationFacet.name.getText());
 
@@ -148,7 +148,7 @@ public class TypeDeclarationResolver {
 
         @Override
         public Object visitTraitFacet(RAMLParser.TraitFacetContext traitFacet) {
-            final Trait trait = create(TRAIT, traitFacet.getStart());
+            final Trait trait = create(TRAIT, traitFacet);
             scope.setValue(trait, traitFacet.getStart());
             trait.setName(traitFacet.name.getText());
 
@@ -185,24 +185,25 @@ public class TypeDeclarationResolver {
         public Object visitTypeDeclarationMap(final RAMLParser.TypeDeclarationMapContext typeDeclarationMap) {
             final EObject superType = getSuperType(scope, typeDeclarationMap);
 
-            return constructType(typeDeclarationMap.name, superType);
+            return constructType(typeDeclarationMap, superType);
         }
 
         @Override
         public Object visitTypeDeclarationTuple(final RAMLParser.TypeDeclarationTupleContext typeDeclarationTuple) {
             final EObject superType = getSuperType(scope, typeDeclarationTuple);
 
-            return constructType(typeDeclarationTuple.name, superType);
+            return constructType(typeDeclarationTuple, superType);
         }
 
-        private EObject constructType(final Token nameToken, final EObject superType) {
+        private EObject constructType(final ParserRuleContext context, final EObject superType) {
             final EObject declaredType;
+            final Token nameToken = context.getStart();
             final Optional<BuiltinType> optionalBuiltinType = BuiltinType.of(nameToken.getText());
             if (optionalBuiltinType.isPresent() || superType == null || !superType.eIsProxy()) {
                 final EClass eClass = optionalBuiltinType
                         .map(builtinType -> builtinType.getScopedMetaType(scope))
                         .orElseGet(() -> superType == null ? BuiltinType.STRING.getScopedMetaType(scope) : superType.eClass());
-                declaredType = create(eClass, nameToken);
+                declaredType = create(eClass, context);
                 final Scope typeScope = scope.with(declaredType);
 
                 final String name = nameToken.getText();
@@ -238,7 +239,7 @@ public class TypeDeclarationResolver {
             final EObject superType = withinScope(scope.with(TYPE_CONTAINER__TYPES),
                     typesScope -> getSuperType(typesScope, typeDeclarationTuple));
 
-            return resolveType(nameToken, superType);
+            return resolveType(typeDeclarationTuple, superType);
         }
 
         @Override
@@ -247,18 +248,19 @@ public class TypeDeclarationResolver {
             final EObject superType = withinScope(scope.with(TYPE_CONTAINER__TYPES),
                     typesScope -> getSuperType(typesScope, typeDeclarationMap));
 
-            return resolveType(nameToken, superType);
+            return resolveType(typeDeclarationMap, superType);
         }
 
-        private EObject resolveType(final Token nameToken, final EObject superType) {
+        private EObject resolveType(final ParserRuleContext ruleContext, final EObject superType) {
             final EObject resolvedType;
 
             if (superType.eIsProxy()) {
                 resolvedType = null;
             } else {
-                resolvedType = create(superType.eClass(), nameToken);
+                resolvedType = create(superType.eClass(), ruleContext);
                 EcoreUtil.replace(unresolved, resolvedType);
 
+                final Token nameToken = ruleContext.getStart();
                 final String name = nameToken.getText();
                 final Scope typeScope = scope.with(resolvedType, TYPE_CONTAINER__TYPES);
 

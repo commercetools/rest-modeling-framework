@@ -4,7 +4,7 @@ import io.vrap.rmf.raml.model.util.RAMLTokenAdapter;
 import io.vrap.rmf.raml.persistence.antlr.RAMLBaseVisitor;
 import io.vrap.rmf.raml.persistence.antlr.RAMLParser;
 import io.vrap.rmf.raml.persistence.antlr.RamlToken;
-import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.ParserRuleContext;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
@@ -107,9 +107,9 @@ abstract class AbstractScopedVisitor<T> extends RAMLBaseVisitor<T> {
         }
     }
 
-    protected <T extends EObject> T create(final EClass eClass, final Token token) {
+    protected <T extends EObject> T create(final EClass eClass, final ParserRuleContext ruleContext) {
         final T newEObject = (T) EcoreUtil.create(eClass);
-        final RAMLTokenAdapter adapter = RAMLTokenAdapter.of((RamlToken) token);
+        final RAMLTokenAdapter adapter = RAMLTokenAdapter.of((RamlToken) ruleContext.getStart());
         newEObject.eAdapters().add(adapter);
         return newEObject;
     }

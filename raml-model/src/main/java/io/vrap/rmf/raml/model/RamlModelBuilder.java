@@ -38,7 +38,7 @@ public class RamlModelBuilder {
         final RamlResourceSet resourceSet = new RamlResourceSet();
         final Resource resource = resourceSet.getResource(uri, true);
         final Api api = (Api) resource.getContents().get(0);
-        final Api apiCopy =copy(api);
+        final Api apiCopy = copy(api);
         final Resource resolvedResource = resourceSet.createResource(uri.appendQuery("resolved=true"));
         resolvedResource.getContents().add(apiCopy);
         final ResourceResolver resourceResolver = new ResourceResolver();
@@ -46,6 +46,9 @@ public class RamlModelBuilder {
         return apiCopy;
     }
 
+    /**
+     * Copies the given object and shallow copies all adapters.
+     */
     private static <T extends EObject> T copy(T eObject)
     {
         EcoreUtil.Copier copier = new EcoreUtil.Copier() {
