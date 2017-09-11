@@ -146,7 +146,7 @@ resourceMethodWithParams(resource, index) ::=<<
 /**
  * @return Resource<index>
  */
-public function with<resource.relativeUri; format="methodName">($<resource.relativeUri; format="params">) {
+public function <resource.relativeUri; format="methodName">($<resource.relativeUri; format="params">) {
     $args = array_merge($this->getArgs(), [<resource.relativeUri; format="paramArray">]);
     return new Resource<index>($this->getUri() . '<resource.relativeUri; format="uri">', $args);
 }
