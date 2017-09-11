@@ -5,10 +5,13 @@ import io.vrap.rmf.raml.model.modules.Library
 import io.vrap.rmf.raml.model.resources.Trait
 import io.vrap.rmf.raml.model.security.OAuth20Settings
 import io.vrap.rmf.raml.model.types.AnnotationTarget
+import io.vrap.rmf.raml.model.types.AnyType
 import io.vrap.rmf.raml.model.types.ObjectType
+import io.vrap.rmf.raml.model.types.Property
 import io.vrap.rmf.raml.model.types.StringAnnotationType
 import io.vrap.rmf.raml.model.types.StringType
 import io.vrap.rmf.raml.model.types.TypeTemplate
+import io.vrap.rmf.raml.model.types.UnionType
 import io.vrap.rmf.raml.persistence.RamlResourceSet
 import io.vrap.rmf.raml.persistence.antlr.RAMLCustomLexer
 import io.vrap.rmf.raml.persistence.antlr.RAMLParser
@@ -229,6 +232,25 @@ class LibraryConstructorTest extends Specification {
         library.resourceTypes[0].methods[0].responses[0].bodies[0].type instanceof TypeTemplate
         library.resourceTypes[0].methods[0].responses[0].bodies[0].inlineTypes.size() == 1
         library.resourceTypes[0].methods[0].responses[0].bodies[0].type.name == '<<resourceQueryType>>'
+    }
+
+    def "multi-line union type"() {
+        when:
+        Library library = constructLibrary(
+                '''\
+        types:
+            Type:
+                properties:
+                    anyOrName:
+                        type: any |
+                            string
+        ''')
+        then:
+        AnyType type = library.getType('Type')
+        type instanceof ObjectType
+        ObjectType objectType = type
+        Property property = objectType.getProperty('anyOrName')
+        property.type instanceof UnionType
     }
 
     Library constructLibrary(String input) {

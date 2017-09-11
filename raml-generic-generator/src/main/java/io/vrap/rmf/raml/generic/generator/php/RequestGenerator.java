@@ -156,7 +156,7 @@ public class RequestGenerator extends AbstractTemplateGenerator {
             final AnyType returnType;
             if (bodyType != null && bodyType.getInlineTypes().isEmpty() && !BuiltinType.of(bodyType.getType().getName()).isPresent()) {
                 returnType = bodyType.getType();
-            } else if (bodyType != null && !bodyType.getInlineTypes().isEmpty() && bodyType.getType().getType() != null && !BuiltinType.of(bodyType.getType().getType().getName()).isPresent()) {
+            } else if (bodyType != null && !bodyType.getInlineTypes().isEmpty() && !BuiltinType.of(bodyType.getType().getName()).isPresent()) {
                 returnType = bodyType.getType().getType();
             } else {
                 returnType = null;
@@ -183,16 +183,20 @@ public class RequestGenerator extends AbstractTemplateGenerator {
         return new ResourceGeneratingVisitor(vendorName, packageName, createSTGroup(Resources.getResource(resourcesPath + type + ".stg")), type, resources);
     }
 
-    protected String toRequestName(UriTemplate uri, Method method) {
+    protected String toParamName(final UriTemplate uri, final String delimiter) {
         return StringUtils.capitalize(uri.getParts().stream().map(
                 uriTemplatePart -> {
                     if (uriTemplatePart instanceof UriTemplateExpression) {
                         return ((UriTemplateExpression)uriTemplatePart).getVariables().stream()
-                                .map(s -> "By" + StringUtils.capitalize(s)).collect(Collectors.joining());
+                                .map(s -> delimiter + StringUtils.capitalize(s)).collect(Collectors.joining());
                     }
                     return CaseFormat.LOWER_HYPHEN.to(CaseFormat.LOWER_CAMEL, uriTemplatePart.toString().replace("/", "-"));
                 }
-        ).collect(Collectors.joining())).replaceAll("[^\\p{L}\\p{Nd}]+", "") + StringUtils.capitalize(method.getMethod().toString());
+        ).collect(Collectors.joining())).replaceAll("[^\\p{L}\\p{Nd}]+", "");
+    }
+
+    protected String toRequestName(UriTemplate uri, Method method) {
+        return toParamName(uri, "By") + StringUtils.capitalize(method.getMethod().toString());
     }
 
     @Override
@@ -267,10 +271,7 @@ public class RequestGenerator extends AbstractTemplateGenerator {
                     switch (Strings.nullToEmpty(formatString)) {
                         case "methodName":
                             if (parts.size() > 0) {
-                                return parts.stream().map(
-                                        uriTemplateExpression -> uriTemplateExpression.getVariables().stream()
-                                                .map(StringUtils::capitalize).collect(Collectors.joining("And"))
-                                ).collect(Collectors.joining("And"));
+                                return CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, toParamName((UriTemplate)arg, "With"));
                             }
 
                             final String uri = arg.toString();

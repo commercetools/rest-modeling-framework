@@ -299,14 +299,14 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
         if (type.isInlineType()) {
             return type;
         } else {
-            final AnyType inlinedType = (AnyType) createAndCopyAttributes(type);
+            final AnyType inlinedType = (AnyType) createAndCopy(type);
             scope.with(inlinedType, ANY_TYPE__TYPE).setValue(type, token);
-            scope.addValue(INLINE_TYPE_CONTAINER__INLINE_TYPES, type);
+            scope.addValue(INLINE_TYPE_CONTAINER__INLINE_TYPES, inlinedType);
             return inlinedType;
         }
     }
 
-    protected EObject createAndCopyAttributes(final EObject eObject) {
+    protected EObject createAndCopy(final EObject eObject) {
         final EClass eClass = eObject.eClass();
         final EObject newEObject = EcoreUtil.create(eClass);
         final Consumer<EAttribute> copyAttribute = attribute -> newEObject.eSet(attribute, eObject.eGet(attribute));
@@ -478,7 +478,8 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
      */
     @Override
     public Object visitTypeDeclarationMap(final RAMLParser.TypeDeclarationMapContext typeDeclarationMap) {
-        final EObject declaredType = scope.getEObjectByName(typeDeclarationMap.name.getText());
+        final String text = typeDeclarationMap.name.getText();
+        final EObject declaredType = scope.getEObjectByName(text);
 
         return withinScope(scope.with(declaredType), typeScope -> {
             typeDeclarationMap.annotationFacet().forEach(this::visitAnnotationFacet);

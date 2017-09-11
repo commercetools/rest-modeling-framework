@@ -58,6 +58,16 @@ class AnyType extends AnnotationsFacet, DocumentableElement, IdentifiableElement
     op boolean isInlineType() {
     	eContainer instanceof InlineTypeContainer
     }
+    
+    /*
+     * If {@code inheritAnnotation} is true, this method traverses the inheritance chain to
+     * find the specified annotation. Otherwise this method only tries to find the annotation
+     * in this type.  
+     */
+    op Annotation getAnnotation(AnyAnnotationType annotationType, boolean inheritAnnotation) {
+    	val Annotation anno = getAnnotation(annotationType)
+    	if (inheritAnnotation && anno == null) ^type.getAnnotation(annotationType, inheritAnnotation) else anno
+    }
 }
 
 /*
@@ -404,7 +414,7 @@ interface AnnotationsFacet {
 			if (anno.^type == annotationType) return anno
 		}
 		return null
-	} 
+	}
 }
 
 class Annotation {

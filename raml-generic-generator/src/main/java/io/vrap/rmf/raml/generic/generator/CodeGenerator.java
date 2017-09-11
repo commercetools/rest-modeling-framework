@@ -3,6 +3,7 @@ package io.vrap.rmf.raml.generic.generator;
 import io.vrap.rmf.raml.generic.generator.java.JavaGenerator;
 import io.vrap.rmf.raml.generic.generator.md.MdGenerator;
 import io.vrap.rmf.raml.generic.generator.php.PhpGenerator;
+import io.vrap.rmf.raml.model.RamlModelBuilder;
 import io.vrap.rmf.raml.model.modules.Api;
 import io.vrap.rmf.raml.persistence.RamlResourceSet;
 import org.eclipse.emf.common.util.EList;
@@ -30,6 +31,7 @@ public class CodeGenerator {
         final URI fileURI = URI.createFileURI(options.getRamlPath().toString());
         final File generateTo = new File(options.getOutputPath().toString() + "/" + options.getLanguage());
 
+        Api api = new RamlModelBuilder().buildApi(fileURI);
         ResourceSet resourceSet = new RamlResourceSet();
         final Resource resource = resourceSet
                 .getResource(fileURI, true);
@@ -40,7 +42,7 @@ public class CodeGenerator {
         if (errors.isEmpty() && contents.size() == 1) {
             Generator generator = of(options.getLanguage(), options.getVendorName());
 
-            generator.generate((Api)contents.get(0), generateTo);
+            generator.generate(api, generateTo);
 
             final long endTimeMillis = System.currentTimeMillis();
             final Duration duration = Duration.ofMillis(endTimeMillis - startTimeMillis);
