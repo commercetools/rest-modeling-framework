@@ -38,12 +38,29 @@ public class RamlModelBuilder {
         final RamlResourceSet resourceSet = new RamlResourceSet();
         final Resource resource = resourceSet.getResource(uri, true);
         final Api api = (Api) resource.getContents().get(0);
-        final Api apiCopy = EcoreUtil.copy(api);
+        final Api apiCopy =copy(api);
         final Resource resolvedResource = resourceSet.createResource(uri.appendQuery("resolved=true"));
         resolvedResource.getContents().add(apiCopy);
         final ResourceResolver resourceResolver = new ResourceResolver();
         apiCopy.eAllContents().forEachRemaining(resourceResolver::doSwitch);
         return apiCopy;
+    }
+
+    private static <T extends EObject> T copy(T eObject)
+    {
+        EcoreUtil.Copier copier = new EcoreUtil.Copier() {
+            @Override
+            public EObject copy(EObject eObject) {
+                final EObject copy = super.copy(eObject);
+                eObject.eAdapters().forEach(adapter -> copy.eAdapters().add(adapter));
+                return copy;
+            }
+        };
+        EObject result = copier.copy(eObject);
+        copier.copyReferences();
+
+        @SuppressWarnings("unchecked")T t = (T)result;
+        return t;
     }
 
     private static class ResourceResolver extends ResourcesSwitch<EObject> {

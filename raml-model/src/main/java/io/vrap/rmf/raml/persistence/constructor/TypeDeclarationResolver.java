@@ -24,6 +24,8 @@ import java.util.stream.Collectors;
 
 import static io.vrap.rmf.raml.model.elements.ElementsPackage.Literals.IDENTIFIABLE_ELEMENT__NAME;
 import static io.vrap.rmf.raml.model.modules.ModulesPackage.Literals.*;
+import static io.vrap.rmf.raml.model.resources.ResourcesPackage.Literals.RESOURCE_TYPE;
+import static io.vrap.rmf.raml.model.resources.ResourcesPackage.Literals.TRAIT;
 
 /**
  * Resolves all types and annotation types so that they all have a resolved type.
@@ -89,7 +91,7 @@ public class TypeDeclarationResolver {
 
         @Override
         public Object visitLibrary(final RAMLParser.LibraryContext ctx) {
-            final Library library = ModulesFactory.eINSTANCE.createLibrary();
+            final Library library = create(LIBRARY, ctx.getStart());
             scope.getResource().getContents().add(library);
 
             withinScope(scope.with(library), libraryScope ->
@@ -100,7 +102,7 @@ public class TypeDeclarationResolver {
 
         @Override
         public Object visitApi(final RAMLParser.ApiContext ctx) {
-            final Api api = ModulesFactory.eINSTANCE.createApi();
+            final Api api = create(API, ctx.getStart());
             scope.getResource().getContents().add(api);
 
             withinScope(scope.with(api), apiScope ->
@@ -113,7 +115,7 @@ public class TypeDeclarationResolver {
         public Object visitLibraryUse(final RAMLParser.LibraryUseContext libraryUseFacet) {
             final Resource libraryResource = scope.getResource(libraryUseFacet.libraryUri.getText());
             final EList<EObject> contents = libraryResource.getContents();
-            final LibraryUse libraryUse = ModulesFactory.eINSTANCE.createLibraryUse();
+            final LibraryUse libraryUse = create(LIBRARY_USE, libraryUseFacet.getStart());
 
             libraryUse.setName(libraryUseFacet.name.getText());
             libraryUse.setLibrary((Library) contents.get(0));
@@ -131,7 +133,7 @@ public class TypeDeclarationResolver {
 
         @Override
         public Object visitResourceTypeDeclarationFacet(RAMLParser.ResourceTypeDeclarationFacetContext resourceTypeDeclarationFacet) {
-            final ResourceType resourceType = ResourcesFactory.eINSTANCE.createResourceType();
+            final ResourceType resourceType = create(RESOURCE_TYPE, resourceTypeDeclarationFacet.getStart());
             scope.setValue(resourceType, resourceTypeDeclarationFacet.getStart());
             resourceType.setName(resourceTypeDeclarationFacet.name.getText());
 
@@ -146,7 +148,7 @@ public class TypeDeclarationResolver {
 
         @Override
         public Object visitTraitFacet(RAMLParser.TraitFacetContext traitFacet) {
-            final Trait trait = ResourcesFactory.eINSTANCE.createTrait();
+            final Trait trait = create(TRAIT, traitFacet.getStart());
             scope.setValue(trait, traitFacet.getStart());
             trait.setName(traitFacet.name.getText());
 
@@ -200,7 +202,7 @@ public class TypeDeclarationResolver {
                 final EClass eClass = optionalBuiltinType
                         .map(builtinType -> builtinType.getScopedMetaType(scope))
                         .orElseGet(() -> superType == null ? BuiltinType.STRING.getScopedMetaType(scope) : superType.eClass());
-                declaredType = EcoreUtil.create(eClass);
+                declaredType = create(eClass, nameToken);
                 final Scope typeScope = scope.with(declaredType);
 
                 final String name = nameToken.getText();
@@ -254,7 +256,7 @@ public class TypeDeclarationResolver {
             if (superType.eIsProxy()) {
                 resolvedType = null;
             } else {
-                resolvedType = EcoreUtil.create(superType.eClass());
+                resolvedType = create(superType.eClass(), nameToken);
                 EcoreUtil.replace(unresolved, resolvedType);
 
                 final String name = nameToken.getText();

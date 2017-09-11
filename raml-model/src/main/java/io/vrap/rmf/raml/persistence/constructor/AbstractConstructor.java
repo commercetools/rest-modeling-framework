@@ -25,8 +25,7 @@ import static io.vrap.rmf.raml.model.elements.ElementsPackage.Literals.IDENTIFIA
 import static io.vrap.rmf.raml.model.modules.ModulesPackage.Literals.TYPE_CONTAINER__RESOURCE_TYPES;
 import static io.vrap.rmf.raml.model.modules.ModulesPackage.Literals.TYPE_CONTAINER__TRAITS;
 import static io.vrap.rmf.raml.model.resources.ResourcesPackage.Literals.*;
-import static io.vrap.rmf.raml.model.responses.ResponsesPackage.Literals.BODY_CONTAINER__BODIES;
-import static io.vrap.rmf.raml.model.responses.ResponsesPackage.Literals.RESPONSES_FACET__RESPONSES;
+import static io.vrap.rmf.raml.model.responses.ResponsesPackage.Literals.*;
 import static io.vrap.rmf.raml.model.security.SecurityPackage.Literals.*;
 import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.*;
 
@@ -79,7 +78,7 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
 
     @Override
     public Object visitTraitApplication(RAMLParser.TraitApplicationContext ctx) {
-        final TraitApplication traitApplication = ResourcesFactory.eINSTANCE.createTraitApplication();
+        final TraitApplication traitApplication = create(TRAIT_APPLICATION, ctx.getStart());
         scope.setValue(traitApplication, ctx.getStart());
         final String traitName = ctx.id().getText();
         final Trait trait = (Trait) scope.with(TRAIT_APPLICATION__TRAIT).getEObjectByName(traitName);
@@ -92,7 +91,7 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
 
     @Override
     public Object visitArgument(RAMLParser.ArgumentContext ctx) {
-        final Parameter traitParameter = ResourcesFactory.eINSTANCE.createParameter();
+        final Parameter traitParameter = create(PARAMETER, ctx.getStart());
         scope.setValue(traitParameter, ctx.getStart());
 
         traitParameter.setName(ctx.name.getText());
@@ -109,7 +108,7 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
             scope.addError("Missing type for security scheme at {0}", securitySchemeFacet.getStart());
             securityScheme = null;
         } else {
-            securityScheme = SecurityFactory.eINSTANCE.createSecurityScheme();
+            securityScheme = create(SECURITY_SCHEME, securitySchemeFacet.getStart());
             final String name = securitySchemeFacet.name.getText();
             securityScheme.setName(name);
             withinScope(scope.with(securityScheme), securitySchemeScope -> {
@@ -123,10 +122,10 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
                 SecuritySchemeSettings securitySchemeSettings = null;
                 switch (securityScheme.getType()) {
                     case OAUTH_10:
-                        securitySchemeSettings = SecurityFactory.eINSTANCE.createOAuth10Settings();
+                        securitySchemeSettings = create(OAUTH10_SETTINGS, securitySchemeFacet.getStart());
                         break;
                     case OAUTH_20:
-                        securitySchemeSettings = SecurityFactory.eINSTANCE.createOAuth20Settings();
+                        securitySchemeSettings = create(OAUTH20_SETTINGS, securitySchemeFacet.getStart());
                         break;
                     default:
                         if (securitySchemeFacet.securitySchemeSettingsFacet().size() > 0) {
@@ -150,7 +149,7 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
 
     @Override
     public Object visitDescribedByFacet(RAMLParser.DescribedByFacetContext describedByFacet) {
-        final SecuritySchemeDescription securitySchemeDescription = SecurityFactory.eINSTANCE.createSecuritySchemeDescription();
+        final SecuritySchemeDescription securitySchemeDescription = create(SECURITY_SCHEME_DESCRIPTION, describedByFacet.getStart());
         scope.with(SECURITY_SCHEME__DESCRIBED_BY).setValue(securitySchemeDescription, describedByFacet.getStart());
 
         return withinScope(scope.with(securitySchemeDescription), securitySchemeDescriptionScope -> {
@@ -175,7 +174,7 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
 
     @Override
     public Object visitResponseFacet(RAMLParser.ResponseFacetContext responseFacet) {
-        final Response response = ResponsesFactory.eINSTANCE.createResponse();
+        final Response response = create(RESPONSE, responseFacet.getStart());
         scope.setValue(response, responseFacet.getStart());
         response.setStatusCode(responseFacet.statusCode.getText());
         return withinScope(scope.with(response), responseScope -> {
@@ -196,7 +195,7 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
 
     @Override
     public Object visitBodyContentTypeFacet(RAMLParser.BodyContentTypeFacetContext bodyContentType) {
-        final BodyType bodyType = ResponsesFactory.eINSTANCE.createBodyType();
+        final BodyType bodyType = create(BODY_TYPE, bodyContentType.getStart());
         scope.setValue(bodyType, bodyContentType.getStart());
         if (bodyContentType.contentType != null) {
             final String contentType = bodyContentType.contentType.getText();
@@ -248,7 +247,7 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
 
     @Override
     public Object visitBodyTypeFacet(RAMLParser.BodyTypeFacetContext bodyTypeFacet) {
-        final BodyType bodyType = ResponsesFactory.eINSTANCE.createBodyType();
+        final BodyType bodyType = create(BODY_TYPE, bodyTypeFacet.getStart());
         scope.setValue(bodyType, bodyTypeFacet.getStart());
 
         return withinScope(scope.with(bodyType), bodyTypeScope -> {
@@ -514,7 +513,7 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
     @Override
     public Object visitTypedElementFacet(RAMLParser.TypedElementFacetContext typedElementFacet) {
         final EClass eType = (EClass) scope.eFeature().getEType();
-        final EObject typedElement = EcoreUtil.create(eType);
+        final EObject typedElement = create(eType, typedElementFacet.getStart());
         scope.setValue(typedElement, typedElementFacet.getStart());
 
         return withinScope(scope.with(typedElement, TYPED_ELEMENT__TYPE), propertyScope ->
@@ -619,7 +618,7 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
 
     @Override
     public Object visitResourceTypeApplication(RAMLParser.ResourceTypeApplicationContext ctx) {
-        final ResourceTypeApplication resourceTypeApplication = ResourcesFactory.eINSTANCE.createResourceTypeApplication();
+        final ResourceTypeApplication resourceTypeApplication = create(RESOURCE_TYPE_APPLICATION, ctx.getStart());
         scope.setValue(resourceTypeApplication, ctx.getStart());
         final ResourceType resourceType = (ResourceType) scope.with(RESOURCE_TYPE_APPLICATION__TYPE).getEObjectByName(ctx.type.getText());
         resourceTypeApplication.setType(resourceType);
@@ -650,7 +649,7 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
     @Override
     public Object visitMethodFacet(RAMLParser.MethodFacetContext methodFacet) {
         return withinScope(scope.with(RESOURCE_BASE__METHODS), methodsScope -> {
-            final Method method = ResourcesFactory.eINSTANCE.createMethod();
+            final Method method = create(METHOD, methodFacet.getStart());
             String httpMethodText = methodFacet.httpMethod().getText();
             final boolean required = !httpMethodText.endsWith("?");
             method.setRequired(required);
@@ -679,4 +678,6 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
             return method;
         });
     }
+
+
 }

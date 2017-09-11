@@ -58,7 +58,7 @@ public abstract class BaseConstructor extends AbstractConstructor {
 
     @Override
     public Object visitExampleFacet(RAMLParser.ExampleFacetContext exampleFacet) {
-        final Example example = TypesFactory.eINSTANCE.createExample();
+        final Example example = create(EXAMPLE, exampleFacet.getStart());
         return withinScope(scope.with(ANY_TYPE__EXAMPLE), exampleScope -> {
             scope.setValue(example, exampleFacet.getStart());
             instanceConstructor.withinScope(exampleScope.with(example, EXAMPLE__VALUE), exampleValueScope ->
@@ -78,7 +78,7 @@ public abstract class BaseConstructor extends AbstractConstructor {
 
     @Override
     public Object visitNamedExample(RAMLParser.NamedExampleContext namedExample) {
-        final Example example = TypesFactory.eINSTANCE.createExample();
+        final Example example = create(EXAMPLE, namedExample.getStart());
         example.setName(namedExample.name.getText());
         scope.setValue(example, namedExample.getStart());
         return instanceConstructor.withinScope(scope.with(example, EXAMPLE__VALUE), exampleValueScope ->
