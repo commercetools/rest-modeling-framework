@@ -25,12 +25,12 @@ public class InstanceConstructor extends AbstractConstructor {
         switch (text) {
             case "true":
             case "false":
-                final BooleanInstance typeInstance = FacetsFactory.eINSTANCE.createBooleanInstance();
+                final BooleanInstance typeInstance = create(BOOLEAN_INSTANCE, simpleInstance);
                 typeInstance.setValue(Boolean.valueOf(text));
                 instance = typeInstance;
                 break;
             default:
-                final StringInstance stringInstance = FacetsFactory.eINSTANCE.createStringInstance();
+                final StringInstance stringInstance = create(STRING_INSTANCE, simpleInstance);
                 stringInstance.setValue(text);
                 instance = stringInstance;
         }
@@ -40,7 +40,7 @@ public class InstanceConstructor extends AbstractConstructor {
 
     @Override
     public Object visitObjectInstance(RAMLParser.ObjectInstanceContext ctx) {
-        final ObjectInstance objectInstance = FacetsFactory.eINSTANCE.createObjectInstance();
+        final ObjectInstance objectInstance = create(OBJECT_INSTANCE, ctx);
         scope.setValue(objectInstance, ctx.getStart());
 
         return withinScope(scope.with(objectInstance, OBJECT_INSTANCE__PROPERTY_VALUES), propertyValuesScope -> {
@@ -51,7 +51,7 @@ public class InstanceConstructor extends AbstractConstructor {
 
     @Override
     public Object visitInstanceProperty(RAMLParser.InstancePropertyContext ctx) {
-        final PropertyValue propertyValue = FacetsFactory.eINSTANCE.createPropertyValue();
+        final PropertyValue propertyValue = create(PROPERTY_VALUE, ctx);
         scope.setValue(propertyValue, ctx.getStart());
 
         propertyValue.setName(ctx.name.getText());
@@ -64,7 +64,7 @@ public class InstanceConstructor extends AbstractConstructor {
 
     @Override
     public Object visitArrayInstance(RAMLParser.ArrayInstanceContext ctx) {
-        final ArrayInstance arrayInstance = FacetsFactory.eINSTANCE.createArrayInstance();
+        final ArrayInstance arrayInstance = create(ARRAY_INSTANCE, ctx);
         scope.setValue(arrayInstance, ctx.getStart());
 
         return withinScope(scope.with(arrayInstance, ARRAY_INSTANCE__VALUES), arrayInstanceScope -> {

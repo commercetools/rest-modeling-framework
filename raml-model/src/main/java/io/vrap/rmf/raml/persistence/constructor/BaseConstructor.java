@@ -11,6 +11,7 @@ import org.eclipse.emf.common.util.ECollections;
 
 import java.util.stream.Collectors;
 
+import static io.vrap.rmf.raml.model.security.SecurityPackage.Literals.SECURED_BY;
 import static io.vrap.rmf.raml.model.security.SecurityPackage.Literals.SECURED_BY__PARAMETERS;
 import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.*;
 
@@ -20,7 +21,7 @@ public abstract class BaseConstructor extends AbstractConstructor {
 
     @Override
     public Object visitSecuredBy(RAMLParser.SecuredByContext ctx) {
-        final SecuredBy securedBy = SecurityFactory.eINSTANCE.createSecuredBy();
+        final SecuredBy securedBy = create(SECURED_BY, ctx);
         scope.setValue(securedBy, ctx.getStart());
 
         final SecurityScheme scheme = (SecurityScheme) scope.getEObjectByName(ctx.name.getText());
@@ -58,7 +59,7 @@ public abstract class BaseConstructor extends AbstractConstructor {
 
     @Override
     public Object visitExampleFacet(RAMLParser.ExampleFacetContext exampleFacet) {
-        final Example example = TypesFactory.eINSTANCE.createExample();
+        final Example example = create(EXAMPLE, exampleFacet);
         return withinScope(scope.with(ANY_TYPE__EXAMPLE), exampleScope -> {
             scope.setValue(example, exampleFacet.getStart());
             instanceConstructor.withinScope(exampleScope.with(example, EXAMPLE__VALUE), exampleValueScope ->
@@ -78,7 +79,7 @@ public abstract class BaseConstructor extends AbstractConstructor {
 
     @Override
     public Object visitNamedExample(RAMLParser.NamedExampleContext namedExample) {
-        final Example example = TypesFactory.eINSTANCE.createExample();
+        final Example example = create(EXAMPLE, namedExample);
         example.setName(namedExample.name.getText());
         scope.setValue(example, namedExample.getStart());
         return instanceConstructor.withinScope(scope.with(example, EXAMPLE__VALUE), exampleValueScope ->

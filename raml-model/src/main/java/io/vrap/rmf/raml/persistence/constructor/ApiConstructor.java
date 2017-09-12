@@ -63,7 +63,7 @@ public class ApiConstructor extends BaseConstructor {
 
     @Override
     public Object visitDocument(RAMLParser.DocumentContext ctx) {
-        final Document document = ModulesFactory.eINSTANCE.createDocument();
+        final Document document = create(DOCUMENT, ctx);
         scope.setValue(document, ctx.getStart());
 
         return withinScope(scope.with(document), documentScope -> {
@@ -97,7 +97,7 @@ public class ApiConstructor extends BaseConstructor {
     @Override
     public Object visitResourceFacet(RAMLParser.ResourceFacetContext resourceFacet) {
         return withinScope(scope.with(RESOURCE_CONTAINER__RESOURCES), resourcesScope -> {
-            final Resource resource = ResourcesFactory.eINSTANCE.createResource();
+            final Resource resource = create(RESOURCE, resourceFacet);
             resourcesScope.setValue(resource, resourceFacet.getStart());
 
             final UriTemplate relativeUri = uriTemplateConstructor.parse(resourceFacet.relativeUri.getText(), resourcesScope);

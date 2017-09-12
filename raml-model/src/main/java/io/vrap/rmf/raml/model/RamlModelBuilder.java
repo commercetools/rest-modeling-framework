@@ -38,12 +38,33 @@ public class RamlModelBuilder {
         final RamlResourceSet resourceSet = new RamlResourceSet();
         final Resource resource = resourceSet.getResource(uri, true);
         final Api api = (Api) resource.getContents().get(0);
-        final Api apiCopy = EcoreUtil.copy(api);
+        final Api apiCopy = copy(api);
         final Resource resolvedResource = resourceSet.createResource(uri.appendQuery("resolved=true"));
         resolvedResource.getContents().add(apiCopy);
+        resolvedResource.getErrors().addAll(resource.getErrors());
         final ResourceResolver resourceResolver = new ResourceResolver();
         apiCopy.eAllContents().forEachRemaining(resourceResolver::doSwitch);
         return apiCopy;
+    }
+
+    /**
+     * Copies the given object and shallow copies all adapters.
+     */
+    private static <T extends EObject> T copy(T eObject)
+    {
+        EcoreUtil.Copier copier = new EcoreUtil.Copier() {
+            @Override
+            public EObject copy(EObject eObject) {
+                final EObject copy = super.copy(eObject);
+                eObject.eAdapters().forEach(adapter -> copy.eAdapters().add(adapter));
+                return copy;
+            }
+        };
+        EObject result = copier.copy(eObject);
+        copier.copyReferences();
+
+        @SuppressWarnings("unchecked")T t = (T)result;
+        return t;
     }
 
     private static class ResourceResolver extends ResourcesSwitch<EObject> {
@@ -73,6 +94,11 @@ public class RamlModelBuilder {
         }
 
         public io.vrap.rmf.raml.model.resources.Resource resolve(final ResourceType resourceType) {
+            for (final UriParameter uriParameter : resourceType.getUriParameters()) {
+                final UriParameter resolvedUriParameter = EcoreUtil.copy(uriParameter);
+                typedElementResolver.resolve(resolvedUriParameter);
+                resource.getUriParameters().add(resolvedUriParameter);
+            }
             for (final Method method : resourceType.getMethods()) {
                 final Method resolvedMethod = EcoreUtil.copy(method);
                 typedElementResolver.resolveAll(resolvedMethod);
@@ -171,7 +197,7 @@ public class RamlModelBuilder {
             }
         }
 
-        private TypedElement resolve(final TypedElement typedElement) {
+        public TypedElement resolve(final TypedElement typedElement) {
             final AnyType type = typedElement.getType();
             if (type instanceof TypeTemplate) {
                 final String template = type.getName();

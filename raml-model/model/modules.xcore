@@ -66,7 +66,9 @@ class Api extends AnnotationsFacet, TypeContainer, ResourceContainer, ProtocolsF
 	@Ecore(invariant="true")	
 	op boolean hasValidProtocols(EDiagnosticChain diagnostics,EMap<Object,Object> context) {
 		val invalidValues = protocols.map[it.toLowerCase].filter[it != 'http' && it != 'https']
-		invalidValues.forEach[diagnostics.add(new BasicDiagnostic(Diagnostic.ERROR, null, -1, "Invalid protocol " + it, null))]
+		invalidValues.forEach[diagnostics.add(new BasicDiagnostic(Diagnostic.ERROR, null, -1, "Invalid protocol " + it, 
+			<Object>newArrayList(this)
+		))]
 		invalidValues.empty
 	}
 }
