@@ -41,6 +41,7 @@ public class RamlModelBuilder {
         final Api apiCopy = copy(api);
         final Resource resolvedResource = resourceSet.createResource(uri.appendQuery("resolved=true"));
         resolvedResource.getContents().add(apiCopy);
+        resolvedResource.getErrors().addAll(resource.getErrors());
         final ResourceResolver resourceResolver = new ResourceResolver();
         apiCopy.eAllContents().forEachRemaining(resourceResolver::doSwitch);
         return apiCopy;

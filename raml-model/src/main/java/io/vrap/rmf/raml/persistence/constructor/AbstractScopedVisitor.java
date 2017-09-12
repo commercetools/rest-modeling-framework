@@ -1,6 +1,5 @@
 package io.vrap.rmf.raml.persistence.constructor;
 
-import io.vrap.rmf.raml.model.util.RAMLTokenAdapter;
 import io.vrap.rmf.raml.persistence.antlr.RAMLBaseVisitor;
 import io.vrap.rmf.raml.persistence.antlr.RAMLParser;
 import io.vrap.rmf.raml.persistence.antlr.RamlToken;
@@ -109,7 +108,7 @@ abstract class AbstractScopedVisitor<T> extends RAMLBaseVisitor<T> {
 
     protected <T extends EObject> T create(final EClass eClass, final ParserRuleContext ruleContext) {
         final T newEObject = (T) EcoreUtil.create(eClass);
-        final RAMLTokenAdapter adapter = RAMLTokenAdapter.of((RamlToken) ruleContext.getStart());
+        final RAMLTokenProviderAdapter adapter = RAMLTokenProviderAdapter.of((RamlToken) ruleContext.getStart());
         newEObject.eAdapters().add(adapter);
         return newEObject;
     }

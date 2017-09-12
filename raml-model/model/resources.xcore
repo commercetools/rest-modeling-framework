@@ -143,7 +143,7 @@ class Resource extends ResourceBase, ResourceContainer, ApplyTraitsFacet {
 	op boolean methodsMustBeRequired(EDiagnosticChain diagnostics,EMap<Object,Object> context) {
 		val optionalMethods = methods.filter[!it.required].toList
 		optionalMethods.forEach[diagnostics.add(new BasicDiagnostic(Diagnostic.ERROR, null, -1, 
-			"Optional method not allowed in resource declaration " + it, null))]
+			"Optional method not allowed in resource declaration " + it, <Object>newArrayList(this)))]
 		optionalMethods.isEmpty
 	}
 }
@@ -191,7 +191,9 @@ class Method extends MethodBase {
 	@Ecore(invariant="true")	
 	op boolean hasValidProtocols(EDiagnosticChain diagnostics,EMap<Object,Object> context) {
 		val invalidValues = protocols.map[it.toLowerCase].filter[it != 'http' && it != 'https']
-		invalidValues.forEach[diagnostics.add(new BasicDiagnostic(Diagnostic.ERROR, null, -1, "Invalid protocol " + it, null))]
+		invalidValues.forEach[diagnostics.add(new BasicDiagnostic(Diagnostic.ERROR, null, -1, "Invalid protocol " + it, 
+			<Object>newArrayList(this)
+		))]
 		invalidValues.empty
 	}
 }

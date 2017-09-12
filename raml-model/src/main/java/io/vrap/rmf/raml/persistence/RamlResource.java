@@ -1,12 +1,12 @@
 package io.vrap.rmf.raml.persistence;
 
 import io.vrap.rmf.raml.model.RamlError;
+import io.vrap.rmf.raml.persistence.antlr.RamlTokenProvider;
 import io.vrap.rmf.raml.persistence.antlr.ParserErrorCollector;
 import io.vrap.rmf.raml.persistence.antlr.RAMLCustomLexer;
 import io.vrap.rmf.raml.persistence.antlr.RAMLParser;
-import io.vrap.rmf.raml.persistence.antlr.RamlTokenFactory;
+import io.vrap.rmf.raml.persistence.antlr.RamlToken;
 import io.vrap.rmf.raml.persistence.constructor.*;
-import org.antlr.v4.runtime.CommonTokenFactory;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.TokenStream;
 import org.eclipse.emf.common.util.EList;
@@ -16,6 +16,7 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.resource.impl.ResourceImpl;
 import org.eclipse.emf.ecore.util.Diagnostician;
+import org.eclipse.emf.ecore.util.EcoreUtil;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -74,7 +75,18 @@ public class RamlResource extends ResourceImpl {
     }
 
     private void addValidationError(final org.eclipse.emf.common.util.Diagnostic diagnostic) {
-        errors.add(RamlError.of(diagnostic.getMessage(), diagnostic.getSource(), -1, -1));
+        int line = -1;
+        int column = -1;
+        String source = diagnostic.getSource();
+        if (diagnostic.getData().size() > 0 && diagnostic.getData().get(0) instanceof EObject) {
+            final EObject eObject = (EObject) diagnostic.getData().get(0);
+            final RamlTokenProvider ramlTokenProvider = (RamlTokenProvider) EcoreUtil.getExistingAdapter(eObject, RamlTokenProvider.class);
+            final RamlToken ramlToken = ramlTokenProvider.get();
+            line = ramlToken.getLine();
+            column = ramlToken.getCharPositionInLine();
+            source = ramlToken.getLocation();
+        }
+        errors.add(RamlError.of(diagnostic.getMessage(), source, line, column));
     }
 
     @Override
