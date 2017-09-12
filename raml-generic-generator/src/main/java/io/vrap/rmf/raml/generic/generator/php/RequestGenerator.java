@@ -168,8 +168,11 @@ public class RequestGenerator extends AbstractTemplateGenerator {
     }
 
     private String getPackageFolder(AnyType anyType, final String glue) {
-        return anyType.getAnnotations().stream().filter(annotation -> annotation.getType().equals(packageAnnotationType))
-                .map(annotation -> ((StringInstance)annotation.getValue()).getValue() + glue).findFirst().orElse("");
+        Annotation annotation = anyType.getAnnotation(packageAnnotationType, true);
+        if (annotation == null) {
+            return "";
+        }
+        return ((StringInstance)anyType.getAnnotation(packageAnnotationType, true).getValue()).getValue() + glue;
     }
 
     String generateResource(final ResourceGeneratingVisitor requestGeneratingVisitor, final Resource resource) {
