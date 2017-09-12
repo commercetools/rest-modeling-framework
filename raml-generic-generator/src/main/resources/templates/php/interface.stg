@@ -1,6 +1,6 @@
 import "generic.stg"
 
-interface(vendorName, type, package, builtInParent, propertyTypes, propertySetters, propertyGetters, typeProperties, typePackage, uses, patternProperties) ::= <<
+interface(vendorName, type, package, builtInParent, propertyTypes, propertySetters, propertyGetters, typeProperties, typePackage, uses, patternProperties, subTypes, subTypePackages) ::= <<
 \<?php
 <generatorInfo()>
 
@@ -10,8 +10,18 @@ namespace <vendorName>\\<package; format="capitalize"><if(typePackage)>\\<typePa
 use <vendorName>\\Base\\JsonObject;
 <endif>
 <uses: {c |<useImport(c)>}>
+<if(typePackage)>
+use <vendorName>\\<package; format="capitalize">;
+<endif>
 
 interface <type.name> extends <if(!builtInParent)><type.type.name><else>JsonObject<endif> {
+    <if(type.discriminator)>
+    const DISCRIMINATOR = '<type.discriminator>';
+    const SUB_TYPES = [
+        <subTypes, subTypePackages: {t,tp|<discriminatorMapping(package, t,tp)>}>
+    ];
+
+    <endif>
     <typeProperties: {p |<propertyConstant(p)>}>
     <propertyGetters, propertyTypes: {p, pt|<propertyInterfaceGet(p, pt)>}>
     <propertySetters: {p |<p>}>
@@ -20,6 +30,11 @@ interface <type.name> extends <if(!builtInParent)><type.type.name><else>JsonObje
     public function set($key, $value);
     <endif>
 }
+
+>>
+
+discriminatorMapping(package, type, typePackage) ::= <<
+'<type.discriminatorValue>' => <package; format="capitalize">\\<typePackage><type.name; format="capitalize">::class,
 
 >>
 

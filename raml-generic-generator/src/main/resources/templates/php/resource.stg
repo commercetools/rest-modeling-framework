@@ -53,6 +53,7 @@ use <vendorName>\\Type\\<returnPackage><returnType.name>;
 use <vendorName>\\Base\\JsonObject;
 <endif>
 
+use <vendorName>\\Base\\ResultMapper;
 use Psr\Http\Message\ResponseInterface;
 <method; format="useBody">
 
@@ -76,9 +77,9 @@ class <requestName> extends ApiRequest
      * @param ResponseInterface $response
      * @return <if(returnType)><returnType.name><else>JsonObject<endif>
      */
-    public function map(ResponseInterface $response)
+    public function map(ResponseInterface $response, ResultMapper $mapper)
     {
-        return parent::map($response);
+        return parent::map($response, $mapper);
     }
 
     <if(method.queryParameters)>

@@ -12,7 +12,6 @@ namespace <vendorName>\\<package; format="capitalize"><if(typePackage)>\\<typePa
 <if(builtInParent)>
 use <vendorName>\\Base\\JsonObjectModel;
 <endif>
-use <vendorName>\\Base\\ResultMapper;
 <uses: {c |<useImport(c)>}>
 
 class <type.name>Model extends <if(!builtInParent)><type.type.name>Model<else>JsonObjectModel<endif> implements <type.name> {
@@ -103,15 +102,17 @@ public function get<property.name; format="capitalize">()
     if (is_null($this-><property.name>)) {
         $value = $this->raw(<parent.name>::FIELD_<property.name; format="upperUnderscore">);
         <if(property.type.discriminator)>
-        $resolvedClass = <property.type.name>DiscriminatorResolver::discriminatorType($value);
-        $mappedClass = ResultMapper::getMappedClass($resolvedClass);
-        <else>
-        $mappedClass = ResultMapper::getMappedClass(<property.type.name>::class);
-        <endif>
+        $resolvedClass = $this->getMapper()->resolveDiscriminator(<property.type.name>::class, <property.type.name>::DISCRIMINATOR, <property.type.name>::SUB_TYPES, $value);
         if (is_null($value)) {
-            return new $mappedClass();
+            return $this->mapData($resolvedClass, null);
         }
-        $this-><property.name> = new $mappedClass($value);
+        $this-><property.name> = $this->mapData($resolvedClass, $value);
+        <else>
+        if (is_null($value)) {
+            return $this->mapData(<property.type.name>::class, null);
+        }
+        $this-><property.name> = $this->mapData(<property.type.name>::class, $value);
+        <endif>
     }
     return $this-><property.name>;
 }
@@ -126,11 +127,10 @@ public function get<property.name; format="capitalize">()
 {
     if (is_null($this-><property.name>)) {
         $value = $this->raw(<parent.name>::FIELD_<property.name; format="upperUnderscore">);
-        $mappedClass = ResultMapper::getMappedClass(<propertyType>::class);
         if (is_null($value)) {
-            return new $mappedClass();
+            return $this->mapData(<propertyType>::class, null);
         }
-        $this-><property.name> = new $mappedClass($value);
+        $this-><property.name> = $this->mapData(<propertyType>::class, $value);
     }
     return $this-><property.name>;
 }

@@ -58,10 +58,10 @@ class TypeExpressionConstructorTest extends Specification implements ResourceFix
         UnionType unionType = parse('string|number')
         then:
         unionType.oneOf.size() == 2
-        unionType.oneOf[0].type instanceof StringType
-        unionType.oneOf[0].type.name == 'string'
-        unionType.oneOf[1].type instanceof NumberType
-        unionType.oneOf[1].type.name == 'number'
+        unionType.oneOf[0] instanceof StringType
+        unionType.oneOf[0].name == 'string'
+        unionType.oneOf[1] instanceof NumberType
+        unionType.oneOf[1].name == 'number'
     }
 
     def "TypeTemplate"() {
@@ -93,8 +93,8 @@ class TypeExpressionConstructorTest extends Specification implements ResourceFix
         arrayType.items instanceof UnionType
         UnionType unionType = arrayType.items
         unionType.oneOf.size() == 2
-        unionType.oneOf[0].type instanceof StringType
-        unionType.oneOf[1].type instanceof NumberType
+        unionType.oneOf[0] instanceof StringType
+        unionType.oneOf[1] instanceof NumberType
     }
 
     EObject parse(String typeExpression) {

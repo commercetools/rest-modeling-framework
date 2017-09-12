@@ -773,6 +773,36 @@ class ApiConstructorTest extends Specification {
         objectType.properties[0].type instanceof StringType
     }
 
+    def "type recursion.raml"() {
+        when:
+        Api api = constructApi(
+                '''\
+        #%RAML 1.0
+        title: type recursion
+
+        types:
+            foo:
+                properties:
+                    bar: object
+        ''')
+        then:
+        api.types.size() == 1
+
+        api.types.get(0).name == "foo"
+        api.types.get(0).type instanceof ObjectType
+        ObjectType objectType = api.types.get(0).getType()
+        objectType.name == "object"
+        objectType.properties.size() == 0
+        objectType.type == null
+
+        api.types.get(0).properties.get(0).type instanceof ObjectType
+        api.types.get(0).properties.get(0).name == "bar"
+        ObjectType propertyType = api.types.get(0).properties.get(0).type
+        propertyType.properties.size() == 0
+        propertyType.name == "object"
+        propertyType.type == null
+    }
+
     Api constructApi(String input) {
         RAMLParser parser = parser(input)
         def apiConstructor = new ApiConstructor()

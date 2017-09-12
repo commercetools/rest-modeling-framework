@@ -47,7 +47,6 @@ public class TypesGenerator extends AbstractTemplateGenerator {
         final List<File> f = Lists.newArrayList();
         f.addAll(generateTypes(outputPath, types));
         f.addAll(generateMapFile(outputPath, types));
-        f.addAll(generateDiscriminatorResolver(outputPath, types));
         f.addAll(generateCollections(outputPath, types));
 
         return f;
@@ -99,28 +98,6 @@ public class TypesGenerator extends AbstractTemplateGenerator {
                     }
                 }
             }
-        }
-        return f;
-    }
-
-    private List<File> generateDiscriminatorResolver(final File outputPath, final List<AnyType> types) throws IOException {
-        final List<ObjectType> discriminatorTypes = types.stream().filter(anyType -> anyType instanceof ObjectType && ((ObjectType) anyType).getDiscriminator() != null)
-                .map(anyType -> (ObjectType)anyType)
-                .collect(Collectors.toList());
-        final STGroupFile stGroup = createSTGroup(Resources.getResource(resourcesPath + "discriminator.stg"));
-        final List<File> f = Lists.newArrayList();
-        for (final ObjectType objectType : discriminatorTypes) {
-            final ST st = stGroup.getInstanceOf(TYPE_DISCRIMINATOR_RESOLVER);
-            st.add("package", PACKAGE_NAME);
-            st.add("vendorName", vendorName);
-            st.add("type", objectType);
-            Annotation packageAnnotation = objectType.getAnnotations().stream().filter(annotation -> annotation.getType().equals(packageAnnotationType)).findFirst().orElse(null);
-            st.add("typePackage", packageAnnotation);
-            st.add("subTypes", objectType.subTypes());
-            st.add("subTypePackages", objectType.subTypes().stream().map(anyType -> getPackageFolder(anyType, "\\")).collect(Collectors.toList()));
-            final String packageFolder = getPackageFolder(objectType);
-
-            f.add(generateFile(st.render(), new File(outputPath, packageFolder + objectType.getName() + "DiscriminatorResolver.php")));
         }
         return f;
     }
@@ -643,10 +620,16 @@ public class TypesGenerator extends AbstractTemplateGenerator {
                         .map(property -> {
                             AnyType t = property.getType() instanceof ArrayType ? ((ArrayType) property.getType()).getItems() : property.getType();
                             final String typePackage = getPackageFolder(t , "\\");
-                            return vendorName + "\\" + capitalize(packageName) + "\\" + typePackage + (new PropertyTypeVisitor()).doSwitch(property.getType());
+                            return vendorName + "\\" + capitalize(packageName) + "\\" + typePackage + (new PropertyTypeVisitor()).doSwitch(t);
                         })
                         .collect(Collectors.toSet());
-
+                uses.addAll(
+                        objectType.getProperties().stream()
+                            .filter(property -> property.getType() instanceof ObjectType)
+                            .filter(property -> ((ObjectType)property.getType()).getDiscriminator() != null)
+                            .map(property -> vendorName + "\\Base\\DiscriminatorResolver")
+                            .collect(Collectors.toSet())
+                );
                 uses.addAll(
                         objectType.getProperties().stream()
                                 .map(property -> getBaseProperty(property))
@@ -717,6 +700,11 @@ public class TypesGenerator extends AbstractTemplateGenerator {
                     st.add("typeProperties", typeProperties.entrySet());
                     st.add("propertyGetters", propertyGetters);
                     st.add("propertySetters", propertySetters);
+                    if (objectType.getDiscriminator() != null) {
+                        st.add("subTypes", objectType.subTypes());
+                        st.add("subTypePackages", objectType.subTypes().stream().map(anyType -> getPackageFolder(anyType, "\\")).collect(Collectors.toList()));
+                    }
+
                 }
                 if (type.equals(TYPE_MODEL) || type.equals(TYPE_INTERFACE)) {
                     List<String> propertyTypes = nonPatternProperties.stream()

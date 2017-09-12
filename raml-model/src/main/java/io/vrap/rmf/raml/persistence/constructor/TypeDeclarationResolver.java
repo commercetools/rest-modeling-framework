@@ -209,8 +209,10 @@ public class TypeDeclarationResolver {
                 final String name = nameToken.getText();
                 typeScope.with(declaredType.eClass().getEStructuralFeature("name"))
                         .setValue(name, nameToken);
-                typeScope.with(declaredType.eClass().getEStructuralFeature("type"))
-                        .setValue(superType, nameToken);
+                if (!optionalBuiltinType.isPresent()) {
+                    typeScope.with(declaredType.eClass().getEStructuralFeature("type"))
+                            .setValue(superType, nameToken);
+                }
             } else {
                 final InternalEObject proxy = (InternalEObject) EcoreUtil.create(superType.eClass());
                 final String uriFragment = scope.getUriFragment(nameToken.getText());

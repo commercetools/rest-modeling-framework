@@ -25,8 +25,7 @@ public class BuiltinTypeTest implements ResourceFixtures {
             assertThat(anyType).isInstanceOf(AnyType.class);
             final AnyType type = (AnyType) anyType;
             final AnyType superType = type.getType();
-            assertThat(superType).isEqualTo(type)
-                    .describedAs("The type of the builtin type points to itself.");
+            assertThat(superType).isNull();
 
             final EObject anyAnnotationType = builtinTypesResource.getEObject("/annotationTypes/" + builtinType.getName());
 
@@ -34,9 +33,7 @@ public class BuiltinTypeTest implements ResourceFixtures {
             assertThat(anyAnnotationType).isInstanceOf(AnyAnnotationType.class);
             final AnyAnnotationType annotationType = (AnyAnnotationType) anyAnnotationType;
             final AnyAnnotationType superAnnotationType = annotationType.getType();
-            assertThat(superAnnotationType).isEqualTo(annotationType)
-                    .describedAs("The type of the builtin type points to itself.");
-
+            assertThat(superAnnotationType).isNull();
         }
     }
 }

@@ -8,7 +8,9 @@ namespace <vendorName>\\<package; format="capitalize"><if(typePackage)>\\<typePa
 
 use <vendorName>\\Base\\JsonCollection;
 use <vendorName>\\Base\\Collection;
-use <vendorName>\\Base\\ResultMapper;
+<if(type.discriminator)>
+use <vendorName>\\Base\\DiscriminatorResolver;
+<endif>
 
 class <type.name>CollectionModel extends JsonCollection implements <type.name>Collection {
 
@@ -32,12 +34,11 @@ class <type.name>CollectionModel extends JsonCollection implements <type.name>Co
     {
         if (!is_null($data) && !$data instanceof <type.name>) {
             <if(type.discriminator)>
-            $resolvedClass = <type.name>DiscriminatorResolver::discriminatorType($data);
-            $mappedClass = ResultMapper::getMappedClass($resolvedClass);
+            $resolvedClass = $this->getMapper()->resolveDiscriminator(<type.name>::class, <type.name>::DISCRIMINATOR, <type.name>::SUB_TYPES, $data);
+            $data = $this->mapData($resolvedClass, $data);
             <else>
-            $mappedClass = ResultMapper::getMappedClass(<type.name>::class);
+            $data = $this->mapData(<type.name>::class, $data);
             <endif>
-            $data = new $mappedClass($data);
             $this->rawSet($data, $index);
         }
         return $data;
