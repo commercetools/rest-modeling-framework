@@ -102,7 +102,7 @@ public function get<property.name; format="capitalize">()
     if (is_null($this-><property.name>)) {
         $value = $this->raw(<parent.name>::FIELD_<property.name; format="upperUnderscore">);
         <if(property.type.discriminator)>
-        $resolvedClass = $this->getMapper()->resolveDiscriminator(<property.type.name>::class, <property.type.name>::DISCRIMINATOR, <property.type.name>::SUB_TYPES, $value);
+        $resolvedClass = $this->resolveDiscriminator(<property.type.name>::class, $value);
         if (is_null($value)) {
             return $this->mapData($resolvedClass, null);
         }

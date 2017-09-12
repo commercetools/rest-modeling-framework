@@ -45,6 +45,11 @@ class JsonCollection implements Collection, MapperAware, \\JsonSerializable
         return $this->resultMapper;
     }
 
+    protected function resolveDiscriminator($class, $data)
+    {
+        return $this->getMapper()->resolveDiscriminator($class, $class::DISCRIMINATOR, $class::SUB_TYPES, $data);
+    }
+
     protected function mapData($class, $data)
     {
         return $this->getMapper()->mapData($class, $data);
