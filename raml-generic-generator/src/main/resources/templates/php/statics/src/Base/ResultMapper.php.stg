@@ -38,6 +38,12 @@ class ResultMapper implements Mapper
         return $object;
     }
 
+    public function resolveDiscriminator($class, $discriminator, array $subTypes, array $data)
+    {
+        $discriminatorValue = isset($data[$discriminator]) ? $data[$discriminator] : '';
+        return isset($subTypes[$discriminatorValue]) ? $subTypes[$discriminatorValue] : $class;
+    }
+
     private function mapResponseToClass($class, ResponseInterface $response)
     {
         $body = (string)$response->getBody();

@@ -34,7 +34,7 @@ class <type.name>CollectionModel extends JsonCollection implements <type.name>Co
     {
         if (!is_null($data) && !$data instanceof <type.name>) {
             <if(type.discriminator)>
-            $resolvedClass = DiscriminatorResolver::resolve(<type.name>::class, $data);
+            $resolvedClass = $this->getMapper()->resolveDiscriminator(<type.name>::class, <type.name>::DISCRIMINATOR, <type.name>::SUB_TYPES, $data);
             $data = $this->mapData($resolvedClass, $data);
             <else>
             $data = $this->mapData(<type.name>::class, $data);
