@@ -1,0 +1,18 @@
+import "../../../generic.stg"
+
+main(vendorName) ::=<<
+\<?php
+<generatorInfo()>
+
+namespace <vendorName>\\Base;
+
+class DiscriminatorResolver
+{
+    public static function resolve($class, array $data)
+    {
+        $types = $class::SUB_TYPES;
+        $discriminatorValue = isset($data[$class::DISCRIMINATOR]) ? $data[$class::DISCRIMINATOR] : '';
+        return isset($types[$discriminatorValue]) ? $types[$discriminatorValue] : $class;
+    }
+}
+>>
