@@ -1,0 +1,16 @@
+import "../../../generic.stg"
+
+main(vendorName) ::=<<
+\<?php
+<generatorInfo()>
+
+namespace <vendorName>\\Base;
+
+use <vendorName>\Client\ApiRequest;
+use Psr\Http\Message\ResponseInterface;
+
+interface Mapper
+{
+    public function mapData($class, $data);
+}
+>>

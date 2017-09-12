@@ -154,10 +154,8 @@ public class RequestGenerator extends AbstractTemplateGenerator {
                     .filter(bodyType1 -> bodyType1.getContentTypes().size() == 0 || bodyType1.getContentTypes().contains("application/json"))
                     .findFirst().orElse(null);
             final AnyType returnType;
-            if (bodyType != null && bodyType.getInlineTypes().isEmpty() && !BuiltinType.of(bodyType.getType().getName()).isPresent()) {
+            if (bodyType != null && !BuiltinType.of(bodyType.getName()).isPresent()) {
                 returnType = bodyType.getType();
-            } else if (bodyType != null && !bodyType.getInlineTypes().isEmpty() && !BuiltinType.of(bodyType.getType().getName()).isPresent()) {
-                returnType = bodyType.getType().getType();
             } else {
                 returnType = null;
             }

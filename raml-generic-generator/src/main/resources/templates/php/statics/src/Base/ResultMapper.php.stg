@@ -9,7 +9,7 @@ namespace <vendorName>\\Base;
 use <vendorName>\Client\ApiRequest;
 use Psr\Http\Message\ResponseInterface;
 
-class ResultMapper
+class ResultMapper implements Mapper
 {
     private $classMap;
 
@@ -18,37 +18,31 @@ class ResultMapper
         $this->classMap = $classMap;
     }
 
-    private function mapData($class, $data)
+    public function map(ApiRequest $request, ResponseInterface $response)
     {
-        $type = $this->mappedClass($class);
-        return new $type($data);
+        return $this->mapResponseToClass($request::RESULT_TYPE, $response);
     }
 
-    private function mappedClass($class)
+    public function mapData($class, $data)
     {
-        return $this->classMap->getMappedClass($class);
+        $type = $this->classMap->getMappedClass($class);
+        if (is_null($data)) {
+            $object = new $type();
+        } else {
+            $object = new $type($data);
+        }
+        if ($object instanceof MapperAware) {
+            $object->setMapper($this);
+        }
+
+        return $object;
     }
 
-    public static function getMappedClass($class)
-    {
-        return Container::getInstance()->get(ResultMapper::class)->mappedClass($class);
-    }
-
-    public static function map(ApiRequest $request, ResponseInterface $response)
-    {
-        return static::mapResponseToClass($request::RESULT_TYPE, $response);
-    }
-
-    public static function mapResponseToClass($class, ResponseInterface $response)
+    private function mapResponseToClass($class, ResponseInterface $response)
     {
         $body = (string)$response->getBody();
         $json = json_decode($body, true);
-        return static::mapResultToClass($class, $json);
-    }
-
-    public static function mapResultToClass($class, $data)
-    {
-        return  Container::getInstance()->get(ResultMapper::class)->mapData($class, $data);
+        return $this->mapData($class, $json);
     }
 }
 
