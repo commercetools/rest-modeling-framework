@@ -643,10 +643,21 @@ public class TypesGenerator extends AbstractTemplateGenerator {
                         .map(property -> {
                             AnyType t = property.getType() instanceof ArrayType ? ((ArrayType) property.getType()).getItems() : property.getType();
                             final String typePackage = getPackageFolder(t , "\\");
-                            return vendorName + "\\" + capitalize(packageName) + "\\" + typePackage + (new PropertyTypeVisitor()).doSwitch(property.getType());
+                            return vendorName + "\\" + capitalize(packageName) + "\\" + typePackage + (new PropertyTypeVisitor()).doSwitch(t);
                         })
                         .collect(Collectors.toSet());
-
+                uses.addAll(
+                        objectType.getProperties().stream()
+                            .filter(property -> property.getType() instanceof ObjectType)
+                            .filter(property -> !getPackageFolder(property.getType(), "\\").equals(typeFolder))
+                            .filter(property -> ((ObjectType)property.getType()).getDiscriminator() != null)
+                            .map(property -> {
+                                AnyType t = property.getType();
+                                final String typePackage = getPackageFolder(t, "\\");
+                                return vendorName + "\\" + capitalize(packageName) + "\\" + typePackage + t.getName() + "DiscriminatorResolver";
+                            })
+                            .collect(Collectors.toSet())
+                );
                 uses.addAll(
                         objectType.getProperties().stream()
                                 .map(property -> getBaseProperty(property))

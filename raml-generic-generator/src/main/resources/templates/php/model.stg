@@ -105,7 +105,7 @@ public function get<property.name; format="capitalize">()
         <if(property.type.discriminator)>
         $resolvedClass = <property.type.name>DiscriminatorResolver::discriminatorType($value);
         if (is_null($value)) {
-            return $this->map($resolvedClass, null);
+            return $this->mapData($resolvedClass, null);
         }
         $this-><property.name> = $this->mapData($resolvedClass, $value);
         <else>
