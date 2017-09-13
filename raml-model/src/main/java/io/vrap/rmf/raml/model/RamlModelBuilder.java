@@ -4,6 +4,8 @@ import io.vrap.rmf.raml.model.facets.StringInstance;
 import io.vrap.rmf.raml.model.modules.Api;
 import io.vrap.rmf.raml.model.resources.*;
 import io.vrap.rmf.raml.model.resources.util.ResourcesSwitch;
+import io.vrap.rmf.raml.model.responses.BodyType;
+import io.vrap.rmf.raml.model.responses.util.ResponsesSwitch;
 import io.vrap.rmf.raml.model.types.*;
 import io.vrap.rmf.raml.model.types.util.TypesSwitch;
 import io.vrap.rmf.raml.model.util.StringTemplate;
@@ -20,6 +22,8 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
 /**
@@ -42,8 +46,11 @@ public class RamlModelBuilder {
         final Resource resolvedResource = resourceSet.createResource(uri.appendQuery("resolved=true"));
         resolvedResource.getContents().add(apiCopy);
         resolvedResource.getErrors().addAll(resource.getErrors());
+
         final ResourceResolver resourceResolver = new ResourceResolver();
-        apiCopy.eAllContents().forEachRemaining(resourceResolver::doSwitch);
+        final BodyContentTypeResolver bodyContentTypeResolver = new BodyContentTypeResolver(api.getMediaType());
+
+        apiCopy.eAllContents().forEachRemaining(eObject -> { resourceResolver.doSwitch(eObject); bodyContentTypeResolver.doSwitch(eObject); });
         return apiCopy;
     }
 
@@ -77,6 +84,22 @@ public class RamlModelBuilder {
                 resourceTypeResolver.resolve(resourceTypeApplication.getType());
             }
             return resource;
+        }
+    }
+
+    private static class BodyContentTypeResolver extends ResponsesSwitch<EObject> {
+        private final List<String> defaultMediaTypes;
+
+        public BodyContentTypeResolver(final List<String> defaultMediaTypes) {
+            this.defaultMediaTypes = defaultMediaTypes;
+        }
+
+        @Override
+        public EObject caseBodyType(final BodyType body) {
+            if (body.getContentTypes().isEmpty()) {
+                body.getContentTypes().addAll(defaultMediaTypes);
+            }
+            return body;
         }
     }
 

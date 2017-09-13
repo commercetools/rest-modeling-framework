@@ -1,6 +1,9 @@
 #%RAML 1.0
 title: An example API with an applied resource type
 
+mediaType:
+  - application/json
+
 types:
   User:
     properties:
@@ -27,8 +30,7 @@ resourceTypes:
       responses:
         200:
           body:
-            application/json:
-              type: <<resourceName>>
+            type: <<resourceName>>
     post?:
       body:
         application/json:
