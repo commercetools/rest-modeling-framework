@@ -86,7 +86,7 @@ public class RamlResource extends ResourceImpl {
             column = ramlToken.getCharPositionInLine();
             source = ramlToken.getLocation();
         }
-        errors.add(RamlError.of(diagnostic.getMessage(), source, line, column));
+        getErrors().add(RamlError.of(diagnostic.getMessage(), source, line, column));
     }
 
     @Override
