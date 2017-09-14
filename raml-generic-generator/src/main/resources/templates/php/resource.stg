@@ -95,12 +95,12 @@ paramBlock(param) ::=<<
 >>
 withParam(requestName, parameter) ::=<<
 /**
- * @param $<parameter.name; format="lowercamel">
+ * @param <parameter; format="paramName">
  * @return <requestName>
  */
-public function with<parameter.name; format="uppercamel">($<parameter.name; format="lowercamel">)
+public function <parameter; format="methodName">(<parameter; format="methodParam">)
 {
-    return $this->withQueryParam('<parameter.name>', $<parameter.name; format="lowercamel">);
+    return $this->withQueryParam(<parameter; format="template">, <parameter; format="paramName">);
 }
 
 >>
