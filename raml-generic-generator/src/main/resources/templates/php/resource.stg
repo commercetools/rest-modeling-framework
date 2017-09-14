@@ -48,7 +48,7 @@ namespace <vendorName>\\<package; format="capitalize">;
 
 use <vendorName>\\Client\\ApiRequest;
 <if(returnType)>
-use <vendorName>\\Type\\<returnPackage><returnType.name>;
+use <vendorName>\\Types\\<returnPackage><returnType.name>;
 <else>
 use <vendorName>\\Base\\JsonObject;
 <endif>
