@@ -206,7 +206,7 @@ public class RequestGenerator extends AbstractTemplateGenerator {
 
     private String camelize(String arg)
     {
-        return CaseFormat.LOWER_HYPHEN.to(CaseFormat.LOWER_CAMEL, arg.replace(".", "-"));
+        return CaseFormat.LOWER_HYPHEN.to(CaseFormat.LOWER_CAMEL, CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_HYPHEN, arg).replace(".", "-"));
     }
 
     @Override
