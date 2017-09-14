@@ -7,6 +7,8 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.io.Resources;
 import io.vrap.rmf.raml.generic.generator.AbstractTemplateGenerator;
+import io.vrap.rmf.raml.model.facets.ObjectInstance;
+import io.vrap.rmf.raml.model.facets.PropertyValue;
 import io.vrap.rmf.raml.model.facets.StringInstance;
 import io.vrap.rmf.raml.model.resources.*;
 import io.vrap.rmf.raml.model.resources.util.ResourcesSwitch;
@@ -33,11 +35,13 @@ public class RequestGenerator extends AbstractTemplateGenerator {
     static final String PACKAGE_NAME = "request";
     private final String vendorName;
     private final AnyAnnotationType packageAnnotationType;
+    private final AnyAnnotationType placeholderParamAnnotationType;
 
-    RequestGenerator(final String vendorName, final AnyAnnotationType packageAnnotationType)
+    RequestGenerator(final String vendorName, final AnyAnnotationType packageAnnotationType, final AnyAnnotationType placeholderParamAnnotationType)
     {
         this.vendorName = vendorName;
         this.packageAnnotationType = packageAnnotationType;
+        this.placeholderParamAnnotationType = placeholderParamAnnotationType;
     }
 
     public List<File> generate(final List<Resource> resources, final File outputPath) throws IOException {
@@ -200,9 +204,53 @@ public class RequestGenerator extends AbstractTemplateGenerator {
         return toParamName(uri, "By") + StringUtils.capitalize(method.getMethod().toString());
     }
 
+    private String camelize(String arg)
+    {
+        return CaseFormat.LOWER_HYPHEN.to(CaseFormat.LOWER_CAMEL, CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_HYPHEN, arg).replace(".", "-"));
+    }
+
     @Override
     protected STGroupFile createSTGroup(final URL resource) {
         final STGroupFile stGroup = super.createSTGroup(resource);
+        stGroup.registerRenderer(QueryParameter.class,
+                (arg, formatString, locale) -> {
+                    final QueryParameter param = (QueryParameter) arg;
+                    Annotation anno = param.getAnnotation(placeholderParamAnnotationType);
+                    switch (Strings.nullToEmpty(formatString)) {
+                        case "methodParam":
+                            if (anno != null) {
+                                ObjectInstance o = (ObjectInstance)anno.getValue();
+                                StringInstance placeholder = (StringInstance)o.getPropertyValues().stream().filter(propertyValue -> propertyValue.getName().equals("placeholder")).findFirst().orElse(null).getValue();
+                                StringInstance paramName = (StringInstance)o.getPropertyValues().stream().filter(propertyValue -> propertyValue.getName().equals("paramName")).findFirst().orElse(null).getValue();
+                                return "$" + camelize(placeholder.getValue()) + ", $" + paramName.getValue();
+                            }
+                            return "$" + camelize(param.getName());
+                        case "methodName":
+                            if (anno != null) {
+                                ObjectInstance o = (ObjectInstance)anno.getValue();
+                                StringInstance paramName = (StringInstance)o.getPropertyValues().stream().filter(propertyValue -> propertyValue.getName().equals("paramName")).findFirst().orElse(null).getValue();
+                                return "with" + capitalize(paramName.getValue());
+                            }
+                            return "with" + capitalize(camelize(param.getName()));
+                        case "paramName":
+                            if (anno != null) {
+                                ObjectInstance o = (ObjectInstance)anno.getValue();
+                                StringInstance paramName = (StringInstance)o.getPropertyValues().stream().filter(propertyValue -> propertyValue.getName().equals("paramName")).findFirst().orElse(null).getValue();
+                                return "$" + paramName.getValue();
+                            }
+                            return "$" + camelize(param.getName());
+                        case "template":
+                            if (anno != null) {
+                                ObjectInstance o = (ObjectInstance) anno.getValue();
+                                StringInstance template = (StringInstance) o.getPropertyValues().stream().filter(propertyValue -> propertyValue.getName().equals("template")).findFirst().orElse(null).getValue();
+                                StringInstance placeholder = (StringInstance) o.getPropertyValues().stream().filter(propertyValue -> propertyValue.getName().equals("placeholder")).findFirst().orElse(null).getValue();
+                                return "sprintf('" + template.getValue().replace("<<" + placeholder.getValue() + ">>", "%s") + "', $" + placeholder.getValue() + ")";
+                            }
+                            return "'" + param.getName() + "'";
+                        default:
+                            return camelize(param.getName());
+                    }
+                });
         stGroup.registerRenderer(Method.class,
                 (arg, formatString, locale) -> {
                     final Method method = (Method)arg;

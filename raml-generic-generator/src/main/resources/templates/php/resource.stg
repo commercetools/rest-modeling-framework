@@ -48,7 +48,7 @@ namespace <vendorName>\\<package; format="capitalize">;
 
 use <vendorName>\\Client\\ApiRequest;
 <if(returnType)>
-use <vendorName>\\Type\\<returnPackage><returnType.name>;
+use <vendorName>\\Types\\<returnPackage><returnType.name>;
 <else>
 use <vendorName>\\Base\\JsonObject;
 <endif>
@@ -95,12 +95,12 @@ paramBlock(param) ::=<<
 >>
 withParam(requestName, parameter) ::=<<
 /**
- * @param $<parameter.name; format="lowercamel">
+ * @param <parameter; format="paramName">
  * @return <requestName>
  */
-public function with<parameter.name; format="uppercamel">($<parameter.name; format="lowercamel">)
+public function <parameter; format="methodName">(<parameter; format="methodParam">)
 {
-    return $this->withQueryParam('<parameter.name>', $<parameter.name; format="lowercamel">);
+    return $this->withQueryParam(<parameter; format="template">, <parameter; format="paramName">);
 }
 
 >>
