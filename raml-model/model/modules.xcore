@@ -14,6 +14,7 @@ import io.vrap.rmf.raml.model.facets.ProtocolsFacet
 import io.vrap.rmf.raml.model.types.AnnotationsFacet
 import io.vrap.rmf.raml.model.types.AnyAnnotationType
 import io.vrap.rmf.raml.model.types.AnyType
+import io.vrap.rmf.raml.model.types.InlineTypeContainer
 
 import io.vrap.rmf.raml.model.resources.ResourceContainer
 import io.vrap.rmf.raml.model.resources.ResourceType
@@ -86,7 +87,7 @@ class Document {
 	String content
 }
 
-interface TypeContainer {
+interface TypeContainer extends InlineTypeContainer {
 	contains LibraryUse[] uses
     
     contains AnyType[] types
