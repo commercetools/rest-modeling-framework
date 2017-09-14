@@ -89,7 +89,7 @@ public class ApiConstructor extends BaseConstructor {
             final List<Object> baseUriParameters = baseUriParametersFacet.uriParameterFacets.stream()
                     .map(this::visitTypedElementFacet)
                     .collect(Collectors.toList());
-
+            scope.setValue(baseUriParameters, baseUriParametersFacet.getStart());
             return baseUriParameters;
         });
     }

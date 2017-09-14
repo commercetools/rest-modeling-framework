@@ -822,6 +822,19 @@ class ApiConstructorTest extends Specification {
         api.baseUriParameters.get(0).type.type.eIsProxy() == true
     }
 
+    def "dangling items.raml"() {
+        when:
+        Api api = constructApi(
+                '''\
+        #%RAML 1.0
+        title: Test
+        types:
+            foo:
+                type: X[]''')
+        then:
+        api.types.size() == 1
+    }
+
     Api constructApi(String input) {
         RAMLParser parser = parser(input)
         def apiConstructor = new ApiConstructor()
