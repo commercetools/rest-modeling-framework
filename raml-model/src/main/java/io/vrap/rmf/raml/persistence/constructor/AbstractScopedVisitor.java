@@ -89,11 +89,13 @@ abstract class AbstractScopedVisitor<T> extends RAMLBaseVisitor<T> {
     }
 
     private void setAttribute(final EObject eObject, final EAttribute eAttribute, final RAMLParser.IdContext valueToken) {
-        final Object value = createFromString(eAttribute, valueToken);
-        if (eAttribute.isMany()) {
-            eObject.eSet(eAttribute, Collections.singletonList(value));
-        } else {
-            eObject.eSet(eAttribute, value);
+        if (valueToken.getText().length() > 0) {
+            final Object value = createFromString(eAttribute, valueToken);
+            if (eAttribute.isMany()) {
+                eObject.eSet(eAttribute, Collections.singletonList(value));
+            } else {
+                eObject.eSet(eAttribute, value);
+            }
         }
     }
 
