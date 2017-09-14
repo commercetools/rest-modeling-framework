@@ -134,9 +134,7 @@ interface PropertiesFacet {
 	 * The properties that instances of this type can or must have.
 	 */
 	contains Property[] properties
-}
 
-class ObjectType extends AnyType, ObjectTypeFacet, PropertiesFacet {
 	/*
 	 * Returns the property with the given name or null if no property 
 	 * with the given name exists.
@@ -147,7 +145,10 @@ class ObjectType extends AnyType, ObjectTypeFacet, PropertiesFacet {
 		}
 		return null
 	}
-	
+}
+
+class ObjectType extends AnyType, ObjectTypeFacet, PropertiesFacet {
+
 	/*
      * Returns all properties (with inherited) of this object type.
      *
