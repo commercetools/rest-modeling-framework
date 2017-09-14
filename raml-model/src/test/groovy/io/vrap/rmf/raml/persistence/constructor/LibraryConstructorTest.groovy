@@ -144,7 +144,6 @@ class LibraryConstructorTest extends Specification {
         objectType.getProperty('name') != null
         objectType.getProperty('name').type instanceof StringType
         StringType inlineStringType = objectType.getProperty('name').type
-        inlineStringType.name == null
         inlineStringType.minLength == 10
     }
 

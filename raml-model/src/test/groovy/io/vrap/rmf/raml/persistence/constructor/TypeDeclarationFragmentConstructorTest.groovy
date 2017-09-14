@@ -74,7 +74,6 @@ class TypeDeclarationFragmentConstructorTest extends Specification {
         StringType namePropertyType = objectType.properties[0].type
 
         StringType stringType = BuiltinType.STRING.getEObject(resourceSet)
-        namePropertyType.name == null
         namePropertyType != stringType
         namePropertyType.example != null
         namePropertyType.example.value instanceof StringInstance
@@ -98,7 +97,6 @@ class TypeDeclarationFragmentConstructorTest extends Specification {
         StringType namePropertyType = objectType.properties[0].type
 
         StringType stringType = BuiltinType.STRING.getEObject(resourceSet)
-        namePropertyType.name == null
         namePropertyType != stringType
         namePropertyType.default instanceof StringInstance
     }

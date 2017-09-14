@@ -558,15 +558,15 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
 
         scope.setValue(IDENTIFIABLE_ELEMENT__NAME, parsedName, typedElementMap.getStart());
 
-        EObject typedElementType;
+        AnyType typedElementType;
         if (typedElementMap.typeFacet().size() > 0) {
             final RAMLParser.TypeFacetContext typeFacet = typedElementMap.typeFacet().get(0);
-            typedElementType = (EObject) withinScope(scope.with(TYPED_ELEMENT__TYPE),
+            typedElementType = (AnyType) withinScope(scope.with(TYPED_ELEMENT__TYPE),
                     propertyTypeScope -> visitTypeFacet(typeFacet));
         } else if (typedElementMap.propertiesFacet().size() == 1) {
-            typedElementType = scope.getEObjectByName(BuiltinType.OBJECT.getName());
+            typedElementType = (AnyType) scope.getEObjectByName(BuiltinType.OBJECT.getName());
         } else {
-            typedElementType = scope.getEObjectByName(BuiltinType.STRING.getName());
+            typedElementType = (AnyType) scope.getEObjectByName(BuiltinType.STRING.getName());
         }
 
         // inline type declaration
@@ -576,7 +576,7 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
                         typedElementMap.defaultFacet().size() > 0 || typedElementMap.enumFacet().size() > 0 ||
                         typedElementMap.itemsFacet().size() > 0;
         if (isInlineTypeDeclaration) {
-            typedElementType = EcoreUtil.create(typedElementType.eClass());
+            typedElementType = inlineTypeDeclaration(typedElementType, scope, typedElementMap);
             scope.addValue(INLINE_TYPE_CONTAINER__INLINE_TYPES, typedElementType);
             withinScope(scope.with(typedElementType),
                     inlineTypeDeclarationScope -> {

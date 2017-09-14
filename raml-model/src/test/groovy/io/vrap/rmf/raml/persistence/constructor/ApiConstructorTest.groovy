@@ -259,7 +259,6 @@ class ApiConstructorTest extends Specification {
         api.securitySchemes[0].describedBy.headers.size() == 1
         api.securitySchemes[0].describedBy.headers[0].name == 'Authorization'
         api.securitySchemes[0].describedBy.headers[0].type instanceof StringType
-        api.securitySchemes[0].describedBy.headers[0].type.name == null
         api.securitySchemes[0].describedBy.responses.size() == 1
         api.securitySchemes[0].describedBy.responses[0].statusCode == '401'
         api.securitySchemes[0].describedBy.responses[0].description == 'Unauthorized'
@@ -801,6 +800,26 @@ class ApiConstructorTest extends Specification {
         propertyType.properties.size() == 0
         propertyType.name == "object"
         propertyType.type == null
+    }
+
+    def "baseuriparameter-with-invalid-type.raml (TCK)"() {
+        when:
+        Api api = constructApi(
+                '''\
+        #%RAML 1.0
+        title: Test
+        baseUri: http://{a}.myapi.org
+        baseUriParameters:
+            a:
+                displayName: A
+                description: This is A
+                type: X
+        ''')
+        then:
+        api.types.size() == 0
+        api.baseUriParameters.size() == 1
+        api.baseUriParameters.get(0).type != null
+        api.baseUriParameters.get(0).type.type.eIsProxy() == true
     }
 
     Api constructApi(String input) {
