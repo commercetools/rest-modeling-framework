@@ -19,7 +19,7 @@ interface <type.name> extends <if(!builtInParent)><type.type.name><else>JsonObje
     <if(type.discriminator)>
     const DISCRIMINATOR = '<type.discriminator>';
     const SUB_TYPES = [
-        <subTypes, subTypePackages: {t,tp|<discriminatorMapping(package, t,tp)>}>
+        <subTypes, subTypePackages: {t,tp|<discriminatorMapping(typePackage, package, t,tp)>}>
     ];
 
     <endif>
@@ -34,8 +34,8 @@ interface <type.name> extends <if(!builtInParent)><type.type.name><else>JsonObje
 
 >>
 
-discriminatorMapping(package, type, typePackage) ::= <<
-'<type.discriminatorValue>' => <package; format="capitalize">\\<typePackage><type.name; format="capitalize">::class,
+discriminatorMapping(typePackage, package, type, subtypePackage) ::= <<
+'<type.discriminatorValue>' => <if(typePackage)><package; format="capitalize">\\<endif><subtypePackage><type.name; format="capitalize">::class,
 
 >>
 

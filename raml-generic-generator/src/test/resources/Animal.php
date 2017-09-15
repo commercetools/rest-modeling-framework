@@ -11,7 +11,7 @@ use Test\Base\JsonObject;
 interface Animal extends JsonObject {
     const DISCRIMINATOR = 'kind';
     const SUB_TYPES = [
-        'cat' => Types\Cat::class,
+        'cat' => Cat::class,
 
     ];
 
