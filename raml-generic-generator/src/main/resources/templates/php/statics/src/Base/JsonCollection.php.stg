@@ -6,7 +6,7 @@ main(vendorName) ::=<<
 
 namespace <vendorName>\\Base;
 
-use Commercetools\Type\ModelClassMap;
+use <vendorName>\\Types\\ModelClassMap;
 
 class JsonCollection implements Collection, MapperAware, \\JsonSerializable
 {

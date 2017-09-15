@@ -6,8 +6,6 @@
 
 namespace Test\Client;
 
-use GuzzleHttp\Client;
-
 interface TokenProvider
 {
     public function getToken();

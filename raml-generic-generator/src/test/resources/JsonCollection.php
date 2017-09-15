@@ -6,7 +6,7 @@
 
 namespace Test\Base;
 
-use Commercetools\Type\ModelClassMap;
+use Test\Types\ModelClassMap;
 
 class JsonCollection implements Collection, MapperAware, \JsonSerializable
 {

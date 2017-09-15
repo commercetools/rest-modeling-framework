@@ -6,8 +6,6 @@ main(vendorName) ::=<<
 
 namespace <vendorName>\Client;
 
-use GuzzleHttp\Client;
-
 interface TokenProvider
 {
     public function getToken();
