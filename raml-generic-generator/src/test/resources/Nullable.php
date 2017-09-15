@@ -6,7 +6,10 @@
 
 namespace Test\Base;
 
-interface ClassMap
+interface Nullable
 {
-    public function getMappedClass($class);
+    /*
+     * @var bool
+     */
+    public function isPresent();
 }

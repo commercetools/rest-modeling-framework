@@ -26,7 +26,7 @@ import spock.lang.Unroll
 import java.nio.charset.StandardCharsets
 import static org.apache.commons.lang3.StringUtils.capitalize;
 
-@Ignore
+//@Ignore
 class PHPGeneratorTest extends Specification implements ResourceFixtures {
     @Shared
     ResourceSet resourceSet = new RamlResourceSet()
@@ -156,7 +156,7 @@ class PHPGeneratorTest extends Specification implements ResourceFixtures {
                     street: string
         ''')
         then:
-        TypesGenerator generator = new TypesGenerator("Test", packageAnnotation)
+        TypesGenerator generator = new TypesGenerator("Test", packageAnnotation, identifierAnnotation)
         String result = generator.generateMap(api.types);
         result == fileContent("ModelClassMap.php")
     }
@@ -211,8 +211,19 @@ class PHPGeneratorTest extends Specification implements ResourceFixtures {
     }
 
     String generate(final String generateType, final AnyType type) {
-        TypesGenerator generator = new TypesGenerator("Test", packageAnnotation)
+        TypesGenerator generator = new TypesGenerator("Test", packageAnnotation, identifierAnnotation)
         return generator.generateType(generator.createVisitor(TypesGenerator.PACKAGE_NAME, generateType), type);
+    }
+
+    AnyAnnotationType getIdentifierAnnotation() {
+        Api api = constructApi('''
+        annotationTypes:
+            identifier:
+                type: string
+                allowedTargets: TypeDeclaration
+        ''')
+        AnyAnnotationType identifierAnnotationType = api.getAnnotationType("identifier");
+        return identifierAnnotationType;
     }
 
     AnyAnnotationType getPackageAnnotation() {
@@ -222,8 +233,8 @@ class PHPGeneratorTest extends Specification implements ResourceFixtures {
                 type: string
                 allowedTargets: TypeDeclaration
         ''')
-        AnyAnnotationType packageAnnotation = api.getAnnotationTypes().stream().filter{anyAnnotationType -> anyAnnotationType.getName().equals("package") }.findFirst().orElse(null);
-        return packageAnnotation;
+        AnyAnnotationType packageAnnotationType = api.getAnnotationType("package");
+        return packageAnnotationType;
     }
 
     Api constructApi(final String input) {

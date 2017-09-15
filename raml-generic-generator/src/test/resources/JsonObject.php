@@ -6,13 +6,8 @@
 
 namespace Test\Base;
 
-interface JsonObject extends \JsonSerializable
+interface JsonObject extends Nullable, \JsonSerializable
 {
-    /**
-     * @return bool
-     */
-    public function isPresent($field);
-
     /**
      * @param array $data
      * @return static

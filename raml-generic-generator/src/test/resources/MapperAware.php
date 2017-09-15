@@ -1,10 +1,10 @@
-import "../../../generic.stg"
+<?php
+/**
+ * This file has been auto generated
+ * Do not change it
+ */
 
-main(vendorName) ::=<<
-\<?php
-<generatorInfo()>
-
-namespace <vendorName>\\Base;
+namespace Test\Base;
 
 interface MapperAware
 {
@@ -18,5 +18,3 @@ interface MapperAware
      */
     public function getMapper();
 }
-
->>

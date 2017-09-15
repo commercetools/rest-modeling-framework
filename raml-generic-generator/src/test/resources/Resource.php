@@ -1,10 +1,10 @@
-import "../../../generic.stg"
+<?php
+/**
+ * This file has been auto generated
+ * Do not change it
+ */
 
-main(vendorName) ::=<<
-\<?php
-<generatorInfo()>
-
-namespace <vendorName>\Client;
+namespace Test\Client;
 
 use GuzzleHttp\Psr7;
 use Psr\Http\Message\RequestInterface;
@@ -62,5 +62,3 @@ class Resource
         return $request;
     }
 }
-
->>

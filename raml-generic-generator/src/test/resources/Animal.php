@@ -9,6 +9,12 @@ namespace Test\Types;
 use Test\Base\JsonObject;
 
 interface Animal extends JsonObject {
+    const DISCRIMINATOR = 'kind';
+    const SUB_TYPES = [
+        'cat' => Types\Cat::class,
+
+    ];
+
     const FIELD_KIND = 'kind';
 
     /**

@@ -9,23 +9,45 @@ namespace Test\Base;
 use Test\Client\ApiRequest;
 use Psr\Http\Message\ResponseInterface;
 
-class ResultMapper
+class ResultMapper implements Mapper
 {
-    public static function map(ApiRequest $request, ResponseInterface $response)
+    private $classMap;
+
+    public function __construct(ClassMap $classMap)
     {
-        return static::mapResponseToClass($request::RESULT_TYPE, $response);
+        $this->classMap = $classMap;
     }
 
-    public static function mapResponseToClass($class, ResponseInterface $response)
+    public function map(ApiRequest $request, ResponseInterface $response)
+    {
+        return $this->mapResponseToClass($request::RESULT_TYPE, $response);
+    }
+
+    public function mapData($class, $data)
+    {
+        $type = $this->classMap->getMappedClass($class);
+        if (is_null($data)) {
+            $object = new $type();
+        } else {
+            $object = new $type($data);
+        }
+        if ($object instanceof MapperAware) {
+            $object->setMapper($this);
+        }
+
+        return $object;
+    }
+
+    public function resolveDiscriminator($class, $discriminator, array $subTypes, array $data)
+    {
+        $discriminatorValue = isset($data[$discriminator]) ? $data[$discriminator] : '';
+        return isset($subTypes[$discriminatorValue]) ? $subTypes[$discriminatorValue] : $class;
+    }
+
+    private function mapResponseToClass($class, ResponseInterface $response)
     {
         $body = (string)$response->getBody();
         $json = json_decode($body, true);
-        return static::mapResultToClass($class, $json);
-    }
-
-    public static function mapResultToClass($class, $data)
-    {
-        $type = ResourceClassMap::getMappedClass($class);
-        return new $type($data);
+        return $this->mapData($class, $json);
     }
 }

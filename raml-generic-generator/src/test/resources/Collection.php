@@ -6,7 +6,7 @@
 
 namespace Test\Base;
 
-interface Collection extends \IteratorAggregate, \ArrayAccess
+interface Collection extends Nullable, \IteratorAggregate, \ArrayAccess
 {
     public function at($index);
 

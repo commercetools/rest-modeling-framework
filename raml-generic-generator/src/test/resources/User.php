@@ -6,7 +6,6 @@
 
 namespace Test\Types;
 
-
 interface User extends Person {
     const FIELD_ROLE = 'role';
 

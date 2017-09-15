@@ -6,13 +6,45 @@
 
 namespace Test\Base;
 
-class JsonObjectModel implements JsonObject
+use Commercetools\Type\ModelClassMap;
+
+class JsonObjectModel implements JsonObject, MapperAware
 {
     private $rawData;
+    private $resultMapper;
 
-    public function __construct(array $data = [])
+    public function __construct(array $data = null)
     {
         $this->rawData = $data;
+    }
+
+    /**
+     * @param Mapper $mapper
+     */
+    public function setMapper(Mapper $mapper)
+    {
+        $this->resultMapper = $mapper;
+    }
+
+    /**
+     * @returns Mapper
+     */
+    public function getMapper()
+    {
+        if (is_null($this->resultMapper)) {
+            $this->resultMapper = new ResultMapper(new ModelClassMap());
+        }
+        return $this->resultMapper;
+    }
+
+    protected function resolveDiscriminator($class, $data)
+    {
+        return $this->getMapper()->resolveDiscriminator($class, $class::DISCRIMINATOR, $class::SUB_TYPES, $data);
+    }
+
+    protected function mapData($class, $data)
+    {
+        return $this->getMapper()->mapData($class, $data);
     }
 
     final protected function raw($field)
@@ -24,9 +56,9 @@ class JsonObjectModel implements JsonObject
     }
 
 
-    public function isPresent($field)
+    public function isPresent()
     {
-        return isset($this->rawData[$field]) || isset($this->$field);
+        return !is_null($this->rawData);
     }
 
     public function jsonSerialize()
@@ -50,7 +82,7 @@ class JsonObjectModel implements JsonObject
         $data = array_filter(
             get_object_vars($this),
             function ($value, $key) {
-                if ($key == 'rawData') {
+                if ($key == 'rawData' || $key == 'resultMapper') {
                     return false;
                 }
                 return !is_null($value);

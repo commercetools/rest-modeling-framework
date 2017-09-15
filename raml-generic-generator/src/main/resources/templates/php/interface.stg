@@ -8,6 +8,7 @@ namespace <vendorName>\\<package; format="capitalize"><if(typePackage)>\\<typePa
 
 <if(builtInParent)>
 use <vendorName>\\Base\\JsonObject;
+
 <endif>
 <uses: {c |<useImport(c)>}>
 <if(typePackage)>

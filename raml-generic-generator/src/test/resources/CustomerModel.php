@@ -7,7 +7,6 @@
 namespace Test\Types;
 
 use Test\Base\JsonObjectModel;
-use Test\Base\ResourceClassMap;
 
 class CustomerModel extends JsonObjectModel implements Customer {
     /**
@@ -22,11 +21,10 @@ class CustomerModel extends JsonObjectModel implements Customer {
     {
         if (is_null($this->address)) {
             $value = $this->raw(Customer::FIELD_ADDRESS);
-            $mappedClass = ResourceClassMap::getMappedClass(Address::class);
             if (is_null($value)) {
-                return new $mappedClass([]);
+                return $this->mapData(Address::class, null);
             }
-            $this->address = new $mappedClass($value);
+            $this->address = $this->mapData(Address::class, $value);
         }
         return $this->address;
     }

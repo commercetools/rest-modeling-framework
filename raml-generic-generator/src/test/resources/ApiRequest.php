@@ -29,7 +29,7 @@ class ApiRequest extends Request
         parent::__construct($method, $uri, $headers, $body, $version);
     }
 
-    private function ensureHeader(array $headers, $header, $defaultValue)
+    protected function ensureHeader(array $headers, $header, $defaultValue)
     {
         $normalizedHeader = strtolower($header);
         foreach ($headers as $header => $value) {
@@ -44,9 +44,9 @@ class ApiRequest extends Request
         return $headers;
     }
 
-    public function map(ResponseInterface $response)
+    public function map(ResponseInterface $response, ResultMapper $mapper)
     {
-        return ResultMapper::mapResponseToClass(static::RESULT_TYPE, $response);
+        return $mapper->map($this, $response);
     }
 
     public function withQueryParam($parameterName, $value)

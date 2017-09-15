@@ -7,7 +7,6 @@
 namespace Test\Types;
 
 use Test\Base\JsonObjectModel;
-use Test\Base\ResourceClassMap;
 
 class PersonModel extends JsonObjectModel implements Person {
     /**

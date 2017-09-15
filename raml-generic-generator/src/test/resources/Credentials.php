@@ -9,7 +9,7 @@ namespace Test\Client;
 class Credentials
 {
     const CLIENT_ID = 'clientId';
-    const CLIENT_SECRET = 'clientId';
+    const CLIENT_SECRET = 'clientSecret';
     const SCOPE = 'scope';
 
     /**

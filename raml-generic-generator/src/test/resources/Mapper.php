@@ -1,12 +1,12 @@
-import "../../../generic.stg"
+<?php
+/**
+ * This file has been auto generated
+ * Do not change it
+ */
 
-main(vendorName) ::=<<
-\<?php
-<generatorInfo()>
+namespace Test\Base;
 
-namespace <vendorName>\\Base;
-
-use <vendorName>\Client\ApiRequest;
+use Test\Client\ApiRequest;
 use Psr\Http\Message\ResponseInterface;
 
 interface Mapper
@@ -15,5 +15,3 @@ interface Mapper
 
     public function resolveDiscriminator($class, $discriminator, array $subTypes, array $data);
 }
-
->>

@@ -6,24 +6,63 @@
 
 namespace Test\Base;
 
-class JsonCollection implements Collection, \JsonSerializable
+use Commercetools\Type\ModelClassMap;
+
+class JsonCollection implements Collection, MapperAware, \JsonSerializable
 {
     private $rawData;
     private $keys;
     private $indexes = [];
     private $iterator;
+    private $resultMapper;
 
-    public function __construct(array $data = [])
+    public function __construct(array $data = null)
     {
-        $this->keys = array_keys($data);
-        $this->index($data);
+        if (is_array($data)) {
+            $this->keys = array_keys($data);
+            $this->index($data);
+        }
         $this->rawData = $data;
         $this->iterator = $this->getIterator();
+    }
+
+    /**
+     * @param Mapper $mapper
+     */
+    public function setMapper(Mapper $mapper)
+    {
+        $this->resultMapper = $mapper;
+    }
+
+    /**
+     * @returns Mapper
+     */
+    public function getMapper()
+    {
+        if (is_null($this->resultMapper)) {
+            $this->resultMapper = new ResultMapper(new ModelClassMap());
+        }
+        return $this->resultMapper;
+    }
+
+    protected function resolveDiscriminator($class, $data)
+    {
+        return $this->getMapper()->resolveDiscriminator($class, $class::DISCRIMINATOR, $class::SUB_TYPES, $data);
+    }
+
+    protected function mapData($class, $data)
+    {
+        return $this->getMapper()->mapData($class, $data);
     }
 
     public function jsonSerialize()
     {
         return $this->rawData;
+    }
+
+    public function isPresent()
+    {
+        return !is_null($this->rawData);
     }
 
     /**
@@ -61,6 +100,7 @@ class JsonCollection implements Collection, \JsonSerializable
      */
     public function add($value) {
         $this->rawSet($value, null);
+        $this->iterator = $this->getIterator();
 
         return $this;
     }
@@ -90,7 +130,8 @@ class JsonCollection implements Collection, \JsonSerializable
      */
     public function getIterator()
     {
-        return new MapIterator($this->rawData, [$this, 'map']);
+        $data = !is_null($this->rawData) ? $this->rawData : [];
+        return new MapIterator($data, [$this, 'map']);
     }
 
     /**
@@ -155,6 +196,7 @@ class JsonCollection implements Collection, \JsonSerializable
     public function offsetSet($offset, $value)
     {
         $this->rawSet($value, $offset);
+        $this->iterator = $this->getIterator();
     }
 
     /**
