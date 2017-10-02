@@ -268,8 +268,8 @@ public class TypesGenerator extends AbstractTemplateGenerator {
 //                st.add("parent", property.eContainer());
 //                st.add("property", property);
 //                final Property t = getBaseProperty(property);
-//                st.add("propertyType", (new PropertyTypeVisitor()).doSwitch(t.getType()));
-//                st.add("paramType", (new PropertyTypeVisitor()).doSwitch(t.getType()));
+//                st.add("propertyType", (new TypeNameVisitor()).doSwitch(t.getType()));
+//                st.add("paramType", (new TypeNameVisitor()).doSwitch(t.getType()));
 //                return st.render();
             } else {
                 if (BuiltinType.of(arrayType.getItems().getName()).isPresent()) {
@@ -602,61 +602,60 @@ public class TypesGenerator extends AbstractTemplateGenerator {
             if (objectType.getName() == null) {
                 return null;
             } else {
+                final MetaType metaType = new MetaType(objectType);
+
                 final ST st = stGroup.getInstanceOf(type);
                 st.add("vendorName", vendorName);
-                st.add("type", objectType);
-                final Boolean builtInParentType = objectType.getType() == null || BuiltinType.of(objectType.getType().getName()).isPresent();
-                st.add("builtInParent", builtInParentType);
-                st.add("package", packageName);
-                Annotation packageAnnotation = objectType.getAnnotations().stream().filter(annotation -> annotation.getType().equals(packageAnnotationType)).findFirst().orElse(null);
-                st.add("typePackage", packageAnnotation);
-                final String typeFolder = getPackageFolder(objectType, "\\");
-                final Set<String> uses = objectType.getProperties().stream()
-                        .filter(property -> property.getType() instanceof ObjectType || property.getType() instanceof ArrayType && ((ArrayType) property.getType()).getItems() instanceof ObjectType)
-                        .filter(property -> {
-                            AnyType t = property.getType() instanceof ArrayType ? ((ArrayType) property.getType()).getItems() : property.getType();
-                            return !getPackageFolder(t, "\\").equals(typeFolder);
-                        })
-                        .map(property -> {
-                            AnyType t = property.getType() instanceof ArrayType ? ((ArrayType) property.getType()).getItems() : property.getType();
-                            final String typePackage = getPackageFolder(t , "\\");
-                            return vendorName + "\\" + capitalize(packageName) + "\\" + typePackage + (new PropertyTypeVisitor()).doSwitch(t);
-                        })
-                        .collect(Collectors.toSet());
-                uses.addAll(
-                        objectType.getProperties().stream()
-                            .filter(property -> property.getType() instanceof ObjectType)
-                            .filter(property -> ((ObjectType)property.getType()).getDiscriminator() != null)
-                            .map(property -> vendorName + "\\Base\\DiscriminatorResolver")
-                            .collect(Collectors.toSet())
-                );
-                uses.addAll(
-                        objectType.getProperties().stream()
-                                .map(property -> getBaseProperty(property))
-                                .filter(property -> property.getType() instanceof ObjectType || property.getType() instanceof ArrayType && ((ArrayType) property.getType()).getItems() instanceof ObjectType)
-                                .filter(property -> {
-                                    AnyType t = property.getType() instanceof ArrayType ? ((ArrayType) property.getType()).getItems() : property.getType();
-                                    return !getPackageFolder(t, "\\").equals(typeFolder);
-                                })
-                                .map(property -> {
-                                    AnyType t = property.getType() instanceof ArrayType ? ((ArrayType) property.getType()).getItems() : property.getType();
-                                    final String typePackage = getPackageFolder(t , "\\");
-                                    return vendorName + "\\" + capitalize(packageName) + "\\" + typePackage + (new PropertyTypeVisitor()).doSwitch(property.getType());
-                                })
-                                .collect(Collectors.toSet())
-                );
-                final String typePackageFolder = getPackageFolder(objectType.getType(), "\\");
-                if (!builtInParentType && !typePackageFolder.equals(getPackageFolder(objectType, "\\"))) {
-                    final String suffix = type.equals(TYPE_MODEL) ? "Model" : "";
-                    uses.add(vendorName + "\\" + capitalize(packageName) + "\\" + typePackageFolder + objectType.getType().getName() + suffix);
+                if (type.equals(TYPE_INTERFACE)) {
+                    st.add("type", metaType);
+                } else {
+                    st.add("type", objectType);
+                    st.add("builtInParent", metaType.getHasBuiltinParent());
+                    st.add("package", packageName);
+                    st.add("typePackage", metaType.getPackage() != null ? metaType.getPackage().getAnnotation() : null);
+
+                    final String typeFolder = getPackageFolder(objectType, "\\");
+                    final Set<String> uses = objectType.getProperties().stream()
+                            .filter(property -> property.getType() instanceof ObjectType || property.getType() instanceof ArrayType && ((ArrayType) property.getType()).getItems() instanceof ObjectType)
+                            .filter(property -> {
+                                AnyType t = property.getType() instanceof ArrayType ? ((ArrayType) property.getType()).getItems() : property.getType();
+                                return !getPackageFolder(t, "\\").equals(typeFolder);
+                            })
+                            .map(property -> {
+                                AnyType t = property.getType() instanceof ArrayType ? ((ArrayType) property.getType()).getItems() : property.getType();
+                                final String typePackage = getPackageFolder(t , "\\");
+                                return vendorName + "\\" + capitalize(packageName) + "\\" + typePackage + (new PropertyTypeVisitor()).doSwitch(t);
+                            })
+                            .collect(Collectors.toSet());
+                    uses.addAll(
+                            objectType.getProperties().stream()
+                                    .filter(property -> property.getType() instanceof ObjectType)
+                                    .filter(property -> ((ObjectType)property.getType()).getDiscriminator() != null)
+                                    .map(property -> vendorName + "\\Base\\DiscriminatorResolver")
+                                    .collect(Collectors.toSet())
+                    );
+                    uses.addAll(
+                            objectType.getProperties().stream()
+                                    .map(property -> getBaseProperty(property))
+                                    .filter(property -> property.getType() instanceof ObjectType || property.getType() instanceof ArrayType && ((ArrayType) property.getType()).getItems() instanceof ObjectType)
+                                    .filter(property -> {
+                                        AnyType t = property.getType() instanceof ArrayType ? ((ArrayType) property.getType()).getItems() : property.getType();
+                                        return !getPackageFolder(t, "\\").equals(typeFolder);
+                                    })
+                                    .map(property -> {
+                                        AnyType t = property.getType() instanceof ArrayType ? ((ArrayType) property.getType()).getItems() : property.getType();
+                                        final String typePackage = getPackageFolder(t , "\\");
+                                        return vendorName + "\\" + capitalize(packageName) + "\\" + typePackage + (new PropertyTypeVisitor()).doSwitch(property.getType());
+                                    })
+                                    .collect(Collectors.toSet())
+                    );
+                    final String typePackageFolder = getPackageFolder(objectType.getType(), "\\");
+                    if (!metaType.getHasBuiltinParent() && !typePackageFolder.equals(getPackageFolder(objectType, "\\"))) {
+                        final String suffix = type.equals(TYPE_MODEL) ? "Model" : "";
+                        uses.add(vendorName + "\\" + capitalize(packageName) + "\\" + typePackageFolder + objectType.getType().getName() + suffix);
+                    }
+                    st.add("uses", uses);
                 }
-                st.add("uses", uses);
-                final List<Property> nonPatternProperties = objectType.getProperties().stream()
-                        .filter(property -> !(property.getName().startsWith("/") && property.getName().endsWith("/")))
-                        .collect(Collectors.toList());
-                final List<Property> patternProperties = objectType.getProperties().stream()
-                        .filter(property -> property.getName().startsWith("/") && property.getName().endsWith("/"))
-                        .collect(Collectors.toList());
 
                 if (type.equals(TYPE_COLLECTION_MODEL) || type.equals(TYPE_COLLECTION_INTERFACE)) {
                     final List<String> identifiers = objectType.getAllProperties().stream()
@@ -672,50 +671,16 @@ public class TypesGenerator extends AbstractTemplateGenerator {
                             .collect(Collectors.toList());
                     st.add("identifiers", identifiers);
                 }
-                if (type.equals(TYPE_INTERFACE)) {
-                    final Map<String, String> typeProperties;
-                    if(objectType.getType() instanceof ObjectType) {
-                        ObjectType superType = (ObjectType)objectType.getType();
-                        typeProperties = objectType.getProperties().stream()
-                                .filter(property -> superType.getProperty(property.getName()) == null)
-                                .collect(Collectors.toMap(
-                                        property ->
-                                            property.getName().startsWith("/") && property.getName().endsWith("/") ?
-                                                    "pattern" + property.hashCode() :
-                                                    property.getName(),
-                                        Property::getName
-                                ));
-                    } else {
-                        typeProperties = Maps.newHashMap();
-                    }
-                    final List<String> propertySetters = nonPatternProperties.stream()
-                            .map(property -> {
-                                PropertyInterfaceSetterGeneratingVisitor visitor = new PropertyInterfaceSetterGeneratingVisitor(stGroup, property);
-                                return visitor.doSwitch(property.getType());
-                            }).collect(Collectors.toList());
-                    final List<Property> propertyGetters = objectType.getProperties().stream()
-                            .filter(property -> !(property.getName().startsWith("/") && property.getName().endsWith("/")))
-                            .collect(Collectors.toList());
-                    st.add("patternProperties", patternProperties.size() > 0);
-                    st.add("typeProperties", typeProperties.entrySet());
-                    st.add("propertyGetters", propertyGetters);
-                    st.add("propertySetters", propertySetters);
-                    if (objectType.getDiscriminator() != null) {
-                        st.add("subTypes", objectType.subTypes());
-                        st.add("subTypePackages", objectType.subTypes().stream().map(anyType -> getPackageFolder(anyType, "\\")).collect(Collectors.toList()));
-                    }
-
-                }
-                if (type.equals(TYPE_MODEL) || type.equals(TYPE_INTERFACE)) {
+                if (type.equals(TYPE_MODEL)) {
+                    final List<Property> nonPatternProperties = metaType.getNonPatternProperties().stream().map(MetaProperty::getProperty).collect(Collectors.toList());
                     List<String> propertyTypes = nonPatternProperties.stream()
                             .map(property -> {
                                 PropertyTypeVisitor visitor = new PropertyTypeVisitor();
                                 return visitor.doSwitch(property.getType());
                             }).collect(Collectors.toList());
                     st.add("propertyTypes", propertyTypes);
-                }
-                if (type.equals(TYPE_MODEL)) {
-                    List<String> propertyGetters =nonPatternProperties.stream()
+
+                    List<String> propertyGetters = nonPatternProperties.stream()
                             .map(property -> {
                                 PropertyGetterGeneratingVisitor visitor = new PropertyGetterGeneratingVisitor(stGroup, property);
                                 return visitor.doSwitch(property.getType());

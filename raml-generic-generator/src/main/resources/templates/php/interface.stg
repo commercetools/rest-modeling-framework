@@ -1,32 +1,28 @@
 import "generic.stg"
 
-interface(vendorName, type, package, builtInParent, propertyTypes, propertySetters, propertyGetters, typeProperties, typePackage, uses, patternProperties, subTypes, subTypePackages) ::= <<
+interface(vendorName, type) ::= <<
 \<?php
 <generatorInfo()>
 
-namespace <vendorName>\\<package; format="capitalize"><if(typePackage)>\\<typePackage.value.value><endif>;
+namespace <vendorName>\\<type.package.name>;
 
-<if(builtInParent)>
+<if(type.hasBuiltinParent)>
 use <vendorName>\\Base\\JsonObject;
 
 <endif>
-<uses: {c |<useImport(c)>}>
-<if(typePackage)>
-use <vendorName>\\<package; format="capitalize">;
-<endif>
-
-interface <type.name> extends <if(!builtInParent)><type.type.name><else>JsonObject<endif> {
+<type.typeImports: {ti |<useTypeImport(vendorName, ti)>}>
+interface <type.name> extends <if(!type.hasBuiltinParent)><type.parent.name><else>JsonObject<endif> {
     <if(type.discriminator)>
     const DISCRIMINATOR = '<type.discriminator>';
     const SUB_TYPES = [
-        <subTypes, subTypePackages: {t,tp|<discriminatorMapping(typePackage, package, t,tp)>}>
+        <type.subTypes: {t |<discriminatorMapping(t)>}>
     ];
 
     <endif>
-    <typeProperties: {p |<propertyConstant(p)>}>
-    <propertyGetters, propertyTypes: {p, pt|<propertyInterfaceGet(p, pt)>}>
-    <propertySetters: {p |<p>}>
-    <if(patternProperties)>
+    <type.typeProperties: {p |<propertyConstant(p)>}>
+    <type.nonPatternProperties: {p |<propertyInterfaceGet(p)>}>
+    <type.nonPatternProperties: {p |<propertyInterfaceSet(p)>}>
+    <if(type.hasPatternProperties)>
     public function get($key);
     public function set($key, $value);
     <endif>
@@ -34,8 +30,13 @@ interface <type.name> extends <if(!builtInParent)><type.type.name><else>JsonObje
 
 >>
 
-discriminatorMapping(typePackage, package, type, subtypePackage) ::= <<
-'<type.discriminatorValue>' => <if(typePackage)><package; format="capitalize">\\<endif><subtypePackage><type.name; format="capitalize">::class,
+useTypeImport(vendorName, typeImport) ::=<<
+use <vendorName><if(typeImport.package.name)>\\<typeImport.package.name><endif><if(typeImport.name)>\\<typeImport.name><endif>;
+
+>>
+
+discriminatorMapping(type) ::= <<
+'<type.discriminatorValue>' => <if(type.package.hasPackage)><type.package.name>\\<endif><type.name>::class,
 
 >>
 
@@ -44,20 +45,20 @@ const FIELD_<entry.key; format="upperUnderscore"> = '<entry.value>';
 
 >>
 
-propertyInterfaceGet(property, propertyType) ::= <<
+propertyInterfaceGet(property) ::= <<
 
 /**
- * @return <propertyType>
+ * @return <property.type.typeName>
  */
 public function get<property.name; format="capitalize">();
 >>
 
-propertyInterfaceSet(property, propertyType, paramType) ::= <<
+propertyInterfaceSet(property) ::= <<
 
 /**
- * @param <paramType> $<property.name>
+ * @param <property.type.typeName> $<property.name>
  * @return $this
  */
-public function set<property.name; format="capitalize">(<if(propertyType)><propertyType> <endif>$<property.name>);
+public function set<property.name; format="capitalize">(<if(property.paramType)><property.paramType> <endif>$<property.name>);
 
 >>
