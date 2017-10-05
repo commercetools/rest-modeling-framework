@@ -55,13 +55,15 @@ class TypeExpressionConstructorTest extends Specification implements ResourceFix
 
     def "UnionType"() {
         when:
-        UnionType unionType = parse('string|number')
+        UnionType unionType = parse('string|number|boolean')
         then:
-        unionType.oneOf.size() == 2
+        unionType.oneOf.size() == 3
         unionType.oneOf[0] instanceof StringType
         unionType.oneOf[0].name == 'string'
         unionType.oneOf[1] instanceof NumberType
         unionType.oneOf[1].name == 'number'
+        unionType.oneOf[2] instanceof BooleanType
+        unionType.oneOf[2].name == 'boolean'
     }
 
     def "TypeTemplate"() {
@@ -88,13 +90,31 @@ class TypeExpressionConstructorTest extends Specification implements ResourceFix
 
     def "Parens"() {
         when:
-        ArrayType arrayType = parse('(string|number)[]')
+        ArrayType arrayType = parse('(string|number|boolean)[]')
         then:
         arrayType.items instanceof UnionType
         UnionType unionType = arrayType.items
-        unionType.oneOf.size() == 2
+        unionType.oneOf.size() == 3
         unionType.oneOf[0] instanceof StringType
         unionType.oneOf[1] instanceof NumberType
+        unionType.oneOf[2] instanceof BooleanType
+    }
+
+    def "Complex UnionType"() {
+        when:
+        UnionType unionType = parse('string[]|(number|boolean)[]')
+        then:
+        unionType.oneOf.size() == 2
+        unionType.oneOf[0] instanceof ArrayType
+        ArrayType simpleArrayType = unionType.oneOf[0]
+        simpleArrayType.items instanceof StringType
+        unionType.oneOf[1] instanceof ArrayType
+        ArrayType arrayUnionType = unionType.oneOf[1]
+        arrayUnionType.items instanceof UnionType
+        UnionType items = arrayUnionType.items
+        items.oneOf.size() == 2
+        items.oneOf[0] instanceof NumberType
+        items.oneOf[1] instanceof BooleanType
     }
 
     EObject parse(String typeExpression) {

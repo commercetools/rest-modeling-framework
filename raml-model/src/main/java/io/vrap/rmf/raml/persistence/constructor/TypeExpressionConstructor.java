@@ -68,7 +68,7 @@ public class TypeExpressionConstructor {
         public EObject visitArrayType(final TypeExpressionParser.ArrayTypeContext ctx) {
             final EObject arrayType = EcoreUtil.create(arrayTypeDeclarationType);
             scope.addValue(INLINE_TYPE_CONTAINER__INLINE_TYPES, arrayType);
-            final EObject itemsType = visit(ctx.type_expr());
+            final EObject itemsType = visit(ctx.primary_type_expr());
             arrayType.eSet(itemsFeature, itemsType);
 
             return arrayType;
@@ -78,7 +78,7 @@ public class TypeExpressionConstructor {
         public EObject visitUnionType(final TypeExpressionParser.UnionTypeContext ctx) {
             final UnionType unionType = (UnionType) EcoreUtil.create(UNION_TYPE);
             scope.addValue(INLINE_TYPE_CONTAINER__INLINE_TYPES, unionType);
-            final EList<AnyType> oneOfType = ECollections.asEList(ctx.type_expr().stream()
+            final EList<AnyType> oneOfType = ECollections.asEList(ctx.primary_type_expr().stream()
                     .map(this::visit)
                     .filter(AnyType.class::isInstance) // TODO report errors
                     .map(AnyType.class::cast)
