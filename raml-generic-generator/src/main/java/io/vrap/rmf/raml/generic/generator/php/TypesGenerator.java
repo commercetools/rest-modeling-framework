@@ -156,39 +156,6 @@ public class TypesGenerator extends AbstractTemplateGenerator {
         return visitor.doSwitch(type);
     }
 
-    private class SerializerGeneratingVisitor extends TypesSwitch<String> {
-        private final STGroupFile stGroup;
-        private final Property property;
-
-        public SerializerGeneratingVisitor(final STGroupFile stGroup, final Property property) {
-            this.stGroup = stGroup;
-            this.property = property;
-        }
-
-        @Override
-        public String caseTimeOnlyType(TimeOnlyType object) {
-            return dateTimeMapper("timeSerializer", "H:i:s.u");
-        }
-
-        @Override
-        public String caseDateOnlyType(DateOnlyType object) {
-            return dateTimeMapper("dateSerializer", "Y-m-d");
-        }
-
-        @Override
-        public String caseDateTimeType(DateTimeType object) {
-            return dateTimeMapper("dateTimeSerializer", "c");
-        }
-
-        private String dateTimeMapper(final String serializer, final String dateTimeFormat)
-        {
-            final ST st = stGroup.getInstanceOf(serializer);
-            st.add("property", property);
-            st.add("dateTimeFormat", dateTimeFormat);
-            return st.render();
-        }
-    }
-
     static abstract class PropertyVisitor extends TypesSwitch<String> {
         @Override
         public String caseStringType(StringType object) {
@@ -214,96 +181,6 @@ public class TypesGenerator extends AbstractTemplateGenerator {
         }
 
         abstract String scalarMapper(final String scalarType);
-    }
-
-    private class PropertyGetterGeneratingVisitor extends PropertyVisitor {
-        final STGroupFile stGroup;
-        final Property property;
-
-        PropertyGetterGeneratingVisitor(final STGroupFile stGroup, final Property property) {
-            this.stGroup = stGroup;
-            this.property = property;
-        }
-
-        @Override
-        public String caseTimeOnlyType(TimeOnlyType object) {
-            return dateTimeMapper("H:i:s.u");
-        }
-
-        @Override
-        public String caseDateOnlyType(DateOnlyType object) {
-            return dateTimeMapper("Y-m-d");
-        }
-
-        @Override
-        public String caseDateTimeType(DateTimeType object) {
-            return dateTimeMapper("Y-m-d?H:i:s.uT");
-        }
-
-        String dateTimeMapper(final String dateTimeFormat)
-        {
-            final ST st = stGroup.getInstanceOf("dateTimeGetter");
-            st.add("property", property);
-            st.add("parent", property.eContainer());
-            st.add("dateTimeFormat", dateTimeFormat);
-            return st.render();
-        }
-
-        String scalarMapper(final String scalarType)
-        {
-            final ST st = stGroup.getInstanceOf("scalarGetter");
-            st.add("property", property);
-            st.add("parent", property.eContainer());
-            st.add("scalarType", scalarType);
-            return st.render();
-        }
-
-        @Override
-        public String caseArrayType(final ArrayType arrayType) {
-            if (arrayType.getItems() == null || BuiltinType.of(arrayType.getItems().getName()).isPresent()) {
-                return null;
-            } else if (arrayType.getItems() instanceof UnionType) {
-                return scalarMapper("array");
-//                final ST st = stGroup.getInstanceOf("arrayGetter");
-//                st.add("parent", property.eContainer());
-//                st.add("property", property);
-//                final Property t = getBaseProperty(property);
-//                st.add("propertyType", (new TypeNameVisitor()).doSwitch(t.getType()));
-//                st.add("paramType", (new TypeNameVisitor()).doSwitch(t.getType()));
-//                return st.render();
-            } else {
-                if (BuiltinType.of(arrayType.getItems().getName()).isPresent()) {
-                    return scalarMapper("array");
-                }
-                final ST st = stGroup.getInstanceOf("arrayGetter");
-                st.add("parent", property.eContainer());
-                st.add("property", property);
-                st.add("propertyType", arrayType.getItems().getName() + "Collection");
-                st.add("paramType", arrayType.getItems().getName() + "Collection");
-
-                return st.render();
-            }
-        }
-
-        @Override
-        public String caseObjectType(final ObjectType objectType) {
-            if (BuiltinType.of(objectType.getName()).isPresent()) {
-                return null;
-            } else {
-                final ST st = stGroup.getInstanceOf("classGetter");
-                st.add("parent", property.eContainer());
-                st.add("property", property);
-                return st.render();
-            }
-        }
-
-        @Override
-        public String defaultCase(EObject object) {
-            final ST st = stGroup.getInstanceOf("defaultGetter");
-            st.add("parent", property.eContainer());
-            st.add("property", property);
-            return st.render();
-        }
     }
 
     static class PropertyTypeVisitor extends PropertyVisitor {
@@ -354,194 +231,6 @@ public class TypesGenerator extends AbstractTemplateGenerator {
         @Override
         public String defaultCase(EObject object) {
             return "mixed";
-        }
-    }
-
-    private class PropertyInterfaceSetterGeneratingVisitor extends PropertyVisitor {
-        final STGroupFile stGroup;
-        final Property property;
-
-        PropertyInterfaceSetterGeneratingVisitor(final STGroupFile stGroup, final Property property) {
-            this.stGroup = stGroup;
-            this.property = property;
-        }
-
-        @Override
-        public String doSwitch(EObject eObject) {
-            if (property.getName().startsWith("/") && property.getName().endsWith("/")) {
-                return patternProperty();
-            }
-            return super.doSwitch(eObject);
-        }
-
-        private String patternProperty()
-        {
-            return "";
-        }
-
-        @Override
-        public String caseTimeOnlyType(TimeOnlyType object) {
-            return dateTimeMapper();
-        }
-
-        @Override
-        public String caseDateOnlyType(DateOnlyType object) {
-            return dateTimeMapper();
-        }
-
-        @Override
-        public String caseDateTimeType(DateTimeType object) {
-            return dateTimeMapper();
-        }
-
-        private String dateTimeMapper()
-        {
-            final ST st = stGroup.getInstanceOf("propertyInterfaceSet");
-            st.add("property", property);
-            st.add("propertyType", null);
-            st.add("paramType", "\\DateTimeImmutable|\\DateTime|string");
-            return st.render();
-        }
-
-        String scalarMapper(final String scalarType)
-        {
-            final ST st = stGroup.getInstanceOf("propertyInterfaceSet");
-            st.add("property", property);
-            st.add("propertyType", null);
-            st.add("paramType", scalarType);
-            return st.render();
-        }
-
-        @Override
-        public String caseArrayType(final ArrayType arrayType) {
-            if (arrayType.getItems() == null || BuiltinType.of(arrayType.getItems().getName()).isPresent()) {
-                return null;
-            } else {
-                final ST st = stGroup.getInstanceOf("propertyInterfaceSet");
-
-                st.add("property", property);
-                if (BuiltinType.of(arrayType.getItems().getName()).isPresent()) {
-                    st.add("propertyType", "array");
-                    st.add("paramType", "array");
-                } else {
-                    final Property t = getBaseProperty(property);
-                    st.add("propertyType", (new PropertyTypeVisitor()).doSwitch(t.getType()));
-                    st.add("paramType", (new PropertyTypeVisitor()).doSwitch(arrayType));
-                }
-                return st.render();
-            }
-        }
-
-        @Override
-        public String caseObjectType(final ObjectType objectType) {
-            if (BuiltinType.of(objectType.getName()).isPresent()) {
-                return null;
-            } else {
-                final ST st = stGroup.getInstanceOf("propertyInterfaceSet");
-                st.add("property", property);
-                final Property t = getBaseProperty(property);
-                st.add("propertyType", (new PropertyTypeVisitor()).doSwitch(t.getType()));
-                st.add("paramType", (new PropertyTypeVisitor()).doSwitch(objectType));
-                return st.render();
-            }
-        }
-
-        @Override
-        public String defaultCase(EObject object) {
-            final ST st = stGroup.getInstanceOf("propertyInterfaceSet");
-            st.add("property", property);
-            st.add("propertyType", null);
-            st.add("paramType", "");
-            return st.render();
-        }
-    }
-
-    private class PropertySetterGeneratingVisitor extends PropertyVisitor {
-        final STGroupFile stGroup;
-        final Property property;
-
-        PropertySetterGeneratingVisitor(final STGroupFile stGroup, final Property property) {
-            this.stGroup = stGroup;
-            this.property = property;
-        }
-        @Override
-        public String caseTimeOnlyType(TimeOnlyType object) {
-            return dateTimeMapper();
-        }
-
-        @Override
-        public String caseDateOnlyType(DateOnlyType object) {
-            return dateTimeMapper();
-        }
-
-        @Override
-        public String caseDateTimeType(DateTimeType object) {
-            return dateTimeMapper();
-        }
-
-        private String dateTimeMapper()
-        {
-            final ST st = stGroup.getInstanceOf("dateTimeSetter");
-            st.add("property", property);
-            return st.render();
-        }
-
-        String scalarMapper(final String scalarType)
-        {
-            final ST st = stGroup.getInstanceOf("scalarSetter");
-            st.add("property", property);
-            st.add("scalarType", scalarType);
-            return st.render();
-        }
-
-        @Override
-        public String caseArrayType(final ArrayType arrayType) {
-            if (arrayType.getItems() == null || BuiltinType.of(arrayType.getItems().getName()).isPresent()) {
-                return null;
-            } else if (arrayType.getItems() instanceof UnionType) {
-                final ST st = stGroup.getInstanceOf("arraySetter");
-                st.add("property", property);
-                final Property t = getBaseProperty(property);
-                doSwitch(t);
-                st.add("propertyType", (new PropertyTypeVisitor()).doSwitch(t.getType()));
-                st.add("paramType", (new PropertyTypeVisitor()).doSwitch(t.getType()));
-                return st.render();
-            } else {
-                final ST st = stGroup.getInstanceOf("arraySetter");
-                st.add("property", property);
-                if (BuiltinType.of(arrayType.getItems().getName()).isPresent()) {
-                    st.add("propertyType", "array");
-                    st.add("paramType", "array");
-                } else {
-                    final Property t = getBaseProperty(property);
-                    st.add("propertyType", (new PropertyTypeVisitor()).doSwitch(t.getType()));
-                    st.add("paramCheck", !arrayType.equals(t.getType()));
-                    st.add("paramType", (new PropertyTypeVisitor()).doSwitch(arrayType));
-                }
-                return st.render();
-            }
-        }
-
-        @Override
-        public String caseObjectType(final ObjectType objectType) {
-            if (BuiltinType.of(objectType.getName()).isPresent()) {
-                return null;
-            } else {
-                final ST st = stGroup.getInstanceOf("classSetter");
-                st.add("property", property);
-                final Property t = getBaseProperty(property);
-                st.add("propertyType", (new PropertyTypeVisitor()).doSwitch(t.getType()));
-                st.add("paramCheck", !objectType.equals(t.getType()));
-                st.add("paramType", (new PropertyTypeVisitor()).doSwitch(objectType));
-                return st.render();
-            }
-        }
-
-        @Override
-        public String defaultCase(EObject object) {
-            final ST st = stGroup.getInstanceOf("defaultSetter");
-            st.add("property", property);
-            return st.render();
         }
     }
 
@@ -606,7 +295,7 @@ public class TypesGenerator extends AbstractTemplateGenerator {
 
                 final ST st = stGroup.getInstanceOf(type);
                 st.add("vendorName", vendorName);
-                if (type.equals(TYPE_INTERFACE)) {
+                if (type.equals(TYPE_INTERFACE) || type.equals(TYPE_MODEL)) {
                     st.add("type", metaType);
                 } else {
                     st.add("type", objectType);
@@ -655,51 +344,23 @@ public class TypesGenerator extends AbstractTemplateGenerator {
                         uses.add(vendorName + "\\" + capitalize(packageName) + "\\" + typePackageFolder + objectType.getType().getName() + suffix);
                     }
                     st.add("uses", uses);
+
+                    if (type.equals(TYPE_COLLECTION_MODEL) || type.equals(TYPE_COLLECTION_INTERFACE)) {
+                        final List<String> identifiers = objectType.getAllProperties().stream()
+                                .filter(property -> {
+                                    Annotation identifier = property.getAnnotation(identifierAnnotationType);
+                                    if (identifier != null) {
+                                        BooleanInstance t = (BooleanInstance)identifier.getValue();
+                                        return t.getValue();
+                                    }
+                                    return false;
+                                })
+                                .map(IdentifiableElement::getName)
+                                .collect(Collectors.toList());
+                        st.add("identifiers", identifiers);
+                    }
                 }
 
-                if (type.equals(TYPE_COLLECTION_MODEL) || type.equals(TYPE_COLLECTION_INTERFACE)) {
-                    final List<String> identifiers = objectType.getAllProperties().stream()
-                            .filter(property -> {
-                                Annotation identifier = property.getAnnotation(identifierAnnotationType);
-                                if (identifier != null) {
-                                    BooleanInstance t = (BooleanInstance)identifier.getValue();
-                                    return t.getValue();
-                                }
-                                return false;
-                            })
-                            .map(IdentifiableElement::getName)
-                            .collect(Collectors.toList());
-                    st.add("identifiers", identifiers);
-                }
-                if (type.equals(TYPE_MODEL)) {
-                    final List<Property> nonPatternProperties = metaType.getNonPatternProperties().stream().map(MetaProperty::getProperty).collect(Collectors.toList());
-                    List<String> propertyTypes = nonPatternProperties.stream()
-                            .map(property -> {
-                                PropertyTypeVisitor visitor = new PropertyTypeVisitor();
-                                return visitor.doSwitch(property.getType());
-                            }).collect(Collectors.toList());
-                    st.add("propertyTypes", propertyTypes);
-
-                    List<String> propertyGetters = nonPatternProperties.stream()
-                            .map(property -> {
-                                PropertyGetterGeneratingVisitor visitor = new PropertyGetterGeneratingVisitor(stGroup, property);
-                                return visitor.doSwitch(property.getType());
-                            }).collect(Collectors.toList());
-                    List<String> propertySetters = nonPatternProperties.stream()
-                            .map(property -> {
-                                PropertySetterGeneratingVisitor visitor = new PropertySetterGeneratingVisitor(stGroup, property);
-                                return visitor.doSwitch(property.getType());
-                            }).collect(Collectors.toList());
-
-                    List<String> serializers = objectType.getProperties().stream().map(property -> {
-                        SerializerGeneratingVisitor visitor = new SerializerGeneratingVisitor(stGroup, property);
-                        return visitor.doSwitch(property.getType());
-                    }).filter(Objects::nonNull).collect(Collectors.toList());
-
-                    st.add("propertyGetters", propertyGetters);
-                    st.add("propertySetters", propertySetters);
-                    st.add("serializers", serializers);
-                }
                 return st.render();
             }
         }

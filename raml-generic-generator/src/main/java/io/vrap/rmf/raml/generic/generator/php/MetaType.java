@@ -10,6 +10,7 @@ import org.eclipse.emf.ecore.EObject;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -44,6 +45,14 @@ public class MetaType {
     {
         if (this.type instanceof ObjectType) {
             return ((ObjectType) this.type).getDiscriminator();
+        }
+        return null;
+    }
+
+    @Nullable
+    public List<MetaType> getOneOf() {
+        if (type instanceof UnionType) {
+            return ((UnionType)type).getOneOf().stream().map(MetaType::new).collect(Collectors.toList());
         }
         return null;
     }
@@ -88,6 +97,29 @@ public class MetaType {
         if (type instanceof ObjectType) {
             return ((ObjectType)type).getProperties().stream()
                     .filter(property -> property.getName().startsWith("/") && property.getName().endsWith("/"))
+                    .map(MetaProperty::new)
+                    .collect(Collectors.toList());
+        }
+        return Lists.newArrayList();
+    }
+
+    @Nullable
+    public List<MetaSerializer> getSerializers()
+    {
+        if (type instanceof ObjectType) {
+            return ((ObjectType)type).getProperties().stream().map(property -> {
+                    return new MetaHelper.SerializerVisitor(new MetaProperty(property)).doSwitch(property.getType());
+                }).filter(Objects::nonNull).collect(Collectors.toList());
+        }
+        return null;
+    }
+
+    public List<MetaProperty> getUnionProperties()
+    {
+        if (type instanceof ObjectType) {
+            return ((ObjectType) type).getProperties().stream()
+                    .filter(property -> !(property.getName().startsWith("/") && property.getName().endsWith("/")))
+                    .filter(property -> property.getType() instanceof UnionType)
                     .map(MetaProperty::new)
                     .collect(Collectors.toList());
         }

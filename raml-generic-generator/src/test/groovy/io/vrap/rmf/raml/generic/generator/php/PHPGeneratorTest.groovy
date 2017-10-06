@@ -52,6 +52,21 @@ class PHPGeneratorTest extends Specification implements ResourceFixtures {
         result == fileContent("Person.php")
     }
 
+    def "generate serializer"() {
+        when:
+        Api api = constructApi(
+                '''\
+        types:
+            Document:
+                properties:
+                    createdAt: datetime
+        ''')
+        then:
+        String result = generate(TypesGenerator.TYPE_MODEL, api.types.get(0));
+        result == fileContent("Document.php")
+    }
+
+
     def "generate extended interface"() {
         when:
         Api api = constructApi(
@@ -186,6 +201,46 @@ class PHPGeneratorTest extends Specification implements ResourceFixtures {
 
         String kindClass = generate(TypesGenerator.TYPE_MODEL, api.types.get(1));
         kindClass == fileContent("CatModel.php")
+    }
+
+    def "generate as type getter"() {
+        when:
+        Api api = constructApi(
+                '''\
+        types:
+            Attribute:
+                properties:
+                    name: string
+                    value: string | Money | Enum
+            Money:
+                type: object
+                properties:
+                    centAmount: string
+                    currencyCode: string
+            Enum:
+                type: object
+                properties:
+                    key: string
+                    label: string
+        ''')
+        then:
+        String attributeInterface = generate(TypesGenerator.TYPE_INTERFACE, api.types.get(0));
+        attributeInterface == fileContent("Attribute.php")
+
+        String attributeClass = generate(TypesGenerator.TYPE_MODEL, api.types.get(0));
+        attributeClass == fileContent("AttributeModel.php")
+
+        String enumInterface = generate(TypesGenerator.TYPE_INTERFACE, api.types.get(1));
+        enumInterface == fileContent("Money.php")
+
+        String enumClass = generate(TypesGenerator.TYPE_MODEL, api.types.get(1));
+        enumClass == fileContent("MoneyModel.php")
+
+        String referenceInterface = generate(TypesGenerator.TYPE_INTERFACE, api.types.get(2));
+        referenceInterface == fileContent("Enum.php")
+
+        String referenceClass = generate(TypesGenerator.TYPE_MODEL, api.types.get(2));
+        referenceClass == fileContent("EnumModel.php")
     }
 
     @Unroll

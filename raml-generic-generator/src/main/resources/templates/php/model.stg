@@ -3,18 +3,20 @@ import "generic.stg"
 /*
  * implementation template functions
  */
-model(vendorName, type, package, builtInParent, propertyTypes, propertyGetters, propertySetters, serializers, typePackage, uses) ::= <<
+model(vendorName, type) ::= <<
 \<?php
 <generatorInfo()>
 
-namespace <vendorName>\\<package; format="capitalize"><if(typePackage)>\\<typePackage.value.value><endif>;
+namespace <vendorName>\\<type.package.name>;
 
-<if(builtInParent)>
+<if(type.hasBuiltinParent)>
 use <vendorName>\\Base\\JsonObjectModel;
-<endif>
-<uses: {c |<useImport(c)>}>
 
-class <type.name>Model extends <if(!builtInParent)><type.type.name>Model<else>JsonObjectModel<endif> implements <type.name> {
+<else>
+<useTypeImport(vendorName, type.parent.import, "Model")>
+<endif>
+<type.typeImports: {ti |<useTypeImport(vendorName, ti)>}>
+class <type.name>Model extends <if(!type.hasBuiltinParent)><type.parent.name>Model<else>JsonObjectModel<endif> implements <type.name> {
     <if(type.discriminator || type.discriminatorValue)>
     const DISCRIMINATOR_VALUE = '<type.discriminatorValue>';
 
@@ -26,14 +28,14 @@ class <type.name>Model extends <if(!builtInParent)><type.type.name>Model<else>Js
     }
 
     <endif>
-    <type.properties, propertyTypes: {p, pt|<property(p, pt)>}>
-    <propertyGetters: {p | <p>}>
-    <propertySetters: {p | <p>}>
-    <if(serializers)>
+    <type.nonPatternProperties: {p |<property(p)>}>
+    <type.nonPatternProperties: {p |<(p.getter.getter)(type, p)>}>
+    <type.nonPatternProperties: {p |<(p.setter.setter)(p)>}>
+    <if(type.serializers)>
 
     public function jsonSerialize() {
         $data = parent::jsonSerialize();
-        <serializers: {s |<s>}>
+        <type.serializers: {s|<(s.serializer)(type, s.property, s.format)>}>
         return $data;
     }
     <endif>
@@ -41,14 +43,14 @@ class <type.name>Model extends <if(!builtInParent)><type.type.name>Model<else>Js
 
 >>
 
-defaultGetter(property, parent) ::= <<
+defaultGetter(type, property) ::= <<
 /**
- * @return mixed
+ * @return <property.type.typeName>
  */
 public function get<property.name; format="capitalize">()
 {
     if (is_null($this-><property.name>)) {
-        $value = $this->raw(<parent.name>::FIELD_<property.name; format="upperUnderscore">);
+        $value = $this->raw(<type.name>::FIELD_<property.name; format="upperUnderscore">);
         $this-><property.name> = $value;
     }
     return $this-><property.name>;
@@ -56,16 +58,16 @@ public function get<property.name; format="capitalize">()
 
 >>
 
-dateTimeGetter(property, dateTimeFormat, parent) ::= <<
+dateTimeGetter(type, property) ::= <<
 /**
- * @return \DateTimeImmutable
+ * @return <property.type.typeName>
  */
 public function get<property.name; format="capitalize">()
 {
     if (is_null($this-><property.name>)) {
-        $value = $this->raw(<parent.name>::FIELD_<property.name; format="upperUnderscore">);
-        <if(dateTimeFormat)>
-        $dateTime = \DateTimeImmutable::createFromFormat('<dateTimeFormat>', $value);
+        $value = $this->raw(<type.name>::FIELD_<property.name; format="upperUnderscore">);
+        <if(property.getter.format)>
+        $dateTime = \DateTimeImmutable::createFromFormat('<property.getter.format>', $value);
         if ($dateTime) {
             $this-><property.name> = $dateTime;
         }
@@ -78,29 +80,29 @@ public function get<property.name; format="capitalize">()
 
 >>
 
-scalarGetter(property, scalarType, parent) ::= <<
+scalarGetter(type, property) ::= <<
 /**
- * @return <scalarType>
+ * @return <property.type.typeName>
  */
 public function get<property.name; format="capitalize">()
 {
     if (is_null($this-><property.name>)) {
-        $value = $this->raw(<parent.name>::FIELD_<property.name; format="upperUnderscore">);
-        $this-><property.name> = (<scalarType>)$value;
+        $value = $this->raw(<type.name>::FIELD_<property.name; format="upperUnderscore">);
+        $this-><property.name> = (<property.getter.format>)$value;
     }
     return $this-><property.name>;
 }
 
 >>
 
-classGetter(property, parent) ::= <<
+classGetter(type, property) ::= <<
 /**
- * @return <if(property.type.name)><property.type.name><else>mixed<endif>
+ * @return <property.type.typeName>
  */
 public function get<property.name; format="capitalize">()
 {
     if (is_null($this-><property.name>)) {
-        $value = $this->raw(<parent.name>::FIELD_<property.name; format="upperUnderscore">);
+        $value = $this->raw(<type.name>::FIELD_<property.name; format="upperUnderscore">);
         <if(property.type.discriminator)>
         $resolvedClass = $this->resolveDiscriminator(<property.type.name>::class, $value);
         if (is_null($value)) {
@@ -119,18 +121,18 @@ public function get<property.name; format="capitalize">()
 
 >>
 
-arrayGetter(property, parent, propertyType, paramType) ::= <<
+arrayGetter(type, property, format) ::= <<
 /**
- * @return <if(paramType)><paramType><else>array<endif>
+ * @return <property.type.typeName>
  */
 public function get<property.name; format="capitalize">()
 {
     if (is_null($this-><property.name>)) {
-        $value = $this->raw(<parent.name>::FIELD_<property.name; format="upperUnderscore">);
+        $value = $this->raw(<type.name>::FIELD_<property.name; format="upperUnderscore">);
         if (is_null($value)) {
-            return $this->mapData(<propertyType>::class, null);
+            return $this->mapData(<property.type.typeName>::class, null);
         }
-        $this-><property.name> = $this->mapData(<propertyType>::class, $value);
+        $this-><property.name> = $this->mapData(<property.type.typeName>::class, $value);
     }
     return $this-><property.name>;
 }
@@ -171,29 +173,29 @@ public function set<property.name; format="capitalize">($<property.name>)
 
 >>
 
-scalarSetter(property, scalarType) ::= <<
+scalarSetter(property) ::= <<
 /**
- * @param <scalarType> $<property.name>
+ * @param <property.type.typeName> $<property.name>
  * @return $this
  */
 public function set<property.name; format="capitalize">($<property.name>)
 {
-    $this-><property.name> = (<scalarType>)$<property.name>;
+    $this-><property.name> = (<property.type.typeName>)$<property.name>;
 
     return $this;
 }
 
 >>
 
-classSetter(property, propertyType, paramType, paramCheck) ::= <<
+classSetter(property) ::= <<
 /**
- * @param <if(paramType)><paramType><else>mixed<endif> $<property.name>
+ * @param <if(property.setter.docType)><property.setter.docType><else>mixed<endif> $<property.name>
  * @return $this
  */
-public function set<property.name; format="capitalize">(<if(propertyType)><propertyType> <endif> $<property.name>)
+public function set<property.name; format="capitalize">(<if(property.setter.paramType)><property.setter.paramType> <endif>$<property.name>)
 {
-    <if(paramCheck)>
-    if (!$<property.name> instanceof <paramType>) {
+    <if(property.setter.paramCheck)>
+    if (!$<property.name> instanceof <property.setter.docType>) {
         throw new \InvalidArgumentException();
     }
     <endif>
@@ -204,15 +206,15 @@ public function set<property.name; format="capitalize">(<if(propertyType)><prope
 
 >>
 
-arraySetter(property, propertyType, paramType, paramCheck) ::= <<
+arraySetter(property) ::= <<
 /**
- * @param <if(paramType)><paramType><else>mixed<endif> $<property.name>
+ * @param <if(property.setter.docType)><property.setter.docType><else>mixed<endif> $<property.name>
  * @return $this
  */
-public function set<property.name; format="capitalize">(<if(propertyType)><propertyType> <endif>$<property.name>)
+public function set<property.name; format="capitalize">(<if(property.setter.paramType)><property.setter.paramType> <endif>$<property.name>)
 {
-    <if(paramCheck)>
-    if (!$<property.name> instanceof <paramType>) {
+    <if(property.setter.paramCheck)>
+    if (!$<property.name> instanceof <property.setter.docType>) {
         throw new \InvalidArgumentException();
     }
     <endif>
@@ -223,31 +225,31 @@ public function set<property.name; format="capitalize">(<if(propertyType)><prope
 
 >>
 
-property(property, propertyType) ::= <<
+property(property) ::= <<
 /**
- * @var <propertyType>
+ * @var <property.type.typeName>
  */
 private $<property.name>;
 
 >>
 
-timeSerializer(property, dateTimeFormat) ::= <<
-if (isset($data['<property.name>']) && $data['<property.name>'] instanceof \DateTimeImmutable) {
-    $data['<property.name>'] = $data['<property.name>']->format('<dateTimeFormat>');
-}
+timeSerializer(type, property, dateTimeFormat) ::= <<
 
+if (isset($data[<type.name>::<property.constantName>]) && $data[<type.name>::<property.constantName>] instanceof \DateTimeImmutable) {
+    $data[<type.name>::<property.constantName>] = $data[<type.name>::<property.constantName>]->format('<dateTimeFormat>');
+}
 >>
 
-dateSerializer(property, dateTimeFormat) ::= <<
-if (isset($data['<property.name>']) && $data['<property.name>'] instanceof \DateTimeImmutable) {
-    $data['<property.name>'] = $data['<property.name>']->format('<dateTimeFormat>');
-}
+dateSerializer(type, property, dateTimeFormat) ::= <<
 
+if (isset($data[<type.name>::<property.constantName>]) && $data[<type.name>::<property.constantName>] instanceof \DateTimeImmutable) {
+    $data[<type.name>::<property.constantName>] = $data[<type.name>::<property.constantName>]->format('<dateTimeFormat>');
+}
 >>
 
-dateTimeSerializer(property, dateTimeFormat) ::= <<
-if (isset($data['<property.name>']) && $data['<property.name>'] instanceof \DateTimeImmutable) {
-    $data['<property.name>'] = $data['<property.name>']->setTimeZone(new \DateTimeZone('UTC'))->format('<dateTimeFormat>');
-}
+dateTimeSerializer(type, property, dateTimeFormat) ::= <<
 
+if (isset($data[<type.name>::<property.constantName>]) && $data[<type.name>::<property.constantName>] instanceof \DateTimeImmutable) {
+    $data[<type.name>::<property.constantName>] = $data[<type.name>::<property.constantName>]->setTimeZone(new \DateTimeZone('UTC'))->format('<dateTimeFormat>');
+}
 >>

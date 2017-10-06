@@ -22,16 +22,12 @@ interface <type.name> extends <if(!type.hasBuiltinParent)><type.parent.name><els
     <type.typeProperties: {p |<propertyConstant(p)>}>
     <type.nonPatternProperties: {p |<propertyInterfaceGet(p)>}>
     <type.nonPatternProperties: {p |<propertyInterfaceSet(p)>}>
+    <type.unionProperties: {p |<propertyInterfaceGetAs(p)>}>
     <if(type.hasPatternProperties)>
     public function get($key);
     public function set($key, $value);
     <endif>
 }
-
->>
-
-useTypeImport(vendorName, typeImport) ::=<<
-use <vendorName><if(typeImport.package.name)>\\<typeImport.package.name><endif><if(typeImport.name)>\\<typeImport.name><endif>;
 
 >>
 
@@ -45,12 +41,27 @@ const FIELD_<entry.key; format="upperUnderscore"> = '<entry.value>';
 
 >>
 
+propertyInterfaceGetAs(property) ::= <<
+<property.type.oneOf: {st |<propertyInterfaceGetAsType(property, st)>}>
+>>
+
+propertyInterfaceGetAsType(property, type) ::= <<
+
+/**
+ * @return <type.typeName>
+ */
+public function get<property.name; format="capitalize">As<type.typeName; format="capitalize">();
+
+>>
+
+
 propertyInterfaceGet(property) ::= <<
 
 /**
  * @return <property.type.typeName>
  */
 public function get<property.name; format="capitalize">();
+
 >>
 
 propertyInterfaceSet(property) ::= <<

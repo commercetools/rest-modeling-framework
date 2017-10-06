@@ -6,6 +6,7 @@
 
 namespace Test\Types;
 
+use Test\Types\PersonModel;
 
 class UserModel extends PersonModel implements User {
     /**

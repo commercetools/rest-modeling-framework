@@ -15,6 +15,7 @@ interface Person extends JsonObject {
      * @return string
      */
     public function getName();
+
     /**
      * @param string $name
      * @return $this

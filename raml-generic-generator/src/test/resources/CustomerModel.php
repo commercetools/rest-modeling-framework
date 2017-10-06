@@ -33,7 +33,7 @@ class CustomerModel extends JsonObjectModel implements Customer {
      * @param Address $address
      * @return $this
      */
-    public function setAddress(Address  $address)
+    public function setAddress(Address $address)
     {
         $this->address = $address;
 
