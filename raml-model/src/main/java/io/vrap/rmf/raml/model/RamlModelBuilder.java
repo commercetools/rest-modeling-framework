@@ -2,12 +2,13 @@ package io.vrap.rmf.raml.model;
 
 import io.vrap.rmf.raml.model.facets.StringInstance;
 import io.vrap.rmf.raml.model.modules.Api;
+import io.vrap.rmf.raml.model.modules.ApiExtension;
+import io.vrap.rmf.raml.model.modules.util.ModulesSwitch;
 import io.vrap.rmf.raml.model.resources.*;
 import io.vrap.rmf.raml.model.resources.util.ResourcesSwitch;
 import io.vrap.rmf.raml.model.responses.BodyType;
 import io.vrap.rmf.raml.model.responses.util.ResponsesSwitch;
 import io.vrap.rmf.raml.model.types.*;
-import io.vrap.rmf.raml.model.types.util.TypesSwitch;
 import io.vrap.rmf.raml.model.util.StringTemplate;
 import io.vrap.rmf.raml.persistence.RamlResourceSet;
 import org.eclipse.emf.common.util.EList;
@@ -17,13 +18,12 @@ import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.resource.Resource;
+import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
 /**
@@ -41,37 +41,57 @@ public class RamlModelBuilder {
     public Api buildApi(final URI uri) {
         final RamlResourceSet resourceSet = new RamlResourceSet();
         final Resource resource = resourceSet.getResource(uri, true);
-        final Api api = (Api) resource.getContents().get(0);
-        final Api apiCopy = copy(api);
-        final Resource resolvedResource = resourceSet.createResource(uri.appendQuery("resolved=true"));
-        resolvedResource.getContents().add(apiCopy);
-        resolvedResource.getErrors().addAll(resource.getErrors());
-
-        final ResourceResolver resourceResolver = new ResourceResolver();
-        final BodyContentTypeResolver bodyContentTypeResolver = new BodyContentTypeResolver(api.getMediaType());
-
-        apiCopy.eAllContents().forEachRemaining(eObject -> { resourceResolver.doSwitch(eObject); bodyContentTypeResolver.doSwitch(eObject); });
+        final EObject rootObject = resource.getContents().get(0);
+        final Api apiCopy = new ApiResolver().doSwitch(rootObject);
         return apiCopy;
     }
 
-    /**
-     * Copies the given object and shallow copies all adapters.
-     */
-    private static <T extends EObject> T copy(T eObject)
-    {
-        EcoreUtil.Copier copier = new EcoreUtil.Copier() {
-            @Override
-            public EObject copy(EObject eObject) {
-                final EObject copy = super.copy(eObject);
-                eObject.eAdapters().forEach(adapter -> copy.eAdapters().add(adapter));
-                return copy;
-            }
-        };
-        EObject result = copier.copy(eObject);
-        copier.copyReferences();
+    private static class ApiResolver extends ModulesSwitch<Api> {
 
-        @SuppressWarnings("unchecked")T t = (T)result;
-        return t;
+        @Override
+        public Api caseApi(final Api api) {
+            final Resource resource = api.eResource();
+            final ResourceSet resourceSet = resource.getResourceSet();
+            final Api resolvedApi = copy(api);
+            final URI resolvedApiUri = resource.getURI().appendQuery("resolved=true");
+            final Resource resolvedResource = resourceSet.createResource(resolvedApiUri);
+
+            resolvedResource.getContents().add(resolvedApi);
+            resolvedResource.getErrors().addAll(resource.getErrors());
+
+            final ResourceResolver resourceResolver = new ResourceResolver();
+            final BodyContentTypeResolver bodyContentTypeResolver = new BodyContentTypeResolver(api.getMediaType());
+
+            resolvedApi.eAllContents().forEachRemaining(eObject -> { resourceResolver.doSwitch(eObject); bodyContentTypeResolver.doSwitch(eObject); });
+
+            return resolvedApi;
+        }
+
+        @Override
+        public Api caseApiExtension(final ApiExtension apiExtension) {
+            final Api resolvedApi = caseApi(apiExtension.getExtends());
+            return resolvedApi;
+        }
+
+        /**
+         * Copies the given object and shallow copies all adapters.
+         */
+        private static <T extends EObject> T copy(T eObject)
+        {
+            EcoreUtil.Copier copier = new EcoreUtil.Copier() {
+                @Override
+                public EObject copy(EObject eObject) {
+                    final EObject copy = super.copy(eObject);
+                    eObject.eAdapters().forEach(adapter -> copy.eAdapters().add(adapter));
+                    return copy;
+                }
+            };
+            EObject result = copier.copy(eObject);
+            copier.copyReferences();
+
+            @SuppressWarnings("unchecked")T t = (T)result;
+            return t;
+        }
     }
 
     private static class ResourceResolver extends ResourcesSwitch<EObject> {
