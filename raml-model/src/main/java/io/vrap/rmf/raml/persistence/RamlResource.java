@@ -1,11 +1,7 @@
 package io.vrap.rmf.raml.persistence;
 
 import io.vrap.rmf.raml.model.RamlError;
-import io.vrap.rmf.raml.persistence.antlr.RamlTokenProvider;
-import io.vrap.rmf.raml.persistence.antlr.ParserErrorCollector;
-import io.vrap.rmf.raml.persistence.antlr.RAMLCustomLexer;
-import io.vrap.rmf.raml.persistence.antlr.RAMLParser;
-import io.vrap.rmf.raml.persistence.antlr.RamlToken;
+import io.vrap.rmf.raml.persistence.antlr.*;
 import io.vrap.rmf.raml.persistence.constructor.*;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.TokenStream;
@@ -123,11 +119,12 @@ public class RamlResource extends ResourceImpl {
         }
         switch (fragmentKind) {
             case API: return Optional.of(new ApiConstructor());
+            case EXTENSION: return Optional.of(new ExtensionConstructor());
             case LIBRARY: return Optional.of(new LibraryConstructor());
             case DATA_TYPE: return Optional.of(new TypeDeclarationFragmentConstructor(TYPE_CONTAINER__TYPES));
             case ANNOTATION_TYPE_DECLARATION: return Optional.of(new TypeDeclarationFragmentConstructor(TYPE_CONTAINER__ANNOTATION_TYPES));
             default:
-                resourceScope.addError("Not yet implemented frament kind {0}", fragmentKind);
+                resourceScope.addError("Not yet implemented fragment kind {0}", fragmentKind);
                 return Optional.empty();
         }
     }

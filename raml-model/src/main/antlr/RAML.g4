@@ -13,13 +13,27 @@ tokens {
 
 api:
     MAP_START
-    (
-        usesFacet | baseUriFacet | baseUriParametersFacet | documentationFacet
-        | resourceFacet
-        | securitySchemesFacet | securedByFacet
-        | resourceTypesFacet | attributeFacet
-        | typesFacet | traitsFacet | annotationFacet )*
+        apiFacets*
     MAP_END;
+
+apiFacets:
+    usesFacet | baseUriFacet | baseUriParametersFacet | documentationFacet
+    | resourceFacet
+    | securitySchemesFacet | securedByFacet
+    | resourceTypesFacet | attributeFacet
+    | typesFacet | traitsFacet | annotationFacet
+    ;
+
+extension:
+    MAP_START
+    (
+        extendsFacet | apiFacets
+    )*
+    MAP_END;
+
+extendsFacet:
+    'extends' uri=SCALAR
+    ;
 
 documentationFacet:
     'documentation'
@@ -497,7 +511,7 @@ id:
     |   'baseUri' | 'baseUriParameters'
     |   'get' | 'patch' | 'put' | 'post' | 'delete' | 'head' | 'options'
     |   'default' | 'describedBy' | 'documentation'
-    |   'enum' | 'example' | 'examples'
+    |   'enum' | 'example' | 'examples' | 'extends'
     |   'headers'
     |   'items' | 'is'
     |   'properties'
