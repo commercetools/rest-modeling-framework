@@ -1,0 +1,16 @@
+#%RAML 1.0
+title: An example api
+
+mediaType:
+  - application/json
+
+types:
+  Update:
+  ProjectUpdate:
+
+
+/{project}:
+  post:
+    body:
+      type: Update
+

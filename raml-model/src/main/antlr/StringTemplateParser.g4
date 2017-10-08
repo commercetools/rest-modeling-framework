@@ -1,4 +1,8 @@
-grammar StringTemplate;
+parser grammar StringTemplateParser;
+
+options {
+    tokenVocab=StringTemplateLexer;
+}
 
 @header {
 package io.vrap.rmf.raml.persistence.antlr;
@@ -10,15 +14,12 @@ stringTemplate:
     ;
 
 literal:
-    ID
+    TEXT
     ;
 expression:
-    '<<' ID fnApplication* '>>'
+    OPEN ID fnApplication* CLOSE
     ;
 
 fnApplication:
-    '|' '!' fn=ID
+    SEPARATOR FN fn=ID
     ;
-
-ID : [a-zA-Z_]+ [a-zA-Z0-9_-]* ;
-WS : [ \t\n\r]+ -> channel(HIDDEN) ;

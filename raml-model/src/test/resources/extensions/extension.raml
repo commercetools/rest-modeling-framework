@@ -1,0 +1,11 @@
+#%RAML 1.0 Extension
+usage: An example extension
+extends: api.raml
+
+
+/{project}:
+  post:
+    body:
+      application/json:
+        type: ProjectUpdate
+
