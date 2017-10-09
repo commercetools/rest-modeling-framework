@@ -5,7 +5,8 @@ package io.vrap.rmf.raml.persistence.antlr;
 }
 
 OPEN: '<<' -> mode(ISLAND);
-TEXT: ~'<'+;
+TEXT: '<' ~'<'*
+    | ~'<'+;
 
 
 mode ISLAND;
