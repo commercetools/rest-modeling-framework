@@ -21,6 +21,9 @@ class <type.name>Model extends <if(!type.hasBuiltinParent)><type.parent.name>Mod
     const DISCRIMINATOR_VALUE = '<type.discriminatorValue>';
 
     <endif>
+    <if(type.patternProperties)>
+    private $patternData = [];
+    <endif>
     <if(type.discriminator)>
     public function __construct(array $data = []) {
         parent::__construct($data);
@@ -31,11 +34,37 @@ class <type.name>Model extends <if(!type.hasBuiltinParent)><type.parent.name>Mod
     <type.nonPatternProperties: {p |<property(p)>}>
     <type.nonPatternProperties: {p |<(p.getter.getter)(type, p)>}>
     <type.nonPatternProperties: {p |<(p.setter.setter)(p)>}>
+    <if(type.patternProperties)>
+    <patternGetter(type, type.patternProperties)>
+    <patternSetter(type, type.patternProperties)>
+    <endif>
     <if(type.serializers)>
 
     public function jsonSerialize() {
         $data = parent::jsonSerialize();
         <type.serializers: {s|<(s.serializer)(type, s.property, s.format)>}>
+        return $data;
+    }
+    <endif>
+    <if(type.patternProperties)>
+
+    private function validKey($key)
+    {
+        switch (true) {
+            <type.patternProperties: {p |<patternValid(type, p)>}>
+            default:
+                return false;
+        }
+    }
+
+    /**
+     * @inheritdoc
+     */
+    protected function toArray()
+    {
+        $data = parent::toArray();
+        $data = array_merge($data, $this->patternData);
+        unset($data['patternData']);
         return $data;
     }
     <endif>
@@ -56,6 +85,48 @@ public function get<property.name; format="capitalize">()
     return $this-><property.name>;
 }
 
+>>
+
+patternGetter(type, properties) ::= <<
+/**
+ * @param string $key
+ * @return mixed
+ */
+public function get($key)
+{
+    if (!$this->validKey($key)) {
+        throw new \InvalidArgumentException();
+    }
+    if (isset($this->patternData[$key])) {
+        $value = $this->patternData[$key];
+    } else {
+        $value = $this->raw($key);
+    }
+    return $value;
+}
+
+>>
+
+patternSetter(type, properties) ::= <<
+/**
+ * @param string $key
+ * @param mixed $value
+ * @return $this
+ */
+public function set($key, $value)
+{
+    if (!$this->validKey($key)) {
+        throw new \InvalidArgumentException();
+    }
+    $this->patternData[$key] = $value;
+    return $this;
+}
+
+>>
+
+patternValid(type, property) ::= <<
+case preg_match('<property.name>', $key):
+    return true;
 >>
 
 dateTimeGetter(type, property) ::= <<
@@ -121,7 +192,7 @@ public function get<property.name; format="capitalize">()
 
 >>
 
-arrayGetter(type, property, format) ::= <<
+arrayGetter(type, property) ::= <<
 /**
  * @return <property.type.typeName>
  */

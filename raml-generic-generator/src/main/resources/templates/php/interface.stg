@@ -19,7 +19,8 @@ interface <type.name> extends <if(!type.hasBuiltinParent)><type.parent.name><els
     ];
 
     <endif>
-    <type.typeProperties: {p |<propertyConstant(p)>}>
+    <type.nonPatternProperties: {p |<propertyConstant(p)>}>
+    <type.patternProperties: {p |<propertyConstant(p)>}>
     <type.nonPatternProperties: {p |<propertyInterfaceGet(p)>}>
     <type.nonPatternProperties: {p |<propertyInterfaceSet(p)>}>
     <type.unionProperties: {p |<propertyInterfaceGetAs(p)>}>
@@ -36,8 +37,8 @@ discriminatorMapping(type) ::= <<
 
 >>
 
-propertyConstant(entry) ::=<<
-const FIELD_<entry.key; format="upperUnderscore"> = '<entry.value>';
+propertyConstant(property) ::=<<
+const <property.constantName> = '<property.name>';
 
 >>
 

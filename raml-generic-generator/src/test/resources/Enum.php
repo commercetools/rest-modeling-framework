@@ -9,8 +9,8 @@ namespace Test\Types;
 use Test\Base\JsonObject;
 
 interface Enum extends JsonObject {
-    const FIELD_LABEL = 'label';
     const FIELD_KEY = 'key';
+    const FIELD_LABEL = 'label';
 
     /**
      * @return string

@@ -203,7 +203,7 @@ class PHPGeneratorTest extends Specification implements ResourceFixtures {
         kindClass == fileContent("CatModel.php")
     }
 
-    def "generate as type getter"() {
+    def "generate property as type getter"() {
         when:
         Api api = constructApi(
                 '''\
@@ -241,6 +241,23 @@ class PHPGeneratorTest extends Specification implements ResourceFixtures {
 
         String referenceClass = generate(TypesGenerator.TYPE_MODEL, api.types.get(2));
         referenceClass == fileContent("EnumModel.php")
+    }
+
+    def "generate map as type getter"() {
+        when:
+        Api api = constructApi(
+                '''\
+        types:
+            Container:
+                properties:
+                    //: string | Money | Enum
+        ''')
+        then:
+        String attributeInterface = generate(TypesGenerator.TYPE_INTERFACE, api.types.get(0));
+        attributeInterface == fileContent("Container.php")
+
+        String attributeClass = generate(TypesGenerator.TYPE_MODEL, api.types.get(0));
+        attributeClass == fileContent("ContainerModel.php")
     }
 
     @Unroll

@@ -7,6 +7,7 @@ import com.google.common.io.Resources;
 import io.vrap.rmf.raml.generic.generator.AbstractTemplateGenerator;
 import io.vrap.rmf.raml.model.elements.IdentifiableElement;
 import io.vrap.rmf.raml.model.facets.BooleanInstance;
+import io.vrap.rmf.raml.model.facets.ObjectInstance;
 import io.vrap.rmf.raml.model.facets.StringInstance;
 import io.vrap.rmf.raml.model.types.*;
 import io.vrap.rmf.raml.model.types.impl.TypesFactoryImpl;
@@ -273,11 +274,7 @@ public class TypesGenerator extends AbstractTemplateGenerator {
                 final List<String> identifiers = ((ObjectType)items).getAllProperties().stream()
                         .filter(property -> {
                             Annotation identifier = property.getAnnotation(identifierAnnotationType);
-                            if (identifier != null) {
-                                BooleanInstance t = (BooleanInstance)identifier.getValue();
-                                return t.getValue();
-                            }
-                            return false;
+                            return identifier != null;
                         })
                         .map(IdentifiableElement::getName)
                         .collect(Collectors.toList());

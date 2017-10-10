@@ -8,10 +8,7 @@ import io.vrap.rmf.raml.model.types.util.TypesSwitch;
 import org.eclipse.emf.ecore.EObject;
 
 import javax.annotation.Nullable;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class MetaType {
@@ -155,9 +152,7 @@ public class MetaType {
                                 AnyType t = property.getType() instanceof ArrayType ? ((ArrayType) property.getType()).getItems() : property.getType();
                                 return !new MetaType(t).getPackage().getName().equals(getPackage().getName());
                             })
-                            .map(property -> {
-                                return new MetaType(property.getType()).getImport();
-                            })
+                            .map(property -> new MetaType(property.getType()).getImport())
                             .collect(Collectors.toSet())
             );
             if (!getHasBuiltinParent() && !getParent().getPackage().getName().equals(getPackage().getName())) {
@@ -193,16 +188,13 @@ public class MetaType {
         final Map<String, String> typeProperties;
         if (type instanceof ObjectType) {
             ObjectType objectType = (ObjectType)type;
-
             if(objectType.getType() instanceof ObjectType) {
                 ObjectType superType = (ObjectType)objectType.getType();
                 typeProperties = objectType.getProperties().stream()
                         .filter(property -> superType.getProperty(property.getName()) == null)
                         .collect(Collectors.toMap(
-                                property ->
-                                        property.getName().startsWith("/") && property.getName().endsWith("/") ?
-                                                "pattern" + property.hashCode() :
-                                                property.getName(),
+                                property -> property.getName().startsWith("/") && property.getName().endsWith("/") ?
+                                        "pattern" + objectType.getProperties().indexOf(property) : property.getName(),
                                 Property::getName
                         ));
             } else {

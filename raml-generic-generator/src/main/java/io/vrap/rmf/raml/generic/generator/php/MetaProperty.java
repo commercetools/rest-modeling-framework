@@ -1,6 +1,7 @@
 package io.vrap.rmf.raml.generic.generator.php;
 
 import com.google.common.base.CaseFormat;
+import io.vrap.rmf.raml.model.types.ObjectType;
 import io.vrap.rmf.raml.model.types.Property;
 
 public class MetaProperty {
@@ -31,7 +32,7 @@ public class MetaProperty {
     }
 
     public String getConstantName() {
-        return CONSTANT_PREFIX +  CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE,getName());
+        return CONSTANT_PREFIX +  CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, getPatternName());
     }
 
     public MetaGetter getGetter()
@@ -42,5 +43,11 @@ public class MetaProperty {
     public MetaSetter getSetter()
     {
         return new MetaHelper.PropertySetterVisitor(this).doSwitch(property.getType());
+    }
+
+    public String getPatternName()
+    {
+        return property.getName().startsWith("/") && property.getName().endsWith("/") ?
+                "pattern" + ((ObjectType)property.eContainer()).getProperties().indexOf(property) : getName();
     }
 }
