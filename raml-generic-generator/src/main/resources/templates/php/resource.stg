@@ -1,10 +1,10 @@
 import "generic.stg"
 
-builder(vendorName, package, resources, resourcesIndex, resourcesWithParams, resourcesWithParamsIndex) ::=<<
+builder(vendorName, resource) ::=<<
 \<?php
 <generatorInfo()>
 
-namespace <vendorName>\\<package; format="capitalize">;
+namespace <vendorName>\\<resource.package.name>;
 
 use <vendorName>\\Client\\Resource;
 use <vendorName>\\Client\\ApiRequest;
@@ -16,12 +16,7 @@ class RequestBuilder extends Resource
         parent::__construct('');
     }
 
-    <if(resources)>
-    <resources, resourcesIndex: {r, ri|<resourceMethod(r, ri)>}>
-    <endif>
-    <if(resourcesWithParams)>
-    <resourcesWithParams, resourcesWithParamsIndex: {r, ri|<resourceMethodWithParams(r, ri)>}>
-    <endif>
+    <resource.resources: {r |<resourceMethod(r)>}>
 
     /**
      * @param string $method
@@ -105,25 +100,22 @@ public function <parameter; format="methodName">(<parameter; format="methodParam
 
 >>
 
-resource(vendorName, package, resource, index, resources, params, resourcesIndex, resourcesWithParams, resourcesWithParamsIndex) ::=<<
+resource(vendorName, resource) ::=<<
 \<?php
 <generatorInfo()>
 
-namespace <vendorName>\\<package; format="capitalize">;
+namespace <vendorName>\\<resource.package.name>;
 
 use <vendorName>\\Client\\Resource;
 <resource.methods: {m |<methodUse(m)>}>
 
-class Resource<index> extends Resource
+class Resource<resource.index> extends Resource
 {
-    <if(resources)>
-    <resources, resourcesIndex: {r, ri|<resourceMethod(r, ri)>}>
-    <endif>
-    <if(resourcesWithParams)>
-    <resourcesWithParams, resourcesWithParamsIndex: {r, ri|<resourceMethodWithParams(r, ri)>}>
+    <if(resource.resources)>
+    <resource.resources: {r |<resourceMethod(r)>}>
     <endif>
 
-    <resource.methods: {m |<(m.method)(m, params)>}>
+    <resource.methods: {m |<(m.method)(m, resource.allParams)>}>
 }
 
 >>
@@ -133,23 +125,13 @@ methodUse(method) ::=<<
 <method; format="useBody">
 >>
 
-resourceMethod(resource, index) ::=<<
+resourceMethod(resource) ::=<<
 /**
- * @return Resource<index>
+ * @return Resource<resource.index>
  */
-public function <resource.relativeUri; format="methodName">() {
-    return new Resource<index>($this->getUri() . '<resource.relativeUri>', $this->getArgs());
-}
-
->>
-
-resourceMethodWithParams(resource, index) ::=<<
-/**
- * @return Resource<index>
- */
-public function <resource.relativeUri; format="methodName">($<resource.relativeUri; format="params">) {
-    $args = array_merge($this->getArgs(), [<resource.relativeUri; format="paramArray">]);
-    return new Resource<index>($this->getUri() . '<resource.relativeUri; format="uri">', $args);
+public function <resource.relativeUri; format="methodName">(<if(resource.hasParams)>$<resource.relativeUri; format="params"><endif>) {
+    <if(resource.hasParams)>$args = array_merge($this->getArgs(), [<resource.relativeUri; format="paramArray">]);<endif>
+    return new Resource<resource.index>($this->getUri() . '<resource.relativeUri>', <if(resource.hasParams)>$args<else>$this->getArgs()<endif>);
 }
 
 >>
