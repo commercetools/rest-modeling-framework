@@ -2,6 +2,9 @@ package io.vrap.rmf.raml.generic.generator.php;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import io.vrap.rmf.raml.model.elements.IdentifiableElement;
+import io.vrap.rmf.raml.model.facets.BooleanInstance;
+import io.vrap.rmf.raml.model.facets.ObjectInstance;
 import io.vrap.rmf.raml.model.modules.Api;
 import io.vrap.rmf.raml.model.types.*;
 import io.vrap.rmf.raml.model.types.util.TypesSwitch;
@@ -181,6 +184,20 @@ public class MetaType {
         final AnyType t = type instanceof ArrayType ? ((ArrayType) type).getItems() : type;
         Annotation annotation = t.getAnnotation(getApi().getAnnotationType("package"), true);
         return new MetaPackage(TYPES, annotation);
+    }
+
+    @Nullable
+    public List<MetaProperty> getIdentifiers()
+    {
+        final AnyType t = type instanceof ArrayType ? ((ArrayType) type).getItems() : type;
+        AnyAnnotationType identifierAnnotationType = getApi().getAnnotationType("identifier");
+        if (t instanceof ObjectType) {
+            return  ((ObjectType)t).getAllProperties().stream()
+                    .map(MetaProperty::new)
+                    .filter(property -> property.getIdentifier() != null)
+                    .collect(Collectors.toList());
+        }
+        return null;
     }
 
     public Set<Map.Entry<String, String>> getTypeProperties()

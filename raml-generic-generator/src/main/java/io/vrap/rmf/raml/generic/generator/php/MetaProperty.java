@@ -1,8 +1,13 @@
 package io.vrap.rmf.raml.generic.generator.php;
 
 import com.google.common.base.CaseFormat;
+import io.vrap.rmf.raml.model.modules.Api;
+import io.vrap.rmf.raml.model.types.Annotation;
+import io.vrap.rmf.raml.model.types.AnyAnnotationType;
 import io.vrap.rmf.raml.model.types.ObjectType;
 import io.vrap.rmf.raml.model.types.Property;
+
+import javax.annotation.Nullable;
 
 public class MetaProperty {
     final private static String CONSTANT_PREFIX = "FIELD_";
@@ -49,5 +54,23 @@ public class MetaProperty {
     {
         return property.getName().startsWith("/") && property.getName().endsWith("/") ?
                 "pattern" + ((ObjectType)property.eContainer()).getProperties().indexOf(property) : getName();
+    }
+
+    private AnyAnnotationType getIdentifierAnnotation()
+    {
+        final ObjectType o = (ObjectType)property.eContainer();
+        final MetaType t = new MetaType(o);
+        return t.getApi().getAnnotationType("identifier");
+    }
+
+    @Nullable
+    public Annotation getIdentifier()
+    {
+        final AnyAnnotationType identifierAnnotation = getIdentifierAnnotation();
+
+        if (identifierAnnotation != null) {
+            return property.getAnnotation(identifierAnnotation);
+        }
+        return null;
     }
 }

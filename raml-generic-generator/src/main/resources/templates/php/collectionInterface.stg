@@ -1,43 +1,44 @@
 import "generic.stg"
 
-collectionInterface(vendorName, type, package, builtInParent, typePackage, uses, identifiers) ::= <<
+collectionInterface(vendorName, type) ::= <<
 \<?php
 <generatorInfo()>
 
-namespace <vendorName>\\<package; format="capitalize"><if(typePackage)>\\<typePackage.value.value><endif>;
+namespace <vendorName>\\<type.package.name>;
 
 use <vendorName>\\Base\\Collection;
 
-interface <type.name>Collection extends Collection {
+interface <type.name> extends Collection {
     /**
      * @param $index
-     * @return <type.name>
+     * @return <type.elementName>
      */
     public function at($index);
 
     /**
-     * @return <type.name>
+     * @return <type.elementName>
      */
     public function current();
 
     /**
      * @param $data
      * @param $index
-     * @return <type.name>
+     * @return <type.elementName>
      */
     public function map($data, $index);
-    <if(identifiers)>
+    <if(type.identifiers)>
 
-    <identifiers: {id |<indexGetter(type, id)>}>
+    <type.identifiers: {id |<indexGetter(id)>}>
     <endif>
 }
 
 >>
 
-indexGetter(type, identifier) ::=<<
+indexGetter(identifier) ::=<<
 
 /**
- * @return <type.name>
+ * @param $<identifier.name>
+ * @return <identifier.type.name>
  */
-public function by<identifier; format="capitalize">($<identifier>);
+public function by<identifier.name; format="capitalize">($<identifier.name>);
 >>

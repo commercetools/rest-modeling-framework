@@ -3,7 +3,6 @@ package io.vrap.rmf.raml.generic.generator.php
 import com.google.common.io.Resources
 import io.vrap.raml.generic.generator.ResourceFixtures
 import io.vrap.rmf.raml.model.modules.Api
-import io.vrap.rmf.raml.model.types.AnyAnnotationType
 import io.vrap.rmf.raml.model.types.AnyType
 import io.vrap.rmf.raml.persistence.RamlResourceSet
 import io.vrap.rmf.raml.persistence.antlr.RAMLCustomLexer
@@ -171,7 +170,7 @@ class PHPGeneratorTest extends Specification implements ResourceFixtures {
                     street: string
         ''')
         then:
-        TypesGenerator generator = new TypesGenerator("Test", packageAnnotation, identifierAnnotation)
+        TypesGenerator generator = new TypesGenerator("Test")
         String result = generator.generateMap(api.types);
         result == fileContent("ModelClassMap.php")
     }
@@ -283,30 +282,8 @@ class PHPGeneratorTest extends Specification implements ResourceFixtures {
     }
 
     String generate(final String generateType, final AnyType type) {
-        TypesGenerator generator = new TypesGenerator("Test", packageAnnotation, identifierAnnotation)
-        return generator.generateType(generator.createVisitor(TypesGenerator.PACKAGE_NAME, generateType), type);
-    }
-
-    AnyAnnotationType getIdentifierAnnotation() {
-        Api api = constructApi('''
-        annotationTypes:
-            identifier:
-                type: string
-                allowedTargets: TypeDeclaration
-        ''')
-        AnyAnnotationType identifierAnnotationType = api.getAnnotationType("identifier");
-        return identifierAnnotationType;
-    }
-
-    AnyAnnotationType getPackageAnnotation() {
-        Api api = constructApi('''
-        annotationTypes:
-            package:
-                type: string
-                allowedTargets: TypeDeclaration
-        ''')
-        AnyAnnotationType packageAnnotationType = api.getAnnotationType("package");
-        return packageAnnotationType;
+        TypesGenerator generator = new TypesGenerator("Test")
+        return generator.generateType(generator.createVisitor(generateType), type);
     }
 
     Api constructApi(final String input) {

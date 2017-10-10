@@ -4,13 +4,14 @@ modelMap(vendorName, package, types) ::= <<
 \<?php
 <generatorInfo()>
 
-namespace <vendorName>\\<package; format="capitalize">;
+namespace <vendorName>\\<package>;
 
 use <vendorName>\\Base\\ClassMapModel;
 use <vendorName>\\Base\\Collection;
 use <vendorName>\\Base\\JsonCollection;
 use <vendorName>\\Base\\JsonObject;
 use <vendorName>\\Base\\JsonObjectModel;
+use <vendorName>\\<package>;
 
 class ModelClassMap extends ClassMapModel
 {
@@ -23,7 +24,7 @@ class ModelClassMap extends ClassMapModel
 
 >>
 
-typeMapping(typeName) ::= <<
-<typeName; format="capitalize">::class => <typeName; format="capitalize">Model::class,
+typeMapping(type) ::= <<
+<type.package.name>\\<type.name>::class => <type.package.name>\\<type.name>Model::class,
 
 >>

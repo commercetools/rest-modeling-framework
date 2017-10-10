@@ -31,9 +31,8 @@ public class PhpGenerator implements Generator {
         }
 
         AnyAnnotationType packageAnnotation = api.getAnnotationType("package");
-        AnyAnnotationType identifierAnnotation = api.getAnnotationType("identifier");
         AnyAnnotationType placeholderParamAnnotation = api.getAnnotationType("placeholderParam");
-        TypesGenerator generator = new TypesGenerator(vendorName, packageAnnotation, identifierAnnotation);
+        TypesGenerator generator = new TypesGenerator(vendorName);
         List<File> f = generator.generate(api.getTypes(), new File(outputPath, "src/" + MetaType.TYPES));
 
         StaticGenerator staticGenerator = new StaticGenerator(vendorName);

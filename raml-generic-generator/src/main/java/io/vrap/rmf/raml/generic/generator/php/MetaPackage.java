@@ -25,10 +25,21 @@ public class MetaPackage {
 
     public String getName()
     {
+        return packageName + (getHasPackage() ? "\\" + getSubPackage() : "");
+    }
+
+    public String getSubPackage()
+    {
         if (getHasPackage()) {
-            return packageName + "\\" + ((StringInstance)annotation.getValue()).getValue();
+            return ((StringInstance)annotation.getValue()).getValue();
         }
-        return packageName;
+        return "";
+    }
+
+    public String getSubPackageFolder()
+    {
+        final String subpackage = getSubPackage();
+        return subpackage + (subpackage.isEmpty() ? "" : "/");
     }
 
     public Boolean getHasPackage()
