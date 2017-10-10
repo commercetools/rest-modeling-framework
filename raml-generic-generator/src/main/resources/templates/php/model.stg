@@ -279,10 +279,10 @@ public function set<property.name; format="capitalize">(<if(property.setter.para
 
 arraySetter(property) ::= <<
 /**
- * @param <if(property.setter.docType)><property.setter.docType><else>mixed<endif> $<property.name>
+ * @param <if(property.setter.paramCheck)><property.setter.docType> <else><if(property.paramType)><property.paramType><else>mixed<endif><endif> $<property.name>
  * @return $this
  */
-public function set<property.name; format="capitalize">(<if(property.setter.paramType)><property.setter.paramType> <endif>$<property.name>)
+public function set<property.name; format="capitalize">(<if(property.paramType)><property.paramType> <endif>$<property.name>)
 {
     <if(property.setter.paramCheck)>
     if (!$<property.name> instanceof <property.setter.docType>) {

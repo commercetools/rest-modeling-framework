@@ -314,7 +314,7 @@ public class MetaHelper {
             if (arrayType.getItems() == null || BuiltinType.of(arrayType.getItems().getName()).isPresent()) {
                 return null;
             } else if (arrayType.getItems() instanceof UnionType) {
-                return new MetaSetter("arraySetter", property, "array");
+                return new MetaSetter("arraySetter", property, null);
             } else {
                 if (BuiltinType.of(arrayType.getItems().getName()).isPresent()) {
                     return new MetaSetter("arraySetter", property, "array", "array");

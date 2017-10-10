@@ -81,6 +81,19 @@ public class MetaType {
         return null;
     }
 
+    public List<MetaProperty> getTypeProperties()
+    {
+        if (type instanceof ObjectType) {
+            ObjectType superType = (ObjectType)type.getType();
+            return ((ObjectType)type).getProperties().stream()
+                    .filter(property -> !(property.getName().startsWith("/") && property.getName().endsWith("/")))
+                    .filter(property -> superType.getAllProperties().stream().filter(property1 -> property1.getName().equals(property.getName())).count() == 0)
+                    .map(MetaProperty::new)
+                    .collect(Collectors.toList());
+        }
+        return Lists.newArrayList();
+    }
+
     public List<MetaProperty> getNonPatternProperties()
     {
         if (type instanceof ObjectType) {
@@ -198,29 +211,6 @@ public class MetaType {
                     .collect(Collectors.toList());
         }
         return null;
-    }
-
-    public Set<Map.Entry<String, String>> getTypeProperties()
-    {
-        final Map<String, String> typeProperties;
-        if (type instanceof ObjectType) {
-            ObjectType objectType = (ObjectType)type;
-            if(objectType.getType() instanceof ObjectType) {
-                ObjectType superType = (ObjectType)objectType.getType();
-                typeProperties = objectType.getProperties().stream()
-                        .filter(property -> superType.getProperty(property.getName()) == null)
-                        .collect(Collectors.toMap(
-                                property -> property.getName().startsWith("/") && property.getName().endsWith("/") ?
-                                        "pattern" + objectType.getProperties().indexOf(property) : property.getName(),
-                                Property::getName
-                        ));
-            } else {
-                typeProperties = Maps.newHashMap();
-            }
-        } else {
-            typeProperties = Maps.newHashMap();
-        }
-        return typeProperties.entrySet();
     }
 
     public Api getApi()
