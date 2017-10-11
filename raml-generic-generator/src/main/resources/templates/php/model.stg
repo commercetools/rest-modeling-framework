@@ -32,7 +32,7 @@ class <type.name>Model extends <if(!type.hasBuiltinParent)><type.parent.name>Mod
 
     <endif>
     <type.nonPatternProperties: {p |<property(p)>}>
-    <type.nonPatternProperties: {p |<(p.getter.getter)(type, p)>}>
+    <type.nonPatternProperties: {p |<getter(type, p)>}>
     <type.nonPatternProperties: {p |<(p.setter.setter)(p)>}>
     <if(type.patternProperties)>
     <patternGetter(type, type.patternProperties)>
@@ -72,21 +72,6 @@ class <type.name>Model extends <if(!type.hasBuiltinParent)><type.parent.name>Mod
 
 >>
 
-defaultGetter(type, property) ::= <<
-/**
- * @return <property.type.typeName>
- */
-public function get<property.name; format="capitalize">()
-{
-    if (is_null($this-><property.name>)) {
-        $value = $this->raw(<type.name>::FIELD_<property.name; format="upperUnderscore">);
-        $this-><property.name> = $value;
-    }
-    return $this-><property.name>;
-}
-
->>
-
 patternGetter(type, properties) ::= <<
 /**
  * @param string $key
@@ -94,17 +79,23 @@ patternGetter(type, properties) ::= <<
  */
 public function get($key)
 {
-    if (!$this->validKey($key)) {
-        throw new \InvalidArgumentException();
+    if(!isset($this->patternData[$key])) {
+        switch (true) {
+            <type.patternProperties: {p |<patternGet(type, p)>}>
+            default:
+                throw new \InvalidArgumentException();
+        }
+        $this->patternData[$key] = $value;
     }
-    if (isset($this->patternData[$key])) {
-        $value = $this->patternData[$key];
-    } else {
-        $value = $this->raw($key);
-    }
-    return $value;
+    return $this->patternData[$key];
 }
 
+>>
+
+patternGet(type, property) ::= <<
+case preg_match('<property.name>', $key):
+    <(property.getter.getter)(type, p, "$key")>
+    break;
 >>
 
 patternSetter(type, properties) ::= <<
@@ -129,85 +120,62 @@ case preg_match('<property.name>', $key):
     return true;
 >>
 
-dateTimeGetter(type, property) ::= <<
+getter(type, property) ::=<<
 /**
  * @return <property.type.typeName>
  */
 public function get<property.name; format="capitalize">()
 {
     if (is_null($this-><property.name>)) {
-        $value = $this->raw(<type.name>::FIELD_<property.name; format="upperUnderscore">);
-        <if(property.getter.format)>
-        $dateTime = \DateTimeImmutable::createFromFormat('<property.getter.format>', $value);
-        if ($dateTime) {
-            $this-><property.name> = $dateTime;
-        }
-        <else>
-        $this-><property.name> = new \DateTimeImmutable($value);
-        <endif>
+        <(property.getter.getter)(type, property, {<type.name>::<property.constantName>})>
+        $this-><property.name> = $value;
     }
     return $this-><property.name>;
 }
 
 >>
 
-scalarGetter(type, property) ::= <<
-/**
- * @return <property.type.typeName>
- */
-public function get<property.name; format="capitalize">()
-{
-    if (is_null($this-><property.name>)) {
-        $value = $this->raw(<type.name>::FIELD_<property.name; format="upperUnderscore">);
-        $this-><property.name> = (<property.getter.format>)$value;
-    }
-    return $this-><property.name>;
-}
-
+defaultGetter(type, property, get) ::= <<
+$value = $this->raw(<get>);
 >>
 
-classGetter(type, property) ::= <<
-/**
- * @return <property.type.typeName>
- */
-public function get<property.name; format="capitalize">()
-{
-    if (is_null($this-><property.name>)) {
-        $value = $this->raw(<type.name>::FIELD_<property.name; format="upperUnderscore">);
-        <if(property.type.discriminator)>
-        $resolvedClass = $this->resolveDiscriminator(<property.type.name>::class, $value);
-        if (is_null($value)) {
-            return $this->mapData($resolvedClass, null);
-        }
-        $this-><property.name> = $this->mapData($resolvedClass, $value);
-        <else>
-        if (is_null($value)) {
-            return $this->mapData(<property.type.name>::class, null);
-        }
-        $this-><property.name> = $this->mapData(<property.type.name>::class, $value);
-        <endif>
-    }
-    return $this-><property.name>;
-}
-
+dateTimeGetter(type, property, get) ::= <<
+$value = $this->raw(<get>);
+<if(property.getter.format)>
+$dateTime = \DateTimeImmutable::createFromFormat('<property.getter.format>', $value);
+$value = $dateTime ? $dateTime : null;
+<else>
+$value = new \DateTimeImmutable($value);
+<endif>
 >>
 
-arrayGetter(type, property) ::= <<
-/**
- * @return <property.type.typeName>
- */
-public function get<property.name; format="capitalize">()
-{
-    if (is_null($this-><property.name>)) {
-        $value = $this->raw(<type.name>::FIELD_<property.name; format="upperUnderscore">);
-        if (is_null($value)) {
-            return $this->mapData(<property.type.typeName>::class, null);
-        }
-        $this-><property.name> = $this->mapData(<property.type.typeName>::class, $value);
-    }
-    return $this-><property.name>;
-}
+scalarGetter(type, property, get) ::= <<
+$value = $this->raw(<get>);
+$value = (<property.getter.format>)$value;
+>>
 
+classGetter(type, property, get) ::= <<
+$value = $this->raw(<get>);
+<if(property.type.discriminator)>
+$resolvedClass = $this->resolveDiscriminator(<property.type.name>::class, $value);
+if (is_null($value)) {
+    return $this->mapData($resolvedClass, null);
+}
+$value = $this->mapData($resolvedClass, $value);
+<else>
+if (is_null($value)) {
+    return $this->mapData(<property.type.name>::class, null);
+}
+$value = $this->mapData(<property.type.name>::class, $value);
+<endif>
+>>
+
+arrayGetter(type, property, get) ::= <<
+$value = $this->raw(<get>);
+if (is_null($value)) {
+    return $this->mapData(<property.type.typeName>::class, null);
+}
+$value = $this->mapData(<property.type.typeName>::class, $value);
 >>
 
 defaultSetter(property) ::= <<

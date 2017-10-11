@@ -25,7 +25,8 @@ class EnumModel extends JsonObjectModel implements Enum {
     {
         if (is_null($this->key)) {
             $value = $this->raw(Enum::FIELD_KEY);
-            $this->key = (string)$value;
+            $value = (string)$value;
+            $this->key = $value;
         }
         return $this->key;
     }
@@ -36,7 +37,8 @@ class EnumModel extends JsonObjectModel implements Enum {
     {
         if (is_null($this->label)) {
             $value = $this->raw(Enum::FIELD_LABEL);
-            $this->label = (string)$value;
+            $value = (string)$value;
+            $this->label = $value;
         }
         return $this->label;
     }

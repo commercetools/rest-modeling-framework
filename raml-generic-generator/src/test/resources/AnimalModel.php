@@ -28,7 +28,8 @@ class AnimalModel extends JsonObjectModel implements Animal {
     {
         if (is_null($this->kind)) {
             $value = $this->raw(Animal::FIELD_KIND);
-            $this->kind = (string)$value;
+            $value = (string)$value;
+            $this->kind = $value;
         }
         return $this->kind;
     }

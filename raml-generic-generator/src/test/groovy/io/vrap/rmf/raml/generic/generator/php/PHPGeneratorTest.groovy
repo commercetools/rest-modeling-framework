@@ -61,8 +61,11 @@ class PHPGeneratorTest extends Specification implements ResourceFixtures {
                     createdAt: datetime
         ''')
         then:
-        String result = generate(TypesGenerator.TYPE_MODEL, api.types.get(0));
-        result == fileContent("Document.php")
+        String documentModel = generate(TypesGenerator.TYPE_MODEL, api.types.get(0));
+        documentModel == fileContent("DocumentModel.php")
+
+        String document = generate(TypesGenerator.TYPE_INTERFACE, api.types.get(0));
+        document == fileContent("Document.php")
     }
 
 

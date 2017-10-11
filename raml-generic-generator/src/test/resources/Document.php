@@ -6,52 +6,20 @@
 
 namespace Test\Types;
 
-use Test\Base\JsonObjectModel;
+use Test\Base\JsonObject;
 
-class DocumentModel extends JsonObjectModel implements Document {
-    /**
-     * @var \DateTimeImmutable
-     */
-    private $createdAt;
+interface Document extends JsonObject {
+    const FIELD_CREATED_AT = 'createdAt';
 
     /**
      * @return \DateTimeImmutable
      */
-    public function getCreatedAt()
-    {
-        if (is_null($this->createdAt)) {
-            $value = $this->raw(Document::FIELD_CREATED_AT);
-            $dateTime = \DateTimeImmutable::createFromFormat('Y-m-d?H:i:s.uT', $value);
-            if ($dateTime) {
-                $this->createdAt = $dateTime;
-            }
-        }
-        return $this->createdAt;
-    }
+    public function getCreatedAt();
 
     /**
-     * @param \DateTimeImmutable|\DateTime|string $createdAt
+     * @param \DateTimeImmutable $createdAt
      * @return $this
      */
-    public function setCreatedAt($createdAt)
-    {
-        if ($createdAt instanceof \DateTime) {
-            $createdAt = \DateTimeImmutable::createFromMutable($createdAt);
-        }
-        if (!$createdAt instanceof \DateTimeImmutable) {
-            $createdAt = new \DateTimeImmutable($createdAt);
-        }
-        $this->$createdAt = $createdAt;
+    public function setCreatedAt($createdAt);
 
-        return $this;
-    }
-
-
-    public function jsonSerialize() {
-        $data = parent::jsonSerialize();
-        if (isset($data[Document::FIELD_CREATED_AT]) && $data[Document::FIELD_CREATED_AT] instanceof \DateTimeImmutable) {
-            $data[Document::FIELD_CREATED_AT] = $data[Document::FIELD_CREATED_AT]->setTimeZone(new \DateTimeZone('UTC'))->format('c');
-        }
-        return $data;
-    }
 }

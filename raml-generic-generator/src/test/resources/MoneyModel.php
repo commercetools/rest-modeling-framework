@@ -25,7 +25,8 @@ class MoneyModel extends JsonObjectModel implements Money {
     {
         if (is_null($this->centAmount)) {
             $value = $this->raw(Money::FIELD_CENT_AMOUNT);
-            $this->centAmount = (string)$value;
+            $value = (string)$value;
+            $this->centAmount = $value;
         }
         return $this->centAmount;
     }
@@ -36,7 +37,8 @@ class MoneyModel extends JsonObjectModel implements Money {
     {
         if (is_null($this->currencyCode)) {
             $value = $this->raw(Money::FIELD_CURRENCY_CODE);
-            $this->currencyCode = (string)$value;
+            $value = (string)$value;
+            $this->currencyCode = $value;
         }
         return $this->currencyCode;
     }

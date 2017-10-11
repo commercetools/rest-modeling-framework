@@ -16,15 +16,17 @@ class ContainerModel extends JsonObjectModel implements Container {
      */
     public function get($key)
     {
-        if (!$this->validKey($key)) {
-            throw new \InvalidArgumentException();
+        if(!isset($this->patternData[$key])) {
+            switch (true) {
+                case preg_match('//', $key):
+                    $value = $this->raw($key);
+                    break;
+                default:
+                    throw new \InvalidArgumentException();
+            }
+            $this->patternData[$key] = $value;
         }
-        if (isset($this->patternData[$key])) {
-            $value = $this->patternData[$key];
-        } else {
-            $value = $this->raw($key);
-        }
-        return $value;
+        return $this->patternData[$key];
     }
 
     /**

@@ -25,7 +25,8 @@ class AttributeModel extends JsonObjectModel implements Attribute {
     {
         if (is_null($this->name)) {
             $value = $this->raw(Attribute::FIELD_NAME);
-            $this->name = (string)$value;
+            $value = (string)$value;
+            $this->name = $value;
         }
         return $this->name;
     }
