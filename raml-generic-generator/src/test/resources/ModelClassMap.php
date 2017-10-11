@@ -11,14 +11,15 @@ use Test\Base\Collection;
 use Test\Base\JsonCollection;
 use Test\Base\JsonObject;
 use Test\Base\JsonObjectModel;
+use Test\Types;
 
 class ModelClassMap extends ClassMapModel
 {
     protected static $types = [
         JsonObject::class => JsonObjectModel::class,
         Collection::class => JsonCollection::class,
-        Address::class => AddressModel::class,
-        Customer::class => CustomerModel::class,
+        Types\Address::class => Types\AddressModel::class,
+        Types\Customer::class => Types\CustomerModel::class,
 
     ];
 }

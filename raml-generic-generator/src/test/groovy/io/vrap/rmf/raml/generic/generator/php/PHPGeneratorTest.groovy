@@ -3,7 +3,6 @@ package io.vrap.rmf.raml.generic.generator.php
 import com.google.common.io.Resources
 import io.vrap.raml.generic.generator.ResourceFixtures
 import io.vrap.rmf.raml.model.modules.Api
-import io.vrap.rmf.raml.model.types.AnyAnnotationType
 import io.vrap.rmf.raml.model.types.AnyType
 import io.vrap.rmf.raml.persistence.RamlResourceSet
 import io.vrap.rmf.raml.persistence.antlr.RAMLCustomLexer
@@ -51,6 +50,24 @@ class PHPGeneratorTest extends Specification implements ResourceFixtures {
         String result = generate(TypesGenerator.TYPE_INTERFACE, api.types.get(0));
         result == fileContent("Person.php")
     }
+
+    def "generate serializer"() {
+        when:
+        Api api = constructApi(
+                '''\
+        types:
+            Document:
+                properties:
+                    createdAt: datetime
+        ''')
+        then:
+        String documentModel = generate(TypesGenerator.TYPE_MODEL, api.types.get(0));
+        documentModel == fileContent("DocumentModel.php")
+
+        String document = generate(TypesGenerator.TYPE_INTERFACE, api.types.get(0));
+        document == fileContent("Document.php")
+    }
+
 
     def "generate extended interface"() {
         when:
@@ -156,7 +173,7 @@ class PHPGeneratorTest extends Specification implements ResourceFixtures {
                     street: string
         ''')
         then:
-        TypesGenerator generator = new TypesGenerator("Test", packageAnnotation, identifierAnnotation)
+        TypesGenerator generator = new TypesGenerator("Test")
         String result = generator.generateMap(api.types);
         result == fileContent("ModelClassMap.php")
     }
@@ -188,6 +205,63 @@ class PHPGeneratorTest extends Specification implements ResourceFixtures {
         kindClass == fileContent("CatModel.php")
     }
 
+    def "generate property as type getter"() {
+        when:
+        Api api = constructApi(
+                '''\
+        types:
+            Attribute:
+                properties:
+                    name: string
+                    value: string | Money | Enum
+            Money:
+                type: object
+                properties:
+                    centAmount: string
+                    currencyCode: string
+            Enum:
+                type: object
+                properties:
+                    key: string
+                    label: string
+        ''')
+        then:
+        String attributeInterface = generate(TypesGenerator.TYPE_INTERFACE, api.types.get(0));
+        attributeInterface == fileContent("Attribute.php")
+
+        String attributeClass = generate(TypesGenerator.TYPE_MODEL, api.types.get(0));
+        attributeClass == fileContent("AttributeModel.php")
+
+        String enumInterface = generate(TypesGenerator.TYPE_INTERFACE, api.types.get(1));
+        enumInterface == fileContent("Money.php")
+
+        String enumClass = generate(TypesGenerator.TYPE_MODEL, api.types.get(1));
+        enumClass == fileContent("MoneyModel.php")
+
+        String referenceInterface = generate(TypesGenerator.TYPE_INTERFACE, api.types.get(2));
+        referenceInterface == fileContent("Enum.php")
+
+        String referenceClass = generate(TypesGenerator.TYPE_MODEL, api.types.get(2));
+        referenceClass == fileContent("EnumModel.php")
+    }
+
+    def "generate map as type getter"() {
+        when:
+        Api api = constructApi(
+                '''\
+        types:
+            Container:
+                properties:
+                    //: string | Money | Enum
+        ''')
+        then:
+        String attributeInterface = generate(TypesGenerator.TYPE_INTERFACE, api.types.get(0));
+        attributeInterface == fileContent("Container.php")
+
+        String attributeClass = generate(TypesGenerator.TYPE_MODEL, api.types.get(0));
+        attributeClass == fileContent("ContainerModel.php")
+    }
+
     @Unroll
     def "test base class files"(File file) {
         given:
@@ -211,30 +285,8 @@ class PHPGeneratorTest extends Specification implements ResourceFixtures {
     }
 
     String generate(final String generateType, final AnyType type) {
-        TypesGenerator generator = new TypesGenerator("Test", packageAnnotation, identifierAnnotation)
-        return generator.generateType(generator.createVisitor(TypesGenerator.PACKAGE_NAME, generateType), type);
-    }
-
-    AnyAnnotationType getIdentifierAnnotation() {
-        Api api = constructApi('''
-        annotationTypes:
-            identifier:
-                type: string
-                allowedTargets: TypeDeclaration
-        ''')
-        AnyAnnotationType identifierAnnotationType = api.getAnnotationType("identifier");
-        return identifierAnnotationType;
-    }
-
-    AnyAnnotationType getPackageAnnotation() {
-        Api api = constructApi('''
-        annotationTypes:
-            package:
-                type: string
-                allowedTargets: TypeDeclaration
-        ''')
-        AnyAnnotationType packageAnnotationType = api.getAnnotationType("package");
-        return packageAnnotationType;
+        TypesGenerator generator = new TypesGenerator("Test")
+        return generator.generateType(generator.createVisitor(generateType), type);
     }
 
     Api constructApi(final String input) {

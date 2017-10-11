@@ -15,6 +15,7 @@ interface Address extends JsonObject {
      * @return string
      */
     public function getStreet();
+
     /**
      * @param string $street
      * @return $this

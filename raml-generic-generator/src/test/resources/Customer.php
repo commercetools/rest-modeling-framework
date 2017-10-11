@@ -15,6 +15,7 @@ interface Customer extends JsonObject {
      * @return Address
      */
     public function getAddress();
+
     /**
      * @param Address $address
      * @return $this

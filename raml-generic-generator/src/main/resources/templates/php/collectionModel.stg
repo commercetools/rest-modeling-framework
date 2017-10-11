@@ -1,25 +1,25 @@
 import "generic.stg"
 
-collectionModel(vendorName, type, package, builtInParent, typePackage, uses, identifiers) ::= <<
+collectionModel(vendorName, type) ::= <<
 \<?php
 <generatorInfo()>
 
-namespace <vendorName>\\<package; format="capitalize"><if(typePackage)>\\<typePackage.value.value><endif>;
+namespace <vendorName>\\<type.package.name>;
 
 use <vendorName>\\Base\\JsonCollection;
-use <vendorName>\\Base\\Collection;
 <if(type.discriminator)>
 use <vendorName>\\Base\\DiscriminatorResolver;
 <endif>
 
-class <type.name>CollectionModel extends JsonCollection implements <type.name>Collection {
+
+class <type.name>Model extends JsonCollection implements <type.name> {
 
     /**
-     * @param <type.name> $value
-     * @return <type.name>Collection
+     * @param <type.elementName> $value
+     * @return <type.name>
      */
     public function add($value) {
-        if (!$value instanceof <type.name>) {
+        if (!$value instanceof <type.elementName>) {
             throw new \InvalidArgumentException();
         }
         parent::add($value);
@@ -28,31 +28,31 @@ class <type.name>CollectionModel extends JsonCollection implements <type.name>Co
     }
 
     /**
-     * @return <type.name>
+     * @return <type.elementName>
      */
     public function map($data, $index)
     {
-        if (!is_null($data) && !$data instanceof <type.name>) {
+        if (!is_null($data) && !$data instanceof <type.elementName>) {
             <if(type.discriminator)>
-            $resolvedClass = $this->resolveDiscriminator(<type.name>::class, $data);
+            $resolvedClass = $this->resolveDiscriminator(<type.elementName>::class, $data);
             $data = $this->mapData($resolvedClass, $data);
             <else>
-            $data = $this->mapData(<type.name>::class, $data);
+            $data = $this->mapData(<type.elementName>::class, $data);
             <endif>
             $this->rawSet($data, $index);
         }
         return $data;
     }
-    <if(identifiers)>
+    <if(type.identifiers)>
 
     protected function index($data)
     {
         foreach ($data as $key => $value) {
-            <identifiers: {id |<index(id)>}>
+            <type.identifiers: {id |<index(id)>}>
         }
     }
 
-    <identifiers: {id |<indexGetter(type, id)>}>
+    <type.identifiers: {id |<indexGetter(id)>}>
     <endif>
 }
 
@@ -60,18 +60,18 @@ class <type.name>CollectionModel extends JsonCollection implements <type.name>Co
 
 index(identifier) ::=<<
 
-if (isset($value['<identifier>'])) {
-    $this->addToIndex('<identifier>', $value['<identifier>'], $key);
+if (isset($value['<identifier.name>'])) {
+    $this->addToIndex('<identifier.name>', $value['<identifier.name>'], $key);
 }
 >>
 
-indexGetter(type, identifier) ::=<<
+indexGetter(identifier) ::=<<
 
 /**
- * @return <type.name>
+ * @return <identifier.type.name>
  */
-public function by<identifier; format="capitalize">($<identifier>)
+public function by<identifier.name; format="capitalize">($<identifier.name>)
 {
-    return $this->valueByKey('<identifier>', $<identifier>);
+    return $this->valueByKey('<identifier.name>', $<identifier.name>);
 }
 >>
