@@ -1,9 +1,9 @@
 package io.vrap.rmf.raml.model.util;
 
 import com.google.common.collect.Lists;
+import io.vrap.rmf.raml.persistence.antlr.StringTemplateBaseVisitor;
 import io.vrap.rmf.raml.persistence.antlr.StringTemplateLexer;
 import io.vrap.rmf.raml.persistence.antlr.StringTemplateParser;
-import io.vrap.rmf.raml.persistence.antlr.StringTemplateParserBaseVisitor;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 
@@ -164,7 +164,7 @@ public class StringTemplate {
         }
     }
 
-    private static class StringTemplateVisitor extends StringTemplateParserBaseVisitor<List<Part>> {
+    private static class StringTemplateVisitor extends StringTemplateBaseVisitor<List<Part>> {
         @Override
         protected List<StringTemplate.Part> aggregateResult(final List<StringTemplate.Part> aggregate, final List<StringTemplate.Part> nextResult) {
             if (aggregate != null) {
