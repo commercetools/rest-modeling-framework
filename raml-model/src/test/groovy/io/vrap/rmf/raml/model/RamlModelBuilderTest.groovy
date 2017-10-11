@@ -5,6 +5,7 @@ import io.vrap.rmf.raml.model.resources.HttpMethod
 import io.vrap.rmf.raml.model.resources.Method
 import io.vrap.rmf.raml.model.resources.Resource
 import io.vrap.rmf.raml.model.types.AnyType
+import io.vrap.rmf.raml.model.types.UnionType
 import io.vrap.rmf.raml.persistence.ResourceFixtures
 import org.eclipse.emf.common.util.URI
 import spock.lang.Shared
@@ -71,6 +72,19 @@ class RamlModelBuilderTest extends Specification implements ResourceFixtures {
         Api api = modelBuilder.buildApi(uri)
         then:
         api != null
+    }
+
+    def "union resource type"() {
+        when:
+        URI uri = uriFromClasspath('/api/resource-type-application.raml')
+        Api api = modelBuilder.buildApi(uri)
+        then:
+        api.resources.size() == 1
+        api.resources[0].getMethod(HttpMethod.GET) != null
+        api.resources[0].getMethod(HttpMethod.GET).responses.size() == 1
+        api.resources[0].getMethod(HttpMethod.GET).responses[0].statusCode == '200'
+        api.resources[0].getMethod(HttpMethod.GET).responses[0].bodies.size() == 1
+        api.resources[0].getMethod(HttpMethod.GET).responses[0].bodies[0].type instanceof UnionType
     }
 
     def "load extension and merge it"() {

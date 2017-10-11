@@ -1,0 +1,19 @@
+#%RAML 1.0
+title: Test
+resourceTypes:
+    baseDomain:
+        get:
+            responses:
+                200:
+                    body:
+                        application/json:
+                            type: <<resourceQueryType>>
+types:
+    TestObject:
+        properties:
+            name: string
+/carts:
+    type:
+        baseDomain:
+            resourceQueryType: TestObject | object
+    get:
