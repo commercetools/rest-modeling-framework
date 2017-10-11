@@ -50,7 +50,7 @@ use <vendorName>\\Base\\JsonObject;
 
 use <vendorName>\\Base\\ResultMapper;
 use Psr\Http\Message\ResponseInterface;
-<request.method; format="useBody">
+<if (request.bodyImport)><useTypeImport(vendorName, request.bodyImport)><endif>
 
 class <request.name> extends ApiRequest
 {
@@ -61,7 +61,7 @@ class <request.name> extends ApiRequest
      * @param $body
      * @param array $headers
      */
-    public function __construct(<request.allParams: {p |$<p.key>, }><request.method; format="bodyType">$body<request.method; format="optionalBody">, array $headers = [])
+    public function __construct(<request.allParams: {p |$<p.key>, }><request.bodyType>$body<request.method; format="optionalBody">, array $headers = [])
     {
         $uri = sprintf('<request.absoluteUri; format="sprintf">'<request.allParams: {p |, $<p.key>}>);
         <request.method; format="ensureHeader">
@@ -115,14 +115,14 @@ class Resource<resource.index> extends Resource
     <resource.resources: {r |<resourceMethod(r)>}>
     <endif>
 
-    <resource.methods: {m |<(m.method)(m, resource.allParams)>}>
+    <resource.methods: {m |<(m.method.method)(m)>}>
 }
 
 >>
 
 methodUse(method) ::=<<
 
-<method; format="useBody">
+<if (method.bodyImport)><useTypeImport(vendorName, method.bodyImport)><endif>
 >>
 
 resourceMethod(resource) ::=<<
@@ -136,36 +136,36 @@ public function <resource.relativeUri; format="methodName">(<if(resource.hasPara
 
 >>
 
-get(method, params) ::=<<
+get(request) ::=<<
 /**
- * @return <method; format="requestName">
+ * @return <request.name>
  */
-public function <method.method>() {
+public function <request.method.method>() {
     $args = $this->getArgs();
-    return new <method; format="requestName">(<trunc(params): {p|$args['<p.key>'], }><last(params): {p|$args['<p.key>']}>);
+    return new <request.name>(<trunc(request.allParams): {p|$args['<p.key>'], }><last(request.allParams): {p|$args['<p.key>']}>);
 }
 
 >>
 
-post(method, params) ::=<<
+post(request) ::=<<
 /**
- * @param <method; format="bodyType">$body
- * @return <method; format="requestName">
+ * @param <request.bodyType>$body
+ * @return <request.name>
  */
-public function <method.method>(<method; format="bodyType">$body) {
+public function <request.method.method>(<request.bodyType>$body) {
     $args = $this->getArgs();
-    return new <method; format="requestName">(<trunc(params): {p|$args['<p.key>'], }><last(params): {p|$args['<p.key>']}>, $body);
+    return new <request.name>(<trunc(request.allParams): {p|$args['<p.key>'], }><last(request.allParams): {p|$args['<p.key>']}>, $body);
 }
 
 >>
 
-delete(method, params) ::=<<
+delete(request) ::=<<
 /**
- * @return <method; format="requestName">
+ * @return <request.name>
  */
-public function <method.method>() {
+public function <request.method.method>() {
     $args = $this->getArgs();
-    return new <method; format="requestName">(<trunc(params): {p|$args['<p.key>'], }><last(params): {p|$args['<p.key>']}>);
+    return new <request.name>(<trunc(request.allParams): {p|$args['<p.key>'], }><last(request.allParams): {p|$args['<p.key>']}>);
 }
 
 >>

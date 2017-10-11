@@ -52,6 +52,26 @@ public class MetaHelper {
         return uri;
     }
 
+    static List<MetaResource> flattenResources(final List<Resource> resources)
+    {
+        final List<Resource> r = flatten(resources);
+        final List<MetaResource> m = Lists.newArrayList();
+
+        return r.stream().map(resource -> new MetaResource(resource, r)).collect(Collectors.toList());
+    }
+
+    private static List<Resource> flatten(final List<Resource> resources)
+    {
+        final List<Resource> r = Lists.newArrayList();
+        for (final Resource resource : resources) {
+            r.add(resource);
+            if (resource.getResources() != null) {
+                r.addAll(flatten(resource.getResources()));
+            }
+        }
+        return r;
+    }
+
     private static List<UriTemplatePart> absoluteUriParts(final Resource resource)
     {
         if (!(resource.eContainer() instanceof Resource)) {

@@ -1,12 +1,11 @@
 package io.vrap.rmf.raml.generic.generator.php;
 
 import com.google.common.base.CaseFormat;
+import com.google.common.collect.Lists;
 import io.vrap.rmf.raml.model.resources.*;
 import io.vrap.rmf.raml.model.responses.BodyType;
 import io.vrap.rmf.raml.model.responses.Response;
-import io.vrap.rmf.raml.model.types.AnyType;
-import io.vrap.rmf.raml.model.types.BuiltinType;
-import io.vrap.rmf.raml.model.types.ObjectType;
+import io.vrap.rmf.raml.model.types.*;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
@@ -59,6 +58,45 @@ public class MetaRequest {
     public UriTemplate getAbsoluteUri()
     {
         return MetaHelper.absoluteUri(getResource());
+    }
+
+    @Nullable
+    public BodyType getFirstBodyType() {
+        return method.getBodies().stream().findFirst().orElse(null);
+    }
+
+    @Nullable
+    public String getBodyType()
+    {
+        final BodyType firstBodyType = getFirstBodyType();
+        if (firstBodyType != null) {
+            if (firstBodyType.getType() instanceof FileType) {
+                return "UploadedFileInterface ";
+            }
+            if (!BuiltinType.of(firstBodyType.getType().getName()).isPresent()) {
+                final String t = (new TypesGenerator.PropertyTypeVisitor()).doSwitch(firstBodyType.getType());
+                if (!Lists.newArrayList("mixed", "null", "bool", "string", "float", "int").contains(t)) {
+                    return t + " ";
+                }
+            }
+        }
+        return null;
+    }
+
+    @Nullable
+    public MetaImport getBodyImport() {
+        final BodyType firstBodyType = getFirstBodyType();
+
+        if (firstBodyType == null) {
+            return null;
+        }
+        if (firstBodyType.getType() instanceof FileType) {
+            return new MetaImport(null, "Psr\\Http\\Message\\UploadedFileInterface");
+        }
+        if (firstBodyType.getType() instanceof ObjectType || firstBodyType.getType() instanceof ArrayType) {
+            return new MetaType(firstBodyType.getType()).getImport();
+        }
+        return null;
     }
 
     @Nullable

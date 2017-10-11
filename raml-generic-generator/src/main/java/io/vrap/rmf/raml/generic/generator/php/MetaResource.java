@@ -55,8 +55,8 @@ public class MetaResource {
         return getResources().stream().filter(metaResource -> metaResource.getResource().getRelativeUri().getParts().size() > 1).collect(Collectors.toList());
     }
 
-    public List<Method> getMethods() {
-        return resource.getMethods();
+    public List<MetaRequest> getMethods() {
+        return resource.getMethods().stream().map(MetaRequest::new).collect(Collectors.toList());
     }
 
     public Boolean getHasParams() {

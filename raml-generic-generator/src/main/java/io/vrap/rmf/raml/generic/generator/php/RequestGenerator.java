@@ -1,6 +1,5 @@
 package io.vrap.rmf.raml.generic.generator.php;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.CaseFormat;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
@@ -10,12 +9,8 @@ import io.vrap.rmf.raml.generic.generator.AbstractTemplateGenerator;
 import io.vrap.rmf.raml.model.facets.ObjectInstance;
 import io.vrap.rmf.raml.model.facets.StringInstance;
 import io.vrap.rmf.raml.model.resources.*;
-import io.vrap.rmf.raml.model.resources.util.ResourcesSwitch;
 import io.vrap.rmf.raml.model.responses.BodyType;
-import io.vrap.rmf.raml.model.responses.Response;
 import io.vrap.rmf.raml.model.types.*;
-import org.apache.commons.lang3.StringUtils;
-import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
@@ -31,15 +26,12 @@ import static org.apache.commons.lang3.StringUtils.capitalize;
 public class RequestGenerator extends AbstractTemplateGenerator {
     private static final String resourcesPath = "./templates/php/";
     static final String TYPE_RESOURCE = "resource";
-    static final String PACKAGE_NAME = "request";
     private final String vendorName;
-    private final AnyAnnotationType packageAnnotationType;
     private final AnyAnnotationType placeholderParamAnnotationType;
 
-    RequestGenerator(final String vendorName, final AnyAnnotationType packageAnnotationType, final AnyAnnotationType placeholderParamAnnotationType)
+    RequestGenerator(final String vendorName, final AnyAnnotationType placeholderParamAnnotationType)
     {
         this.vendorName = vendorName;
-        this.packageAnnotationType = packageAnnotationType;
         this.placeholderParamAnnotationType = placeholderParamAnnotationType;
     }
 
@@ -53,7 +45,7 @@ public class RequestGenerator extends AbstractTemplateGenerator {
     }
 
     private List<File> generateResources(final File outputPath, final List<Resource> resources) throws IOException {
-        final List<MetaResource> flatResources = flattenResources(resources);
+        final List<MetaResource> flatResources = MetaHelper.flattenResources(resources);
 
         final List<File> f = Lists.newArrayList();
         final File requestFile = new File(outputPath, "RequestBuilder.php");
@@ -68,41 +60,17 @@ public class RequestGenerator extends AbstractTemplateGenerator {
     }
 
     private List<File> generateRequests(final File outputPath, final List<Resource> resources) throws IOException {
-        final List<Resource> flatResources = flatten(resources);
+        final List<MetaResource> flatResources = MetaHelper.flattenResources(resources);
 
         final List<File> f = Lists.newArrayList();
-        for (final Resource resource : flatResources) {
-            for(final Method method : resource.getMethods()) {
-                final UriTemplate uri = MetaHelper.absoluteUri(resource);
-                final String requestName = toRequestName(uri, method);
-                final File resourceFile = new File(outputPath, requestName + ".php");
-                f.add(generateFile(generateRequest(resource, method, requestName), resourceFile));
+        for (final MetaResource resource : flatResources) {
+            for(final MetaRequest request : resource.getMethods()) {
+                final File resourceFile = new File(outputPath, request.getName() + ".php");
+                f.add(generateFile(generateRequest(request), resourceFile));
             }
         }
         return f;
     }
-
-    private List<MetaResource> flattenResources(final List<Resource> resources)
-    {
-        final List<Resource> r = flatten(resources);
-        final List<MetaResource> m = Lists.newArrayList();
-
-        return r.stream().map(resource -> new MetaResource(resource, r)).collect(Collectors.toList());
-    }
-
-    private List<Resource> flatten(final List<Resource> resources)
-    {
-        final List<Resource> r = Lists.newArrayList();
-        for (final Resource resource : resources) {
-            r.add(resource);
-            if (resource.getResources() != null) {
-                r.addAll(flatten(resource.getResources()));
-            }
-        }
-        return r;
-    }
-
-
 
     String generateBuilder(final MetaRootResource resource) {
         final STGroupFile stGroup = createSTGroup(Resources.getResource(resourcesPath + TYPE_RESOURCE + ".stg"));
@@ -112,20 +80,12 @@ public class RequestGenerator extends AbstractTemplateGenerator {
         return st.render();
     }
 
-    String generateRequest(final Resource resource, final Method method, final String requestName) {
+    String generateRequest(final MetaRequest request) {
         final STGroupFile stGroup = createSTGroup(Resources.getResource(resourcesPath + TYPE_RESOURCE + ".stg"));
         final ST st = stGroup.getInstanceOf("request");
         st.add("vendorName", vendorName);
-        st.add("request", new MetaRequest(method));
+        st.add("request", request);
         return st.render();
-    }
-
-    private String getPackageFolder(AnyType anyType, final String glue) {
-        Annotation annotation = anyType.getAnnotation(packageAnnotationType, true);
-        if (annotation == null) {
-            return "";
-        }
-        return ((StringInstance)anyType.getAnnotation(packageAnnotationType, true).getValue()).getValue() + glue;
     }
 
     String generateResource(final MetaResource resource) {
@@ -136,22 +96,6 @@ public class RequestGenerator extends AbstractTemplateGenerator {
 
 
         return st.render();
-    }
-
-    protected String toParamName(final UriTemplate uri, final String delimiter) {
-        return StringUtils.capitalize(uri.getParts().stream().map(
-                uriTemplatePart -> {
-                    if (uriTemplatePart instanceof UriTemplateExpression) {
-                        return ((UriTemplateExpression)uriTemplatePart).getVariables().stream()
-                                .map(s -> delimiter + StringUtils.capitalize(s)).collect(Collectors.joining());
-                    }
-                    return CaseFormat.LOWER_HYPHEN.to(CaseFormat.LOWER_CAMEL, uriTemplatePart.toString().replace("/", "-"));
-                }
-        ).collect(Collectors.joining())).replaceAll("[^\\p{L}\\p{Nd}]+", "");
-    }
-
-    protected String toRequestName(UriTemplate uri, Method method) {
-        return toParamName(uri, "By") + StringUtils.capitalize(method.getMethod().toString());
     }
 
     private String camelize(String arg)
@@ -206,19 +150,6 @@ public class RequestGenerator extends AbstractTemplateGenerator {
                     final Method method = (Method)arg;
                     final BodyType firstBodyType = method.getBodies().stream().findFirst().orElse(null);
                     switch (Strings.nullToEmpty(formatString)) {
-                        case "bodyType":
-                            if (firstBodyType != null) {
-                                if (firstBodyType.getType() instanceof FileType) {
-                                    return "UploadedFileInterface ";
-                                }
-                                if (!BuiltinType.of(firstBodyType.getType().getName()).isPresent()) {
-                                    final String t = (new TypesGenerator.PropertyTypeVisitor()).doSwitch(firstBodyType.getType());
-                                    if (!Lists.newArrayList("mixed", "null", "bool", "string", "float", "int").contains(t)) {
-                                        return t + " ";
-                                    }
-                                }
-                            }
-                            return "";
                         case "optionalBody":
                             if (method.getMethod().equals(HttpMethod.POST)) {
                                 return "";
@@ -231,22 +162,6 @@ public class RequestGenerator extends AbstractTemplateGenerator {
                                 }
                             }
                             return "";
-                        case "useBody":
-                            if (firstBodyType != null) {
-                                if (firstBodyType.getType() instanceof FileType) {
-                                    return "use Psr\\Http\\Message\\UploadedFileInterface;";
-                                }
-                                if (!BuiltinType.of(firstBodyType.getType().getName()).isPresent()) {
-                                    final String typePackage = getPackageFolder(firstBodyType.getType() , "\\");
-                                    final String t = (new TypesGenerator.PropertyTypeVisitor()).doSwitch(firstBodyType.getType());
-                                    if (!Lists.newArrayList("mixed", "null", "bool", "array", "string", "float", "int").contains(t)) {
-                                        return "use " + vendorName + "\\" +
-                                                capitalize(TypesGenerator.PACKAGE_NAME) + "\\" +
-                                                typePackage + t + ";";
-                                    }
-                                }
-                            }
-                            return "";
                         case "serialize":
                             if (firstBodyType != null) {
                                 if (firstBodyType.getType() instanceof FileType) {
@@ -254,8 +169,6 @@ public class RequestGenerator extends AbstractTemplateGenerator {
                                 }
                             }
                             return "!is_null($body) ? json_encode($body) : null";
-                        case "requestName":
-                            return toRequestName(MetaHelper.absoluteUri((Resource)method.eContainer()), method);
                         default:
                             return arg.toString();
                     }
@@ -270,7 +183,7 @@ public class RequestGenerator extends AbstractTemplateGenerator {
                     switch (Strings.nullToEmpty(formatString)) {
                         case "methodName":
                             if (parts.size() > 0) {
-                                return CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, toParamName((UriTemplate)arg, "With"));
+                                return CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, MetaHelper.toParamName((UriTemplate)arg, "With"));
                             }
 
                             final String uri = arg.toString();
