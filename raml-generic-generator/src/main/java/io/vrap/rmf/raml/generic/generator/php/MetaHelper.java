@@ -9,6 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -43,6 +44,20 @@ public class MetaHelper {
 
     static String toRequestName(UriTemplate uri, Method method) {
         return toParamName(uri, "By") + StringUtils.capitalize(method.getMethod().toString());
+    }
+
+    @Nullable
+    static <T> T getParent(EObject object, Class<T> parentClass)
+    {
+        if (object.eContainer() == null) {
+            return null;
+        }
+        if (parentClass.isInstance(object.eContainer())) {
+            @SuppressWarnings("unchecked")
+            T parent = (T)object.eContainer();
+            return parent;
+        }
+        return getParent(object.eContainer(), parentClass);
     }
 
     static UriTemplate absoluteUri(final Resource resource)

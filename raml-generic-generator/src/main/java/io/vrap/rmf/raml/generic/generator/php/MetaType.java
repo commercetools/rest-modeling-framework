@@ -215,13 +215,7 @@ public class MetaType {
 
     public Api getApi()
     {
-        return getRoot(type);
-    }
-
-    private Api getRoot(EObject o)
-    {
-        EObject parent = o.eContainer();
-        return parent instanceof Api ? (Api)parent : getRoot(parent);
+        return MetaHelper.getParent(type, Api.class);
     }
 
     private class BuiltinParentVisitor extends TypesSwitch<Boolean> {
