@@ -8,7 +8,7 @@ generatorInfo() ::= <<
  */
 >>
 
-useImport(class) ::=<<
-use <class>;
+useTypeImport(vendorName, typeImport, suffix="") ::=<<
+use <if(typeImport.package.name)><vendorName>\\<typeImport.package.name><endif><if(typeImport.name)><if(typeImport.package.name)>\\<endif><typeImport.name><suffix><endif>;
 
 >>

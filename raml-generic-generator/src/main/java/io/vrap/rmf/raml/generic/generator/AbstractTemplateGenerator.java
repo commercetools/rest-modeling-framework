@@ -54,33 +54,4 @@ public abstract class AbstractTemplateGenerator {
                 });
         return stGroup;
     }
-
-    protected List<AnyType> getParentTypes(AnyType anyType) {
-        if (anyType == null) {
-            return Lists.newArrayList();
-        }
-        if (BuiltinType.of(anyType.getName()).isPresent()) {
-            return Lists.newArrayList();
-        }
-        List<AnyType> t = getParentTypes(anyType.getType());
-        t.add(anyType);
-
-        return t;
-    }
-
-    protected Property getBaseProperty(final Property property) {
-        final AnyType anyType = (AnyType)property.eContainer();
-        if (!(anyType instanceof ObjectType)) {
-            return property;
-        }
-        final List<ObjectType> t = getParentTypes(anyType).stream().map(ObjectType.class::cast).collect(Collectors.toList());
-        if (t.size() <= 1) {
-            return property;
-        }
-        return t.stream()
-                .filter(anyType1 -> anyType1.getProperty(property.getName()) != null)
-                .map(objectType -> objectType.getProperty(property.getName()))
-                .findFirst()
-                .orElse(property);
-    }
 }

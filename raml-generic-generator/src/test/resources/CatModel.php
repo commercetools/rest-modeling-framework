@@ -6,6 +6,7 @@
 
 namespace Test\Types;
 
+use Test\Types\AnimalModel;
 
 class CatModel extends AnimalModel implements Cat {
     const DISCRIMINATOR_VALUE = 'cat';

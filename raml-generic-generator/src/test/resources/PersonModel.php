@@ -21,7 +21,8 @@ class PersonModel extends JsonObjectModel implements Person {
     {
         if (is_null($this->name)) {
             $value = $this->raw(Person::FIELD_NAME);
-            $this->name = (string)$value;
+            $value = (string)$value;
+            $this->name = $value;
         }
         return $this->name;
     }

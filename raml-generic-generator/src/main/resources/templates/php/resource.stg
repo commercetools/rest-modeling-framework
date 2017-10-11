@@ -1,10 +1,10 @@
 import "generic.stg"
 
-builder(vendorName, package, resources, resourcesIndex, resourcesWithParams, resourcesWithParamsIndex) ::=<<
+builder(vendorName, resource) ::=<<
 \<?php
 <generatorInfo()>
 
-namespace <vendorName>\\<package; format="capitalize">;
+namespace <vendorName>\\<resource.package.name>;
 
 use <vendorName>\\Client\\Resource;
 use <vendorName>\\Client\\ApiRequest;
@@ -16,12 +16,7 @@ class RequestBuilder extends Resource
         parent::__construct('');
     }
 
-    <if(resources)>
-    <resources, resourcesIndex: {r, ri|<resourceMethod(r, ri)>}>
-    <endif>
-    <if(resourcesWithParams)>
-    <resourcesWithParams, resourcesWithParamsIndex: {r, ri|<resourceMethodWithParams(r, ri)>}>
-    <endif>
+    <resource.resources: {r |<resourceMethod(r)>}>
 
     /**
      * @param string $method
@@ -40,50 +35,50 @@ class RequestBuilder extends Resource
 
 >>
 
-request(vendorName, package, requestName, method, returnType, returnPackage, absoluteUri, params, fileBody) ::=<<
+request(vendorName, request) ::=<<
 \<?php
 <generatorInfo()>
 
-namespace <vendorName>\\<package; format="capitalize">;
+namespace <vendorName>\\<request.package.name>;
 
 use <vendorName>\\Client\\ApiRequest;
-<if(returnType)>
-use <vendorName>\\Types\\<returnPackage><returnType.name>;
+<if(request.returnType)>
+<useTypeImport(vendorName, request.returnType.import)>
 <else>
 use <vendorName>\\Base\\JsonObject;
 <endif>
 
 use <vendorName>\\Base\\ResultMapper;
 use Psr\Http\Message\ResponseInterface;
-<method; format="useBody">
+<if (request.bodyImport)><useTypeImport(vendorName, request.bodyImport)><endif>
 
-class <requestName> extends ApiRequest
+class <request.name> extends ApiRequest
 {
-    const RESULT_TYPE = <if(returnType)><returnType.name><else>JsonObject<endif>::class;
+    const RESULT_TYPE = <if(request.returnType)><request.returnType.name><else>JsonObject<endif>::class;
 
     /**
-     <params: {p |<paramBlock(p)>}>
+     <request.allParams: {p |<paramBlock(p)>}>
      * @param $body
      * @param array $headers
      */
-    public function __construct(<params: {p |$<p.key>, }><method; format="bodyType">$body<method; format="optionalBody">, array $headers = [])
+    public function __construct(<request.allParams: {p |$<p.key>, }><request.bodyType>$body<request.method; format="optionalBody">, array $headers = [])
     {
-        $uri = sprintf('<absoluteUri; format="sprintf">'<params: {p |, $<p.key>}>);
-        <method; format="ensureHeader">
-        parent::__construct('<method.method>', $uri, $headers, <method; format="serialize">);
+        $uri = sprintf('<request.absoluteUri; format="sprintf">'<request.allParams: {p |, $<p.key>}>);
+        <request.method; format="ensureHeader">
+        parent::__construct('<request.method.method>', $uri, $headers, <request.method; format="serialize">);
     }
 
     /**
      * @param ResponseInterface $response
-     * @return <if(returnType)><returnType.name><else>JsonObject<endif>
+     * @return <if(request.returnType)><request.returnType.name><else>JsonObject<endif>
      */
     public function map(ResponseInterface $response, ResultMapper $mapper)
     {
         return parent::map($response, $mapper);
     }
 
-    <if(method.queryParameters)>
-    <method.queryParameters: {param |<withParam(requestName, param)>}>
+    <if(request.method.queryParameters)>
+    <request.method.queryParameters: {param |<withParam(request.name, param)>}>
     <endif>
 }
 
@@ -105,85 +100,72 @@ public function <parameter; format="methodName">(<parameter; format="methodParam
 
 >>
 
-resource(vendorName, package, resource, index, resources, params, resourcesIndex, resourcesWithParams, resourcesWithParamsIndex) ::=<<
+resource(vendorName, resource) ::=<<
 \<?php
 <generatorInfo()>
 
-namespace <vendorName>\\<package; format="capitalize">;
+namespace <vendorName>\\<resource.package.name>;
 
 use <vendorName>\\Client\\Resource;
 <resource.methods: {m |<methodUse(m)>}>
 
-class Resource<index> extends Resource
+class Resource<resource.index> extends Resource
 {
-    <if(resources)>
-    <resources, resourcesIndex: {r, ri|<resourceMethod(r, ri)>}>
-    <endif>
-    <if(resourcesWithParams)>
-    <resourcesWithParams, resourcesWithParamsIndex: {r, ri|<resourceMethodWithParams(r, ri)>}>
+    <if(resource.resources)>
+    <resource.resources: {r |<resourceMethod(r)>}>
     <endif>
 
-    <resource.methods: {m |<(m.method)(m, params)>}>
+    <resource.methods: {m |<(m.method.method)(m)>}>
 }
 
 >>
 
 methodUse(method) ::=<<
 
-<method; format="useBody">
+<if (method.bodyImport)><useTypeImport(vendorName, method.bodyImport)><endif>
 >>
 
-resourceMethod(resource, index) ::=<<
+resourceMethod(resource) ::=<<
 /**
- * @return Resource<index>
+ * @return Resource<resource.index>
  */
-public function <resource.relativeUri; format="methodName">() {
-    return new Resource<index>($this->getUri() . '<resource.relativeUri>', $this->getArgs());
+public function <resource.relativeUri; format="methodName">(<if(resource.hasParams)>$<resource.relativeUri; format="params"><endif>) {
+    <if(resource.hasParams)>$args = array_merge($this->getArgs(), [<resource.relativeUri; format="paramArray">]);<endif>
+    return new Resource<resource.index>($this->getUri() . '<resource.relativeUri>', <if(resource.hasParams)>$args<else>$this->getArgs()<endif>);
 }
 
 >>
 
-resourceMethodWithParams(resource, index) ::=<<
+get(request) ::=<<
 /**
- * @return Resource<index>
+ * @return <request.name>
  */
-public function <resource.relativeUri; format="methodName">($<resource.relativeUri; format="params">) {
-    $args = array_merge($this->getArgs(), [<resource.relativeUri; format="paramArray">]);
-    return new Resource<index>($this->getUri() . '<resource.relativeUri; format="uri">', $args);
-}
-
->>
-
-get(method, params) ::=<<
-/**
- * @return <method; format="requestName">
- */
-public function <method.method>() {
+public function <request.method.method>() {
     $args = $this->getArgs();
-    return new <method; format="requestName">(<trunc(params): {p|$args['<p.key>'], }><last(params): {p|$args['<p.key>']}>);
+    return new <request.name>(<trunc(request.allParams): {p|$args['<p.key>'], }><last(request.allParams): {p|$args['<p.key>']}>);
 }
 
 >>
 
-post(method, params) ::=<<
+post(request) ::=<<
 /**
- * @param <method; format="bodyType">$body
- * @return <method; format="requestName">
+ * @param <request.bodyType>$body
+ * @return <request.name>
  */
-public function <method.method>(<method; format="bodyType">$body) {
+public function <request.method.method>(<request.bodyType>$body) {
     $args = $this->getArgs();
-    return new <method; format="requestName">(<trunc(params): {p|$args['<p.key>'], }><last(params): {p|$args['<p.key>']}>, $body);
+    return new <request.name>(<trunc(request.allParams): {p|$args['<p.key>'], }><last(request.allParams): {p|$args['<p.key>']}>, $body);
 }
 
 >>
 
-delete(method, params) ::=<<
+delete(request) ::=<<
 /**
- * @return <method; format="requestName">
+ * @return <request.name>
  */
-public function <method.method>() {
+public function <request.method.method>() {
     $args = $this->getArgs();
-    return new <method; format="requestName">(<trunc(params): {p|$args['<p.key>'], }><last(params): {p|$args['<p.key>']}>);
+    return new <request.name>(<trunc(request.allParams): {p|$args['<p.key>'], }><last(request.allParams): {p|$args['<p.key>']}>);
 }
 
 >>

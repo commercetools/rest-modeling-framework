@@ -77,8 +77,9 @@ class JsonObjectModel implements JsonObject, MapperAware
     /**
      * @inheritdoc
      */
-    private function toArray()
+    protected function toArray()
     {
+        $rawData = is_array($this->rawData) ? $this->rawData : [];
         $data = array_filter(
             get_object_vars($this),
             function ($value, $key) {
@@ -89,7 +90,7 @@ class JsonObjectModel implements JsonObject, MapperAware
             },
             ARRAY_FILTER_USE_BOTH
         );
-        $data = array_merge($this->rawData, $data);
+        $data = array_merge($rawData, $data);
         return $data;
     }
 }

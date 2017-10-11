@@ -24,7 +24,9 @@ class CustomerModel extends JsonObjectModel implements Customer {
             if (is_null($value)) {
                 return $this->mapData(Address::class, null);
             }
-            $this->address = $this->mapData(Address::class, $value);
+            $value = $this->mapData(Address::class, $value);
+
+            $this->address = $value;
         }
         return $this->address;
     }
@@ -33,7 +35,7 @@ class CustomerModel extends JsonObjectModel implements Customer {
      * @param Address $address
      * @return $this
      */
-    public function setAddress(Address  $address)
+    public function setAddress(Address $address)
     {
         $this->address = $address;
 

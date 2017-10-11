@@ -13,6 +13,7 @@ interface User extends Person {
      * @return string
      */
     public function getRole();
+
     /**
      * @param string $role
      * @return $this

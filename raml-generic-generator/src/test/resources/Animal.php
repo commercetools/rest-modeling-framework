@@ -21,6 +21,7 @@ interface Animal extends JsonObject {
      * @return string
      */
     public function getKind();
+
     /**
      * @param string $kind
      * @return $this
