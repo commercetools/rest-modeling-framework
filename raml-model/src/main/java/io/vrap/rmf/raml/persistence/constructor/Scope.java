@@ -1,6 +1,7 @@
 package io.vrap.rmf.raml.persistence.constructor;
 
 import io.vrap.rmf.raml.model.RamlError;
+import io.vrap.rmf.raml.model.modules.ApiExtension;
 import io.vrap.rmf.raml.model.modules.Library;
 import io.vrap.rmf.raml.model.modules.LibraryUse;
 import io.vrap.rmf.raml.model.modules.TypeContainer;
@@ -36,7 +37,6 @@ public class Scope {
     private final Scope parent;
     private final Resource resource;
     private final URI uri;
-    private final ResourceSet resourceSet;
     private final EObject eObject;
     private final EStructuralFeature feature;
 
@@ -45,22 +45,8 @@ public class Scope {
         this.parent = parent;
         this.resource = resource;
         this.uri = uri;
-        this.resourceSet = resource.getResourceSet();
         this.eObject = eObject;
         this.feature = feature;
-    }
-
-    public Library getUsedLibrary(final String name) {
-        final Optional<LibraryUse> libraryUse = resource.getContents().stream()
-                .filter(TypeContainer.class::isInstance)
-                .map(TypeContainer.class::cast)
-                .flatMap(typeContainer -> typeContainer.getUses().stream())
-                .filter(LibraryUse.class::isInstance)
-                .map(LibraryUse.class::cast)
-                .filter(use -> use.getName().equals(name))
-                .findFirst();
-
-        return libraryUse.map(LibraryUse::getLibrary).orElse(null);
     }
 
     public Resource getResource() {
@@ -86,16 +72,20 @@ public class Scope {
 
     public Resource getResource(final String relativePath) {
         final URI uri = resolve(relativePath);
-        return resourceSet.getResource(uri, true);
+        return getResourceSet().getResource(uri, true);
     }
 
     public EObject getEObjectByName(final String name) {
         final String uriFragment = getUriFragment(name);
 
-        final Resource builtinTypeResource = resourceSet.getResource(BuiltinType.RESOURCE_URI, true);
+        final Resource builtinTypeResource = getResourceSet().getResource(BuiltinType.RESOURCE_URI, true);
         final EObject resolvedType = Optional.ofNullable(builtinTypeResource.getEObject(uriFragment))
                 .orElseGet(() -> getEObjectByName(this.resource, name));
         return resolvedType;
+    }
+
+    private ResourceSet getResourceSet() {
+        return resource.getResourceSet();
     }
 
     public String getUriFragment(final String id) {
@@ -121,7 +111,7 @@ public class Scope {
         final EObject resolvedType;
         final String[] segments = name.split("\\.");
         if (segments.length == 1) {
-            final EObject eObject = resource.getEObject(uriFragment);
+            final EObject eObject = getEObject(uriFragment);
             if (eObject != null) {
                 resolvedType = eObject;
             } else {
@@ -145,6 +135,43 @@ public class Scope {
             resolvedType = null;
         }
         return resolvedType;
+    }
+
+    private EObject getEObject(final String uriFragment) {
+        final EObject directEObject = resource.getEObject(uriFragment);
+        if (directEObject == null) {
+            final Optional<Resource> extendsResource = getExtendsResource();
+            final EObject extendsEObject = extendsResource.map(resource -> resource.getEObject(uriFragment)).orElse(null);
+            return extendsEObject;
+        }
+        return directEObject;
+    }
+
+    private Optional<Resource> getExtendsResource() {
+        final Optional<EObject> first = this.resource.getContents().stream().findFirst();
+        if (first.isPresent()) {
+            final EObject rootObject = first.get();
+            if (rootObject instanceof ApiExtension) {
+                final ApiExtension apiExtension = (ApiExtension) rootObject;
+                if (apiExtension.getExtends() != null) {
+                    return Optional.ofNullable(apiExtension.getExtends().eResource());
+                }
+            }
+        }
+        return Optional.empty();
+    }
+
+    private Library getUsedLibrary(final String name) {
+        final Optional<LibraryUse> libraryUse = resource.getContents().stream()
+                .filter(TypeContainer.class::isInstance)
+                .map(TypeContainer.class::cast)
+                .flatMap(typeContainer -> typeContainer.getUses().stream())
+                .filter(LibraryUse.class::isInstance)
+                .map(LibraryUse.class::cast)
+                .filter(use -> use.getName().equals(name))
+                .findFirst();
+
+        return libraryUse.map(LibraryUse::getLibrary).orElse(null);
     }
 
     /**

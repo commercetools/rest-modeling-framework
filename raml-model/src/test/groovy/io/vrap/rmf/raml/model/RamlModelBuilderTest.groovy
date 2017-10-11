@@ -6,9 +6,8 @@ import io.vrap.rmf.raml.model.resources.Method
 import io.vrap.rmf.raml.model.resources.Resource
 import io.vrap.rmf.raml.model.types.AnyType
 import io.vrap.rmf.raml.persistence.ResourceFixtures
-import spock.lang.PendingFeature
-import spock.lang.Shared
 import org.eclipse.emf.common.util.URI
+import spock.lang.Shared
 import spock.lang.Specification
 
 /**
@@ -66,4 +65,24 @@ class RamlModelBuilderTest extends Specification implements ResourceFixtures {
         api != null
     }
 
+    def "should resolve ct api extension"() {
+        when:
+        URI uri = uriFromClasspath("/commercetools-api-reference-master/update-actions.raml")
+        Api api = modelBuilder.buildApi(uri)
+        then:
+        api != null
+    }
+
+    def "load extension and merge it"() {
+        when:
+        URI uri = uriFromClasspath("/extensions/extension.raml")
+        Api api = modelBuilder.buildApi(uri)
+        then:
+        api.resources.size() == 1
+        api.resources[0].methods.size() == 1
+        api.resources[0].methods[0].method == HttpMethod.POST
+        api.resources[0].methods[0].bodies.size() == 1
+        api.resources[0].methods[0].bodies[0].type != null
+        api.resources[0].methods[0].bodies[0].type.name == 'ProjectUpdate'
+    }
 }

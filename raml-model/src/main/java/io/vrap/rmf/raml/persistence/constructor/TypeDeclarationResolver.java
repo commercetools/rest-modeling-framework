@@ -1,11 +1,10 @@
 package io.vrap.rmf.raml.persistence.constructor;
 
 import io.vrap.rmf.raml.model.modules.Api;
+import io.vrap.rmf.raml.model.modules.Extension;
 import io.vrap.rmf.raml.model.modules.Library;
 import io.vrap.rmf.raml.model.modules.LibraryUse;
-import io.vrap.rmf.raml.model.modules.ModulesFactory;
 import io.vrap.rmf.raml.model.resources.ResourceType;
-import io.vrap.rmf.raml.model.resources.ResourcesFactory;
 import io.vrap.rmf.raml.model.resources.Trait;
 import io.vrap.rmf.raml.model.types.BuiltinType;
 import io.vrap.rmf.raml.persistence.antlr.RAMLParser;
@@ -109,6 +108,17 @@ public class TypeDeclarationResolver {
                     super.visitApi(ctx));
 
             return api;
+        }
+
+        @Override
+        public Object visitExtension(RAMLParser.ExtensionContext ctx) {
+            final Extension extension = create(EXTENSION, ctx);
+            scope.getResource().getContents().add(extension);
+
+            withinScope(scope.with(extension), extensionScope ->
+                    super.visitExtension(ctx));
+
+            return extension;
         }
 
         @Override

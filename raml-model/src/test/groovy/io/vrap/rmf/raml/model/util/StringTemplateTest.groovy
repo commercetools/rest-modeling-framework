@@ -13,7 +13,7 @@ class StringTemplateTest extends Specification {
         then:
         stringTemplate.toString() == template
         where:
-        template << [ '<<resourcePathName>>Draft', 'Name<<name>>', 'Name<<name>>Impl' ]
+        template << [ '<<resourcePathName>>Draft', 'Name<<name>>', 'Name<<name>>Impl', '<<t>><<fff', '<<<<t>>', '201<<t>>' ]
     }
 
     def "render(Map<String, String>)"() {
@@ -22,11 +22,17 @@ class StringTemplateTest extends Specification {
         then:
         stringTemplate.render(values) == result
         where:
-        template                                    | values                       || result
-        '<<resourcePathName>>Draft'                 | ['resourcePathName': 'User'] || 'UserDraft'
-        '<<resourcePathName|!uppercamelcase>>Draft' | ['resourcePathName': 'user'] || 'UserDraft'
-        'Name<<name>>'                              | ['name': 'Hello']            || 'NameHello'
-        'Name<<name>>Impl'                          | ['name': 'Hello']            || 'NameHelloImpl'
+        template                                      | values                       || result
+        '<<resourcePathName>>Draft'                   | ['resourcePathName': 'User'] || 'UserDraft'
+        '<<resourcePathName|!uppercamelcase>>Draft'   | ['resourcePathName': 'user'] || 'UserDraft'
+        '<<resourcePathName|!uppercamelcase>> Draft'  | ['resourcePathName': 'user'] || 'User Draft'
+        '<<resourcePathName | !uppercamelcase>>Draft' | ['resourcePathName': 'user'] || 'UserDraft'
+        'Name<<name>>'                                | ['name': 'Hello']            || 'NameHello'
+        'Name<<name>>Impl'                            | ['name': 'Hello']            || 'NameHelloImpl'
+        '<<t>><<fff'                                  | ['t': 'T']                   || 'T<<fff'
+        '<<t>>>>fff'                                  | ['t': 'T']                   || 'T>>fff'
+        '<<<<t>>'                                     | ['t': 'T']                   || '<<T'
+        '201<<t>>'                                    | ['t': 'T']                   || '201T'
     }
 
     def "getParameters()"() {

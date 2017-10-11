@@ -23,6 +23,11 @@ public enum RamlFragmentKind {
     API("#%RAML 1.0", Literals.API),
 
     /**
+     * An extension file.
+     */
+    EXTENSION("Extension", Literals.EXTENSION),
+
+    /**
      * A RAML library.
      */
     LIBRARY("Library", Literals.LIBRARY),

@@ -2,13 +2,15 @@ package io.vrap.rmf.raml.persistence.constructor;
 
 import io.vrap.rmf.raml.model.modules.Api;
 import io.vrap.rmf.raml.model.modules.Document;
-import io.vrap.rmf.raml.model.modules.ModulesFactory;
-import io.vrap.rmf.raml.model.resources.*;
+import io.vrap.rmf.raml.model.resources.Resource;
+import io.vrap.rmf.raml.model.resources.UriTemplate;
 import io.vrap.rmf.raml.persistence.antlr.RAMLParser;
+import org.antlr.v4.runtime.tree.ParseTree;
 import org.eclipse.emf.common.util.ECollections;
 import org.eclipse.emf.ecore.EObject;
 
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static io.vrap.rmf.raml.model.modules.ModulesPackage.Literals.*;
@@ -33,25 +35,39 @@ public class ApiConstructor extends BaseConstructor {
         final EObject rootObject = scope.getResource().getContents().get(0);
 
         return withinScope(scope.with(rootObject), rootScope -> {
-            ctx.documentationFacet().forEach(this::visitDocumentationFacet);
-            ctx.annotationFacet().forEach(this::visitAnnotationFacet);
-            ctx.attributeFacet().forEach(this::visitAttributeFacet);
-            ctx.traitsFacet().forEach(this::visitTraitsFacet);
-            ctx.typesFacet().forEach(this::visitTypesFacet);
-            ctx.baseUriFacet().forEach(this::visitBaseUriFacet);
-            ctx.baseUriParametersFacet().forEach(this::visitBaseUriParametersFacet);
+            final Predicate<RAMLParser.ApiFacetsContext> isSecuritySchemesFacet =
+                    apiFacetsContext -> apiFacetsContext.securitySchemesFacet() != null;
 
-            // order is relevant:
-            // 1. construct security schemes
-            ctx.securitySchemesFacet().forEach(this::visitSecuritySchemesFacet); // TODO move to first construction phase
-            // 2. resolve secured by
+            // TODO move to first pass
+            // order is relevant here: first create security schemes
+            ctx.apiFacets().stream()
+                    .filter(isSecuritySchemesFacet)
+                    .forEach(this::visitApiFacets);
 
-            ctx.securedByFacet().forEach(this::visitSecuredByFacet);
-            ctx.resourceFacet().forEach(this::visitResourceFacet);
-            ctx.resourceTypesFacet().forEach(this::visitResourceTypesFacet);
+            ctx.apiFacets().stream()
+                    .filter(isSecuritySchemesFacet.negate())
+                    .forEach(this::visitApiFacets);
 
             return rootObject;
         });
+    }
+
+    @Override
+    public Object visitApiFacets(RAMLParser.ApiFacetsContext ctx) {
+        // TODO move creation of security schemes to 1 pass
+        final RAMLParser.SecuritySchemesFacetContext securitySchemesFacet = ctx.securitySchemesFacet();
+        if (securitySchemesFacet != null) {
+            visitSecuritySchemesFacet(securitySchemesFacet);
+        }
+
+        for (int i = 0; i < ctx.getChildCount(); i++) {
+            final ParseTree child = ctx.getChild(i);
+            if (child != securitySchemesFacet) {
+                child.accept(this);
+            }
+        }
+
+        return scope.eObject();
     }
 
     @Override
