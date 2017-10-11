@@ -1,9 +1,13 @@
 package io.vrap.rmf.raml.generic.generator.php;
 
+import com.google.common.base.CaseFormat;
 import com.google.common.collect.Lists;
+import io.vrap.rmf.raml.model.resources.*;
 import io.vrap.rmf.raml.model.types.*;
 import io.vrap.rmf.raml.model.types.util.TypesSwitch;
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.util.EcoreUtil;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -23,6 +27,39 @@ public class MetaHelper {
                 .map(objectType -> objectType.getProperty(property.getName()))
                 .findFirst()
                 .orElse(property);
+    }
+
+    static String toParamName(final UriTemplate uri, final String delimiter) {
+        return StringUtils.capitalize(uri.getParts().stream().map(
+                uriTemplatePart -> {
+                    if (uriTemplatePart instanceof UriTemplateExpression) {
+                        return ((UriTemplateExpression)uriTemplatePart).getVariables().stream()
+                                .map(s -> delimiter + StringUtils.capitalize(s)).collect(Collectors.joining());
+                    }
+                    return CaseFormat.LOWER_HYPHEN.to(CaseFormat.LOWER_CAMEL, uriTemplatePart.toString().replace("/", "-"));
+                }
+        ).collect(Collectors.joining())).replaceAll("[^\\p{L}\\p{Nd}]+", "");
+    }
+
+    static String toRequestName(UriTemplate uri, Method method) {
+        return toParamName(uri, "By") + StringUtils.capitalize(method.getMethod().toString());
+    }
+
+    static UriTemplate absoluteUri(final Resource resource)
+    {
+        final UriTemplate uri = ResourcesFactory.eINSTANCE.createUriTemplate();
+        uri.getParts().addAll(absoluteUriParts(resource));
+        return uri;
+    }
+
+    private static List<UriTemplatePart> absoluteUriParts(final Resource resource)
+    {
+        if (!(resource.eContainer() instanceof Resource)) {
+            return (List<UriTemplatePart>) EcoreUtil.copyAll(resource.getRelativeUri().getParts());
+        }
+        final List<UriTemplatePart> parts = absoluteUriParts((Resource)resource.eContainer());
+        parts.addAll(EcoreUtil.copyAll(resource.getRelativeUri().getParts()));
+        return parts;
     }
 
     private static List<AnyType> getParentTypes(final AnyType anyType) {

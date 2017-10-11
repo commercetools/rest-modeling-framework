@@ -73,30 +73,13 @@ public class RequestGenerator extends AbstractTemplateGenerator {
         final List<File> f = Lists.newArrayList();
         for (final Resource resource : flatResources) {
             for(final Method method : resource.getMethods()) {
-                final UriTemplate uri = absoluteUri(resource);
+                final UriTemplate uri = MetaHelper.absoluteUri(resource);
                 final String requestName = toRequestName(uri, method);
                 final File resourceFile = new File(outputPath, requestName + ".php");
                 f.add(generateFile(generateRequest(resource, method, requestName), resourceFile));
             }
         }
         return f;
-    }
-
-    private UriTemplate absoluteUri(final Resource resource)
-    {
-        final UriTemplate uri = ResourcesFactory.eINSTANCE.createUriTemplate();
-        uri.getParts().addAll(absoluteUriParts(resource));
-        return uri;
-    }
-
-    private List<UriTemplatePart> absoluteUriParts(final Resource resource)
-    {
-        if (!(resource.eContainer() instanceof Resource)) {
-            return (List<UriTemplatePart>)EcoreUtil.copyAll(resource.getRelativeUri().getParts());
-        }
-        final List<UriTemplatePart> parts = absoluteUriParts((Resource)resource.eContainer());
-        parts.addAll(EcoreUtil.copyAll(resource.getRelativeUri().getParts()));
-        return parts;
     }
 
     private List<MetaResource> flattenResources(final List<Resource> resources)
@@ -133,39 +116,7 @@ public class RequestGenerator extends AbstractTemplateGenerator {
         final STGroupFile stGroup = createSTGroup(Resources.getResource(resourcesPath + TYPE_RESOURCE + ".stg"));
         final ST st = stGroup.getInstanceOf("request");
         st.add("vendorName", vendorName);
-        st.add("package", PACKAGE_NAME);
-        st.add("requestName", requestName);
-        final UriTemplate uri = absoluteUri(resource);
-        final Map<String, Object> params = uri.getParts().stream()
-                .filter(uriTemplatePart -> uriTemplatePart instanceof UriTemplateExpression)
-                .flatMap(uriTemplatePart -> ((UriTemplateExpression)uriTemplatePart).getVariables().stream())
-                .collect(Collectors.toMap(o -> o, o -> "%s"));
-        st.add("absoluteUri", uri);
-        st.add("params", params.entrySet());
-        st.add("method", method);
-        final BodyType firstBodyType = method.getBodies().stream().findFirst().orElse(null);
-        if (firstBodyType != null) {
-            if (firstBodyType.getType() instanceof FileType) {
-                st.add("fileBody", firstBodyType.getType());
-            }
-        }
-
-        Response response = method.getResponses().stream().filter(response1 -> response1.getStatusCode().matches("^2[0-9]{2}$")).findFirst().orElse(null);
-        if (response != null) {
-            BodyType bodyType = response.getBodies().stream()
-                    .filter(bodyType1 -> bodyType1.getContentTypes().size() == 0 || bodyType1.getContentTypes().contains("application/json"))
-                    .findFirst().orElse(null);
-            final AnyType returnType;
-            if (bodyType != null && !BuiltinType.of(bodyType.getName()).isPresent()) {
-                returnType = bodyType.getType();
-            } else {
-                returnType = null;
-            }
-            if (returnType instanceof ObjectType) {
-                st.add("returnType", returnType);
-                st.add("returnPackage", getPackageFolder(returnType, "\\"));
-            }
-        }
+        st.add("request", new MetaRequest(method));
         return st.render();
     }
 
@@ -304,7 +255,7 @@ public class RequestGenerator extends AbstractTemplateGenerator {
                             }
                             return "!is_null($body) ? json_encode($body) : null";
                         case "requestName":
-                            return toRequestName(absoluteUri((Resource)method.eContainer()), method);
+                            return toRequestName(MetaHelper.absoluteUri((Resource)method.eContainer()), method);
                         default:
                             return arg.toString();
                     }

@@ -62,9 +62,10 @@ public class MetaResource {
     public Boolean getHasParams() {
         return resource.getRelativeUri().getParts().size() > 1;
     }
+
     @Nullable
     public Set<Map.Entry<String, String>> getAllParams() {
-        Map<String, String> params = absoluteUri(resource).getParts().stream()
+        Map<String, String> params = MetaHelper.absoluteUri(resource).getParts().stream()
                 .filter(uriTemplatePart -> uriTemplatePart instanceof UriTemplateExpression)
                 .flatMap(uriTemplatePart -> ((UriTemplateExpression)uriTemplatePart).getVariables().stream())
                 .collect(Collectors.toMap(o -> o, o -> "%s"));
@@ -72,22 +73,5 @@ public class MetaResource {
             return params.entrySet();
         }
         return null;
-    }
-
-    private UriTemplate absoluteUri(final Resource resource)
-    {
-        final UriTemplate uri = ResourcesFactory.eINSTANCE.createUriTemplate();
-        uri.getParts().addAll(absoluteUriParts(resource));
-        return uri;
-    }
-
-    private List<UriTemplatePart> absoluteUriParts(final Resource resource)
-    {
-        if (!(resource.eContainer() instanceof Resource)) {
-            return (List<UriTemplatePart>) EcoreUtil.copyAll(resource.getRelativeUri().getParts());
-        }
-        final List<UriTemplatePart> parts = absoluteUriParts((Resource)resource.eContainer());
-        parts.addAll(EcoreUtil.copyAll(resource.getRelativeUri().getParts()));
-        return parts;
     }
 }

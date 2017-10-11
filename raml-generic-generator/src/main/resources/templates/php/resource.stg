@@ -35,50 +35,50 @@ class RequestBuilder extends Resource
 
 >>
 
-request(vendorName, package, requestName, method, returnType, returnPackage, absoluteUri, params, fileBody) ::=<<
+request(vendorName, request) ::=<<
 \<?php
 <generatorInfo()>
 
-namespace <vendorName>\\<package; format="capitalize">;
+namespace <vendorName>\\<request.package.name>;
 
 use <vendorName>\\Client\\ApiRequest;
-<if(returnType)>
-use <vendorName>\\Types\\<returnPackage><returnType.name>;
+<if(request.returnType)>
+<useTypeImport(vendorName, request.returnType.import)>
 <else>
 use <vendorName>\\Base\\JsonObject;
 <endif>
 
 use <vendorName>\\Base\\ResultMapper;
 use Psr\Http\Message\ResponseInterface;
-<method; format="useBody">
+<request.method; format="useBody">
 
-class <requestName> extends ApiRequest
+class <request.name> extends ApiRequest
 {
-    const RESULT_TYPE = <if(returnType)><returnType.name><else>JsonObject<endif>::class;
+    const RESULT_TYPE = <if(request.returnType)><request.returnType.name><else>JsonObject<endif>::class;
 
     /**
-     <params: {p |<paramBlock(p)>}>
+     <request.allParams: {p |<paramBlock(p)>}>
      * @param $body
      * @param array $headers
      */
-    public function __construct(<params: {p |$<p.key>, }><method; format="bodyType">$body<method; format="optionalBody">, array $headers = [])
+    public function __construct(<request.allParams: {p |$<p.key>, }><request.method; format="bodyType">$body<request.method; format="optionalBody">, array $headers = [])
     {
-        $uri = sprintf('<absoluteUri; format="sprintf">'<params: {p |, $<p.key>}>);
-        <method; format="ensureHeader">
-        parent::__construct('<method.method>', $uri, $headers, <method; format="serialize">);
+        $uri = sprintf('<request.absoluteUri; format="sprintf">'<request.allParams: {p |, $<p.key>}>);
+        <request.method; format="ensureHeader">
+        parent::__construct('<request.method.method>', $uri, $headers, <request.method; format="serialize">);
     }
 
     /**
      * @param ResponseInterface $response
-     * @return <if(returnType)><returnType.name><else>JsonObject<endif>
+     * @return <if(request.returnType)><request.returnType.name><else>JsonObject<endif>
      */
     public function map(ResponseInterface $response, ResultMapper $mapper)
     {
         return parent::map($response, $mapper);
     }
 
-    <if(method.queryParameters)>
-    <method.queryParameters: {param |<withParam(requestName, param)>}>
+    <if(request.method.queryParameters)>
+    <request.method.queryParameters: {param |<withParam(request.name, param)>}>
     <endif>
 }
 
