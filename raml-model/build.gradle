@@ -68,6 +68,7 @@ dependencies {
     compile 'org.eclipse.emf:org.eclipse.emf.ecore:2.11+'
     compile 'org.eclipse.emf:org.eclipse.emf.ecore.xcore.lib:1.1.100'
     compile "org.eclipse.xtext:org.eclipse.xtext.xbase.lib:$xtextVersion"
+    compile 'com.fasterxml.jackson.core:jackson-core:2.9.1'
 
     antlr "org.antlr:antlr4:4.7"
 

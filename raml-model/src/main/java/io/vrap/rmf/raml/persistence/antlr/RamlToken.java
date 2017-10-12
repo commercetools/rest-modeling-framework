@@ -1,6 +1,9 @@
 package io.vrap.rmf.raml.persistence.antlr;
 
-import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CommonToken;
+import org.antlr.v4.runtime.Recognizer;
+import org.antlr.v4.runtime.TokenSource;
 import org.antlr.v4.runtime.misc.Pair;
 
 /**
@@ -8,6 +11,7 @@ import org.antlr.v4.runtime.misc.Pair;
  */
 public class RamlToken extends CommonToken {
     private String location;
+    private String includeUri;
 
     public RamlToken(final Pair<TokenSource, CharStream> source,
                      final int type, final int channel, final int start, final int stop) {
@@ -30,6 +34,14 @@ public class RamlToken extends CommonToken {
 
     void setLocation(final String location) {
         this.location = location;
+    }
+
+    public String getIncludeUri() {
+        return includeUri;
+    }
+
+    void setIncludeUri(final String includeUri) {
+        this.includeUri = includeUri;
     }
 
     @Override
