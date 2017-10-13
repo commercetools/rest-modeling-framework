@@ -2,23 +2,23 @@ package io.vrap.rmf.raml.generic.generator.php;
 
 import javax.annotation.Nullable;
 
-public class MetaImport {
-    private final MetaPackage metaPackage;
+public class ImportGenModel {
+    private final PackageGenModel packageGenModel;
     private final String name;
 
 
-    public MetaImport(final MetaPackage metaPackage) {
-        this(metaPackage, null);
+    public ImportGenModel(final PackageGenModel packageGenModel) {
+        this(packageGenModel, null);
     }
 
-    public MetaImport(final MetaPackage metaPackage, final String name) {
-        this.metaPackage = metaPackage;
+    public ImportGenModel(final PackageGenModel packageGenModel, final String name) {
+        this.packageGenModel = packageGenModel;
         this.name = name;
     }
 
-    public MetaPackage getPackage()
+    public PackageGenModel getPackage()
     {
-        return metaPackage;
+        return packageGenModel;
     }
 
     @Nullable
@@ -31,15 +31,15 @@ public class MetaImport {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        MetaImport that = (MetaImport) o;
+        ImportGenModel that = (ImportGenModel) o;
 
-        if (!metaPackage.equals(that.metaPackage)) return false;
+        if (!packageGenModel.equals(that.packageGenModel)) return false;
         return name != null ? name.equals(that.name) : that.name == null;
     }
 
     @Override
     public int hashCode() {
-        int result = metaPackage.hashCode();
+        int result = packageGenModel.hashCode();
         result = 31 * result + (name != null ? name.hashCode() : 0);
         return result;
     }

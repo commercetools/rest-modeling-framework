@@ -1,10 +1,6 @@
 package io.vrap.rmf.raml.generic.generator.php;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import io.vrap.rmf.raml.model.elements.IdentifiableElement;
-import io.vrap.rmf.raml.model.facets.BooleanInstance;
-import io.vrap.rmf.raml.model.facets.ObjectInstance;
 import io.vrap.rmf.raml.model.modules.Api;
 import io.vrap.rmf.raml.model.types.*;
 import io.vrap.rmf.raml.model.types.util.TypesSwitch;
@@ -14,13 +10,13 @@ import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class MetaType {
+public class TypeGenModel {
     static final String TYPES = "Types";
     static final String BASE = "Base";
 
     private final AnyType type;
 
-    public MetaType(final AnyType type) {
+    public TypeGenModel(final AnyType type) {
         this.type = type;
     }
 
@@ -35,9 +31,9 @@ public class MetaType {
         return this.type.getName();
     }
 
-    public MetaType getParent()
+    public TypeGenModel getParent()
     {
-        return new MetaType(this.type.getType());
+        return new TypeGenModel(this.type.getType());
     }
 
     @Nullable
@@ -50,9 +46,9 @@ public class MetaType {
     }
 
     @Nullable
-    public List<MetaType> getOneOf() {
+    public List<TypeGenModel> getOneOf() {
         if (type instanceof UnionType) {
-            return ((UnionType)type).getOneOf().stream().map(MetaType::new).collect(Collectors.toList());
+            return ((UnionType)type).getOneOf().stream().map(TypeGenModel::new).collect(Collectors.toList());
         }
         return null;
     }
@@ -66,74 +62,74 @@ public class MetaType {
         return null;
     }
 
-    public MetaImport getImport()
+    public ImportGenModel getImport()
     {
-        final String name = (new MetaHelper.TypeNameVisitor()).doSwitch(type);
-        return new MetaImport(getPackage(), name);
+        final String name = (new GeneratorHelper.TypeNameVisitor()).doSwitch(type);
+        return new ImportGenModel(getPackage(), name);
     }
 
     @Nullable
-    public List<MetaType> getSubTypes()
+    public List<TypeGenModel> getSubTypes()
     {
         if (this.type.subTypes() != null) {
-            return this.type.subTypes().stream().map(MetaType::new).collect(Collectors.toList());
+            return this.type.subTypes().stream().map(TypeGenModel::new).collect(Collectors.toList());
         }
         return null;
     }
 
-    public List<MetaProperty> getTypeProperties()
+    public List<PropertyGenModel> getTypeProperties()
     {
         if (type instanceof ObjectType) {
             ObjectType superType = (ObjectType)type.getType();
             return ((ObjectType)type).getProperties().stream()
                     .filter(property -> !(property.getName().startsWith("/") && property.getName().endsWith("/")))
                     .filter(property -> superType.getAllProperties().stream().filter(property1 -> property1.getName().equals(property.getName())).count() == 0)
-                    .map(MetaProperty::new)
+                    .map(PropertyGenModel::new)
                     .collect(Collectors.toList());
         }
         return Lists.newArrayList();
     }
 
-    public List<MetaProperty> getNonPatternProperties()
+    public List<PropertyGenModel> getNonPatternProperties()
     {
         if (type instanceof ObjectType) {
             return ((ObjectType)type).getProperties().stream()
                     .filter(property -> !(property.getName().startsWith("/") && property.getName().endsWith("/")))
-                    .map(MetaProperty::new)
+                    .map(PropertyGenModel::new)
                     .collect(Collectors.toList());
         }
         return Lists.newArrayList();
     }
 
-    public List<MetaProperty> getPatternProperties()
+    public List<PropertyGenModel> getPatternProperties()
     {
         if (type instanceof ObjectType) {
             return ((ObjectType)type).getProperties().stream()
                     .filter(property -> property.getName().startsWith("/") && property.getName().endsWith("/"))
-                    .map(MetaProperty::new)
+                    .map(PropertyGenModel::new)
                     .collect(Collectors.toList());
         }
         return Lists.newArrayList();
     }
 
     @Nullable
-    public List<MetaSerializer> getSerializers()
+    public List<SerializerGenModel> getSerializers()
     {
         if (type instanceof ObjectType) {
             return ((ObjectType)type).getProperties().stream().map(property -> {
-                    return new MetaHelper.SerializerVisitor(new MetaProperty(property)).doSwitch(property.getType());
+                    return new GeneratorHelper.SerializerVisitor(new PropertyGenModel(property)).doSwitch(property.getType());
                 }).filter(Objects::nonNull).collect(Collectors.toList());
         }
         return null;
     }
 
-    public List<MetaProperty> getUnionProperties()
+    public List<PropertyGenModel> getUnionProperties()
     {
         if (type instanceof ObjectType) {
             return ((ObjectType) type).getProperties().stream()
                     .filter(property -> !(property.getName().startsWith("/") && property.getName().endsWith("/")))
                     .filter(property -> property.getType() instanceof UnionType)
-                    .map(MetaProperty::new)
+                    .map(PropertyGenModel::new)
                     .collect(Collectors.toList());
         }
         return Lists.newArrayList();
@@ -141,41 +137,41 @@ public class MetaType {
 
     public String getTypeName()
     {
-        return new MetaHelper.TypeNameVisitor().doSwitch(type);
+        return new GeneratorHelper.TypeNameVisitor().doSwitch(type);
     }
 
-    public Set<MetaImport> getTypeImports()
+    public Set<ImportGenModel> getTypeImports()
     {
         if (type instanceof ObjectType) {
             ObjectType objectType = (ObjectType)type;
 
-            final Set<MetaImport> uses = objectType.getProperties().stream()
+            final Set<ImportGenModel> uses = objectType.getProperties().stream()
                     .filter(property -> property.getType() instanceof ObjectType || property.getType() instanceof ArrayType && ((ArrayType) property.getType()).getItems() instanceof ObjectType)
                     .filter(property -> {
                         AnyType t = property.getType() instanceof ArrayType ? ((ArrayType) property.getType()).getItems() : property.getType();
-                        return !new MetaType(t).getPackage().getName().equals(getPackage().getName());
+                        return !new TypeGenModel(t).getPackage().getName().equals(getPackage().getName());
                     })
                     .map(property -> {
                         AnyType t = property.getType() instanceof ArrayType ? ((ArrayType) property.getType()).getItems() : property.getType();
-                        return new MetaType(t).getImport();
+                        return new TypeGenModel(t).getImport();
                     })
                     .collect(Collectors.toSet());
             uses.addAll(
                     objectType.getProperties().stream()
-                            .map(MetaHelper::getBaseProperty)
+                            .map(GeneratorHelper::getBaseProperty)
                             .filter(property -> property.getType() instanceof ObjectType || property.getType() instanceof ArrayType && ((ArrayType) property.getType()).getItems() instanceof ObjectType)
                             .filter(property -> {
                                 AnyType t = property.getType() instanceof ArrayType ? ((ArrayType) property.getType()).getItems() : property.getType();
-                                return !new MetaType(t).getPackage().getName().equals(getPackage().getName());
+                                return !new TypeGenModel(t).getPackage().getName().equals(getPackage().getName());
                             })
-                            .map(property -> new MetaType(property.getType()).getImport())
+                            .map(property -> new TypeGenModel(property.getType()).getImport())
                             .collect(Collectors.toSet())
             );
             if (!getHasBuiltinParent() && !getParent().getPackage().getName().equals(getPackage().getName())) {
                 uses.add(getParent().getImport());
             }
             if (getDiscriminator() != null && getPackage().getHasPackage()) {
-                uses.add(new MetaImport(new MetaPackage(TYPES)));
+                uses.add(new ImportGenModel(new PackageGenModel(TYPES)));
             }
             return uses;
         }
@@ -192,21 +188,21 @@ public class MetaType {
         return getPatternProperties().size() > 0;
     }
 
-    public MetaPackage getPackage()
+    public PackageGenModel getPackage()
     {
         final AnyType t = type instanceof ArrayType ? ((ArrayType) type).getItems() : type;
         Annotation annotation = t.getAnnotation(getApi().getAnnotationType("package"), true);
-        return new MetaPackage(TYPES, annotation);
+        return new PackageGenModel(TYPES, annotation);
     }
 
     @Nullable
-    public List<MetaProperty> getIdentifiers()
+    public List<PropertyGenModel> getIdentifiers()
     {
         final AnyType t = type instanceof ArrayType ? ((ArrayType) type).getItems() : type;
         AnyAnnotationType identifierAnnotationType = getApi().getAnnotationType("identifier");
         if (t instanceof ObjectType) {
             return  ((ObjectType)t).getAllProperties().stream()
-                    .map(MetaProperty::new)
+                    .map(PropertyGenModel::new)
                     .filter(property -> property.getIdentifier() != null)
                     .collect(Collectors.toList());
         }
@@ -215,7 +211,7 @@ public class MetaType {
 
     public Api getApi()
     {
-        return MetaHelper.getParent(type, Api.class);
+        return GeneratorHelper.getParent(type, Api.class);
     }
 
     private class BuiltinParentVisitor extends TypesSwitch<Boolean> {

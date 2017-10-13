@@ -4,8 +4,8 @@ import io.vrap.rmf.raml.model.types.AnyType;
 
 import javax.annotation.Nullable;
 
-public class MetaCollection extends MetaType {
-    public MetaCollection(final AnyType type) {
+public class CollectionGenModel extends TypeGenModel {
+    public CollectionGenModel(final AnyType type) {
         super(type);
     }
 
