@@ -1,14 +1,9 @@
 package io.vrap.rmf.raml.persistence.constructor
 
-import io.vrap.rmf.raml.model.facets.ArrayInstance
-import io.vrap.rmf.raml.model.facets.Instance
-import io.vrap.rmf.raml.model.facets.ObjectInstance
-import io.vrap.rmf.raml.model.facets.StringInstance
+import io.vrap.rmf.raml.model.facets.*
 import io.vrap.rmf.raml.persistence.RamlResourceSet
 import io.vrap.rmf.raml.persistence.antlr.RAMLCustomLexer
 import io.vrap.rmf.raml.persistence.antlr.RAMLParser
-import io.vrap.rmf.raml.persistence.antlr.RamlTokenFactory
-import org.antlr.v4.runtime.CommonTokenFactory
 import org.antlr.v4.runtime.CommonTokenStream
 import org.antlr.v4.runtime.TokenStream
 import org.eclipse.emf.common.util.URI
@@ -29,16 +24,18 @@ class InstanceConstructorTest extends Specification {
         resourceSet = new RamlResourceSet()
     }
 
-    def "string instance"() {
+    def "primitive type instances parsed correctly"() {
         when:
-        Instance instance = constructInstance(
-                '''\
-        value
-        ''')
+        Instance instance = constructInstance(input)
         then:
-        instance instanceof StringInstance
-        StringInstance stringInstance = instance
-        stringInstance.value == 'value'
+        instance.eGet(instance.eClass().getEStructuralFeature('value')) == value
+        where:
+        input    | value
+        'text'   | 'text'
+        'true'   | true
+        'false'  | false
+        '1'      | 1
+        '1.0'    | BigDecimal.ONE
     }
 
     def "object instance"() {
@@ -111,11 +108,11 @@ class InstanceConstructorTest extends Specification {
         instance instanceof ArrayInstance
         ArrayInstance arrayInstance = instance
         arrayInstance.values.size() == 2
-        arrayInstance.values[0] instanceof StringInstance
-        StringInstance value1 = arrayInstance.values[0]
-        value1.value == '1'
-        StringInstance value2 = arrayInstance.values[1]
-        value2.value == '2'
+        arrayInstance.values[0] instanceof IntegerInstance
+        IntegerInstance value1 = arrayInstance.values[0]
+        value1.value == 1
+        IntegerInstance value2 = arrayInstance.values[1]
+        value2.value == 2
     }
 
     Instance constructInstance(String input) {

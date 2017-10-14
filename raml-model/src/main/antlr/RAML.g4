@@ -8,6 +8,7 @@ package io.vrap.rmf.raml.persistence.antlr;
 
 tokens {
     MAP_START, MAP_END, LIST_START, LIST_END, SCALAR,
+    INT, FLOAT, BOOL,
     ANNOTATION_TYPE_REF, RELATIVE_URI, MEDIA_TYPE
 }
 
@@ -213,7 +214,7 @@ responsesFacet:
     ;
 
 responseFacet:
-    statusCode=SCALAR
+    statusCode=INT
             (
                 SCALAR
                 |   (
@@ -353,8 +354,12 @@ attributeFacet:
     ;
 
 facetValue:
-        value=id
-    |   (LIST_START values+=id* LIST_END)
+        value=anyValue
+    |   (LIST_START values+=anyValue* LIST_END)
+    ;
+
+anyValue:
+    id | BOOL | INT | FLOAT
     ;
 
 library:
@@ -486,7 +491,23 @@ instance:
     ;
 
 simpleInstance:
+    stringInstance | booleanInstance | integerInstance | numberInstance
+    ;
+
+stringInstance:
     value=id
+    ;
+
+booleanInstance:
+    value=BOOL
+    ;
+
+integerInstance:
+    value=INT
+    ;
+
+numberInstance:
+    value=FLOAT
     ;
 
 arrayInstance:
@@ -526,7 +547,7 @@ id:
     ;
 
 requiredFacet:
-    'required' required=SCALAR
+    'required' required=BOOL
     ;
 
 annotationFacet:

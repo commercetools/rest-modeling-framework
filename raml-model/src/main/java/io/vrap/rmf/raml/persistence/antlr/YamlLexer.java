@@ -9,6 +9,9 @@ import org.eclipse.emf.ecore.resource.URIConverter;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.error.Mark;
 import org.yaml.snakeyaml.events.*;
+import org.yaml.snakeyaml.nodes.NodeId;
+import org.yaml.snakeyaml.nodes.Tag;
+import org.yaml.snakeyaml.resolver.Resolver;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -32,11 +35,12 @@ class YamlLexer implements TokenSource {
     public static final Mark EMPTY_FILE_MARK = new Mark(null, 0, 0, 0, "", 0);
     public static final ScalarEvent EMPTY_SCALAR_EVENT = new ScalarEvent(null, null, null, "", EMPTY_FILE_MARK, EMPTY_FILE_MARK, null);
 
+    private static final Resolver IMPLICIT_TAG_RESOLVER = new Resolver();
     private final Yaml yaml = new Yaml();
     private Iterator<Event> eventIterator;
     private Map<String, Integer> literalTokenTypes = new HashMap<>();
     private final TypeSwitch<Event, Token> eventSwitch;
-
+    private final Map<Tag, Integer> scalarTagTokenTypes = new HashMap<>();
     private RamlTokenFactory factory;
     private Event currentEvent;
 
@@ -86,6 +90,9 @@ class YamlLexer implements TokenSource {
                 literalTokenTypes.put(literalText, tokenType);
             }
         }
+        scalarTagTokenTypes.put(Tag.FLOAT, RAMLParser.FLOAT);
+        scalarTagTokenTypes.put(Tag.INT, RAMLParser.INT);
+        scalarTagTokenTypes.put(Tag.BOOL, RAMLParser.BOOL);
     }
 
     private void loadEvents(final URI uri) {
@@ -133,13 +140,14 @@ class YamlLexer implements TokenSource {
 
     private Token scalar(final ScalarEvent scalarEvent) {
         final String scalarValue = scalarEvent.getValue();
+        final Tag implicitTag = IMPLICIT_TAG_RESOLVER.resolve(NodeId.scalar, scalarValue, true);
         final Matcher matcher = ANNOTATION_TYPE_REF_PATTERN.matcher(scalarValue);
         final int type = literalTokenTypes.containsKey(scalarValue) ?
                 literalTokenTypes.get(scalarValue) :
                 matcher.matches() ?
                         annotationTypeRef :
                         scalarValue.startsWith("/") && !scalarValue.endsWith("/") ?
-                                relativeUri : scalar;
+                                relativeUri : scalarTagTokenTypes.getOrDefault(implicitTag, scalar);
         final String text = matcher.matches() ?
                 matcher.group(1) :
                 scalarValue;

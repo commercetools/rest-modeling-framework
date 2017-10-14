@@ -20,7 +20,6 @@ class JsonLexer implements TokenSource {
     private final int mapEnd = RAMLParser.MAP_END;
     private final int listStart = RAMLParser.LIST_START;
     private final int listEnd = RAMLParser.LIST_END;
-    private final int scalar = RAMLParser.SCALAR;
 
     public JsonLexer(final URI uri, final URIConverter uriConverter) {
         this.uri = uri;
@@ -48,18 +47,19 @@ class JsonLexer implements TokenSource {
                     case END_OBJECT:
                         return createToken(mapEnd, "");
                     case VALUE_NUMBER_INT:
+                        return createToken(RAMLParser.INT, parser.getNumberValue().toString());
                     case VALUE_NUMBER_FLOAT:
-                        return createToken(scalar, parser.getNumberValue().toString());
+                        return createToken(RAMLParser.FLOAT, parser.getNumberValue().toString());
                     case FIELD_NAME:
-                        return createToken(scalar, parser.getCurrentName());
+                        return createToken(RAMLParser.SCALAR, parser.getCurrentName());
                     case VALUE_TRUE:
-                        return createToken(scalar, "true");
+                        return createToken(RAMLParser.BOOL, "true");
                     case VALUE_FALSE:
-                        return createToken(scalar, "false");
+                        return createToken(RAMLParser.BOOL, "false");
                     case VALUE_NULL:
-                        return createToken(scalar, "null");
+                        return createToken(RAMLParser.SCALAR, "null");
                     case VALUE_STRING:
-                        return createToken(scalar, parser.getText());
+                        return createToken(RAMLParser.SCALAR, parser.getText());
                     default:
                         throw new IllegalStateException("Unsupported json token: " + jsonToken);
                 }

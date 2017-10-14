@@ -62,16 +62,16 @@ abstract class AbstractScopedVisitor<T> extends RAMLBaseVisitor<T> {
                     attributeFacet.facetValue().values :
                     attributeFacet.facetValue().value;
 
-            if (attributeFacet.facetValue().value != null) {
-                setAttribute(eObject, eAttribute, attributeFacet.facetValue().value);
+            if (attributeFacet.facetValue().anyValue().size() == 1) {
+                setAttribute(eObject, eAttribute, attributeFacet.facetValue().anyValue().get(0));
             } else {
-                setAttribute(eObject, eAttribute, attributeFacet.facetValue().values);
+                setAttribute(eObject, eAttribute, attributeFacet.facetValue().anyValue());
             }
         }
         return value;
     }
 
-    private void setAttribute(final EObject eObject, final EAttribute eAttribute, final List<RAMLParser.IdContext> valueTokens) {
+    private void setAttribute(final EObject eObject, final EAttribute eAttribute, final List<RAMLParser.AnyValueContext> valueTokens) {
         if (eAttribute.isMany()) {
             final List<Object> values = valueTokens.stream()
                     .map(v -> createFromString(eAttribute, v))
@@ -88,9 +88,9 @@ abstract class AbstractScopedVisitor<T> extends RAMLBaseVisitor<T> {
         }
     }
 
-    private void setAttribute(final EObject eObject, final EAttribute eAttribute, final RAMLParser.IdContext valueToken) {
-        if (valueToken.getText().length() > 0) {
-            final Object value = createFromString(eAttribute, valueToken);
+    private void setAttribute(final EObject eObject, final EAttribute eAttribute, final RAMLParser.AnyValueContext anyValueContext) {
+        if (anyValueContext.getText().length() > 0) {
+            final Object value = createFromString(eAttribute, anyValueContext);
             if (eAttribute.isMany()) {
                 eObject.eSet(eAttribute, Collections.singletonList(value));
             } else {
@@ -99,11 +99,11 @@ abstract class AbstractScopedVisitor<T> extends RAMLBaseVisitor<T> {
         }
     }
 
-    private Object createFromString(final EAttribute eAttribute, final RAMLParser.IdContext valueToken) {
+    private Object createFromString(final EAttribute eAttribute, final RAMLParser.AnyValueContext anyValueContext) {
         try {
-            return EcoreUtil.createFromString(eAttribute.getEAttributeType(), valueToken.getText());
+            return EcoreUtil.createFromString(eAttribute.getEAttributeType(), anyValueContext.getText());
         } catch (IllegalArgumentException e) {
-            scope.addError("{0} at {1}", e.getMessage(), valueToken.getStart());
+            scope.addError("{0} at {1}", e.getMessage(), anyValueContext.getStart());
             return null;
         }
     }

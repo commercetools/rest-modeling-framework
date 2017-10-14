@@ -4,6 +4,8 @@ import io.vrap.rmf.raml.model.facets.*;
 import io.vrap.rmf.raml.persistence.antlr.RAMLParser;
 import org.eclipse.emf.ecore.EObject;
 
+import java.math.BigDecimal;
+
 import static io.vrap.rmf.raml.model.facets.FacetsPackage.Literals.*;
 
 /**
@@ -18,24 +20,38 @@ public class InstanceConstructor extends AbstractConstructor {
     }
 
     @Override
-    public Object visitSimpleInstance(RAMLParser.SimpleInstanceContext simpleInstance) {
-        final String text = simpleInstance.value.getText();
-
-        final Instance instance;
-        switch (text) {
-            case "true":
-            case "false":
-                final BooleanInstance typeInstance = create(BOOLEAN_INSTANCE, simpleInstance);
-                typeInstance.setValue(Boolean.valueOf(text));
-                instance = typeInstance;
-                break;
-            default:
-                final StringInstance stringInstance = create(STRING_INSTANCE, simpleInstance);
-                stringInstance.setValue(text);
-                instance = stringInstance;
-        }
-        scope.setValue(instance, simpleInstance.getStart());
+    public Object visitSimpleInstance(final RAMLParser.SimpleInstanceContext ctx) {
+        final Instance instance = (Instance) super.visitSimpleInstance(ctx);
+        scope.setValue(instance, ctx.getStart());
         return instance;
+    }
+
+    @Override
+    public Object visitStringInstance(final RAMLParser.StringInstanceContext ctx) {
+        final StringInstance stringInstance = create(STRING_INSTANCE, ctx);
+        stringInstance.setValue(ctx.getText());
+        return stringInstance;
+    }
+
+    @Override
+    public Object visitBooleanInstance(final RAMLParser.BooleanInstanceContext ctx) {
+        final BooleanInstance booleanInstance = create(BOOLEAN_INSTANCE, ctx);
+        booleanInstance.setValue(Boolean.valueOf(ctx.getText()));
+        return booleanInstance;
+    }
+
+    @Override
+    public Object visitIntegerInstance(final RAMLParser.IntegerInstanceContext ctx) {
+        final IntegerInstance integerInstance = create(INTEGER_INSTANCE, ctx);
+        integerInstance.setValue(Integer.parseInt(ctx.getText()));
+        return integerInstance;
+    }
+
+    @Override
+    public Object visitNumberInstance(final RAMLParser.NumberInstanceContext ctx) {
+        final NumberInstance numberInstance = create(NUMBER_INSTANCE, ctx);
+        numberInstance.setValue(new BigDecimal(ctx.getText()));
+        return numberInstance;
     }
 
     @Override
