@@ -2,10 +2,8 @@ package io.vrap.rmf.raml.persistence.constructor;
 
 import io.vrap.rmf.raml.model.facets.ObjectInstance;
 import io.vrap.rmf.raml.model.security.SecuredBy;
-import io.vrap.rmf.raml.model.security.SecurityFactory;
 import io.vrap.rmf.raml.model.security.SecurityScheme;
 import io.vrap.rmf.raml.model.types.Example;
-import io.vrap.rmf.raml.model.types.TypesFactory;
 import io.vrap.rmf.raml.persistence.antlr.RAMLParser;
 import org.eclipse.emf.common.util.ECollections;
 
@@ -60,7 +58,8 @@ public abstract class BaseConstructor extends AbstractConstructor {
     @Override
     public Object visitExampleFacet(RAMLParser.ExampleFacetContext exampleFacet) {
         final Example example = create(EXAMPLE, exampleFacet);
-        return withinScope(scope.with(ANY_TYPE__EXAMPLE), exampleScope -> {
+        example.setName("");
+        return withinScope(scope.with(ANY_TYPE__EXAMPLES), exampleScope -> {
             scope.setValue(example, exampleFacet.getStart());
             instanceConstructor.withinScope(exampleScope.with(example, EXAMPLE__VALUE), exampleValueScope ->
                     instanceConstructor.visitInstance(exampleFacet.instance()));

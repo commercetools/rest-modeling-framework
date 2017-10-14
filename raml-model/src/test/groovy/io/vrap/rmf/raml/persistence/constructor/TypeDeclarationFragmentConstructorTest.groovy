@@ -5,7 +5,6 @@ import io.vrap.rmf.raml.model.types.*
 import io.vrap.rmf.raml.persistence.RamlResourceSet
 import io.vrap.rmf.raml.persistence.antlr.RAMLCustomLexer
 import io.vrap.rmf.raml.persistence.antlr.RAMLParser
-import org.antlr.v4.runtime.CommonTokenFactory
 import org.antlr.v4.runtime.CommonTokenStream
 import org.antlr.v4.runtime.TokenStream
 import org.eclipse.emf.common.util.URI
@@ -52,8 +51,8 @@ class TypeDeclarationFragmentConstructorTest extends Specification {
         StringType stringType = BuiltinType.STRING.getEObject(resourceSet)
         type != stringType
         type.displayName == 'Simple'
-        type.example != null
-        type.example.value instanceof StringInstance
+        type.examples.size() == 1
+        type.examples[0].value instanceof StringInstance
     }
 
     def "type with property and example"() {
@@ -75,8 +74,8 @@ class TypeDeclarationFragmentConstructorTest extends Specification {
 
         StringType stringType = BuiltinType.STRING.getEObject(resourceSet)
         namePropertyType != stringType
-        namePropertyType.example != null
-        namePropertyType.example.value instanceof StringInstance
+        namePropertyType.examples.size() == 1
+        namePropertyType.examples[0].value instanceof StringInstance
     }
 
     def "type with property and default"() {

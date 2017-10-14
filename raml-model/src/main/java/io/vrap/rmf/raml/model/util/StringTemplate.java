@@ -166,6 +166,11 @@ public class StringTemplate {
 
     private static class StringTemplateVisitor extends StringTemplateBaseVisitor<List<Part>> {
         @Override
+        protected List<Part> defaultResult() {
+            return new ArrayList<>();
+        }
+
+        @Override
         protected List<StringTemplate.Part> aggregateResult(final List<StringTemplate.Part> aggregate, final List<StringTemplate.Part> nextResult) {
             if (aggregate != null) {
                 aggregate.addAll(nextResult);

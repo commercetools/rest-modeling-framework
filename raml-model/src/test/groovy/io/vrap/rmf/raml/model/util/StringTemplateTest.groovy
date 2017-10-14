@@ -13,7 +13,7 @@ class StringTemplateTest extends Specification {
         then:
         stringTemplate.toString() == template
         where:
-        template << [ '<<resourcePathName>>Draft', 'Name<<name>>', 'Name<<name>>Impl', '<<t>><<fff', '<<<<t>>', '201<<t>>' ]
+        template << [ '', '<<resourcePathName>>Draft', 'Name<<name>>', 'Name<<name>>Impl', '<<t>><<fff', '<<<<t>>', '201<<t>>' ]
     }
 
     def "render(Map<String, String>)"() {

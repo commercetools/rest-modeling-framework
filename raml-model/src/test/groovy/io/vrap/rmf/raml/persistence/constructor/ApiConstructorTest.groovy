@@ -17,8 +17,6 @@ import io.vrap.rmf.raml.model.types.TypeTemplate
 import io.vrap.rmf.raml.persistence.RamlResourceSet
 import io.vrap.rmf.raml.persistence.antlr.RAMLCustomLexer
 import io.vrap.rmf.raml.persistence.antlr.RAMLParser
-import io.vrap.rmf.raml.persistence.antlr.RamlTokenFactory
-import org.antlr.v4.runtime.CommonTokenFactory
 import org.antlr.v4.runtime.CommonTokenStream
 import org.antlr.v4.runtime.TokenStream
 import org.eclipse.emf.common.util.URI
@@ -74,10 +72,10 @@ class ApiConstructorTest extends Specification {
         ''')
         then:
         api.types.size() == 2
-        api.types[0].example != null
-        api.types[0].example.name == null
-        api.types[0].example.value instanceof ObjectInstance
-        ObjectInstance example = api.types[0].example.value
+        api.types[0].examples.size() == 1
+        api.types[0].examples[0].name == ''
+        api.types[0].examples[0].value instanceof ObjectInstance
+        ObjectInstance example = api.types[0].examples[0].value
         example.propertyValues.size() == 1
         example.propertyValues[0].name == 'name'
         example.propertyValues[0].value instanceof StringInstance
@@ -85,9 +83,9 @@ class ApiConstructorTest extends Specification {
         stringInstance.value == 'Mr. X'
 
 
-        api.types[1].example != null
-        api.types[1].example.value instanceof StringInstance
-        StringInstance stringInstance1 = api.types[1].example.value
+        api.types[1].examples.size() == 1
+        api.types[1].examples[0].value instanceof StringInstance
+        StringInstance stringInstance1 = api.types[1].examples[0].value
         stringInstance1.value == 'John Doe'
     }
 
