@@ -22,25 +22,25 @@ public class TypeGenModel {
 
     public Boolean getHasBuiltinParent()
     {
-        return new BuiltinParentVisitor().doSwitch(this.type);
+        return new BuiltinParentVisitor().doSwitch(type);
     }
 
     @Nullable
     public String getName()
     {
-        return this.type.getName();
+        return type.getName();
     }
 
     public TypeGenModel getParent()
     {
-        return new TypeGenModel(this.type.getType());
+        return new TypeGenModel(type.getType());
     }
 
     @Nullable
     public String getDiscriminator()
     {
-        if (this.type instanceof ObjectType) {
-            return ((ObjectType) this.type).getDiscriminator();
+        if (type instanceof ObjectType) {
+            return ((ObjectType) type).getDiscriminator();
         }
         return null;
     }
@@ -56,10 +56,15 @@ public class TypeGenModel {
     @Nullable
     public String getDiscriminatorValue()
     {
-        if (this.type instanceof ObjectType) {
-            return ((ObjectType) this.type).getDiscriminatorValue();
+        if (type instanceof ObjectType) {
+            return ((ObjectType) type).getDiscriminatorValue();
         }
         return null;
+    }
+
+    public Boolean getIsClass()
+    {
+        return new IsClassVisitor().doSwitch(type);
     }
 
     public ImportGenModel getImport()
@@ -71,8 +76,8 @@ public class TypeGenModel {
     @Nullable
     public List<TypeGenModel> getSubTypes()
     {
-        if (this.type.subTypes() != null) {
-            return this.type.subTypes().stream().map(TypeGenModel::new).collect(Collectors.toList());
+        if (type.subTypes() != null) {
+            return type.subTypes().stream().map(TypeGenModel::new).collect(Collectors.toList());
         }
         return null;
     }
@@ -136,6 +141,11 @@ public class TypeGenModel {
     }
 
     public String getTypeName()
+    {
+        return new GeneratorHelper.TypeNameVisitor().doSwitch(type);
+    }
+
+    public String getReturnTypeName()
     {
         return new GeneratorHelper.TypeNameVisitor().doSwitch(type);
     }
@@ -232,4 +242,21 @@ public class TypeGenModel {
         }
     }
 
+    private class IsClassVisitor extends TypesSwitch<Boolean> {
+        @Override
+        public Boolean defaultCase(EObject object) {
+            return false;
+        }
+
+        @Override
+        public Boolean caseArrayType(final ArrayType arrayType) {
+            final AnyType items = arrayType.getItems();
+            return items != null && items.getName() != null;
+        }
+
+        @Override
+        public Boolean caseObjectType(final ObjectType objectType) {
+            return objectType.getName() != null;
+        }
+    }
 }

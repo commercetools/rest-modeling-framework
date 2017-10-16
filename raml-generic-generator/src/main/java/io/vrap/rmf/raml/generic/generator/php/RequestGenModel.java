@@ -70,7 +70,7 @@ public class RequestGenModel {
                 return "UploadedFileInterface ";
             }
             if (!BuiltinType.of(firstBodyType.getType().getName()).isPresent()) {
-                final String t = (new TypesGenerator.PropertyTypeVisitor()).doSwitch(firstBodyType.getType());
+                final String t = (new GeneratorHelper.TypeNameVisitor()).doSwitch(firstBodyType.getType());
                 if (!Lists.newArrayList("mixed", "null", "bool", "string", "float", "int").contains(t)) {
                     return t + " ";
                 }
