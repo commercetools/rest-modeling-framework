@@ -58,22 +58,6 @@ class RamlModelBuilderTest extends Specification implements ResourceFixtures {
         singleUserResource.uriParameters[0].name == 'ID'
     }
 
-    def "should resolve ct api"() {
-        when:
-        URI uri = uriFromClasspath("/commercetools-api-reference-master/api.raml")
-        Api api = modelBuilder.buildApi(uri)
-        then:
-        api != null
-    }
-
-    def "should resolve ct api extension"() {
-        when:
-        URI uri = uriFromClasspath("/commercetools-api-reference-master/update-actions.raml")
-        Api api = modelBuilder.buildApi(uri)
-        then:
-        api != null
-    }
-
     def "union resource type"() {
         when:
         URI uri = uriFromClasspath('/api/resource-type-application.raml')
