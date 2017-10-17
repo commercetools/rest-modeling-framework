@@ -416,6 +416,17 @@ interface AnnotationsFacet {
 		}
 		return null
 	}
+	
+	/*
+	 * Returns the annotation with the given name or null if no such
+	 * annotation exists.
+	 */
+	op Annotation getAnnotation(String name) {
+		for (Annotation anno : annotations) {
+			if (anno.^type?.name == name) return anno
+		}
+		return null
+	}
 }
 
 class Annotation {
