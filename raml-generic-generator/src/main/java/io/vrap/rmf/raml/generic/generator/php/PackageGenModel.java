@@ -5,15 +5,15 @@ import io.vrap.rmf.raml.model.types.Annotation;
 
 import javax.annotation.Nullable;
 
-public class MetaPackage {
+public class PackageGenModel {
     private final String packageName;
     private final Annotation annotation;
 
-    public MetaPackage(final String packageName) {
+    public PackageGenModel(final String packageName) {
         this(packageName, null);
     }
 
-    public MetaPackage(final String packageName, final Annotation annotation) {
+    public PackageGenModel(final String packageName, final Annotation annotation) {
         this.packageName = packageName;
         this.annotation = annotation;
     }
@@ -52,7 +52,7 @@ public class MetaPackage {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        MetaPackage that = (MetaPackage) o;
+        PackageGenModel that = (PackageGenModel) o;
 
         if (!packageName.equals(that.packageName)) return false;
         return annotation != null ? annotation.equals(that.annotation) : that.annotation == null;

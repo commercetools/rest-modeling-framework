@@ -13,7 +13,7 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class MetaHelper {
+public class GeneratorHelper {
     static Property getBaseProperty(final Property property) {
         final AnyType anyType = (AnyType)property.eContainer();
         if (!(anyType instanceof ObjectType)) {
@@ -31,11 +31,15 @@ public class MetaHelper {
     }
 
     static String toParamName(final UriTemplate uri, final String delimiter) {
+        return toParamName(uri, delimiter, "");
+    }
+
+    static String toParamName(final UriTemplate uri, final String delimiter, final String suffix) {
         return StringUtils.capitalize(uri.getParts().stream().map(
                 uriTemplatePart -> {
                     if (uriTemplatePart instanceof UriTemplateExpression) {
                         return ((UriTemplateExpression)uriTemplatePart).getVariables().stream()
-                                .map(s -> delimiter + StringUtils.capitalize(s)).collect(Collectors.joining());
+                                .map(s -> delimiter + StringUtils.capitalize(s) + suffix).collect(Collectors.joining());
                     }
                     return CaseFormat.LOWER_HYPHEN.to(CaseFormat.LOWER_CAMEL, uriTemplatePart.toString().replace("/", "-"));
                 }
@@ -67,12 +71,12 @@ public class MetaHelper {
         return uri;
     }
 
-    static List<MetaResource> flattenResources(final List<Resource> resources)
+    static List<ResourceGenModel> flattenResources(final List<Resource> resources)
     {
         final List<Resource> r = flatten(resources);
-        final List<MetaResource> m = Lists.newArrayList();
+        final List<ResourceGenModel> m = Lists.newArrayList();
 
-        return r.stream().map(resource -> new MetaResource(resource, r)).collect(Collectors.toList());
+        return r.stream().map(resource -> new ResourceGenModel(resource, r)).collect(Collectors.toList());
     }
 
     private static List<Resource> flatten(final List<Resource> resources)
@@ -230,136 +234,136 @@ public class MetaHelper {
         }
     }
 
-    static class SerializerVisitor extends TypesSwitch<MetaSerializer> {
-        final MetaProperty property;
+    static class SerializerVisitor extends TypesSwitch<SerializerGenModel> {
+        final PropertyGenModel property;
 
-        SerializerVisitor(final MetaProperty property) {
+        SerializerVisitor(final PropertyGenModel property) {
             this.property = property;
         }
 
         @Override
-        public MetaSerializer caseTimeOnlyType(TimeOnlyType object) {
-            return new MetaSerializer(property, "timeSerializer", "H:i:s.u");
+        public SerializerGenModel caseTimeOnlyType(TimeOnlyType object) {
+            return new SerializerGenModel(property, "timeSerializer", "H:i:s.u");
         }
 
         @Override
-        public MetaSerializer caseDateOnlyType(DateOnlyType object) {
-            return new MetaSerializer(property,"dateSerializer", "Y-m-d");
+        public SerializerGenModel caseDateOnlyType(DateOnlyType object) {
+            return new SerializerGenModel(property,"dateSerializer", "Y-m-d");
         }
 
         @Override
-        public MetaSerializer caseDateTimeType(DateTimeType object) {
-            return new MetaSerializer(property,"dateTimeSerializer", "c");
+        public SerializerGenModel caseDateTimeType(DateTimeType object) {
+            return new SerializerGenModel(property,"dateTimeSerializer", "c");
         }
     }
 
-    static class PropertyGetterVisitor extends TypesSwitch<MetaGetter> {
-        final MetaProperty property;
+    static class PropertyGetterVisitor extends TypesSwitch<GetterGenModel> {
+        final PropertyGenModel property;
 
-        PropertyGetterVisitor(final MetaProperty property) {
+        PropertyGetterVisitor(final PropertyGenModel property) {
             this.property = property;
         }
 
         @Override
-        public MetaGetter caseTimeOnlyType(TimeOnlyType object) {
-            return new MetaGetter("dateTimeGetter", property, "H:i:s.u");
+        public GetterGenModel caseTimeOnlyType(TimeOnlyType object) {
+            return new GetterGenModel("dateTimeGetter", property, "H:i:s.u");
         }
 
         @Override
-        public MetaGetter caseDateOnlyType(DateOnlyType object) {
-            return new MetaGetter("dateTimeGetter", property, "Y-m-d");
+        public GetterGenModel caseDateOnlyType(DateOnlyType object) {
+            return new GetterGenModel("dateTimeGetter", property, "Y-m-d");
         }
 
         @Override
-        public MetaGetter caseDateTimeType(DateTimeType object) {
-            return new MetaGetter("dateTimeGetter", property, "Y-m-d?H:i:s.uT");
+        public GetterGenModel caseDateTimeType(DateTimeType object) {
+            return new GetterGenModel("dateTimeGetter", property, "Y-m-d?H:i:s.uT");
         }
 
         @Override
-        public MetaGetter caseStringType(StringType object) {
-            return new MetaGetter("scalarGetter", property, "string");
+        public GetterGenModel caseStringType(StringType object) {
+            return new GetterGenModel("scalarGetter", property, "string");
         }
 
         @Override
-        public MetaGetter caseNumberType(NumberType object) {
+        public GetterGenModel caseNumberType(NumberType object) {
             switch (object.getFormat()) {
                 case INT:
                 case INT8:
                 case INT16:
                 case INT32:
                 case INT64:
-                    return new MetaGetter("scalarGetter", property, "int");
+                    return new GetterGenModel("scalarGetter", property, "int");
                 default:
-                    return new MetaGetter("scalarGetter", property, "float");
+                    return new GetterGenModel("scalarGetter", property, "float");
             }
         }
 
-        public MetaGetter caseIntegerType(IntegerType object) {
-            return new MetaGetter("scalarGetter", property, "int");
+        public GetterGenModel caseIntegerType(IntegerType object) {
+            return new GetterGenModel("scalarGetter", property, "int");
         }
 
         @Override
-        public MetaGetter caseArrayType(final ArrayType arrayType) {
+        public GetterGenModel caseArrayType(final ArrayType arrayType) {
             if (arrayType.getItems() == null || BuiltinType.of(arrayType.getItems().getName()).isPresent()) {
                 return null;
             } else if (arrayType.getItems() instanceof UnionType) {
-                return new MetaGetter("scalarGetter", property, "array");
+                return new GetterGenModel("scalarGetter", property, "array");
             } else {
                 if (BuiltinType.of(arrayType.getItems().getName()).isPresent()) {
-                    return new MetaGetter("scalarGetter", property, "array");
+                    return new GetterGenModel("scalarGetter", property, "array");
                 }
-                return new MetaGetter("arrayGetter", property, "array");
+                return new GetterGenModel("arrayGetter", property, "array");
             }
         }
 
         @Override
-        public MetaGetter caseObjectType(final ObjectType objectType) {
+        public GetterGenModel caseObjectType(final ObjectType objectType) {
             if (BuiltinType.of(objectType.getName()).isPresent()) {
                 return null;
             } else {
-                return new MetaGetter("classGetter", property);
+                return new GetterGenModel("classGetter", property);
             }
         }
 
         @Override
-        public MetaGetter defaultCase(EObject object) {
-            return new MetaGetter("defaultGetter", property);
+        public GetterGenModel defaultCase(EObject object) {
+            return new GetterGenModel("defaultGetter", property);
         }
     }
 
-    static class PropertySetterVisitor extends TypesSwitch<MetaSetter> {
-        final MetaProperty property;
+    static class PropertySetterVisitor extends TypesSwitch<SetterGenModel> {
+        final PropertyGenModel property;
 
-        PropertySetterVisitor(final MetaProperty property) {
+        PropertySetterVisitor(final PropertyGenModel property) {
             this.property = property;
         }
         @Override
-        public MetaSetter caseTimeOnlyType(TimeOnlyType object) {
+        public SetterGenModel caseTimeOnlyType(TimeOnlyType object) {
             return dateTimeMapper();
         }
 
         @Override
-        public MetaSetter caseDateOnlyType(DateOnlyType object) {
+        public SetterGenModel caseDateOnlyType(DateOnlyType object) {
             return dateTimeMapper();
         }
 
         @Override
-        public MetaSetter caseDateTimeType(DateTimeType object) {
+        public SetterGenModel caseDateTimeType(DateTimeType object) {
             return dateTimeMapper();
         }
 
-        private MetaSetter dateTimeMapper()
+        private SetterGenModel dateTimeMapper()
         {
-            return new MetaSetter("dateTimeSetter", property, null);
+            return new SetterGenModel("dateTimeSetter", property, null);
         }
 
         @Override
-        public MetaSetter caseStringType(StringType object) {
+        public SetterGenModel caseStringType(StringType object) {
             return scalarMapper("string");
         }
 
         @Override
-        public MetaSetter caseNumberType(NumberType object) {
+        public SetterGenModel caseNumberType(NumberType object) {
             switch (object.getFormat()) {
                 case INT:
                 case INT8:
@@ -372,48 +376,48 @@ public class MetaHelper {
             }
         }
 
-        public MetaSetter caseIntegerType(IntegerType object) {
+        public SetterGenModel caseIntegerType(IntegerType object) {
             return scalarMapper("int");
         }
 
-        private MetaSetter scalarMapper(final String scalarType)
+        private SetterGenModel scalarMapper(final String scalarType)
         {
-            return new MetaSetter("scalarSetter", property, scalarType);
+            return new SetterGenModel("scalarSetter", property, scalarType);
         }
 
         @Override
-        public MetaSetter caseArrayType(final ArrayType arrayType) {
+        public SetterGenModel caseArrayType(final ArrayType arrayType) {
             if (arrayType.getItems() == null || BuiltinType.of(arrayType.getItems().getName()).isPresent()) {
                 return null;
             } else if (arrayType.getItems() instanceof UnionType) {
-                return new MetaSetter("arraySetter", property, null);
+                return new SetterGenModel("arraySetter", property, null);
             } else {
                 if (BuiltinType.of(arrayType.getItems().getName()).isPresent()) {
-                    return new MetaSetter("arraySetter", property, "array", "array");
+                    return new SetterGenModel("arraySetter", property, "array", "array");
                 } else {
                     final Property t = getBaseProperty(property.getProperty());
                     final String paramType = new ParamVisitor(property.getProperty()).doSwitch(t.getType());
                     final String docType = new ParamVisitor(property.getProperty()).doSwitch(arrayType);
-                    return new MetaSetter("arraySetter", property, docType, paramType);
+                    return new SetterGenModel("arraySetter", property, docType, paramType);
                 }
             }
         }
 
         @Override
-        public MetaSetter caseObjectType(final ObjectType objectType) {
+        public SetterGenModel caseObjectType(final ObjectType objectType) {
             if (BuiltinType.of(objectType.getName()).isPresent()) {
                 return null;
             } else {
                 final Property t = getBaseProperty(property.getProperty());
                 final String paramType = new ParamVisitor(property.getProperty()).doSwitch(t.getType());
                 final String docType = new ParamVisitor(property.getProperty()).doSwitch(objectType);
-                return new MetaSetter("classSetter", property, docType, paramType);
+                return new SetterGenModel("classSetter", property, docType, paramType);
             }
         }
 
         @Override
-        public MetaSetter defaultCase(EObject object) {
-            return new MetaSetter("defaultSetter", property, null);
+        public SetterGenModel defaultCase(EObject object) {
+            return new SetterGenModel("defaultSetter", property, null);
         }
     }
 }

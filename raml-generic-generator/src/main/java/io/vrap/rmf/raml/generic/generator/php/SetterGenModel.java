@@ -2,20 +2,20 @@ package io.vrap.rmf.raml.generic.generator.php;
 
 import javax.annotation.Nullable;
 
-public class MetaSetter {
+public class SetterGenModel {
     final private String setter;
-    final private MetaProperty property;
+    final private PropertyGenModel property;
     final private String docType;
     final private String paramType;
 
-    public MetaSetter(final String setter, final MetaProperty property, final String docType, final String paramType) {
+    public SetterGenModel(final String setter, final PropertyGenModel property, final String docType, final String paramType) {
         this.setter = setter;
         this.property = property;
         this.docType = docType;
         this.paramType = paramType;
     }
 
-    public MetaSetter(final String setter, final MetaProperty property, final String docType) {
+    public SetterGenModel(final String setter, final PropertyGenModel property, final String docType) {
         this(setter, property, docType, null);
     }
 
@@ -23,7 +23,7 @@ public class MetaSetter {
         return setter;
     }
 
-    public MetaProperty getProperty() {
+    public PropertyGenModel getProperty() {
         return property;
     }
 

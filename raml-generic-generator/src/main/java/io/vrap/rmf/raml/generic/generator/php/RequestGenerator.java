@@ -45,13 +45,13 @@ public class RequestGenerator extends AbstractTemplateGenerator {
     }
 
     private List<File> generateResources(final File outputPath, final List<Resource> resources) throws IOException {
-        final List<MetaResource> flatResources = MetaHelper.flattenResources(resources);
+        final List<ResourceGenModel> flatResources = GeneratorHelper.flattenResources(resources);
 
         final List<File> f = Lists.newArrayList();
         final File requestFile = new File(outputPath, "RequestBuilder.php");
-        final MetaRootResource root = new MetaRootResource(flatResources.stream().filter(metaResource -> resources.contains(metaResource.getResource())).collect(Collectors.toList()));
+        final RootResourceGenModel root = new RootResourceGenModel(flatResources.stream().filter(resourceGenModel -> resources.contains(resourceGenModel.getResource())).collect(Collectors.toList()));
         f.add(generateFile(generateBuilder(root), requestFile));
-        for (final MetaResource resource : flatResources) {
+        for (final ResourceGenModel resource : flatResources) {
             final File resourceFile = new File(outputPath, "Resource" + resource.getIndex() + ".php");
 
             f.add(generateFile(generateResource(resource), resourceFile));
@@ -60,11 +60,11 @@ public class RequestGenerator extends AbstractTemplateGenerator {
     }
 
     private List<File> generateRequests(final File outputPath, final List<Resource> resources) throws IOException {
-        final List<MetaResource> flatResources = MetaHelper.flattenResources(resources);
+        final List<ResourceGenModel> flatResources = GeneratorHelper.flattenResources(resources);
 
         final List<File> f = Lists.newArrayList();
-        for (final MetaResource resource : flatResources) {
-            for(final MetaRequest request : resource.getMethods()) {
+        for (final ResourceGenModel resource : flatResources) {
+            for(final RequestGenModel request : resource.getMethods()) {
                 final File resourceFile = new File(outputPath, request.getName() + ".php");
                 f.add(generateFile(generateRequest(request), resourceFile));
             }
@@ -72,7 +72,7 @@ public class RequestGenerator extends AbstractTemplateGenerator {
         return f;
     }
 
-    String generateBuilder(final MetaRootResource resource) {
+    String generateBuilder(final RootResourceGenModel resource) {
         final STGroupFile stGroup = createSTGroup(Resources.getResource(resourcesPath + TYPE_RESOURCE + ".stg"));
         final ST st = stGroup.getInstanceOf("builder");
         st.add("vendorName", vendorName);
@@ -80,7 +80,7 @@ public class RequestGenerator extends AbstractTemplateGenerator {
         return st.render();
     }
 
-    String generateRequest(final MetaRequest request) {
+    String generateRequest(final RequestGenModel request) {
         final STGroupFile stGroup = createSTGroup(Resources.getResource(resourcesPath + TYPE_RESOURCE + ".stg"));
         final ST st = stGroup.getInstanceOf("request");
         st.add("vendorName", vendorName);
@@ -88,7 +88,7 @@ public class RequestGenerator extends AbstractTemplateGenerator {
         return st.render();
     }
 
-    String generateResource(final MetaResource resource) {
+    String generateResource(final ResourceGenModel resource) {
         final STGroup stGroup = createSTGroup(Resources.getResource(resourcesPath + TYPE_RESOURCE + ".stg"));
         final ST st = stGroup.getInstanceOf("resource");
         st.add("vendorName", vendorName);
@@ -183,7 +183,7 @@ public class RequestGenerator extends AbstractTemplateGenerator {
                     switch (Strings.nullToEmpty(formatString)) {
                         case "methodName":
                             if (parts.size() > 0) {
-                                return CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, MetaHelper.toParamName((UriTemplate)arg, "With"));
+                                return CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, GeneratorHelper.toParamName((UriTemplate)arg, "With", "Value"));
                             }
 
                             final String uri = arg.toString();

@@ -42,10 +42,14 @@ request(vendorName, request) ::=<<
 namespace <vendorName>\\<request.package.name>;
 
 use <vendorName>\\Client\\ApiRequest;
-<if(request.returnType)>
+<if(first(request.returnType.oneOf).isClass)>
+<useTypeImport(vendorName, first(request.returnType.oneOf).import)>
+<else>
+<if(request.returnType.isClass)>
 <useTypeImport(vendorName, request.returnType.import)>
 <else>
 use <vendorName>\\Base\\JsonObject;
+<endif>
 <endif>
 
 use <vendorName>\\Base\\ResultMapper;
@@ -54,7 +58,7 @@ use Psr\Http\Message\ResponseInterface;
 
 class <request.name> extends ApiRequest
 {
-    const RESULT_TYPE = <if(request.returnType)><request.returnType.name><else>JsonObject<endif>::class;
+    const RESULT_TYPE = <returnType(request.returnType)>::class;
 
     /**
      <request.allParams: {p |<paramBlock(p)>}>
@@ -70,7 +74,7 @@ class <request.name> extends ApiRequest
 
     /**
      * @param ResponseInterface $response
-     * @return <if(request.returnType)><request.returnType.name><else>JsonObject<endif>
+     * @return <returnType(request.returnType)>
      */
     public function map(ResponseInterface $response, ResultMapper $mapper)
     {
@@ -84,6 +88,9 @@ class <request.name> extends ApiRequest
 
 >>
 
+returnType(returnType) ::=<<
+<if(first(returnType.oneOf).isClass)><first(returnType.oneOf).typeName><else><if(returnType.isClass)><returnType.typeName><else>JsonObject<endif><endif>
+>>
 paramBlock(param) ::=<<
 
 * @param $<param.key>

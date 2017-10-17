@@ -2,13 +2,8 @@ package io.vrap.rmf.raml.generic.generator.php;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.common.io.Resources;
 import io.vrap.rmf.raml.generic.generator.AbstractTemplateGenerator;
-import io.vrap.rmf.raml.model.elements.IdentifiableElement;
-import io.vrap.rmf.raml.model.facets.BooleanInstance;
-import io.vrap.rmf.raml.model.facets.ObjectInstance;
-import io.vrap.rmf.raml.model.facets.StringInstance;
 import io.vrap.rmf.raml.model.types.*;
 import io.vrap.rmf.raml.model.types.impl.TypesFactoryImpl;
 import io.vrap.rmf.raml.model.types.util.TypesSwitch;
@@ -20,8 +15,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
-
-import static org.apache.commons.lang3.StringUtils.capitalize;
 
 public class TypesGenerator extends AbstractTemplateGenerator {
     private static final String resourcesPath = "./templates/php/";
@@ -54,7 +47,7 @@ public class TypesGenerator extends AbstractTemplateGenerator {
 
         final List<File> f = Lists.newArrayList();
         for (final AnyType anyType : types) {
-            final String packageFolder = new MetaType(anyType).getPackage().getSubPackageFolder();
+            final String packageFolder = new TypeGenModel(anyType).getPackage().getSubPackageFolder();
             final File interfaceFile = new File(outputPath, packageFolder + anyType.getName().concat(".php"));
             final File modelFile = new File(outputPath, packageFolder + anyType.getName().concat("Model.php"));
 
@@ -75,7 +68,7 @@ public class TypesGenerator extends AbstractTemplateGenerator {
                     if (property.getType() instanceof ArrayType) {
                         ArrayType arrayType = (ArrayType)property.getType();
                         if (arrayType.getItems() != null && arrayType.getItems() instanceof ObjectType && arrayType.getItems().getName() != null) {
-                            final String packageFolder = new MetaType(arrayType.getItems()).getPackage().getSubPackageFolder();
+                            final String packageFolder = new TypeGenModel(arrayType.getItems()).getPackage().getSubPackageFolder();
                             final File interfaceFile = new File(outputPath, packageFolder + arrayType.getItems().getName().concat("Collection.php"));
                             final File modelFile = new File(outputPath, packageFolder + arrayType.getItems().getName().concat("CollectionModel.php"));
 
@@ -91,9 +84,9 @@ public class TypesGenerator extends AbstractTemplateGenerator {
 
     @VisibleForTesting
     String generateMap(final List<AnyType> types) {
-        final List<MetaType> objectTypes = types.stream()
+        final List<TypeGenModel> objectTypes = types.stream()
                 .filter(anyType -> anyType instanceof ObjectType)
-                .map(MetaType::new)
+                .map(TypeGenModel::new)
                 .collect(Collectors.toList());
         for (final AnyType anyType : types) {
             if (anyType instanceof ObjectType) {
@@ -101,7 +94,7 @@ public class TypesGenerator extends AbstractTemplateGenerator {
                     if (property.getType() instanceof ArrayType) {
                         ArrayType arrayType = (ArrayType) property.getType();
                         if (arrayType.getItems() != null && arrayType.getItems() instanceof ObjectType && arrayType.getItems().getName() != null) {
-                            final MetaCollection collection = new MetaCollection(arrayType.getItems());
+                            final CollectionGenModel collection = new CollectionGenModel(arrayType.getItems());
                             if (!objectTypes.contains(collection)) {
                                 objectTypes.add(collection);
                             }
@@ -114,9 +107,9 @@ public class TypesGenerator extends AbstractTemplateGenerator {
         final STGroupFile stGroup = createSTGroup(Resources.getResource(resourcesPath + "modelmap.stg"));
         final ST st = stGroup.getInstanceOf(TYPE_MODEL_MAP);
         st.add("vendorName", vendorName);
-        st.add("package", MetaType.TYPES);
+        st.add("package", TypeGenModel.TYPES);
 
-        objectTypes.sort(Comparator.comparing(MetaType::getName, Comparator.naturalOrder()));
+        objectTypes.sort(Comparator.comparing(TypeGenModel::getName, Comparator.naturalOrder()));
         st.add("types", objectTypes);
         return st.render();
     }
@@ -141,84 +134,6 @@ public class TypesGenerator extends AbstractTemplateGenerator {
     @VisibleForTesting
     String generateType(final TypeGeneratingVisitor visitor, final AnyType type) {
         return visitor.doSwitch(type);
-    }
-
-    static abstract class PropertyVisitor extends TypesSwitch<String> {
-        @Override
-        public String caseStringType(StringType object) {
-            return scalarMapper("string");
-        }
-
-        @Override
-        public String caseNumberType(NumberType object) {
-            switch (object.getFormat()) {
-                case INT:
-                case INT8:
-                case INT16:
-                case INT32:
-                case INT64:
-                    return scalarMapper("int");
-                default:
-                    return scalarMapper("float");
-            }
-        }
-
-        public String caseIntegerType(IntegerType object) {
-            return scalarMapper("int");
-        }
-
-        abstract String scalarMapper(final String scalarType);
-    }
-
-    static class PropertyTypeVisitor extends PropertyVisitor {
-
-        @Override
-        public String caseTimeOnlyType(TimeOnlyType object) {
-            return dateTimeMapper();
-        }
-
-        @Override
-        public String caseDateOnlyType(DateOnlyType object) {
-            return dateTimeMapper();
-        }
-
-        @Override
-        public String caseDateTimeType(DateTimeType object) {
-            return dateTimeMapper();
-        }
-
-        String dateTimeMapper()
-        {
-            return "\\DateTimeImmutable";
-        }
-
-        String scalarMapper(final String scalarType)
-        {
-            return scalarType;
-        }
-
-        @Override
-        public String caseArrayType(final ArrayType arrayType) {
-            if (arrayType.getItems() == null || arrayType.getItems().getName() == null || BuiltinType.of(arrayType.getItems().getName()).isPresent()) {
-                return "array";
-            } else {
-                return  arrayType.getItems().getName() + "Collection";
-            }
-        }
-
-        @Override
-        public String caseObjectType(final ObjectType objectType) {
-            if (objectType.getName() == null) {
-                return null;
-            } else {
-                return objectType.getName();
-            }
-        }
-
-        @Override
-        public String defaultCase(EObject object) {
-            return "mixed";
-        }
     }
 
     private class TypeGeneratingVisitor extends TypesSwitch<String> {
@@ -248,7 +163,7 @@ public class TypesGenerator extends AbstractTemplateGenerator {
             }
             final ST st = stGroup.getInstanceOf(type);
             st.add("vendorName", vendorName);
-            st.add("type", new MetaCollection(items));
+            st.add("type", new CollectionGenModel(items));
             return st.render();
         }
 
@@ -257,14 +172,14 @@ public class TypesGenerator extends AbstractTemplateGenerator {
             if (objectType.getName() == null) {
                 return null;
             } else {
-                final MetaType metaType = new MetaType(objectType);
+                final TypeGenModel typeGenModel = new TypeGenModel(objectType);
 
                 final ST st = stGroup.getInstanceOf(type);
                 st.add("vendorName", vendorName);
                 if (type.equals(TYPE_INTERFACE) || type.equals(TYPE_MODEL)) {
-                    st.add("type", metaType);
+                    st.add("type", typeGenModel);
                 } else if (type.equals(TYPE_COLLECTION_INTERFACE) || type.equals(TYPE_COLLECTION_MODEL)) {
-                    st.add("type", new MetaCollection(objectType));
+                    st.add("type", new CollectionGenModel(objectType));
                 }
 
                 return st.render();

@@ -32,7 +32,7 @@ public class PhpGenerator implements Generator {
 
         AnyAnnotationType placeholderParamAnnotation = api.getAnnotationType("placeholderParam");
         TypesGenerator generator = new TypesGenerator(vendorName);
-        List<File> f = generator.generate(api.getTypes(), new File(outputPath, "src/" + MetaType.TYPES));
+        List<File> f = generator.generate(api.getTypes(), new File(outputPath, "src/" + TypeGenModel.TYPES));
 
         StaticGenerator staticGenerator = new StaticGenerator(vendorName);
         f.addAll(staticGenerator.generate(outputPath, api));
