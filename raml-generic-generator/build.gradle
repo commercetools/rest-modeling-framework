@@ -46,4 +46,5 @@ task downloadAndUnzipCtpApiFile(dependsOn: downloadCtpApiZipFile, type: Copy) {
     into "$buildDir/resources/main/raml"
 }
 
+test.dependsOn(':raml-model:build')
 build.dependsOn(downloadAndUnzipCtpApiFile)

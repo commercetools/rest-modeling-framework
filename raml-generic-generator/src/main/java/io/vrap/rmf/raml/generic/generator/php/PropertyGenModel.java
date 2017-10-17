@@ -65,11 +65,6 @@ public class PropertyGenModel {
     @Nullable
     public Annotation getIdentifier()
     {
-        final AnyAnnotationType identifierAnnotation = getIdentifierAnnotation();
-
-        if (identifierAnnotation != null) {
-            return property.getAnnotation(identifierAnnotation);
-        }
-        return null;
+        return property.getAnnotation("identifier");
     }
 }

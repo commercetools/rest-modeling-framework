@@ -1,4 +1,4 @@
-package io.vrap.rmf.raml.persistence;
+package io.vrap.rmf.raml.test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tngtech.java.junit.dataprovider.DataProvider;
@@ -7,7 +7,6 @@ import com.tngtech.java.junit.dataprovider.UseDataProvider;
 import org.assertj.core.util.Lists;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.Resource;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -22,7 +21,6 @@ import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Ignore
 @RunWith(DataProviderRunner.class)
 public class RamlTck2Test implements ResourceFixtures {
     private class TckParseException extends Exception {
