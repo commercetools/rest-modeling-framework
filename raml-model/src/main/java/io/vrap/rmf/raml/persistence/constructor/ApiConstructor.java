@@ -5,7 +5,6 @@ import io.vrap.rmf.raml.model.modules.Document;
 import io.vrap.rmf.raml.model.resources.Resource;
 import io.vrap.rmf.raml.model.resources.UriTemplate;
 import io.vrap.rmf.raml.persistence.antlr.RAMLParser;
-import org.antlr.v4.runtime.tree.ParseTree;
 import org.eclipse.emf.common.util.ECollections;
 import org.eclipse.emf.ecore.EObject;
 
@@ -35,39 +34,23 @@ public class ApiConstructor extends BaseConstructor {
         final EObject rootObject = scope.getResource().getContents().get(0);
 
         return withinScope(scope.with(rootObject), rootScope -> {
-            final Predicate<RAMLParser.ApiFacetsContext> isSecuritySchemesFacet =
-                    apiFacetsContext -> apiFacetsContext.securitySchemesFacet() != null;
+            final Predicate<RAMLParser.TypeContainerFacetsContext> isSecuritySchemesFacet =
+                    typeContainerFacets -> typeContainerFacets.securitySchemesFacet() != null;
 
             // TODO move to first pass
             // order is relevant here: first create security schemes
-            ctx.apiFacets().stream()
+            ctx.typeContainerFacets().stream()
                     .filter(isSecuritySchemesFacet)
-                    .forEach(this::visitApiFacets);
+                    .forEach(this::visitTypeContainerFacets);
 
-            ctx.apiFacets().stream()
+            ctx.typeContainerFacets().stream()
                     .filter(isSecuritySchemesFacet.negate())
-                    .forEach(this::visitApiFacets);
+                    .forEach(this::visitTypeContainerFacets);
+
+            ctx.apiFacets().forEach(this::visitApiFacets);
 
             return rootObject;
         });
-    }
-
-    @Override
-    public Object visitApiFacets(RAMLParser.ApiFacetsContext ctx) {
-        // TODO move creation of security schemes to 1 pass
-        final RAMLParser.SecuritySchemesFacetContext securitySchemesFacet = ctx.securitySchemesFacet();
-        if (securitySchemesFacet != null) {
-            visitSecuritySchemesFacet(securitySchemesFacet);
-        }
-
-        for (int i = 0; i < ctx.getChildCount(); i++) {
-            final ParseTree child = ctx.getChild(i);
-            if (child != securitySchemesFacet) {
-                child.accept(this);
-            }
-        }
-
-        return scope.eObject();
     }
 
     @Override

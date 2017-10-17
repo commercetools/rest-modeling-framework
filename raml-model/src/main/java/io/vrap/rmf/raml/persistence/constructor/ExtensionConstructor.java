@@ -33,18 +33,20 @@ public class ExtensionConstructor extends ApiConstructor {
             } else {
                 ctx.extendsFacet().forEach(this::visitExtendsFacet);
             }
-            final Predicate<RAMLParser.ApiFacetsContext> isSecuritySchemesFacet =
-                    apiFacetsContext -> apiFacetsContext.securitySchemesFacet() != null;
+            final Predicate<RAMLParser.TypeContainerFacetsContext> isSecuritySchemesFacet =
+                    typeContainerFacets -> typeContainerFacets.securitySchemesFacet() != null;
 
             // TODO move to first pass
             // order is relevant here: first create security schemes
-            ctx.apiFacets().stream()
+            ctx.typeContainerFacets().stream()
                     .filter(isSecuritySchemesFacet)
-                    .forEach(this::visitApiFacets);
+                    .forEach(this::visitTypeContainerFacets);
 
-            ctx.apiFacets().stream()
+            ctx.typeContainerFacets().stream()
                     .filter(isSecuritySchemesFacet.negate())
-                    .forEach(this::visitApiFacets);
+                    .forEach(this::visitTypeContainerFacets);
+
+            ctx.apiFacets().forEach(this::visitApiFacets);
 
             return rootObject;
         });

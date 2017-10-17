@@ -14,22 +14,20 @@ tokens {
 
 api:
     MAP_START
-        apiFacets*
+        (apiFacets | typeContainerFacets)*
     MAP_END;
 
 apiFacets:
-    usesFacet | baseUriFacet | baseUriParametersFacet | documentationFacet
+      baseUriFacet
+    | baseUriParametersFacet
+    | documentationFacet
     | resourceFacet
-    | securitySchemesFacet | securedByFacet
-    | resourceTypesFacet | attributeFacet
-    | typesFacet | traitsFacet | annotationFacet
+    | securedByFacet
     ;
 
 extension:
     MAP_START
-    (
-        extendsFacet | apiFacets
-    )*
+        (extendsFacet | apiFacets | typeContainerFacets)*
     MAP_END;
 
 extendsFacet:
@@ -364,8 +362,19 @@ anyValue:
 
 library:
     MAP_START
-    ( usesFacet | attributeFacet | typesFacet | traitsFacet | resourceTypesFacet | annotationFacet | securitySchemesFacet )*
+        typeContainerFacets*
     MAP_END
+    ;
+
+typeContainerFacets:
+      usesFacet
+    | attributeFacet
+    | annotationTypesFacet
+    | typesFacet
+    | traitsFacet
+    | resourceTypesFacet
+    | annotationFacet
+    | securitySchemesFacet
     ;
 
 usesFacet:
@@ -380,9 +389,16 @@ libraryUse:
     ;
 
 typesFacet:
-    facet=( 'types' | 'annotationTypes' )
+    'types'
         MAP_START
         ( types+=typeDeclarationFacet )*
+        MAP_END
+    ;
+
+annotationTypesFacet:
+    'annotationTypes'
+        MAP_START
+        ( annotationTypes+=typeDeclarationFacet )*
         MAP_END
     ;
 

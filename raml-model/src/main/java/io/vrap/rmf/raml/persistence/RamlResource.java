@@ -39,10 +39,10 @@ public class RamlResource extends ResourceImpl {
     @Override
     protected void doLoad(final InputStream inputStream, final Map<?, ?> options) throws IOException {
         final BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
-        final Optional<AbstractConstructor> optionalRootConstructor = getRootConstructor(bufferedInputStream);
+        final Optional<BaseConstructor> optionalRootConstructor = getRootConstructor(bufferedInputStream);
 
         if (optionalRootConstructor.isPresent()) {
-            final AbstractConstructor rootConstructor = optionalRootConstructor.get();
+            final BaseConstructor rootConstructor = optionalRootConstructor.get();
             final RAMLCustomLexer lexer = new RAMLCustomLexer(uri, getURIConverter());
             final TokenStream tokenStream = new CommonTokenStream(lexer);
             final RAMLParser parser = new RAMLParser(tokenStream);
@@ -108,7 +108,7 @@ public class RamlResource extends ResourceImpl {
         return null;
     }
 
-    private Optional<AbstractConstructor> getRootConstructor(final InputStream inputStream) throws IOException {
+    private Optional<BaseConstructor> getRootConstructor(final InputStream inputStream) throws IOException {
         inputStream.mark(1024);
         @SuppressWarnings("resource")        final String header = new Scanner(inputStream).useDelimiter("\\n").next();
         inputStream.reset();

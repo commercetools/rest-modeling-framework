@@ -13,7 +13,6 @@ import org.antlr.v4.runtime.Token;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
-import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.InternalEObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.util.EcoreUtil;
@@ -25,6 +24,7 @@ import static io.vrap.rmf.raml.model.elements.ElementsPackage.Literals.IDENTIFIA
 import static io.vrap.rmf.raml.model.modules.ModulesPackage.Literals.*;
 import static io.vrap.rmf.raml.model.resources.ResourcesPackage.Literals.RESOURCE_TYPE;
 import static io.vrap.rmf.raml.model.resources.ResourcesPackage.Literals.TRAIT;
+import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.ANY_TYPE;
 
 /**
  * Resolves all types and annotation types so that they all have a resolved type.
@@ -167,12 +167,19 @@ public class TypeDeclarationResolver {
 
         @Override
         public Object visitTypesFacet(final RAMLParser.TypesFacetContext typesFacet) {
-            final String typesReferenceName = typesFacet.facet.getText();
-            final EClass eClass = scope.eObject().eClass();
-            final EStructuralFeature typesFeature = eClass.getEStructuralFeature(typesReferenceName);
-
-            return withinScope(scope.with(typesFeature), typesScope -> {
+            return withinScope(scope.with(TYPE_CONTAINER__TYPES), typesScope -> {
                 final List<Object> types = typesFacet.types.stream()
+                        .map(this::visitTypeDeclarationFacet)
+                        .collect(Collectors.toList());
+
+                return types;
+            });
+        }
+
+        @Override
+        public Object visitAnnotationTypesFacet(final RAMLParser.AnnotationTypesFacetContext annotationTypesFacet) {
+            return withinScope(scope.with(TYPE_CONTAINER__ANNOTATION_TYPES), typesScope -> {
+                final List<Object> types = annotationTypesFacet.annotationTypes.stream()
                         .map(this::visitTypeDeclarationFacet)
                         .collect(Collectors.toList());
 
@@ -219,7 +226,7 @@ public class TypeDeclarationResolver {
                 final String name = nameToken.getText();
                 typeScope.with(declaredType.eClass().getEStructuralFeature("name"))
                         .setValue(name, nameToken);
-                if (!optionalBuiltinType.isPresent()) {
+                if (!optionalBuiltinType.isPresent() && ANY_TYPE.isSuperTypeOf(eClass)) {
                     typeScope.with(declaredType.eClass().getEStructuralFeature("type"))
                             .setValue(superType, nameToken);
                 }
@@ -246,8 +253,12 @@ public class TypeDeclarationResolver {
         }
 
         @Override
+        public EObject visitAnnotationTypesFacet(RAMLParser.AnnotationTypesFacetContext ctx) {
+            return null;
+        }
+
+        @Override
         public EObject visitTypeDeclarationTuple(final RAMLParser.TypeDeclarationTupleContext typeDeclarationTuple) {
-            final Token nameToken = typeDeclarationTuple.name;
             final EObject superType = withinScope(scope.with(TYPE_CONTAINER__TYPES),
                     typesScope -> getSuperType(typesScope, typeDeclarationTuple));
 
@@ -256,7 +267,6 @@ public class TypeDeclarationResolver {
 
         @Override
         public EObject visitTypeDeclarationMap(final RAMLParser.TypeDeclarationMapContext typeDeclarationMap) {
-            final Token nameToken = typeDeclarationMap.name;
             final EObject superType = withinScope(scope.with(TYPE_CONTAINER__TYPES),
                     typesScope -> getSuperType(typesScope, typeDeclarationMap));
 

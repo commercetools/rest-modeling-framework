@@ -2,10 +2,13 @@ package io.vrap.rmf.raml.persistence.constructor;
 
 import io.vrap.rmf.raml.model.types.BuiltinType;
 import io.vrap.rmf.raml.persistence.antlr.RAMLParser;
+import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.util.EcoreUtil;
+
+import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.ANY_TYPE;
 
 public class TypeDeclarationFragmentConstructor extends BaseConstructor {
     private final EReference typeContainer;
@@ -38,12 +41,15 @@ public class TypeDeclarationFragmentConstructor extends BaseConstructor {
             superType = scope.getEObjectByName(BuiltinType.STRING.getName());
         }
 
-        final EObject declaredType = EcoreUtil.create(superType.eClass());
+        final EClass eClass = superType.eClass();
+        final EObject declaredType = EcoreUtil.create(eClass);
         scope.getResource().getContents().add(declaredType);
 
         withinScope(scope.with(declaredType), typeScope -> {
-            final EStructuralFeature typeReference = superType.eClass().getEStructuralFeature("type");
-            typeScope.setValue(typeReference, superType, typeDeclarationFragment.getStart());
+            if (ANY_TYPE.isSuperTypeOf(eClass)) {
+                final EStructuralFeature typeReference = eClass.getEStructuralFeature("type");
+                typeScope.setValue(typeReference, superType, typeDeclarationFragment.getStart());
+            }
 
             typeDeclarationFragment.annotationFacet().forEach(this::visitAnnotationFacet);
             typeDeclarationFragment.attributeFacet().forEach(this::visitAttributeFacet);

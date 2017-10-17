@@ -227,11 +227,14 @@ class FileType extends AnyType, FileTypeFacet {
 class NilType extends AnyType {
 }
 
+interface OneOfFacet {
+	refers AnyType[] oneOf	
+}
+
 /*
  * A union type is a composition of one of its types.
  */
-class UnionType extends AnyType {
-	refers AnyType[] oneOf
+class UnionType extends AnyType, OneOfFacet {
 }
 
 /*
@@ -348,10 +351,6 @@ enum AnnotationTarget {
  */
 class AnyAnnotationType extends DocumentableElement, IdentifiableElement, AnnotationsFacet, InlineTypeContainer {
 	/*
-	 * The type which this type extends.
-	 */
-	refers AnyAnnotationType ^type
-	/*
 	 * The locations to which annotations are restricted.
 	 * If this node is specified, annotations of this type may be applied only on a node corresponding to one of the locations.
 	 */
@@ -393,6 +392,10 @@ class ObjectAnnotationType extends AnyAnnotationType, ObjectTypeFacet, Propertie
 
 class ArrayAnnotationType extends AnyAnnotationType, ArrayTypeFacet, ItemsFacet {
 }
+
+class UnionAnnotationType extends AnyAnnotationType, OneOfFacet {
+}
+
 
 interface AnnotationsFacet {
 	/*
