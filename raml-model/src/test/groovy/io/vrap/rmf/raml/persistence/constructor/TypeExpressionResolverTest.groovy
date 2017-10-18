@@ -10,11 +10,11 @@ import spock.lang.Specification
 import static io.vrap.rmf.raml.model.modules.ModulesPackage.Literals.TYPE_CONTAINER__TYPES
 
 /**
- * Unit tests for {@link TypeExpressionConstructor}.
+ * Unit tests for {@link TypeExpressionResolver}.
  */
-class TypeExpressionConstructorTest extends Specification implements ResourceFixtures {
+class TypeExpressionResolverTest extends Specification implements ResourceFixtures {
     @Shared
-    TypeExpressionConstructor constructor = new TypeExpressionConstructor();
+    TypeExpressionResolver constructor = new TypeExpressionResolver();
     @Shared
     Resource builtinTypesResource = fromUri(BuiltinType.RESOURCE_URI);
     @Shared
@@ -118,6 +118,6 @@ class TypeExpressionConstructorTest extends Specification implements ResourceFix
     }
 
     EObject parse(String typeExpression) {
-        constructor.parse(typeExpression, typedElementScope);
+        constructor.resolve(typeExpression, typedElementScope);
     }
 }

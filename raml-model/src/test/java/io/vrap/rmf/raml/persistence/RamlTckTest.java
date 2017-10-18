@@ -15,7 +15,8 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -44,7 +45,7 @@ public class RamlTckTest implements ResourceFixtures {
             throw new TckParseException(fileURI.toString(), e);
         }
         assertThat(resource).isInstanceOf(Resource.class)
-                .overridingErrorMessage("Failed to parse: " + f.toString());
+                .overridingErrorMessage("Failed to resolve: " + f.toString());
     }
 
     @Test

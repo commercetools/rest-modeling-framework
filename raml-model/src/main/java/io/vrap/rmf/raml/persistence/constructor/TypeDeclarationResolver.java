@@ -33,7 +33,7 @@ import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.ANY_TYPE;
  * Additiopnally it creates all tarits and resource types.
  */
 public class TypeDeclarationResolver {
-    private final TypeExpressionConstructor typeExpressionConstructor = new TypeExpressionConstructor();
+    private final TypeExpressionResolver typeExpressionResolver = new TypeExpressionResolver();
 
     /**
      * The ordered map of unresolved type declarations.
@@ -317,7 +317,7 @@ public class TypeDeclarationResolver {
         if (typeExpression.isEmpty()) {
             superType = scope.getEObjectByName(BuiltinType.STRING.getName());
         } else {
-            superType = typeExpressionConstructor.parse(typeExpression, scope);
+            superType = typeExpressionResolver.resolve(typeExpression, scope);
         }
         return superType;
     }
@@ -325,6 +325,6 @@ public class TypeDeclarationResolver {
     private Object visitTypeFacet(final Scope scope, final RAMLParser.TypeFacetContext typeFacet) {
         final String typeExpression = typeFacet.typeExpression.getText();
 
-        return typeExpressionConstructor.parse(typeExpression, scope);
+        return typeExpressionResolver.resolve(typeExpression, scope);
     }
 }

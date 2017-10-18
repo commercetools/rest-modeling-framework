@@ -14,7 +14,7 @@ import io.vrap.rmf.raml.model.util.StringTemplate;
 import io.vrap.rmf.raml.model.util.UriFragmentBuilder;
 import io.vrap.rmf.raml.persistence.RamlResourceSet;
 import io.vrap.rmf.raml.persistence.constructor.Scope;
-import io.vrap.rmf.raml.persistence.constructor.TypeExpressionConstructor;
+import io.vrap.rmf.raml.persistence.constructor.TypeExpressionResolver;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.common.util.URI;
@@ -373,13 +373,13 @@ public class RamlModelBuilder {
     private static class TypedElementResolver extends TypesSwitch<AnyType> {
         private final Resource resource;
         private final Map<String, String> parameters;
-        private final TypeExpressionConstructor typeExpressionConstructor;
+        private final TypeExpressionResolver typeExpressionResolver;
         private Scope scope;
 
         public TypedElementResolver(final Resource resource, final Map<String, String> parameters) {
             this.parameters = parameters;
             this.resource = resource;
-            this.typeExpressionConstructor = new TypeExpressionConstructor();
+            this.typeExpressionResolver = new TypeExpressionResolver();
         }
 
         public void resolveAll(final EObject eObject) {
@@ -409,7 +409,7 @@ public class RamlModelBuilder {
         public AnyType caseTypeTemplate(final TypeTemplate typeTemplate) {
             final String template = typeTemplate.getName();
             final String typeName = StringTemplate.of(template).render(parameters);
-            final AnyType resolvedType = (AnyType) typeExpressionConstructor.parse(typeName, scope);
+            final AnyType resolvedType = (AnyType) typeExpressionResolver.resolve(typeName, scope);
             EcoreUtil.remove(typeTemplate);
             return resolvedType;
         }

@@ -24,14 +24,14 @@ import java.util.stream.Collectors;
 import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.*;
 
 /**
- * This class parses a type expression and transforms it to an {@link AnyType}.
+ * This class parses a type expression and resolves it to an {@link AnyType}.
  *
- * This visitor works returns an {@link EObject} because it can parse types and
+ * This visitor works returns an {@link EObject} because it can resolve types and
  * annotation types.
  */
-public class TypeExpressionConstructor {
+public class TypeExpressionResolver {
 
-    public EObject parse(final String typeExpression, final Scope scope) {
+    public EObject resolve(final String typeExpression, final Scope scope) {
         final CharStream charStream = CharStreams.fromString(typeExpression);
         final TypeExpressionLexer lexer = new TypeExpressionLexer(charStream);
         final TokenStream tokenStream = new CommonTokenStream(lexer);

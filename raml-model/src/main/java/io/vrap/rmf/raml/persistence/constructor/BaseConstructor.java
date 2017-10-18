@@ -29,7 +29,7 @@ import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.*;
 
 public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
     private final InstanceConstructor instanceConstructor = new InstanceConstructor();
-    private final TypeExpressionConstructor typeExpressionConstructor = new TypeExpressionConstructor();
+    private final TypeExpressionResolver typeExpressionResolver = new TypeExpressionResolver();
 
     @Override
     public Object visitSecuredBy(RAMLParser.SecuredByContext ctx) {
@@ -486,7 +486,7 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
     public Object visitTypeFacet(final RAMLParser.TypeFacetContext ctx) {
         final String typeExpression = ctx.SCALAR().getText();
 
-        final EObject parsedTypeExpression = typeExpressionConstructor.parse(typeExpression, scope);
+        final EObject parsedTypeExpression = typeExpressionResolver.resolve(typeExpression, scope);
         return parsedTypeExpression;
     }
 
@@ -496,7 +496,7 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
             final EObject itemsType;
             if (itemsFacet.typeExpression != null) {
                 final String typeExpression = itemsFacet.typeExpression.getText();
-                itemsType = typeExpressionConstructor.parse(typeExpression, scope);
+                itemsType = typeExpressionResolver.resolve(typeExpression, scope);
             } else {
                 EObject typedElementType;
                 if (itemsFacet.typeFacet().size() > 0) {
@@ -600,7 +600,7 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
 
         final EObject propertyType = Strings.isNullOrEmpty(type.getText()) ?
                 scope.getEObjectByName(BuiltinType.STRING.getName()) :
-                typeExpressionConstructor.parse(type.getText(), scope);
+                typeExpressionResolver.resolve(type.getText(), scope);
         final boolean isRequired = !name.endsWith("?");
         scope.setValue(TYPED_ELEMENT__REQUIRED, isRequired, typedeElementTuple.getStart());
         final String parsedName = isRequired ? name : name.substring(0, name.length() - 1);
