@@ -30,6 +30,8 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.TYPED_ELEMENT__TYPE;
+
 /**
  * This class is the main interface for accessing RAML models.
  */
@@ -387,7 +389,7 @@ public class RamlModelBuilder {
             while (allContents.hasNext()) {
                 final EObject next = allContents.next();
                 if (next instanceof TypedElement) {
-                    scope = Scope.of(resource).with(next, next.eContainmentFeature());
+                    scope = Scope.of(resource).with(next, TYPED_ELEMENT__TYPE);
                     resolve((TypedElement) next);
                 }
             }

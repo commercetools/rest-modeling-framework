@@ -6,14 +6,13 @@ import io.vrap.rmf.raml.model.modules.Library;
 import io.vrap.rmf.raml.model.modules.LibraryUse;
 import io.vrap.rmf.raml.model.resources.ResourceType;
 import io.vrap.rmf.raml.model.resources.Trait;
+import io.vrap.rmf.raml.model.types.AnyType;
 import io.vrap.rmf.raml.model.types.BuiltinType;
 import io.vrap.rmf.raml.persistence.antlr.RAMLParser;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.eclipse.emf.common.util.EList;
-import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
-import org.eclipse.emf.ecore.InternalEObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
@@ -24,7 +23,7 @@ import static io.vrap.rmf.raml.model.elements.ElementsPackage.Literals.IDENTIFIA
 import static io.vrap.rmf.raml.model.modules.ModulesPackage.Literals.*;
 import static io.vrap.rmf.raml.model.resources.ResourcesPackage.Literals.RESOURCE_TYPE;
 import static io.vrap.rmf.raml.model.resources.ResourcesPackage.Literals.TRAIT;
-import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.ANY_TYPE;
+import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.ANY_TYPE__TYPE;
 
 /**
  * Resolves all types and annotation types so that they all have a resolved type.
@@ -56,7 +55,7 @@ public class TypeDeclarationResolver {
                 final TypeResolvingVisitor typeResolvingVisitor = new TypeResolvingVisitor(unresolved, scope.with(rootObject));
 
                 final EObject resolvedType = typeResolvingVisitor.visitTypeDeclarationFacet(typeDeclarationFacet);
-                if (resolvedType != null) {
+                if (resolvedType != null && !resolvedType.eIsProxy()) {
                     unresolvedTypeDeclarations.remove(typeDeclarationFacet);
                 }
             }
@@ -199,45 +198,19 @@ public class TypeDeclarationResolver {
         }
 
         @Override
-        public Object visitTypeDeclarationMap(final RAMLParser.TypeDeclarationMapContext typeDeclarationMap) {
-            final EObject superType = getSuperType(scope, typeDeclarationMap);
+        public EObject visitTypeDeclarationTuple(final RAMLParser.TypeDeclarationTupleContext typeDeclarationTuple) {
+            final EObject resolved = getType(typeDeclarationTuple, scope);
+            scope.setValue(resolved, typeDeclarationTuple.getStart());
 
-            return constructType(typeDeclarationMap, superType);
+            return resolved;
         }
 
         @Override
-        public Object visitTypeDeclarationTuple(final RAMLParser.TypeDeclarationTupleContext typeDeclarationTuple) {
-            final EObject superType = getSuperType(scope, typeDeclarationTuple);
+        public EObject visitTypeDeclarationMap(final RAMLParser.TypeDeclarationMapContext typeDeclarationMap) {
+            final EObject resolved = getType(typeDeclarationMap, scope);
+            scope.setValue(resolved, typeDeclarationMap.getStart());
 
-            return constructType(typeDeclarationTuple, superType);
-        }
-
-        private EObject constructType(final ParserRuleContext context, final EObject superType) {
-            final EObject declaredType;
-            final Token nameToken = context.getStart();
-            final Optional<BuiltinType> optionalBuiltinType = BuiltinType.of(nameToken.getText());
-            if (optionalBuiltinType.isPresent() || superType == null || !superType.eIsProxy()) {
-                final EClass eClass = optionalBuiltinType
-                        .map(builtinType -> builtinType.getScopedMetaType(scope))
-                        .orElseGet(() -> superType == null ? BuiltinType.STRING.getScopedMetaType(scope) : superType.eClass());
-                declaredType = create(eClass, context);
-                final Scope typeScope = scope.with(declaredType);
-
-                final String name = nameToken.getText();
-                typeScope.with(declaredType.eClass().getEStructuralFeature("name"))
-                        .setValue(name, nameToken);
-                if (!optionalBuiltinType.isPresent() && ANY_TYPE.isSuperTypeOf(eClass)) {
-                    typeScope.with(declaredType.eClass().getEStructuralFeature("type"))
-                            .setValue(superType, nameToken);
-                }
-            } else {
-                final InternalEObject proxy = (InternalEObject) EcoreUtil.create(superType.eClass());
-                final String uriFragment = scope.getUriFragment(nameToken.getText());
-                proxy.eSetProxyURI(scope.getResource().getURI().appendFragment(uriFragment));
-                declaredType = proxy;
-            }
-            scope.setValue(declaredType, nameToken);
-            return declaredType;
+            return resolved;
         }
     }
 
@@ -259,72 +232,80 @@ public class TypeDeclarationResolver {
 
         @Override
         public EObject visitTypeDeclarationTuple(final RAMLParser.TypeDeclarationTupleContext typeDeclarationTuple) {
-            final EObject superType = withinScope(scope.with(TYPE_CONTAINER__TYPES),
-                    typesScope -> getSuperType(typesScope, typeDeclarationTuple));
+            return withinScope(scope.with(TYPE_CONTAINER__TYPES),
+                    typesScope -> resolveType(typeDeclarationTuple, getType(typeDeclarationTuple, typesScope)));
 
-            return resolveType(typeDeclarationTuple, superType);
         }
 
         @Override
         public EObject visitTypeDeclarationMap(final RAMLParser.TypeDeclarationMapContext typeDeclarationMap) {
-            final EObject superType = withinScope(scope.with(TYPE_CONTAINER__TYPES),
-                    typesScope -> getSuperType(typesScope, typeDeclarationMap));
-
-            return resolveType(typeDeclarationMap, superType);
+            return withinScope(scope.with(TYPE_CONTAINER__TYPES),
+                    typesScope -> resolveType(typeDeclarationMap, getType(typeDeclarationMap, typesScope)));
         }
 
-        private EObject resolveType(final ParserRuleContext ruleContext, final EObject superType) {
-            final EObject resolvedType;
-
-            if (superType.eIsProxy()) {
-                resolvedType = null;
-            } else {
-                resolvedType = create(superType.eClass(), ruleContext);
+        private EObject resolveType(final ParserRuleContext ruleContext, final EObject resolvedType) {
+            if (!resolvedType.eIsProxy()) {
                 EcoreUtil.replace(unresolved, resolvedType);
 
                 final Token nameToken = ruleContext.getStart();
                 final String name = nameToken.getText();
-                final Scope typeScope = scope.with(resolvedType, TYPE_CONTAINER__TYPES);
+                final Scope typeScope = scope.with(resolvedType, IDENTIFIABLE_ELEMENT__NAME);
 
-                typeScope.with(IDENTIFIABLE_ELEMENT__NAME)
-                        .setValue(name, nameToken);
-
-                typeScope.with(unresolved.eClass().getEStructuralFeature("type"))
-                        .setValue(superType, nameToken);
+                typeScope.setValue(name, nameToken);
             }
-
             return resolvedType;
         }
     }
 
-    protected EObject getSuperType(final Scope scope, final RAMLParser.TypeDeclarationMapContext typeDeclarationMap) {
-        final EObject superType;
+    private EObject getType(final RAMLParser.TypeDeclarationMapContext typeDeclarationMap, final Scope scope) {
+        final String typeExpression;
         if (typeDeclarationMap.typeFacet().size() == 1) {
             final RAMLParser.TypeFacetContext typeFacet = typeDeclarationMap.typeFacet().get(0);
-            superType = (EObject) visitTypeFacet(scope, typeFacet);
+            typeExpression = typeFacet.typeExpression.getText();
         } else if (typeDeclarationMap.propertiesFacet().size() == 1) {
-            superType = scope.getEObjectByName(BuiltinType.OBJECT.getName());
+            typeExpression = BuiltinType.OBJECT.getName();
 
         } else {
-            superType = scope.getEObjectByName(BuiltinType.STRING.getName());
+            typeExpression = BuiltinType.STRING.getName();
         }
-        return superType;
+
+        final EObject resolved = typeExpressionResolver.resolve(typeExpression, scope);
+        if (!resolved.eIsProxy()) {
+            setTypeName(resolved, typeDeclarationMap.name);
+            setType(resolved, typeExpression, typeDeclarationMap.getStart(), scope);
+        }
+
+        return resolved;
     }
 
-    protected EObject getSuperType(final Scope scope, final RAMLParser.TypeDeclarationTupleContext typeDeclarationTuple) {
-        final EObject superType;
-        final String typeExpression = typeDeclarationTuple.typeExpression.getText();
-        if (typeExpression.isEmpty()) {
-            superType = scope.getEObjectByName(BuiltinType.STRING.getName());
-        } else {
-            superType = typeExpressionResolver.resolve(typeExpression, scope);
+    private EObject getType(final RAMLParser.TypeDeclarationTupleContext typeDeclarationTuple, final Scope scope) {
+        final Token typeExpressionToken = typeDeclarationTuple.typeExpression;
+        final String typeExpression = typeExpressionToken.getText().isEmpty() ?
+                BuiltinType.STRING.getName() :
+                typeExpressionToken.getText();
+
+        final EObject resolved = typeExpressionResolver.resolve(typeExpression, scope);
+        if (!resolved.eIsProxy()) {
+            setTypeName(resolved, typeDeclarationTuple.name);
+            setType(resolved, typeExpression, typeExpressionToken, scope);
         }
-        return superType;
+
+        return resolved;
     }
 
-    private Object visitTypeFacet(final Scope scope, final RAMLParser.TypeFacetContext typeFacet) {
-        final String typeExpression = typeFacet.typeExpression.getText();
+    private void setType(final EObject resolved, final String typeExpression, final Token typeExpressionToken,
+                         final Scope scope) {
+        if (resolved instanceof AnyType) {
+            final Scope anyTypeTypeScope = scope.with(resolved, ANY_TYPE__TYPE);
+            final EObject resolvedType = typeExpressionResolver.resolve(typeExpression, anyTypeTypeScope);
+            if (resolvedType != null) {
+                anyTypeTypeScope.setValue(resolvedType, typeExpressionToken);
+            }
+        }
+    }
 
-        return typeExpressionResolver.resolve(typeExpression, scope);
+    private void setTypeName(final EObject resolved, final Token nameToken) {
+        final String name = nameToken.getText();
+        resolved.eSet(IDENTIFIABLE_ELEMENT__NAME, name);
     }
 }

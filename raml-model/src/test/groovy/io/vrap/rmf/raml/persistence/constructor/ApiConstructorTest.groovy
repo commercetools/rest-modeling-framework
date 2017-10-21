@@ -786,14 +786,11 @@ class ApiConstructorTest extends Specification {
         api.types.size() == 1
 
         api.types.get(0).name == "foo"
-        api.types.get(0).type instanceof ObjectType
-        ObjectType objectType = api.types.get(0).getType()
-        objectType.name == "object"
-        objectType.properties.size() == 0
-        objectType.type == null
+        api.types.get(0) instanceof ObjectType
 
-        api.types.get(0).properties.get(0).type instanceof ObjectType
-        api.types.get(0).properties.get(0).name == "bar"
+        ObjectType foo = api.types[0]
+        foo.properties.get(0).type instanceof ObjectType
+        foo.properties.get(0).name == "bar"
         ObjectType propertyType = api.types.get(0).properties.get(0).type
         propertyType.properties.size() == 0
         propertyType.name == "object"

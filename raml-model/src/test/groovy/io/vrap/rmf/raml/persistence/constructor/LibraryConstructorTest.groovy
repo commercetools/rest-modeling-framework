@@ -4,18 +4,10 @@ import io.vrap.rmf.raml.model.facets.StringInstance
 import io.vrap.rmf.raml.model.modules.Library
 import io.vrap.rmf.raml.model.resources.Trait
 import io.vrap.rmf.raml.model.security.OAuth20Settings
-import io.vrap.rmf.raml.model.types.AnnotationTarget
-import io.vrap.rmf.raml.model.types.AnyType
-import io.vrap.rmf.raml.model.types.ObjectType
-import io.vrap.rmf.raml.model.types.Property
-import io.vrap.rmf.raml.model.types.StringAnnotationType
-import io.vrap.rmf.raml.model.types.StringType
-import io.vrap.rmf.raml.model.types.TypeTemplate
-import io.vrap.rmf.raml.model.types.UnionType
+import io.vrap.rmf.raml.model.types.*
 import io.vrap.rmf.raml.persistence.RamlResourceSet
 import io.vrap.rmf.raml.persistence.antlr.RAMLCustomLexer
 import io.vrap.rmf.raml.persistence.antlr.RAMLParser
-import org.antlr.v4.runtime.CommonTokenFactory
 import org.antlr.v4.runtime.CommonTokenStream
 import org.antlr.v4.runtime.TokenStream
 import org.eclipse.emf.common.util.URI
@@ -67,7 +59,8 @@ class LibraryConstructorTest extends Specification {
         library.usage == 'Test'
         library.types.size() == 6
         library.types[0].name == 'StringType'
-        library.types[0].type instanceof StringType
+        library.types[0].type == null
+        library.types[0] instanceof StringType
         StringType stringType = library.types[0]
         stringType.minLength == 10
 
@@ -75,23 +68,24 @@ class LibraryConstructorTest extends Specification {
         library.types[1] instanceof StringType
 
         library.types[3].name == 'SuperType'
-        library.types[3].type instanceof ObjectType
+        library.types[3].type == null
+        library.types[3] instanceof ObjectType
         ObjectType superType = library.types[3]
 
         library.types[2].name == 'WithProperties'
-        library.types[2].type instanceof ObjectType
+        library.types[2].type == null
+        library.types[2] instanceof ObjectType
         ObjectType objectType = library.types[2]
         objectType.properties.size() == 2
         objectType.getProperty('super') != null
         objectType.getProperty('super').type == superType
 
         library.types[4].name == 'SubType'
-        library.types[4].type instanceof ObjectType
         library.types[4].type == superType
 
         library.types[5].name == 'Enum'
-        library.types[5].type instanceof StringType
-
+        library.types[5].type == null
+        library.types[5] instanceof StringType
         library.types[5].enum.size() == 2
         library.types[5].enum[0] instanceof StringInstance
         StringInstance enumValue1 = library.types[5].enum[0]

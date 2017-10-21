@@ -4,10 +4,11 @@ import io.vrap.rmf.raml.model.types.*
 import io.vrap.rmf.raml.persistence.ResourceFixtures
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.resource.Resource
+import org.eclipse.emf.ecore.util.EcoreUtil
 import spock.lang.Shared
 import spock.lang.Specification
 
-import static io.vrap.rmf.raml.model.modules.ModulesPackage.Literals.TYPE_CONTAINER__TYPES
+import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.TYPED_ELEMENT__TYPE
 
 /**
  * Unit tests for {@link TypeExpressionResolver}.
@@ -19,12 +20,11 @@ class TypeExpressionResolverTest extends Specification implements ResourceFixtur
     Resource builtinTypesResource = fromUri(BuiltinType.RESOURCE_URI);
     @Shared
     Scope typedElementScope = Scope.of(builtinTypesResource)
-            .with(TYPE_CONTAINER__TYPES)
-            .with(TypesFactory.eINSTANCE.createProperty());
+            .with(TypesFactory.eINSTANCE.createProperty(), TYPED_ELEMENT__TYPE);
 
-    def "AnyType"() {
+    def "StringType"() {
         when:
-        AnyType anyType = parse('string');
+        AnyType anyType = resolve('string');
 
         then:
         anyType instanceof StringType
@@ -32,7 +32,7 @@ class TypeExpressionResolverTest extends Specification implements ResourceFixtur
 
     def "ArrayType"() {
         when:
-        ArrayType arrayType = parse('string[]')
+        ArrayType arrayType = resolve('string[]')
 
         then:
         arrayType.name == null
@@ -42,7 +42,7 @@ class TypeExpressionResolverTest extends Specification implements ResourceFixtur
 
     def "Multi-dimensional ArrayType"() {
         when:
-        ArrayType arrayType = parse('string[][]')
+        ArrayType arrayType = resolve('string[][]')
 
         then:
         arrayType.name == null
@@ -55,7 +55,7 @@ class TypeExpressionResolverTest extends Specification implements ResourceFixtur
 
     def "UnionType"() {
         when:
-        UnionType unionType = parse('string|number|boolean')
+        UnionType unionType = resolve('string|number|boolean')
         then:
         unionType.oneOf.size() == 3
         unionType.oneOf[0] instanceof StringType
@@ -68,21 +68,21 @@ class TypeExpressionResolverTest extends Specification implements ResourceFixtur
 
     def "TypeTemplate"() {
         when:
-        TypeTemplate typeTemplate = parse('<<resourcePath>>Draft')
+        TypeTemplate typeTemplate = resolve('<<resourcePath>>Draft')
         then:
         typeTemplate.name == '<<resourcePath>>Draft'
     }
 
     def "TypeTemplate with transformations"() {
         when:
-        TypeTemplate typeTemplate = parse('<<resourcePath|!singularize|!uppercase>>Draft')
+        TypeTemplate typeTemplate = resolve('<<resourcePath|!singularize|!uppercase>>Draft')
         then:
         typeTemplate.name == '<<resourcePath|!singularize|!uppercase>>Draft'
     }
 
     def "TypeTemplate array"() {
         when:
-        ArrayType typeTemplateArray = parse('<<resourcePath>>Draft[]')
+        ArrayType typeTemplateArray = resolve('<<resourcePath>>Draft[]')
         then:
         typeTemplateArray.items instanceof TypeTemplate
         typeTemplateArray.items.name == '<<resourcePath>>Draft'
@@ -90,7 +90,7 @@ class TypeExpressionResolverTest extends Specification implements ResourceFixtur
 
     def "Parens"() {
         when:
-        ArrayType arrayType = parse('(string|number|boolean)[]')
+        ArrayType arrayType = resolve('(string|number|boolean)[]')
         then:
         arrayType.items instanceof UnionType
         UnionType unionType = arrayType.items
@@ -102,7 +102,7 @@ class TypeExpressionResolverTest extends Specification implements ResourceFixtur
 
     def "Complex UnionType"() {
         when:
-        UnionType unionType = parse('string[]|(number|boolean)[]')
+        UnionType unionType = resolve('string[]|(number|boolean)[]')
         then:
         unionType.oneOf.size() == 2
         unionType.oneOf[0] instanceof ArrayType
@@ -117,7 +117,7 @@ class TypeExpressionResolverTest extends Specification implements ResourceFixtur
         items.oneOf[1] instanceof BooleanType
     }
 
-    EObject parse(String typeExpression) {
-        constructor.resolve(typeExpression, typedElementScope);
+    EObject resolve(String typeExpression) {
+        EcoreUtil.resolve(constructor.resolve(typeExpression, typedElementScope), typedElementScope.getResource())
     }
 }

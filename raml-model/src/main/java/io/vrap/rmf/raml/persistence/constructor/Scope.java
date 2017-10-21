@@ -184,7 +184,7 @@ public class Scope {
     @SuppressWarnings("unchecked")
     public <T> T setValue(final T value, final Token token) {
         final EStructuralFeature feature = eFeature();
-        return feature == null ? setValue(resource, value, token) :setValue(feature, value, token);
+        return feature == null ? setValue(resource, value, token) : setValue(feature, value, token);
     }
 
     public <T> T setValue(final Resource resource, final T value, final Token token) {
