@@ -1,4 +1,4 @@
-package io.vrap.rmf.raml.persistence;
+package io.vrap.rmf.raml.test;
 
 import java.util.List;
 

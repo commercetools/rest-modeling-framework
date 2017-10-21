@@ -1,7 +1,6 @@
 package io.vrap.rmf.raml.generic.generator.php;
 
 import com.google.common.base.CaseFormat;
-import io.vrap.rmf.raml.model.modules.Api;
 import io.vrap.rmf.raml.model.types.Annotation;
 import io.vrap.rmf.raml.model.types.AnyAnnotationType;
 import io.vrap.rmf.raml.model.types.ObjectType;
@@ -9,11 +8,11 @@ import io.vrap.rmf.raml.model.types.Property;
 
 import javax.annotation.Nullable;
 
-public class MetaProperty {
+public class PropertyGenModel {
     final private static String CONSTANT_PREFIX = "FIELD_";
     private Property property;
 
-    public MetaProperty(Property property) {
+    public PropertyGenModel(Property property) {
         this.property = property;
     }
 
@@ -21,9 +20,9 @@ public class MetaProperty {
         return property;
     }
 
-    public MetaType getType()
+    public TypeGenModel getType()
     {
-        return new MetaType(property.getType());
+        return new TypeGenModel(property.getType());
     }
 
     public String getName()
@@ -33,21 +32,21 @@ public class MetaProperty {
 
     public String getParamType()
     {
-        return new MetaHelper.ParamVisitor(property).doSwitch(property.getType());
+        return new GeneratorHelper.ParamVisitor(property).doSwitch(property.getType());
     }
 
     public String getConstantName() {
         return CONSTANT_PREFIX +  CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, getPatternName());
     }
 
-    public MetaGetter getGetter()
+    public GetterGenModel getGetter()
     {
-        return new MetaHelper.PropertyGetterVisitor(this).doSwitch(property.getType());
+        return new GeneratorHelper.PropertyGetterVisitor(this).doSwitch(property.getType());
     }
 
-    public MetaSetter getSetter()
+    public SetterGenModel getSetter()
     {
-        return new MetaHelper.PropertySetterVisitor(this).doSwitch(property.getType());
+        return new GeneratorHelper.PropertySetterVisitor(this).doSwitch(property.getType());
     }
 
     public String getPatternName()
@@ -59,18 +58,13 @@ public class MetaProperty {
     private AnyAnnotationType getIdentifierAnnotation()
     {
         final ObjectType o = (ObjectType)property.eContainer();
-        final MetaType t = new MetaType(o);
+        final TypeGenModel t = new TypeGenModel(o);
         return t.getApi().getAnnotationType("identifier");
     }
 
     @Nullable
     public Annotation getIdentifier()
     {
-        final AnyAnnotationType identifierAnnotation = getIdentifierAnnotation();
-
-        if (identifierAnnotation != null) {
-            return property.getAnnotation(identifierAnnotation);
-        }
-        return null;
+        return property.getAnnotation("identifier");
     }
 }

@@ -1,4 +1,4 @@
-package io.vrap.rmf.raml.persistence;
+package io.vrap.rmf.raml.test;
 
 
 import com.fasterxml.jackson.annotation.JsonAlias;

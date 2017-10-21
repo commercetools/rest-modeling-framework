@@ -17,4 +17,16 @@ class AnnotationsFacetTest extends Specification {
         then:
         anyType.getAnnotation(annotationType) == annotation
     }
+
+    def "get annotation by name"() {
+        when:
+        StringAnnotationType annotationType = TypesFactory.eINSTANCE.createStringAnnotationType();
+        annotationType.setName('identifier')
+        AnyType anyType = TypesFactory.eINSTANCE.createAnyType();
+        Annotation annotation = TypesFactory.eINSTANCE.createAnnotation()
+        annotation.type = annotationType
+        anyType.annotations.add(annotation)
+        then:
+        anyType.getAnnotation('identifier') == annotation
+    }
 }

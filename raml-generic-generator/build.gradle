@@ -4,6 +4,10 @@ plugins {
 
 import de.undercouch.gradle.tasks.download.Download
 
+ext {
+    apiProperty = 'api'
+}
+
 sourceSets {
     main {
         resources {
@@ -46,4 +50,7 @@ task downloadAndUnzipCtpApiFile(dependsOn: downloadCtpApiZipFile, type: Copy) {
     into "$buildDir/resources/main/raml"
 }
 
+test.dependsOn(':raml-model:build')
 build.dependsOn(downloadAndUnzipCtpApiFile)
+downloadCtpApiZipFile.onlyIf { project.hasProperty(apiProperty) }
+downloadAndUnzipCtpApiFile.onlyIf { project.hasProperty(apiProperty) }

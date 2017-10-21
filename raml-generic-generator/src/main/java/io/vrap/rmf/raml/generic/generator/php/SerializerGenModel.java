@@ -1,11 +1,11 @@
 package io.vrap.rmf.raml.generic.generator.php;
 
-public class MetaSerializer {
-    final private MetaProperty property;
+public class SerializerGenModel {
+    final private PropertyGenModel property;
     final private String serializer;
     final private String format;
 
-    public MetaSerializer(final MetaProperty property, final String serializer, final String format) {
+    public SerializerGenModel(final PropertyGenModel property, final String serializer, final String format) {
         this.property = property;
         this.serializer = serializer;
         this.format = format;
@@ -19,7 +19,7 @@ public class MetaSerializer {
         return format;
     }
 
-    public MetaProperty getProperty() {
+    public PropertyGenModel getProperty() {
         return property;
     }
 }

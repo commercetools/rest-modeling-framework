@@ -1,26 +1,22 @@
 package io.vrap.rmf.raml.generic.generator.php;
 
-import com.google.common.base.CaseFormat;
 import com.google.common.collect.Lists;
 import io.vrap.rmf.raml.model.resources.*;
 import io.vrap.rmf.raml.model.responses.BodyType;
 import io.vrap.rmf.raml.model.responses.Response;
 import io.vrap.rmf.raml.model.types.*;
-import org.apache.commons.lang3.StringUtils;
-import org.eclipse.emf.ecore.util.EcoreUtil;
 
 import javax.annotation.Nullable;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class MetaRequest {
+public class RequestGenModel {
     static final String REQUEST = "Request";
 
     final private Method method;
 
-    public MetaRequest(final Method method) {
+    public RequestGenModel(final Method method) {
         this.method = method;
     }
 
@@ -28,27 +24,27 @@ public class MetaRequest {
         return method;
     }
 
-    public MetaPackage getPackage()
+    public PackageGenModel getPackage()
     {
-        return new MetaPackage(REQUEST);
+        return new PackageGenModel(REQUEST);
     }
 
     @Nullable
-    public MetaType getReturnType() {
+    public TypeGenModel getReturnType() {
         Response response = method.getResponses().stream().filter(response1 -> response1.getStatusCode().matches("^2[0-9]{2}$")).findFirst().orElse(null);
         if (response != null) {
             BodyType bodyType = response.getBodies().stream()
                     .filter(bodyType1 -> bodyType1.getContentTypes().size() == 0 || bodyType1.getContentTypes().contains("application/json"))
                     .findFirst().orElse(null);
             if (bodyType != null && !BuiltinType.of(bodyType.getName()).isPresent()) {
-                return new MetaType(bodyType.getType());
+                return new TypeGenModel(bodyType.getType());
             }
         }
         return null;
     }
 
     public String getName() {
-        return MetaHelper.toRequestName(getAbsoluteUri(), method);
+        return GeneratorHelper.toRequestName(getAbsoluteUri(), method);
     }
 
     public Resource getResource() {
@@ -57,7 +53,7 @@ public class MetaRequest {
 
     public UriTemplate getAbsoluteUri()
     {
-        return MetaHelper.absoluteUri(getResource());
+        return GeneratorHelper.absoluteUri(getResource());
     }
 
     @Nullable
@@ -74,7 +70,7 @@ public class MetaRequest {
                 return "UploadedFileInterface ";
             }
             if (!BuiltinType.of(firstBodyType.getType().getName()).isPresent()) {
-                final String t = (new TypesGenerator.PropertyTypeVisitor()).doSwitch(firstBodyType.getType());
+                final String t = (new GeneratorHelper.TypeNameVisitor()).doSwitch(firstBodyType.getType());
                 if (!Lists.newArrayList("mixed", "null", "bool", "string", "float", "int").contains(t)) {
                     return t + " ";
                 }
@@ -84,17 +80,17 @@ public class MetaRequest {
     }
 
     @Nullable
-    public MetaImport getBodyImport() {
+    public ImportGenModel getBodyImport() {
         final BodyType firstBodyType = getFirstBodyType();
 
         if (firstBodyType == null) {
             return null;
         }
         if (firstBodyType.getType() instanceof FileType) {
-            return new MetaImport(null, "Psr\\Http\\Message\\UploadedFileInterface");
+            return new ImportGenModel(null, "Psr\\Http\\Message\\UploadedFileInterface");
         }
         if (firstBodyType.getType() instanceof ObjectType || firstBodyType.getType() instanceof ArrayType) {
-            return new MetaType(firstBodyType.getType()).getImport();
+            return new TypeGenModel(firstBodyType.getType()).getImport();
         }
         return null;
     }
