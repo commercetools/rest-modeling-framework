@@ -7,7 +7,10 @@ import io.vrap.rmf.raml.model.types.util.TypesSwitch;
 import org.eclipse.emf.ecore.EObject;
 
 import javax.annotation.Nullable;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class TypeGenModel {
@@ -85,10 +88,12 @@ public class TypeGenModel {
     public List<PropertyGenModel> getTypeProperties()
     {
         if (type instanceof ObjectType) {
-            ObjectType superType = (ObjectType)type.getType();
+            final List<Property> allSuperTypeProperties = type.getType() instanceof ObjectType ?
+                    ((ObjectType) type.getType()).getAllProperties() :
+                    Collections.emptyList();
             return ((ObjectType)type).getProperties().stream()
                     .filter(property -> !(property.getName().startsWith("/") && property.getName().endsWith("/")))
-                    .filter(property -> superType.getAllProperties().stream().filter(property1 -> property1.getName().equals(property.getName())).count() == 0)
+                    .filter(property -> allSuperTypeProperties.stream().filter(property1 -> property1.getName().equals(property.getName())).count() == 0)
                     .map(PropertyGenModel::new)
                     .collect(Collectors.toList());
         }
