@@ -10,6 +10,7 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * This class represent a string template used in {@link io.vrap.rmf.raml.model.resources.Trait}s,
@@ -126,9 +127,11 @@ public class StringTemplate {
     }
 
     private static final Map<String, Function<String, String>> TRANSFORMATIONS = new HashMap<>();
-    {
-        final Function<String, String> capitalize = s -> s.substring(0, 1).toUpperCase() + s.substring(1);
-        TRANSFORMATIONS.put("uppercamelcase", capitalize);
+    static {
+        final Function<StringCaseFormat, String> toTransformationName = stringCaseFormat ->
+                stringCaseFormat.name().replace("_", "").toLowerCase();
+        Stream.of(StringCaseFormat.values())
+                .forEach(stringCaseFormat -> TRANSFORMATIONS.put(toTransformationName.apply(stringCaseFormat), stringCaseFormat));
     }
 
     private static class Expression implements Part {
