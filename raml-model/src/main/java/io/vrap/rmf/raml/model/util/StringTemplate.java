@@ -132,6 +132,8 @@ public class StringTemplate {
                 stringCaseFormat.name().replace("_", "").toLowerCase();
         Stream.of(StringCaseFormat.values())
                 .forEach(stringCaseFormat -> TRANSFORMATIONS.put(toTransformationName.apply(stringCaseFormat), stringCaseFormat));
+        TRANSFORMATIONS.put("lowercase", String::toLowerCase);
+        TRANSFORMATIONS.put("uppercase", String::toUpperCase);
     }
 
     private static class Expression implements Part {
