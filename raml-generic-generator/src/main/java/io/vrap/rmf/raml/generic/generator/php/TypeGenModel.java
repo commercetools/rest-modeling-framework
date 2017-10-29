@@ -201,7 +201,7 @@ public class TypeGenModel {
     public PackageGenModel getPackage()
     {
         final AnyType t = type instanceof ArrayType ? ((ArrayType) type).getItems() : type;
-        Annotation annotation = t.getAnnotation(getApi().getAnnotationType("package"), true);
+        Annotation annotation = t.getAnnotation("package", true);
         return new PackageGenModel(TYPES, annotation);
     }
 
