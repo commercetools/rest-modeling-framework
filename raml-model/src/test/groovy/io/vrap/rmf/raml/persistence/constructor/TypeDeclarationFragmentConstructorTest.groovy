@@ -136,6 +136,29 @@ class TypeDeclarationFragmentConstructorTest extends Specification {
         type.enum.size() == 3
     }
 
+    def "string type with pattern"() {
+        when:
+        AnyType type = constructType(
+                '''\
+        pattern: a.*
+        ''')
+        then:
+        type instanceof StringType
+        StringType stringType = type
+        stringType.pattern.toString() == 'a.*'
+        stringType.pattern.test('ab') == true
+    }
+
+    def "string type with invalid pattern"() {
+        when:
+        AnyType type = constructType(
+                '''\
+        pattern: (
+        ''')
+        then:
+        type.eResource().errors.size() > 0
+    }
+
     def "array type"() {
         when:
         AnyType type = constructType(

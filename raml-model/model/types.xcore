@@ -3,9 +3,6 @@
     complianceLevel="8.0")
 package io.vrap.rmf.raml.model.types
 
-import org.eclipse.emf.ecore.EDiagnosticChain
-import org.eclipse.emf.ecore.EMap
-
 import io.vrap.rmf.raml.model.elements.DocumentableElement
 import io.vrap.rmf.raml.model.elements.IdentifiableElement
 import io.vrap.rmf.raml.model.facets.ArrayTypeFacet
@@ -14,6 +11,7 @@ import io.vrap.rmf.raml.model.facets.FileTypeFacet
 import io.vrap.rmf.raml.model.facets.Instance
 import io.vrap.rmf.raml.model.facets.NumberTypeFacet
 import io.vrap.rmf.raml.model.facets.ObjectTypeFacet
+import io.vrap.rmf.raml.model.facets.RegExp
 import io.vrap.rmf.raml.model.facets.StringTypeFacet
 import io.vrap.rmf.raml.model.util.AllPropertiesCollector
 import io.vrap.rmf.raml.model.util.SuperTypeCrossReferencer
@@ -121,12 +119,7 @@ class Property extends AnnotationsFacet, TypedElement {
 }
 
 class PatternProperty extends Property {
-	String pattern
-	
-	@Ecore(invariant="true")	
-	op boolean patternIsValid(EDiagnosticChain diagnostics,EMap<Object,Object> context) {
-		pattern !== null && pattern.length > 0
-	}
+	RegExp pattern
 }
 
 interface PropertiesFacet {

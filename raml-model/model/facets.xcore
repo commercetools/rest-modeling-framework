@@ -5,6 +5,13 @@
 )
 package io.vrap.rmf.raml.model.facets
 
+import io.vrap.rmf.raml.model.util.RegExp
+
+type RegExp wraps RegExp
+create {
+	RegExp.of(it)	
+}
+
 interface EnumFacet {
 	/*
      * An enumeration of all the possible values of instances of this type.
@@ -67,10 +74,10 @@ interface ArrayTypeFacet {
 }
 
 interface StringTypeFacet {
-		/*
+	/*
 	 * Regular expression that this string SHOULD match.
 	 */
-	String pattern
+	RegExp pattern
 
 	/*
 	 * Minimum length of the string. Value MUST be equal to or greater than 0.
