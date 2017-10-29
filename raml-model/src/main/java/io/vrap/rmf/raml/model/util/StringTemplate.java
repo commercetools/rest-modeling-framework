@@ -134,6 +134,8 @@ public class StringTemplate {
                 .forEach(stringCaseFormat -> TRANSFORMATIONS.put(toTransformationName.apply(stringCaseFormat), stringCaseFormat));
         TRANSFORMATIONS.put("lowercase", String::toLowerCase);
         TRANSFORMATIONS.put("uppercase", String::toUpperCase);
+        TRANSFORMATIONS.put("singularize", Inflector::singular);
+        TRANSFORMATIONS.put("pluralize", Inflector::plural);
     }
 
     private static class Expression implements Part {

@@ -47,6 +47,8 @@ class StringTemplateTest extends Specification {
         '<<name|!upperunderscorecase>>'               | ['name': 'userId']           || 'USER_ID'
         '<<name|!lowercase>>'                         | ['name': 'USER-ID']          || 'user-id'
         '<<name|!uppercase>>'                         | ['name': 'user-id']          || 'USER-ID'
+        '<<name|!pluralize>>'                         | ['name': 'user']             || 'users'
+        '<<name|!singularize>>'                       | ['name': 'users']            || 'user'
         '<<resourcePathName|!uppercamelcase>>Draft'   | ['resourcePathName': 'user'] || 'UserDraft'
         '<<resourcePathName|!uppercamelcase>> Draft'  | ['resourcePathName': 'user'] || 'User Draft'
         '<<resourcePathName|!uppercamelcase>>Draft'   | ['resourcePathName': 'user'] || 'UserDraft'
