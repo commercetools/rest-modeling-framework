@@ -9,6 +9,7 @@ import io.vrap.rmf.raml.model.facets.ArrayTypeFacet
 import io.vrap.rmf.raml.model.facets.DateTimeTypeFacet
 import io.vrap.rmf.raml.model.facets.FileTypeFacet
 import io.vrap.rmf.raml.model.facets.Instance
+import io.vrap.rmf.raml.model.facets.IntegerTypeFacet
 import io.vrap.rmf.raml.model.facets.NumberTypeFacet
 import io.vrap.rmf.raml.model.facets.ObjectTypeFacet
 import io.vrap.rmf.raml.model.facets.RegExp
@@ -192,7 +193,7 @@ class NumberType extends AnyType, NumberTypeFacet {
 /*
  * A subset of JSON numbers that are positive and negative multiples of 1.
  */
-class IntegerType extends NumberType {
+class IntegerType extends AnyType, IntegerTypeFacet {
 }
 
 /*
@@ -379,10 +380,10 @@ class DateTimeOnlyAnnotationType extends AnyAnnotationType {
 class DateOnlyAnnotationType extends AnyAnnotationType {
 }
 
-class NumberAnnotationType extends NumberTypeFacet, AnyAnnotationType {
+class NumberAnnotationType extends AnyAnnotationType, NumberTypeFacet {
 }
 
-class IntegerAnnotationType extends NumberAnnotationType {
+class IntegerAnnotationType extends AnyAnnotationType, IntegerTypeFacet {
 }
 
 class BooleanAnnotationType extends AnyAnnotationType {

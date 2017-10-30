@@ -116,16 +116,7 @@ enum NumberFormat {
 	double
 }
 
-interface NumberTypeFacet {
-	/*
-	 * The minimum value of the parameter. Applicable only to parameters of type number or integer.
-	 */
-	BigDecimal minimum
-	/*
-	 * The maximum value of the parameter. Applicable only to parameters of type number or integer.
-	 */
-	BigDecimal maximum
-
+interface CommonNumberTypeFacet {
 	/*
 	 * The format of the value.
 	 */
@@ -135,7 +126,29 @@ interface NumberTypeFacet {
 	 * A numeric instance is valid against "multipleOf" if the result of dividing the instance
 	 * by this keyword's value is an integer.
 	 */
-	PositiveInteger multipleOf	
+	PositiveInteger multipleOf		
+}
+
+interface NumberTypeFacet extends CommonNumberTypeFacet {
+	/*
+	 * The minimum value of the parameter. Applicable only to parameters of type number or integer.
+	 */
+	BigDecimal minimum
+	/*
+	 * The maximum value of the parameter. Applicable only to parameters of type number or integer.
+	 */
+	BigDecimal maximum
+}
+
+interface IntegerTypeFacet extends CommonNumberTypeFacet {
+	/*
+	 * The minimum value of the parameter. Applicable only to parameters of type number or integer.
+	 */
+	BigDecimal minimum
+	/*
+	 * The maximum value of the parameter. Applicable only to parameters of type number or integer.
+	 */
+	BigDecimal maximum
 }
 
 enum DateTimeFormat {

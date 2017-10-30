@@ -1,7 +1,11 @@
 package io.vrap.rmf.raml.validation;
 
 import io.vrap.rmf.raml.model.facets.ArrayTypeFacet;
+import io.vrap.rmf.raml.model.facets.IntegerTypeFacet;
+import io.vrap.rmf.raml.model.facets.NumberTypeFacet;
 import io.vrap.rmf.raml.model.facets.StringTypeFacet;
+import io.vrap.rmf.raml.model.types.IntegerType;
+import io.vrap.rmf.raml.model.types.NumberType;
 import io.vrap.rmf.raml.model.types.util.TypesSwitch;
 import org.eclipse.emf.common.util.DiagnosticChain;
 import org.eclipse.emf.ecore.EAttribute;
@@ -45,6 +49,30 @@ public class TypesValidator extends AbstractRamlValidator {
 
             if (!rangeIsValid) {
                 error("Facet 'minLength' must be <= 'maxLength'", stringType);
+            }
+            return rangeIsValid;
+        }
+
+        @Override
+        public Boolean caseNumberTypeFacet(final NumberTypeFacet numberType) {
+            boolean rangeIsValid = numberType.getMinimum() == null
+                    || numberType.getMaximum() == null
+                    || numberType.getMinimum().compareTo(numberType.getMaximum()) <= 0;
+
+            if (!rangeIsValid) {
+                error("Facet 'minimum' must be <= 'maximum'", numberType);
+            }
+            return rangeIsValid;
+        }
+
+        @Override
+        public Boolean caseIntegerTypeFacet(final IntegerTypeFacet integerType) {
+            boolean rangeIsValid = integerType.getMinimum() == null
+                    || integerType.getMaximum() == null
+                    || integerType.getMinimum().compareTo(integerType.getMaximum()) <= 0;
+
+            if (!rangeIsValid) {
+                error("Facet 'minimum' must be <= 'maximum'", integerType);
             }
             return rangeIsValid;
         }
