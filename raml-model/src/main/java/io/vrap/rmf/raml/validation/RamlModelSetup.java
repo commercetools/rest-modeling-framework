@@ -25,8 +25,9 @@ public interface RamlModelSetup {
      * Registers validators.
      */
     static void setup() {
-        final RamlObjectValidator ramlObjectValidator = new RamlObjectValidator();
         final EValidator.Registry registry = EValidator.Registry.INSTANCE;
+        registry.put(TypesPackage.eINSTANCE, new TypesValidator());
+        final RamlObjectValidator ramlObjectValidator = new RamlObjectValidator();
         for (final EPackage ePackage : PACKAGES) {
             final CompositeValidator compositeValidator = new CompositeValidator();
             compositeValidator.add(ramlObjectValidator);
