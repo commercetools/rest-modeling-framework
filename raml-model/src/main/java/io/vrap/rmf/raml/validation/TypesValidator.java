@@ -1,6 +1,7 @@
 package io.vrap.rmf.raml.validation;
 
 import io.vrap.rmf.raml.model.facets.ArrayTypeFacet;
+import io.vrap.rmf.raml.model.facets.StringTypeFacet;
 import io.vrap.rmf.raml.model.types.util.TypesSwitch;
 import org.eclipse.emf.common.util.DiagnosticChain;
 import org.eclipse.emf.ecore.EAttribute;
@@ -32,6 +33,18 @@ public class TypesValidator extends AbstractRamlValidator {
 
             if (!rangeIsValid) {
                 error("Facet 'minItems' must be <= 'maxItems'", arrayType);
+            }
+            return rangeIsValid;
+        }
+
+        @Override
+        public Boolean caseStringTypeFacet(final StringTypeFacet stringType) {
+            boolean rangeIsValid = stringType.getMinLength() == null
+                    || stringType.getMaxLength() == null
+                    || stringType.getMinLength() <= stringType.getMaxLength();
+
+            if (!rangeIsValid) {
+                error("Facet 'minLength' must be <= 'maxLength'", stringType);
             }
             return rangeIsValid;
         }
