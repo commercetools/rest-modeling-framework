@@ -11,25 +11,36 @@ import spock.lang.Specification
 /**
  * Unit tests for {@link ModulesValidator}
  */
-class ModulesValidatorTest extends Specification {
+class ModulesValidatorTest extends BaseValidatorTest {
+    Api api
+
+    def setup() {
+        api = ModulesFactory.eINSTANCE.createApi()
+        api.title = 'Test Api'
+    }
+
+    def "should report missing title"() {
+        when:
+        api.title = title
+        then:
+        validate(api) == false
+        where:
+        title << [ null, '']
+    }
 
     def "should report invalid protocols"() {
         when:
-        Api api = ModulesFactory.eINSTANCE.createApi()
         api.protocols.add('ftp')
-        BasicDiagnostic diagnostic = new BasicDiagnostic()
         then:
-        Diagnostician.INSTANCE.validate(api, diagnostic, new HashMap<Object, Object>()) == false
+        validate(api) == false
         diagnostic.severity != Diagnostic.OK
     }
 
     def "should accept valid protocols"() {
         when:
-        Api api = ModulesFactory.eINSTANCE.createApi()
         api.protocols.add(protocol)
-        BasicDiagnostic diagnostic = new BasicDiagnostic()
         then:
-        Diagnostician.INSTANCE.validate(api, diagnostic, new HashMap<Object, Object>()) == true
+        validate(api) == true
         diagnostic.severity == Diagnostic.OK
         where:
         protocol << ['http', 'HTTP', 'https', 'HTTPS']

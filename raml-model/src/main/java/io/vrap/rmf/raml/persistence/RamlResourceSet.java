@@ -1,6 +1,7 @@
 package io.vrap.rmf.raml.persistence;
 
 import io.vrap.rmf.raml.model.types.BuiltinType;
+import io.vrap.rmf.raml.validation.RamlModelSetup;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.ContentHandler;
 import org.eclipse.emf.ecore.resource.Resource;
@@ -18,6 +19,10 @@ public class RamlResourceSet extends ResourceSetImpl {
             Arrays.asList("application/raml+yaml", "application/yaml");
     private final static String ACCEPT_HEADER_VALUE = ACCEPTED_MIME_TYPES.stream()
             .collect(Collectors.joining(", "));
+
+    static {
+        RamlModelSetup.setup(); //  TODO put setup somewhere else
+    }
 
     public RamlResourceSet() {
         final List<URIHandler> uriHandlers = Arrays.asList(

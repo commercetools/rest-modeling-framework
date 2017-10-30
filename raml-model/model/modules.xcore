@@ -30,7 +30,7 @@ class Api extends AnnotationsFacet, TypeContainer, ResourceContainer, ProtocolsF
 	/*
 	 * A short, plain-text label for the API. Its value is a string.
 	 */
-	String title
+	String[1] title
 	/*
 	 * A substantial, human-friendly description of the API.
 	 * Its value is a string and MAY be formatted using markdown.
@@ -80,7 +80,7 @@ interface ApiExtension {
 	 */
 	refers Api ^extends
 	
-	String usage 
+	String[1] usage 
 }
 
 /**
@@ -97,13 +97,13 @@ class Document {
 	/*
 	 * Title of the document. Its value MUST be a non-empty string.
 	 */
-	String title	
+	String[1] title	
 	
 	/*
 	 * Content of the document. 
 	 * Its value MUST be a non-empty string and MAY be formatted using markdown.
 	 */
-	String content
+	String[1] content
 }
 
 interface TypeContainer extends InlineTypeContainer {
@@ -150,10 +150,10 @@ interface TypeContainer extends InlineTypeContainer {
 }
 
 class Library extends AnnotationsFacet, TypeContainer, SecuritySchemeContainer {
-    String usage 
+    String[1] usage 
 }
 
 class LibraryUse {
-	String name
+	String[1] name
 	refers Library library
 }

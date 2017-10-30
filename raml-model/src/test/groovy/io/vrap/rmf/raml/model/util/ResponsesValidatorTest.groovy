@@ -16,12 +16,13 @@ import spock.lang.Specification
 /**
  * Unit tests for {@link io.vrap.rmf.raml.model.responses.util.ResponsesValidator}
  */
-class ResponsesValidatorTest extends Specification {
+class ResponsesValidatorTest extends BaseValidatorTest {
     Api api
     BodyType body
 
     def setup() {
         api = ModulesFactory.eINSTANCE.createApi()
+        api.title = 'Test Api'
         Resource resource = ResourcesFactory.eINSTANCE.createResource()
         api.resources.add(resource)
         Method method = ResourcesFactory.eINSTANCE.createMethod()
@@ -31,28 +32,24 @@ class ResponsesValidatorTest extends Specification {
     }
 
     def "should report missing content types when no default media types are define"() {
-        when:
-        BasicDiagnostic diagnostic = new BasicDiagnostic()
-        Diagnostician.INSTANCE.validate(api, diagnostic, new HashMap<Object, Object>()) == false
-        then:
+        expect:
+        validate(api) == false
         diagnostic.severity != Diagnostic.OK
     }
 
     def "should accept bodies with no content type when default media types are defined"() {
         when:
         api.mediaType.add('application/json')
-        BasicDiagnostic diagnostic = new BasicDiagnostic()
-        Diagnostician.INSTANCE.validate(api, diagnostic, new HashMap<Object, Object>()) == false
         then:
+        validate(api) == true
         diagnostic.severity == Diagnostic.OK
     }
 
     def "should accept bodies with content type"() {
         when:
         body.contentTypes.add('application/json')
-        BasicDiagnostic diagnostic = new BasicDiagnostic()
-        Diagnostician.INSTANCE.validate(api, diagnostic, new HashMap<Object, Object>()) == false
         then:
+        validate(api) == true
         diagnostic.severity == Diagnostic.OK
     }
 }
