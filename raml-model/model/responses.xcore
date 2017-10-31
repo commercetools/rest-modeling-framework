@@ -8,7 +8,7 @@ import org.eclipse.emf.ecore.EMap
 import org.eclipse.emf.common.util.Diagnostic
 import org.eclipse.emf.common.util.BasicDiagnostic
 
-import io.vrap.rmf.raml.model.modules.Api
+import io.vrap.rmf.raml.model.modules.ApiBase
 import io.vrap.rmf.raml.model.types.AnnotationsFacet
 import io.vrap.rmf.raml.model.types.HeadersFacet
 import io.vrap.rmf.raml.model.types.TypedElement
@@ -40,7 +40,7 @@ class BodyType extends AnnotationsFacet, TypedElement {
 	
 	@Ecore(invariant = "true")
 	op boolean contentTypesDefined(EDiagnosticChain diagnostics,EMap<Object,Object> context) {
-		val api = getRootContainer(false) as Api
+		val api = getRootContainer(false) as ApiBase
 		val contentTypesDefined = api == null || api.mediaType.size > 0 || contentTypes.size > 0
 		if (!contentTypesDefined) {
 			diagnostics.add(new BasicDiagnostic(Diagnostic.ERROR, null, -1, "Content type missing", 

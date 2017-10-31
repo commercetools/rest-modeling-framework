@@ -120,7 +120,11 @@ public class RamlModelBuilder {
         }
 
         private void mergeAttributes(final EObject extension, final EObject extendsEObject) {
-            for (final EAttribute attribute : extendsEObject.eClass().getEAllAttributes()) {
+            final List<EAttribute> commonAttributes = new ArrayList<>();
+            commonAttributes.addAll(extension.eClass().getEAllAttributes());
+            commonAttributes.retainAll(extendsEObject.eClass().getEAllAttributes());
+
+            for (final EAttribute attribute : commonAttributes) {
                 if (extension.eIsSet(attribute)) {
                     final Object attributeValue = extension.eGet(attribute);
                     if (attribute.isMany()) {

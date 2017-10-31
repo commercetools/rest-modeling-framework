@@ -72,7 +72,7 @@ public class ApiConstructor extends BaseConstructor {
 
     @Override
     public Object visitDocumentationFacet(RAMLParser.DocumentationFacetContext documentationFacet) {
-        return withinScope(scope.with(API__DOCUMENTATION), documentationScope ->
+        return withinScope(scope.with(API_BASE__DOCUMENTATION), documentationScope ->
                 documentationFacet.document().stream().map(this::visitDocument).collect(Collectors.toList())
         );
     }
@@ -93,7 +93,7 @@ public class ApiConstructor extends BaseConstructor {
     public Object visitBaseUriFacet(RAMLParser.BaseUriFacetContext ctx) {
         final String baseUriText = ctx.baseUri.getText();
         final UriTemplate uriTemplate = uriTemplateConstructor.parse(baseUriText, scope);
-        scope.with(API__BASE_URI).setValue(uriTemplate, ctx.getStart());
+        scope.with(API_BASE__BASE_URI).setValue(uriTemplate, ctx.getStart());
 
         return uriTemplate;
     }
@@ -101,7 +101,7 @@ public class ApiConstructor extends BaseConstructor {
 
     @Override
     public Object visitBaseUriParametersFacet(RAMLParser.BaseUriParametersFacetContext baseUriParametersFacet) {
-        return withinScope(scope.with(API__BASE_URI_PARAMETERS), baseUriParametersScope -> {
+        return withinScope(scope.with(API_BASE__BASE_URI_PARAMETERS), baseUriParametersScope -> {
             final List<Object> baseUriParameters = baseUriParametersFacet.uriParameterFacets.stream()
                     .map(this::visitTypedElementFacet)
                     .collect(Collectors.toList());

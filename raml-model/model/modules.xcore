@@ -25,12 +25,11 @@ import io.vrap.rmf.raml.model.resources.UriParameter
 import io.vrap.rmf.raml.model.security.SecuritySchemeContainer
 import io.vrap.rmf.raml.model.security.SecuredByFacet
 
-class Api extends AnnotationsFacet, TypeContainer, ResourceContainer, ProtocolsFacet, 
+/*
+ * Common interface for api, extension and overlay. 
+ */
+interface ApiBase extends AnnotationsFacet, TypeContainer, ResourceContainer, ProtocolsFacet, 
 		SecuritySchemeContainer, SecuredByFacet {
-	/*
-	 * A short, plain-text label for the API. Its value is a string.
-	 */
-	String[1] title
 	/*
 	 * A substantial, human-friendly description of the API.
 	 * Its value is a string and MAY be formatted using markdown.
@@ -74,6 +73,13 @@ class Api extends AnnotationsFacet, TypeContainer, ResourceContainer, ProtocolsF
 	}
 }
 
+class Api extends ApiBase {
+	/*
+	 * A short, plain-text label for the API. Its value is a string.
+	 */
+	String[1] title
+}
+
 interface ApiExtension {
 	/**
 	 * The api that this object extends.
@@ -90,7 +96,7 @@ interface ApiExtension {
  * instance-specific nodes of an API, such as its service endpoint (URL) without altering its pure 
  * interface definition document.
  */
-class Extension extends Api, ApiExtension {
+class Extension extends ApiBase, ApiExtension {
 }
 
 class Document {
