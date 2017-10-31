@@ -1,9 +1,6 @@
 package io.vrap.rmf.raml.validation;
 
-import io.vrap.rmf.raml.model.facets.ArrayTypeFacet;
-import io.vrap.rmf.raml.model.facets.IntegerTypeFacet;
-import io.vrap.rmf.raml.model.facets.NumberTypeFacet;
-import io.vrap.rmf.raml.model.facets.StringTypeFacet;
+import io.vrap.rmf.raml.model.facets.*;
 import io.vrap.rmf.raml.model.types.IntegerType;
 import io.vrap.rmf.raml.model.types.NumberType;
 import io.vrap.rmf.raml.model.types.util.TypesSwitch;
@@ -73,6 +70,18 @@ public class TypesValidator extends AbstractRamlValidator {
 
             if (!rangeIsValid) {
                 error("Facet 'minimum' must be <= 'maximum'", integerType);
+            }
+            return rangeIsValid;
+        }
+
+        @Override
+        public Boolean caseFileTypeFacet(final FileTypeFacet fileType) {
+            boolean rangeIsValid = fileType.getMinLength() == null
+                    || fileType.getMaxLength() == null
+                    || fileType.getMinLength() <= fileType.getMaxLength();
+
+            if (!rangeIsValid) {
+                error("Facet 'minLength' must be <= 'maxLength'", fileType);
             }
             return rangeIsValid;
         }

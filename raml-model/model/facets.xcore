@@ -6,6 +6,7 @@
 package io.vrap.rmf.raml.model.facets
 
 import io.vrap.rmf.raml.model.util.RegExp
+import io.vrap.rmf.raml.model.util.MediaType
 
 type RegExp wraps RegExp
 create {
@@ -21,6 +22,11 @@ type UnsignedInteger wraps Integer
  * An integer that is > 0.
  */
 type PositiveInteger wraps Integer
+
+type MediaType wraps MediaType
+create {
+	MediaType.of(it)	
+}
 
 interface EnumFacet {
 	/*
@@ -166,10 +172,10 @@ interface DateTimeTypeFacet {
 }
 
 interface FileTypeFacet {
-	    /*
+	/*
      * A list of valid content-type strings for the file.
      */
-    String[] fileTypes
+    MediaType[] fileTypes
 
     /*
      * Specifies the minimum number of bytes for a parameter value. The value MUST be equal to or greater than 0.
