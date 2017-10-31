@@ -18,7 +18,7 @@ class RamlModelBuilderTest extends Specification implements ResourceFixtures {
         URI uri = uriFromClasspath("/commercetools-api-reference-master/api.raml")
         Api api = modelBuilder.buildApi(uri)
         then:
-        api != null
+        api.eResource().errors.empty == true
     }
 
     def "should resolve ct api extension"() {
@@ -26,6 +26,6 @@ class RamlModelBuilderTest extends Specification implements ResourceFixtures {
         URI uri = uriFromClasspath("/commercetools-api-reference-master/update-actions.raml")
         Api api = modelBuilder.buildApi(uri)
         then:
-        api != null
+        api.eResource().errors.empty == true
     }
 }
