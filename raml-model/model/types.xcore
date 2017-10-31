@@ -127,10 +127,23 @@ interface TypedElement extends IdentifiableElement, InlineTypeContainer, Annotat
 }
 
 class Property extends AnnotationsFacet, TypedElement {
+	/*
+	 * @return true iff. this property name equals the given name
+	 */
+	op boolean matches(String name) {
+		this.name == name
+	}
 }
 
 class PatternProperty extends Property {
 	RegExp pattern
+	
+	/*
+	 * @return true iff. this property pattern matches the given name
+	 */
+	op boolean matches(String name) {
+		pattern.test(name)
+	}
 }
 
 interface PropertiesFacet {
@@ -140,14 +153,11 @@ interface PropertiesFacet {
 	contains Property[] properties
 
 	/*
-	 * Returns the property with the given name or null if no property 
+	 * Returns the property which matches the given name or null if no property 
 	 * with the given name exists.
 	 */
 	op Property getProperty(String name) {
-		for (Property property : properties) {
-			if(name == property.name) return property
-		}
-		return null
+		properties.findFirst[it.matches(name)]
 	}
 }
 
