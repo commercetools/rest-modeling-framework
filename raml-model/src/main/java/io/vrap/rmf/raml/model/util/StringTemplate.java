@@ -1,6 +1,7 @@
 package io.vrap.rmf.raml.model.util;
 
 import com.google.common.collect.Lists;
+import com.hypertino.inflector.English;
 import io.vrap.rmf.raml.persistence.antlr.StringTemplateBaseVisitor;
 import io.vrap.rmf.raml.persistence.antlr.StringTemplateLexer;
 import io.vrap.rmf.raml.persistence.antlr.StringTemplateParser;
@@ -134,8 +135,8 @@ public class StringTemplate {
                 .forEach(stringCaseFormat -> TRANSFORMATIONS.put(toTransformationName.apply(stringCaseFormat), stringCaseFormat));
         TRANSFORMATIONS.put("lowercase", String::toLowerCase);
         TRANSFORMATIONS.put("uppercase", String::toUpperCase);
-        TRANSFORMATIONS.put("singularize", Inflector::singular);
-        TRANSFORMATIONS.put("pluralize", Inflector::plural);
+        TRANSFORMATIONS.put("singularize", English::singular);
+        TRANSFORMATIONS.put("pluralize", English::plural);
     }
 
     private static class Expression implements Part {
