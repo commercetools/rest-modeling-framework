@@ -299,7 +299,7 @@ public class RamlModelBuilder {
             this.parameters = parameters.stream()
                     .filter(p -> p.getValue() instanceof StringInstance)
                     .collect(Collectors.toMap(Parameter::getName, p -> ((StringInstance) p.getValue()).getValue()));
-            this.parameters.put("methodName", method.getMethod().getLiteral());
+            this.parameters.put("methodName", method.getMethodName());
             typedElementResolver = new TypedElementResolver(method.eResource(), this.parameters);
         }
 

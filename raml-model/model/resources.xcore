@@ -160,6 +160,13 @@ class Method extends MethodBase {
 	 * but methods defined in a resource type can be optional. 
 	 */
 	boolean required = "true"
+	
+	/*
+	 * The name of the method.
+	 */
+	derived String methodName get {
+		if (method != null) method.getName() else ""
+	} 
 }
 
 class Trait extends IdentifiableElement, MethodBase {
