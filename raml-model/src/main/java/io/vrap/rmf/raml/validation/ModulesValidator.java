@@ -1,6 +1,5 @@
 package io.vrap.rmf.raml.validation;
 
-import com.damnhandy.uri.template.UriTemplate;
 import io.vrap.rmf.raml.model.modules.Api;
 import io.vrap.rmf.raml.model.modules.ApiBase;
 import io.vrap.rmf.raml.model.modules.util.ModulesSwitch;
@@ -45,23 +44,23 @@ public class ModulesValidator extends AbstractRamlValidator {
             final List<Diagnostic> validationErrors = new ArrayList<>();
 
             validationErrors.addAll(caseApiBase(api));
-            validationErrors.addAll(noDuplicateResources(api));
+            validationErrors.addAll(noDuplicateResourcePaths(api));
 
             return validationErrors;
         }
 
-        private List<Diagnostic> noDuplicateResources(final Api api) {
-            final Set<String> fullUris = new HashSet<>();
-
+        private List<Diagnostic> noDuplicateResourcePaths(final Api api) {
             final List<Resource> allResources = api.getResources().stream()
                     .flatMap(r -> r.getAllContainedResources().stream())
                     .collect(Collectors.toList());
             allResources.addAll(api.getResources());
 
+            final Set<String> resourcePaths = new HashSet<>();
+
             return allResources.stream()
                     .filter(r -> {
-                        final UriTemplate fullUri = r.getFullUri();
-                        return fullUri != null && !fullUris.add(fullUri.getTemplate());
+                        final String resourcePath = r.getResourcePath();
+                        return resourcePath.length() > 0 && !resourcePaths.add(resourcePath);
                     })
                     .map(r -> error("Duplicate resource '" + r.getFullUri().getTemplate() + "'", r))
                     .collect(Collectors.toList());

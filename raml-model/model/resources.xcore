@@ -93,6 +93,20 @@ class Resource extends ResourceBase, ResourceContainer, ApplyTraitsFacet {
 	}
 	
 	/*
+	 * The full resource URI relative to the baseUri if there is one.
+	 */
+	derived String resourcePath get {
+		ModelHelper.resourcePath(this)	
+	}
+
+	/*
+	 * The rightmost of the non-URI-parameter-containing path fragments.
+	 */
+	derived String resourcePathName get {
+		ModelHelper.resourcePathName(this)	
+	}
+	
+	/*
 	 * @return the parent resource or null
 	 */
 	refers derived Resource parent get {

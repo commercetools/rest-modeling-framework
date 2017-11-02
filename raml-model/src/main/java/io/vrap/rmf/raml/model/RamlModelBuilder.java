@@ -211,36 +211,10 @@ public class RamlModelBuilder {
             this.parameters = parameters.stream()
                     .filter(p -> p.getValue() instanceof StringInstance)
                     .collect(Collectors.toMap(Parameter::getName, p -> ((StringInstance) p.getValue()).getValue()));
-            this.parameters.put("resourcePath", getResourcePath());
-            this.parameters.put("resourcePathName", getResourcePathName());
+            this.parameters.put("resourcePath", resource.getResourcePath());
+            this.parameters.put("resourcePathName", resource.getResourcePathName());
             typedElementResolver = new TypedElementResolver(resource.eResource(), this.parameters);
             stringTemplateResolver = new StringTemplateResolver(this.parameters);
-        }
-
-        private String getResourcePath() {
-            final List<io.vrap.rmf.raml.model.resources.Resource> resourcesToRoot = getResourcesToRoot();
-
-            return resourcesToRoot.stream()
-                    .map(r -> r.getRelativeUri().toString())
-                    .collect(Collectors.joining(""));
-        }
-
-        private String getResourcePathName() {
-//            final List<io.vrap.rmf.raml.model.resources.Resource> resourcesToRoot = getResourcesToRoot();
-//            Collections.reverse(resourcesToRoot);
-//
-//            for (final io.vrap.rmf.raml.model.resources.Resource r : resourcesToRoot) {
-//                final List<UriTemplatePart> uriTemplateParts = new ArrayList<>(r.getRelativeUri().getParts());
-//                Collections.reverse(uriTemplateParts);
-//                final Optional<UriTemplateLiteral> rightMostLiteral = uriTemplateParts.stream()
-//                        .filter(UriTemplateLiteral.class::isInstance)
-//                        .map(UriTemplateLiteral.class::cast).findFirst();
-//                if (rightMostLiteral.isPresent()) {
-//                    final String pathName = rightMostLiteral.get().getLiteral();
-//                    return pathName.substring(1); // remove '/' at the start
-//                }
-//            }
-            return null;
         }
 
         private List<io.vrap.rmf.raml.model.resources.Resource> getResourcesToRoot() {
