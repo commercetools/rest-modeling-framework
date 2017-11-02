@@ -45,7 +45,7 @@ interface ApiBase extends AnnotationsFacet, TypeContainer, ResourceContainer, Pr
 	 * A URI that serves as the base for URIs of all resources. Often used as the base
 	 * of the URL of each resource containing the location of the API. Can be a template URI.
 	 */
-	contains UriTemplate baseUri
+	UriTemplate baseUri
 
 	/*
 	 * Specifies the uri parameters in the base URI.

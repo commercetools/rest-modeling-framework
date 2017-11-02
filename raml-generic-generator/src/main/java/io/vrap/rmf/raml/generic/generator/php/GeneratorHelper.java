@@ -1,13 +1,15 @@
 package io.vrap.rmf.raml.generic.generator.php;
 
+import com.damnhandy.uri.template.Expression;
+import com.damnhandy.uri.template.UriTemplate;
 import com.google.common.base.CaseFormat;
 import com.google.common.collect.Lists;
-import io.vrap.rmf.raml.model.resources.*;
+import io.vrap.rmf.raml.model.resources.Method;
+import io.vrap.rmf.raml.model.resources.Resource;
 import io.vrap.rmf.raml.model.types.*;
 import io.vrap.rmf.raml.model.types.util.TypesSwitch;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.emf.ecore.EObject;
-import org.eclipse.emf.ecore.util.EcoreUtil;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -35,11 +37,11 @@ public class GeneratorHelper {
     }
 
     static String toParamName(final UriTemplate uri, final String delimiter, final String suffix) {
-        return StringUtils.capitalize(uri.getParts().stream().map(
+        return StringUtils.capitalize(uri.getComponents().stream().map(
                 uriTemplatePart -> {
-                    if (uriTemplatePart instanceof UriTemplateExpression) {
-                        return ((UriTemplateExpression)uriTemplatePart).getVariables().stream()
-                                .map(s -> delimiter + StringUtils.capitalize(s) + suffix).collect(Collectors.joining());
+                    if (uriTemplatePart instanceof Expression) {
+                        return ((Expression)uriTemplatePart).getVarSpecs().stream()
+                                .map(s -> delimiter + StringUtils.capitalize(s.getVariableName()) + suffix).collect(Collectors.joining());
                     }
                     return CaseFormat.LOWER_HYPHEN.to(CaseFormat.LOWER_CAMEL, uriTemplatePart.toString().replace("/", "-"));
                 }
@@ -66,9 +68,12 @@ public class GeneratorHelper {
 
     static UriTemplate absoluteUri(final Resource resource)
     {
-        final UriTemplate uri = ResourcesFactory.eINSTANCE.createUriTemplate();
-        uri.getParts().addAll(absoluteUriParts(resource));
-        return uri;
+        if (resource.eContainer() instanceof Resource) {
+            final Resource parent = (Resource) resource.eContainer();
+            return UriTemplate.fromTemplate(absoluteUri(parent).getTemplate() + resource.getRelativeUri().getTemplate());
+        } else {
+            return resource.getRelativeUri();
+        }
     }
 
     static List<ResourceGenModel> flattenResources(final List<Resource> resources)
@@ -89,16 +94,6 @@ public class GeneratorHelper {
             }
         }
         return r;
-    }
-
-    private static List<UriTemplatePart> absoluteUriParts(final Resource resource)
-    {
-        if (!(resource.eContainer() instanceof Resource)) {
-            return (List<UriTemplatePart>) EcoreUtil.copyAll(resource.getRelativeUri().getParts());
-        }
-        final List<UriTemplatePart> parts = absoluteUriParts((Resource)resource.eContainer());
-        parts.addAll(EcoreUtil.copyAll(resource.getRelativeUri().getParts()));
-        return parts;
     }
 
     private static List<AnyType> getParentTypes(final AnyType anyType) {

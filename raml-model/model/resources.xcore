@@ -21,60 +21,11 @@ import io.vrap.rmf.raml.model.responses.BodyContainer
 import io.vrap.rmf.raml.model.responses.ResponsesFacet
 import io.vrap.rmf.raml.model.facets.Instance
 
-class UriTemplate {
-	contains UriTemplatePart[] parts	
-	
-	op String toString() {
-		parts.join("")
-	}
-	
-	/*
-	 * Converts this uri template to a string where the variables
-	 * are replaced with the given params.
-	 */
-	op String toString(Parameters params) {
-		parts.map[it.toString(params)].join("")
-	}
-}
+import com.damnhandy.uri.template.UriTemplate
 
-type Parameters wraps Map<String, Object>
-
-interface UriTemplatePart {
-	/*
-	 * Converts this uri template part to a string where the variables
-	 * are replaced with the given params.
-	 */
-	op String toString(Parameters params)
-}
-
-class UriTemplateLiteral extends UriTemplatePart {
-	String literal	
-	
-	op String toString() {
-		literal
-	} 
-	
-	op String toString(Parameters params) {
-		toString
-	}
-}
-
-class UriTemplateExpression extends UriTemplatePart {
-	String operator
-	String[] variables
-	
-	op String toString() {
-		val opStr = if (operator === null) "" else operator
-		"{" + opStr  + variables.join(",") + "}"
-	} 	
-	
-	op String toString(Parameters params) {
-		var result = ""
-		for (String varName : variables) {
-			result += params.get(varName)
-		}
-		result
-	}
+type UriTemplate wraps UriTemplate
+create {
+	UriTemplate.fromTemplate(it)
 }
 
 class UriParameter extends TypedElement {
@@ -132,7 +83,7 @@ class Resource extends ResourceBase, ResourceContainer, ApplyTraitsFacet {
 	/*
 	 * The relative uri of this resource.
 	 */
-	contains UriTemplate relativeUri
+	UriTemplate relativeUri
 }
 
 class ResourceType extends ResourceBase, IdentifiableElement {

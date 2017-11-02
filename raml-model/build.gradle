@@ -65,6 +65,7 @@ dependencies {
     compile 'org.eclipse.emf:org.eclipse.emf.ecore.xcore.lib:1.1.100'
     compile "org.eclipse.xtext:org.eclipse.xtext.xbase.lib:$xtextVersion"
     compile 'com.hypertino:inflector_2.12:1.0.7'
+    compile 'com.damnhandy:handy-uri-templates:2.1.6'
 
     antlr "org.antlr:antlr4:4.7"
 

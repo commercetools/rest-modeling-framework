@@ -81,7 +81,7 @@ public class UriFragmentBuilder {
         private List<String> resource(final Resource resource) {
         final List<String> segments = new ArrayList<>();
         segments.add(resource.eContainmentFeature().getName());
-        segments.add(resource.getRelativeUri().toString());
+        segments.add(resource.getRelativeUri().getTemplate());
 
         if (resource.eContainer() instanceof Resource) {
             final List<String> parentSegments = uriFragmentsBuilderSwitch.apply(resource.eContainer());

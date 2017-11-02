@@ -18,7 +18,10 @@ import io.vrap.rmf.raml.persistence.constructor.TypeExpressionConstructor;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.common.util.URI;
-import org.eclipse.emf.ecore.*;
+import org.eclipse.emf.ecore.EAttribute;
+import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.EReference;
+import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.util.EcoreUtil;
@@ -99,9 +102,6 @@ public class RamlModelBuilder {
             mergeAttributes(extension, extendsEObject);
             mergeCrossReferences(extension, extendsEObject, idToEObject);
             for (final EObject extensionChild : extension.eContents()) {
-                if (extensionChild instanceof UriTemplate) {
-                    continue;
-                }
                 final String uriFragment = uriFragmentBuilder.getURIFragment(extensionChild);
                 if (idToEObject.containsKey(uriFragment)) {
                     final EObject extendsChild = idToEObject.get(uriFragment);
@@ -223,20 +223,20 @@ public class RamlModelBuilder {
         }
 
         private String getResourcePathName() {
-            final List<io.vrap.rmf.raml.model.resources.Resource> resourcesToRoot = getResourcesToRoot();
-            Collections.reverse(resourcesToRoot);
-
-            for (final io.vrap.rmf.raml.model.resources.Resource r : resourcesToRoot) {
-                final List<UriTemplatePart> uriTemplateParts = new ArrayList<>(r.getRelativeUri().getParts());
-                Collections.reverse(uriTemplateParts);
-                final Optional<UriTemplateLiteral> rightMostLiteral = uriTemplateParts.stream()
-                        .filter(UriTemplateLiteral.class::isInstance)
-                        .map(UriTemplateLiteral.class::cast).findFirst();
-                if (rightMostLiteral.isPresent()) {
-                    final String pathName = rightMostLiteral.get().getLiteral();
-                    return pathName.substring(1); // remove '/' at the start
-                }
-            }
+//            final List<io.vrap.rmf.raml.model.resources.Resource> resourcesToRoot = getResourcesToRoot();
+//            Collections.reverse(resourcesToRoot);
+//
+//            for (final io.vrap.rmf.raml.model.resources.Resource r : resourcesToRoot) {
+//                final List<UriTemplatePart> uriTemplateParts = new ArrayList<>(r.getRelativeUri().getParts());
+//                Collections.reverse(uriTemplateParts);
+//                final Optional<UriTemplateLiteral> rightMostLiteral = uriTemplateParts.stream()
+//                        .filter(UriTemplateLiteral.class::isInstance)
+//                        .map(UriTemplateLiteral.class::cast).findFirst();
+//                if (rightMostLiteral.isPresent()) {
+//                    final String pathName = rightMostLiteral.get().getLiteral();
+//                    return pathName.substring(1); // remove '/' at the start
+//                }
+//            }
             return null;
         }
 
