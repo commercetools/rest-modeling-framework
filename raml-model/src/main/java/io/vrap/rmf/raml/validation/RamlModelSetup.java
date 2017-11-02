@@ -28,6 +28,7 @@ public interface RamlModelSetup {
         final EValidator.Registry registry = EValidator.Registry.INSTANCE;
 
         registry.put(TypesPackage.eINSTANCE, new TypesValidator());
+        registry.put(ModulesPackage.eINSTANCE, new ModulesValidator());
         registry.put(ResourcesPackage.eINSTANCE, new ResourcesValidator());
 
         final RamlObjectValidator ramlObjectValidator = new RamlObjectValidator();

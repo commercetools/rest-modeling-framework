@@ -3,7 +3,6 @@
     complianceLevel="8.0")
 package io.vrap.rmf.raml.model.resources
 
-import java.util.Map
 
 import io.vrap.rmf.raml.model.facets.ProtocolsFacet
 
@@ -20,6 +19,7 @@ import io.vrap.rmf.raml.model.elements.IdentifiableElement
 import io.vrap.rmf.raml.model.responses.BodyContainer
 import io.vrap.rmf.raml.model.responses.ResponsesFacet
 import io.vrap.rmf.raml.model.facets.Instance
+import io.vrap.rmf.raml.model.util.ModelHelper
 
 import com.damnhandy.uri.template.UriTemplate
 
@@ -84,6 +84,27 @@ class Resource extends ResourceBase, ResourceContainer, ApplyTraitsFacet {
 	 * The relative uri of this resource.
 	 */
 	UriTemplate relativeUri
+	
+	/*
+	 * The full uri does not contain the base uri.
+	 */
+	derived UriTemplate fullUri get {
+		ModelHelper.fullUri(this)
+	}
+	
+	/*
+	 * @return the parent resource or null
+	 */
+	refers derived Resource parent get {
+		if (eContainer instanceof Resource) eContainer as Resource else null
+	}
+	
+	/*
+	 * @return all contained resources
+	 */
+	refers derived Resource[] allContainedResources get {
+		ModelHelper.allContainedResources(this).toEList
+	}
 }
 
 class ResourceType extends ResourceBase, IdentifiableElement {

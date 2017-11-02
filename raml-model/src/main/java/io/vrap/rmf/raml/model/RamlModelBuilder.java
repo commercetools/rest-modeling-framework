@@ -124,7 +124,10 @@ public class RamlModelBuilder {
             commonAttributes.addAll(extension.eClass().getEAllAttributes());
             commonAttributes.retainAll(extendsEObject.eClass().getEAllAttributes());
 
-            for (final EAttribute attribute : commonAttributes) {
+            final List<EAttribute> nonDerivedAttributes = commonAttributes.stream()
+                    .filter(a -> !a.isDerived())
+                    .collect(Collectors.toList());
+            for (final EAttribute attribute : nonDerivedAttributes) {
                 if (extension.eIsSet(attribute)) {
                     final Object attributeValue = extension.eGet(attribute);
                     if (attribute.isMany()) {
