@@ -1,10 +1,10 @@
 package io.vrap.rmf.raml.validation;
 
 import io.vrap.rmf.raml.model.facets.FacetsPackage;
-import org.eclipse.emf.common.util.BasicDiagnostic;
 import org.eclipse.emf.common.util.Diagnostic;
 import org.eclipse.emf.common.util.DiagnosticChain;
-import org.eclipse.emf.ecore.*;
+import org.eclipse.emf.ecore.EClass;
+import org.eclipse.emf.ecore.EObject;
 
 import java.util.ArrayList;
 import java.util.List;
