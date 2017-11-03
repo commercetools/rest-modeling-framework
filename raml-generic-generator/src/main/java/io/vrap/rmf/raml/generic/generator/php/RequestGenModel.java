@@ -6,7 +6,7 @@ import com.damnhandy.uri.template.impl.VarSpec;
 import com.google.common.collect.Lists;
 import io.vrap.rmf.raml.model.resources.Method;
 import io.vrap.rmf.raml.model.resources.Resource;
-import io.vrap.rmf.raml.model.responses.BodyType;
+import io.vrap.rmf.raml.model.responses.Body;
 import io.vrap.rmf.raml.model.responses.Response;
 import io.vrap.rmf.raml.model.types.ArrayType;
 import io.vrap.rmf.raml.model.types.BuiltinType;
@@ -40,7 +40,7 @@ public class RequestGenModel {
     public TypeGenModel getReturnType() {
         Response response = method.getResponses().stream().filter(response1 -> response1.getStatusCode().matches("^2[0-9]{2}$")).findFirst().orElse(null);
         if (response != null) {
-            BodyType bodyType = response.getBodies().stream()
+            Body bodyType = response.getBodies().stream()
                     .filter(bodyType1 -> bodyType1.getContentTypes().size() == 0 || bodyType1.getContentTypes().contains("application/json"))
                     .findFirst().orElse(null);
             if (bodyType != null && !BuiltinType.of(bodyType.getName()).isPresent()) {
@@ -64,14 +64,14 @@ public class RequestGenModel {
     }
 
     @Nullable
-    public BodyType getFirstBodyType() {
+    public Body getFirstBodyType() {
         return method.getBodies().stream().findFirst().orElse(null);
     }
 
     @Nullable
     public String getBodyType()
     {
-        final BodyType firstBodyType = getFirstBodyType();
+        final Body firstBodyType = getFirstBodyType();
         if (firstBodyType != null) {
             if (firstBodyType.getType() instanceof FileType) {
                 return "UploadedFileInterface ";
@@ -88,7 +88,7 @@ public class RequestGenModel {
 
     @Nullable
     public ImportGenModel getBodyImport() {
-        final BodyType firstBodyType = getFirstBodyType();
+        final Body firstBodyType = getFirstBodyType();
 
         if (firstBodyType == null) {
             return null;

@@ -1,11 +1,12 @@
 package io.vrap.rmf.raml.validation
 
+import com.google.common.net.MediaType
 import io.vrap.rmf.raml.model.modules.Api
 import io.vrap.rmf.raml.model.modules.ModulesFactory
 import io.vrap.rmf.raml.model.resources.Method
 import io.vrap.rmf.raml.model.resources.Resource
 import io.vrap.rmf.raml.model.resources.ResourcesFactory
-import io.vrap.rmf.raml.model.responses.BodyType
+import io.vrap.rmf.raml.model.responses.Body
 import io.vrap.rmf.raml.model.responses.ResponsesFactory
 import io.vrap.rmf.raml.model.util.BaseValidatorTest
 import org.eclipse.emf.common.util.Diagnostic
@@ -15,7 +16,7 @@ import org.eclipse.emf.common.util.Diagnostic
  */
 class ResponsesValidatorTest extends BaseValidatorTest {
     Api api
-    BodyType body
+    Body body
 
     def setup() {
         api = ModulesFactory.eINSTANCE.createApi()
@@ -24,7 +25,7 @@ class ResponsesValidatorTest extends BaseValidatorTest {
         api.resources.add(resource)
         Method method = ResourcesFactory.eINSTANCE.createMethod()
         resource.methods.add(method)
-        body = ResponsesFactory.eINSTANCE.createBodyType()
+        body = ResponsesFactory.eINSTANCE.createBody()
         method.bodies.add(body)
     }
 
@@ -36,7 +37,7 @@ class ResponsesValidatorTest extends BaseValidatorTest {
 
     def "should accept bodies with no content type when default media types are defined"() {
         when:
-        api.mediaType.add('application/json')
+        api.mediaType.add(MediaType.parse('application/json'))
         then:
         validate(api) == true
         diagnostic.severity == Diagnostic.OK
@@ -44,7 +45,7 @@ class ResponsesValidatorTest extends BaseValidatorTest {
 
     def "should accept bodies with content type"() {
         when:
-        body.contentTypes.add('application/json')
+        body.contentTypes.add(MediaType.parse('application/json'))
         then:
         validate(api) == true
         diagnostic.severity == Diagnostic.OK

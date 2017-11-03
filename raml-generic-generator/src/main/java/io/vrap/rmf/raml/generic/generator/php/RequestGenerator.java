@@ -13,7 +13,7 @@ import io.vrap.rmf.raml.model.facets.StringInstance;
 import io.vrap.rmf.raml.model.resources.HttpMethod;
 import io.vrap.rmf.raml.model.resources.Method;
 import io.vrap.rmf.raml.model.resources.Resource;
-import io.vrap.rmf.raml.model.responses.BodyType;
+import io.vrap.rmf.raml.model.responses.Body;
 import io.vrap.rmf.raml.model.types.Annotation;
 import io.vrap.rmf.raml.model.types.AnyAnnotationType;
 import io.vrap.rmf.raml.model.types.FileType;
@@ -156,7 +156,7 @@ public class RequestGenerator extends AbstractTemplateGenerator {
         stGroup.registerRenderer(Method.class,
                 (arg, formatString, locale) -> {
                     final Method method = (Method)arg;
-                    final BodyType firstBodyType = method.getBodies().stream().findFirst().orElse(null);
+                    final Body firstBodyType = method.getBodies().stream().findFirst().orElse(null);
                     switch (Strings.nullToEmpty(formatString)) {
                         case "optionalBody":
                             if (method.getMethod().equals(HttpMethod.POST)) {

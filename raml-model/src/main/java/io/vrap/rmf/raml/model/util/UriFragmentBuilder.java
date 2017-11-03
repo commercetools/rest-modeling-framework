@@ -1,10 +1,11 @@
 package io.vrap.rmf.raml.model.util;
 
+import com.google.common.net.MediaType;
 import io.vrap.functional.utils.TypeSwitch;
 import io.vrap.rmf.raml.model.elements.IdentifiableElement;
 import io.vrap.rmf.raml.model.resources.Method;
 import io.vrap.rmf.raml.model.resources.Resource;
-import io.vrap.rmf.raml.model.responses.BodyType;
+import io.vrap.rmf.raml.model.responses.Body;
 import io.vrap.rmf.raml.model.responses.Response;
 import io.vrap.rmf.raml.model.types.Annotation;
 import org.eclipse.emf.ecore.EObject;
@@ -19,7 +20,7 @@ public class UriFragmentBuilder {
             Collectors.joining("/", "/", "");
 
     private final TypeSwitch<EObject, List<String>> uriFragmentsBuilderSwitch = new TypeSwitch<EObject, List<String>>()
-            .on(BodyType.class, this::bodyType)
+            .on(Body.class, this::body)
             .on(IdentifiableElement.class, this::identifiableElement)
             .on(Annotation.class, this::annotation)
             .on(Method.class, this::method)
@@ -68,11 +69,13 @@ public class UriFragmentBuilder {
         return new ArrayList<>();
     }
 
-    private List<String> bodyType(final BodyType bodyType) {
-        if (bodyType.eContainer() != null) {
-            final List<String> segments = uriFragmentsBuilderSwitch.apply(bodyType.eContainer());
-            segments.add(bodyType.eContainmentFeature().getName());
-            segments.add(bodyType.getContentTypes().stream().collect(Collectors.joining(",")));
+    private List<String> body(final Body body) {
+        if (body.eContainer() != null) {
+            final List<String> segments = uriFragmentsBuilderSwitch.apply(body.eContainer());
+            segments.add(body.eContainmentFeature().getName());
+            segments.add(body.getContentTypes().stream()
+                    .map(MediaType::toString)
+                    .collect(Collectors.joining(",")));
             return segments;
         }
         return new ArrayList<>();

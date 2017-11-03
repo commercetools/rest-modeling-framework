@@ -1,7 +1,10 @@
 package io.vrap.rmf.raml.model.util;
 
 import com.damnhandy.uri.template.UriTemplate;
+import com.google.common.net.MediaType;
 import io.vrap.rmf.raml.model.resources.Resource;
+import io.vrap.rmf.raml.model.responses.Body;
+import io.vrap.rmf.raml.model.responses.BodyContainer;
 import io.vrap.rmf.raml.model.types.PatternProperty;
 
 import java.util.ArrayList;
@@ -72,5 +75,13 @@ public class ModelHelper {
                 .filter(fragment -> !fragment.contains("{"))
                 .collect(Collectors.toCollection(LinkedList::new));
         return nonExpressionFragments.isEmpty() ? "" : nonExpressionFragments.getLast();
+    }
+
+    public static Body getBody(final BodyContainer container, final String contentType) {
+        final MediaType parsedContentType = MediaType.parse(contentType);
+        return container.getBodies().stream()
+                .filter(body -> body.getContentTypes().stream().filter(mediaType -> parsedContentType.is(mediaType)).findFirst().isPresent())
+                .findFirst()
+                .orElse(null);
     }
 }

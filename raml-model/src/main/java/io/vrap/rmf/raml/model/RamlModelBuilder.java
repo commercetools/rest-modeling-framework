@@ -1,12 +1,13 @@
 package io.vrap.rmf.raml.model;
 
+import com.google.common.net.MediaType;
 import io.vrap.rmf.raml.model.facets.StringInstance;
 import io.vrap.rmf.raml.model.modules.Api;
 import io.vrap.rmf.raml.model.modules.ApiExtension;
 import io.vrap.rmf.raml.model.modules.util.ModulesSwitch;
 import io.vrap.rmf.raml.model.resources.*;
 import io.vrap.rmf.raml.model.resources.util.ResourcesSwitch;
-import io.vrap.rmf.raml.model.responses.BodyType;
+import io.vrap.rmf.raml.model.responses.Body;
 import io.vrap.rmf.raml.model.responses.util.ResponsesSwitch;
 import io.vrap.rmf.raml.model.types.*;
 import io.vrap.rmf.raml.model.types.util.TypesSwitch;
@@ -415,14 +416,14 @@ public class RamlModelBuilder {
      * content type defined.
      */
     private static class BodyContentTypeResolver extends ResponsesSwitch<EObject> {
-        private final List<String> defaultMediaTypes;
+        private final List<MediaType> defaultMediaTypes;
 
-        public BodyContentTypeResolver(final List<String> defaultMediaTypes) {
+        public BodyContentTypeResolver(final List<MediaType> defaultMediaTypes) {
             this.defaultMediaTypes = defaultMediaTypes;
         }
 
         @Override
-        public EObject caseBodyType(final BodyType body) {
+        public EObject caseBody(final Body body) {
             if (body.getContentTypes().isEmpty()) {
                 body.getContentTypes().addAll(defaultMediaTypes);
             }

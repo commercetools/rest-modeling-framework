@@ -6,7 +6,7 @@
 package io.vrap.rmf.raml.model.facets
 
 import io.vrap.rmf.raml.model.util.RegExp
-import io.vrap.rmf.raml.model.util.MediaType
+import com.google.common.net.MediaType
 
 type RegExp wraps RegExp
 create {
@@ -25,7 +25,7 @@ type PositiveInteger wraps Integer
 
 type MediaType wraps MediaType
 create {
-	MediaType.of(it)	
+	MediaType.parse(it)	
 }
 
 interface EnumFacet {

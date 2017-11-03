@@ -6,6 +6,7 @@
 package io.vrap.rmf.raml.model.modules
 
 import io.vrap.rmf.raml.model.facets.ProtocolsFacet
+import io.vrap.rmf.raml.model.facets.MediaType
 import io.vrap.rmf.raml.model.types.AnnotationsFacet
 import io.vrap.rmf.raml.model.types.AnyAnnotationType
 import io.vrap.rmf.raml.model.types.AnyType
@@ -51,7 +52,7 @@ interface ApiBase extends AnnotationsFacet, TypeContainer, ResourceContainer, Pr
 	 * The default media types to use for request and response bodies (payloads),
 	 * for example "application/json".
 	 */
-	String[] mediaType
+	MediaType[] mediaType
 	
 	/*
 	 * Additional overall documentation for the API.
