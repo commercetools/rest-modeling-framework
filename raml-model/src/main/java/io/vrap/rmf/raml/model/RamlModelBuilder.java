@@ -147,7 +147,7 @@ public class RamlModelBuilder {
 
         private void mergeCrossReferences(final EObject extension, final EObject extendsEObject, final Map<String, EObject> idToEObject) {
             final List<EReference> allNonContainmentReferences = extendsEObject.eClass().getEAllReferences()
-                    .stream().filter(reference -> !reference.isContainment())
+                    .stream().filter(reference -> !reference.isContainment() && !reference.isDerived())
                     .collect(Collectors.toList());
             for (final EReference reference : allNonContainmentReferences) {
                 if (extension.eIsSet(reference)) {

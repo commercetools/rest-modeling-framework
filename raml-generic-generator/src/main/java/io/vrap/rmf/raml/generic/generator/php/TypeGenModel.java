@@ -12,7 +12,6 @@ import java.util.stream.Collectors;
 
 public class TypeGenModel {
     static final String TYPES = "Types";
-    static final String BASE = "Base";
 
     private final AnyType type;
 

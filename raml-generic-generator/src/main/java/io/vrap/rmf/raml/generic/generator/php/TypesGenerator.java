@@ -23,7 +23,6 @@ public class TypesGenerator extends AbstractTemplateGenerator {
     static final String TYPE_COLLECTION_MODEL = "collectionModel";
     static final String TYPE_COLLECTION_INTERFACE = "collectionInterface";
     static final String TYPE_MODEL_MAP = "modelMap";
-    static final String PACKAGE_NAME = "types";
     private final String vendorName;
 
     TypesGenerator(final String vendorName)
