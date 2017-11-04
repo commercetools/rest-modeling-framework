@@ -3,17 +3,14 @@ package io.vrap.rmf.raml
 import com.google.common.base.Charsets
 import io.vrap.rmf.raml.model.RamlModelBuilder
 import io.vrap.rmf.raml.model.modules.Api
-import io.vrap.rmf.raml.model.util.StringCaseFormat;
-import io.vrap.rmf.raml.persistence.RamlResourceSet
-import io.vrap.rmf.raml.persistence.ResourceFixtures;
-import org.eclipse.emf.common.util.URI;
-import org.eclipse.emf.ecore.resource.ResourceSet;
-import spock.lang.Shared;
+import io.vrap.rmf.raml.model.util.StringCaseFormat
+import io.vrap.rmf.raml.persistence.ResourceFixtures
+import org.eclipse.emf.common.util.URI
 import spock.lang.Specification
 
 import java.nio.file.Files
 import java.nio.file.Path
-import java.nio.file.Paths;
+import java.nio.file.Paths
 
 class RegressionTest extends Specification implements ResourceFixtures {
     Path featureFile
@@ -44,6 +41,7 @@ class RegressionTest extends Specification implements ResourceFixtures {
                 type: X
         ''')
         then:
+        api.eResource().errors.size() == 1
         api.types.size() == 0
         api.baseUriParameters.size() == 1
         api.baseUriParameters.get(0).type != null

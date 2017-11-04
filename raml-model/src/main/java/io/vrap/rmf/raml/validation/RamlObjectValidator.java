@@ -5,6 +5,7 @@ import org.eclipse.emf.common.util.Diagnostic;
 import org.eclipse.emf.common.util.DiagnosticChain;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.util.EObjectValidator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,10 +16,12 @@ import java.util.stream.Collectors;
  * A generic validator that checks common constraints.
  */
 public class RamlObjectValidator extends AbstractRamlValidator {
-
+    private EObjectValidator eObjectValidator = new EObjectValidator();
     @Override
     public boolean validate(final EClass eClass, final EObject eObject, final DiagnosticChain diagnostics, final Map<Object, Object> context) {
         final List<Diagnostic> validationErrors = new ArrayList<>();
+
+
 
         validationErrors.addAll(requiredAttributesMustBeSet(eClass, eObject, diagnostics));
         validationErrors.addAll(requiredStringAttributesMustBeNonEmpty(eClass, eObject, diagnostics));
@@ -27,7 +30,7 @@ public class RamlObjectValidator extends AbstractRamlValidator {
 
         validationErrors.forEach(diagnostics::add);
 
-        return validationErrors.isEmpty();
+        return validationErrors.isEmpty() && eObjectValidator.validate(eClass, eObject, diagnostics, context);
     }
 
     private List<Diagnostic> requiredAttributesMustBeSet(final EClass eClass, final EObject eObject, final DiagnosticChain diagnostics) {
