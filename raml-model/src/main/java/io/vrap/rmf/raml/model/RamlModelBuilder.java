@@ -3,6 +3,7 @@ package io.vrap.rmf.raml.model;
 import com.google.common.net.MediaType;
 import io.vrap.rmf.raml.model.facets.StringInstance;
 import io.vrap.rmf.raml.model.modules.Api;
+import io.vrap.rmf.raml.model.modules.ApiBase;
 import io.vrap.rmf.raml.model.modules.ApiExtension;
 import io.vrap.rmf.raml.model.modules.util.ModulesSwitch;
 import io.vrap.rmf.raml.model.resources.*;
@@ -40,12 +41,35 @@ public class RamlModelBuilder {
      * Builds a resolved api from the RAML file given by the uri.
      *
      * @param uri the uri to build the api from
-     * @return a resolved api
+     * @return a resolved api model result
      */
-    public Api buildApi(final URI uri) {
+    public RamlModelResult<Api> buildApi(final URI uri) {
+        final EObject rootObject = load(uri);
+        final Api resolvedApi = resolveToApi(rootObject);
+        return RamlModelResult.of(resolvedApi);
+    }
+
+    /**
+     * Builds a root object from the RAML file given by the uri.
+     *
+     * @param uri the uri to build the api from
+     * @return a model result
+     */
+    public RamlModelResult<EObject> build(final URI uri) {
+        final EObject rootObject = load(uri);
+        final EObject resolved = rootObject instanceof ApiBase ?
+                resolveToApi(rootObject) :
+                rootObject;
+        return RamlModelResult.of(resolved);
+    }
+
+    private EObject load(final URI uri) {
         final RamlResourceSet resourceSet = new RamlResourceSet();
         final Resource resource = resourceSet.getResource(uri, true);
-        final EObject rootObject = resource.getContents().get(0);
+        return resource.getContents().get(0);
+    }
+
+    private Api resolveToApi(final EObject rootObject) {
         final ApiResolver apiResolver = new ApiResolver();
         final Api resolvedApi;
         if (rootObject instanceof ApiExtension) {

@@ -2,6 +2,7 @@ package io.vrap.rmf.raml
 
 import com.google.common.base.Charsets
 import io.vrap.rmf.raml.model.RamlModelBuilder
+import io.vrap.rmf.raml.model.RamlModelResult
 import io.vrap.rmf.raml.model.modules.Api
 import io.vrap.rmf.raml.model.util.StringCaseFormat
 import io.vrap.rmf.raml.persistence.ResourceFixtures
@@ -29,7 +30,7 @@ class RegressionTest extends Specification implements ResourceFixtures {
 
     def "baseuriparameter-with-invalid-type.raml"() {
         when:
-        Api api = constructApi(
+        RamlModelResult<Api> ramlModelResult = constructApi(
                 '''\
         #%RAML 1.0
         title: Test
@@ -41,14 +42,15 @@ class RegressionTest extends Specification implements ResourceFixtures {
                 type: X
         ''')
         then:
-        api.eResource().errors.size() == 1
+        ramlModelResult.validationResults.size() == 1
+        Api api = ramlModelResult.rootObject
         api.types.size() == 0
         api.baseUriParameters.size() == 1
         api.baseUriParameters.get(0).type != null
         api.baseUriParameters.get(0).type.type.eIsProxy() == true
     }
 
-    Api constructApi(String input) {
+    RamlModelResult<Api> constructApi(String input) {
         Files.write(featureFile, input.stripIndent().getBytes(Charsets.UTF_8));
         URI i = URI.createURI(featureFile.toAbsolutePath().toUri().toString())
         return modelBuilder.buildApi(i)

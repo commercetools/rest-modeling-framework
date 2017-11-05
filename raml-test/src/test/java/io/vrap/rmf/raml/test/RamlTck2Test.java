@@ -4,9 +4,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tngtech.java.junit.dataprovider.DataProvider;
 import com.tngtech.java.junit.dataprovider.DataProviderRunner;
 import com.tngtech.java.junit.dataprovider.UseDataProvider;
+import io.vrap.rmf.raml.model.RamlModelBuilder;
+import io.vrap.rmf.raml.model.RamlModelResult;
 import org.assertj.core.util.Lists;
 import org.eclipse.emf.common.util.URI;
-import org.eclipse.emf.ecore.resource.Resource;
+import org.eclipse.emf.ecore.EObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -22,7 +24,7 @@ import java.util.stream.Collectors;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(DataProviderRunner.class)
-public class RamlTck2Test implements ResourceFixtures {
+public class RamlTck2Test {
     private class TckParseException extends Exception {
         public TckParseException(String message, Throwable cause) {
             super(message, cause);
@@ -67,17 +69,20 @@ public class RamlTck2Test implements ResourceFixtures {
     }
 
     public void tckParse(final File f, final Boolean valid, final String description) throws IOException, TckParseException {
-        final Resource resource;
         final URI fileURI = URI.createURI(f.toURI().toString());
         try {
-            resource = fromUri(fileURI);
+            final RamlModelResult<EObject> result = new RamlModelBuilder().build(fileURI);
+            if (valid) {
+                assertThat(result.getValidationResults())
+                        .describedAs(fileURI.toFileString().replace(tckURL.getPath(), "") + "(" + f.getName() + ":0) " + description)
+                        .isEmpty();
+            } else {
+                assertThat(result.getValidationResults())
+                        .describedAs(fileURI.toFileString().replace(tckURL.getPath(), "") + "(" + f.getName() + ":0) " + description)
+                        .isNotEmpty();
+            }
         } catch (Throwable e) {
             throw new TckParseException(f.toString() + "(" + f.getName() + ":0)", e);
-        }
-        if (valid) {
-            assertThat(resource.getErrors()).describedAs(fileURI.toFileString().replace(tckURL.getPath(), "") + "(" + f.getName() + ":0) " + description).isEmpty();
-        } else {
-            assertThat(resource.getErrors()).describedAs(fileURI.toFileString().replace(tckURL.getPath(), "") + "(" + f.getName() + ":0) " + description).isNotEmpty();
         }
     }
 

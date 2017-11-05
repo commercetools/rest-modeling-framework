@@ -3,15 +3,15 @@ package io.vrap.rmf.raml.model;
 import org.eclipse.emf.ecore.resource.Resource;
 
 /**
- * This class is used to report erroros as {@link Resource.Diagnostic}.
+ * This class is used to report validation results as {@link Resource.Diagnostic}.
  */
-public class RamlError implements Resource.Diagnostic {
+public class RamlDiagnostic implements Resource.Diagnostic {
     private final String message;
     private final String location;
     private final int line;
     private final int column;
 
-    private RamlError(final String message, final String location, final int line, final int column) {
+    private RamlDiagnostic(final String message, final String location, final int line, final int column) {
         this.message = message;
         this.location = location;
         this.line = line;
@@ -40,7 +40,7 @@ public class RamlError implements Resource.Diagnostic {
 
     @Override
     public String toString() {
-        return "RamlError{" +
+        return "RamlDiagnostic{" +
                 "message='" + message + '\'' +
                 ", location='" + location + '\'' +
                 ", line=" + line +
@@ -48,7 +48,7 @@ public class RamlError implements Resource.Diagnostic {
                 '}';
     }
 
-    public static RamlError of(final String message, final String location, final int line, final int column) {
-        return new RamlError(message, location, line, column);
+    public static RamlDiagnostic of(final String message, final String location, final int line, final int column) {
+        return new RamlDiagnostic(message, location, line, column);
     }
 }
