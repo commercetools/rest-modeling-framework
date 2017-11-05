@@ -1,5 +1,6 @@
 package io.vrap.rmf.raml.persistence.constructor;
 
+import com.damnhandy.uri.template.MalformedUriTemplateException;
 import com.damnhandy.uri.template.UriTemplate;
 import io.vrap.rmf.raml.model.modules.Api;
 import io.vrap.rmf.raml.model.modules.Document;
@@ -93,10 +94,16 @@ public class ApiConstructor extends BaseConstructor {
     @Override
     public Object visitBaseUriFacet(RAMLParser.BaseUriFacetContext ctx) {
         final String baseUriText = ctx.baseUri.getText();
-        final UriTemplate uriTemplate = (UriTemplate) ResourcesFactory.eINSTANCE.createFromString(ResourcesPackage.Literals.URI_TEMPLATE, baseUriText);
-        scope.with(API_BASE__BASE_URI).setValue(uriTemplate, ctx.getStart());
+        try {
+            final UriTemplate uriTemplate = (UriTemplate) ResourcesFactory.eINSTANCE
+                    .createFromString(ResourcesPackage.Literals.URI_TEMPLATE, baseUriText);
+            scope.with(API_BASE__BASE_URI).setValue(uriTemplate, ctx.getStart());
 
-        return uriTemplate;
+            return uriTemplate;
+        } catch (final MalformedUriTemplateException uriTemplateException) {
+            scope.addError(uriTemplateException.getMessage(), ctx);
+            return null;
+        }
     }
 
 
