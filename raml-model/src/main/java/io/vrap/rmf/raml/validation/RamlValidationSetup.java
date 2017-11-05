@@ -16,7 +16,7 @@ import java.util.List;
 /**
  * This interface provides methods to setup the RAML metamodel.
  */
-public interface RamlModelSetup {
+public interface RamlValidationSetup {
     List<EPackage> PACKAGES = Arrays.asList(
             ElementsPackage.eINSTANCE, FacetsPackage.eINSTANCE, ModulesPackage.eINSTANCE, ResourcesPackage.eINSTANCE,
             ResponsesPackage.eINSTANCE, SecurityPackage.eINSTANCE, TypesPackage.eINSTANCE);

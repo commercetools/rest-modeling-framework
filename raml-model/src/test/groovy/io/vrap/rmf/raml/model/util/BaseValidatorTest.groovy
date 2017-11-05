@@ -1,6 +1,6 @@
 package io.vrap.rmf.raml.model.util
 
-import io.vrap.rmf.raml.validation.RamlModelSetup
+import io.vrap.rmf.raml.validation.RamlValidationSetup
 import org.eclipse.emf.common.util.BasicDiagnostic
 import org.eclipse.emf.common.util.Diagnostic
 import org.eclipse.emf.ecore.EObject
@@ -14,7 +14,7 @@ abstract class BaseValidatorTest extends Specification {
     protected Diagnostic diagnostic
 
     def setupSpec() {
-        RamlModelSetup.setup()
+        RamlValidationSetup.setup()
     }
 
     def setup() {

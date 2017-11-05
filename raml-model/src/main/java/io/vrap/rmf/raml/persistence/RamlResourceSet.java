@@ -1,7 +1,7 @@
 package io.vrap.rmf.raml.persistence;
 
 import io.vrap.rmf.raml.model.types.BuiltinType;
-import io.vrap.rmf.raml.validation.RamlModelSetup;
+import io.vrap.rmf.raml.validation.RamlValidationSetup;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.ContentHandler;
 import org.eclipse.emf.ecore.resource.Resource;
@@ -21,7 +21,7 @@ public class RamlResourceSet extends ResourceSetImpl {
             .collect(Collectors.joining(", "));
 
     static {
-        RamlModelSetup.setup(); //  TODO put setup somewhere else
+        RamlValidationSetup.setup(); //  TODO put setup somewhere else
     }
 
     public RamlResourceSet() {
