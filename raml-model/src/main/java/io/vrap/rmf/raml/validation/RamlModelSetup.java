@@ -30,6 +30,7 @@ public interface RamlModelSetup {
         registry.put(TypesPackage.eINSTANCE, new TypesValidator());
         registry.put(ModulesPackage.eINSTANCE, new ModulesValidator());
         registry.put(ResourcesPackage.eINSTANCE, new ResourcesValidator());
+        registry.put(ResponsesPackage.eINSTANCE, new ResponsesValidator());
 
         final RamlObjectValidator ramlObjectValidator = new RamlObjectValidator();
         for (final EPackage ePackage : PACKAGES) {
