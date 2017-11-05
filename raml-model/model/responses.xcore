@@ -43,7 +43,7 @@ class Body extends AnnotationsFacet, TypedElement {
 	@Ecore(invariant = "true")
 	op boolean contentTypesDefined(EDiagnosticChain diagnostics,EMap<Object,Object> context) {
 		val api = getRootContainer(false) as ApiBase
-		val contentTypesDefined = api == null || api.mediaType.size > 0 || contentTypes.size > 0
+		val contentTypesDefined = api === null || api.mediaType.size > 0 || contentTypes.size > 0
 		if (!contentTypesDefined) {
 			diagnostics.add(new BasicDiagnostic(Diagnostic.ERROR, null, -1, "Content type missing", 
 				<Object>newArrayList(this)))		

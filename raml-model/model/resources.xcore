@@ -165,7 +165,7 @@ class Method extends MethodBase {
 	 * The name of the method.
 	 */
 	derived String methodName get {
-		if (method != null) method.getName() else ""
+		if (method !== null) method.getName() else ""
 	} 
 }
 
