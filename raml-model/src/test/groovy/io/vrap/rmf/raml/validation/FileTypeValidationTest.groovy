@@ -1,9 +1,7 @@
 package io.vrap.rmf.raml.validation
 
 import io.vrap.rmf.raml.model.types.FileType
-import io.vrap.rmf.raml.model.types.StringType
 import io.vrap.rmf.raml.model.types.TypesFactory
-import io.vrap.rmf.raml.model.util.BaseValidatorTest
 
 class FileTypeValidationTest extends BaseValidatorTest {
     FileType fileType

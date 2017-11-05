@@ -1,4 +1,4 @@
-package io.vrap.rmf.raml.model.util
+package io.vrap.rmf.raml.validation
 
 import io.vrap.rmf.raml.validation.RamlValidationSetup
 import org.eclipse.emf.common.util.BasicDiagnostic

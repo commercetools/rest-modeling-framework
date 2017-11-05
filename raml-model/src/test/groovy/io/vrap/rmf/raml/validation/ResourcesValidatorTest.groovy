@@ -4,7 +4,6 @@ import io.vrap.rmf.raml.model.resources.Method
 import io.vrap.rmf.raml.model.resources.Resource
 import io.vrap.rmf.raml.model.resources.ResourceType
 import io.vrap.rmf.raml.model.resources.ResourcesFactory
-import io.vrap.rmf.raml.model.util.BaseValidatorTest
 import org.eclipse.emf.common.util.Diagnostic
 
 /**

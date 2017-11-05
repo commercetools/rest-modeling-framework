@@ -2,7 +2,6 @@ package io.vrap.rmf.raml.validation
 
 import io.vrap.rmf.raml.model.types.NumberType
 import io.vrap.rmf.raml.model.types.TypesFactory
-import io.vrap.rmf.raml.model.util.BaseValidatorTest
 
 class NumberTypeValidationTest extends BaseValidatorTest {
     NumberType numberType

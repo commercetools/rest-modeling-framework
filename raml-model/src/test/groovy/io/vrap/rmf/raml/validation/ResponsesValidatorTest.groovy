@@ -8,7 +8,6 @@ import io.vrap.rmf.raml.model.resources.Resource
 import io.vrap.rmf.raml.model.resources.ResourcesFactory
 import io.vrap.rmf.raml.model.responses.Body
 import io.vrap.rmf.raml.model.responses.ResponsesFactory
-import io.vrap.rmf.raml.model.util.BaseValidatorTest
 import org.eclipse.emf.common.util.Diagnostic
 
 /**
