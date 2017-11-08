@@ -196,55 +196,21 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
     }
 
     @Override
-    public Object visitBodyContentTypeFacet(RAMLParser.BodyContentTypeFacetContext bodyContentType) {
-        final Body body = create(BODY, bodyContentType);
-        scope.setValue(body, bodyContentType.getStart());
+    public Object visitBodyContentTypeFacet(final RAMLParser.BodyContentTypeFacetContext bodyContentType) {
+        final RAMLParser.BodyTypeFacetContext bodyTypeFacet = bodyContentType.bodyTypeFacet();
+
+        final Body body;
+        if (bodyTypeFacet != null) {
+            body = (Body) visitBodyTypeFacet(bodyTypeFacet);
+        } else {
+            body = create(BODY, bodyContentType);
+            scope.setValue(body, bodyContentType.getStart());
+        }
         if (bodyContentType.contentType != null) {
             final MediaType contentType = (MediaType) FacetsFactory.eINSTANCE.createFromString(MEDIA_TYPE, bodyContentType.contentType.getText());
             body.getContentTypes().add(contentType);
         }
-        return withinScope(scope.with(body), bodyScope -> {
-            AnyType type = withinScope(scope.with(TYPED_ELEMENT__TYPE),
-                    typedElementTypeScope -> {
-                        AnyType anyType = null;
-                        if (bodyContentType.typeFacet().size() == 1) {
-                            anyType = (AnyType) visitTypeFacet(bodyContentType.typeFacet(0));
-                        } else if (bodyContentType.propertiesFacet().size() == 1) {
-                            anyType = (AnyType) scope.getEObjectByName(BuiltinType.OBJECT.getName());
-                        }
-                        if (anyType == null) {
-                            anyType = (AnyType) scope.getEObjectByName(BuiltinType.ANY.getName());
-                        }
-                        return anyType;
-                    });
-            // inline type declaration
-            final boolean isInlineTypeDeclaration =
-                    bodyContentType.attributeFacet().size() > 0 || bodyContentType.propertiesFacet().size() > 0 ||
-                            bodyContentType.exampleFacet().size() > 0 || bodyContentType.examplesFacet().size() > 0 ||
-                            bodyContentType.defaultFacet().size() > 0 || bodyContentType.enumFacet().size() > 0 ||
-                            bodyContentType.itemsFacet().size() > 0;
-            if (isInlineTypeDeclaration) {
-                type = inlineTypeDeclaration(type, bodyScope, bodyContentType);
-                withinScope(scope.with(type),
-                        inlineTypeDeclarationScope -> {
-                            bodyContentType.attributeFacet().forEach(this::visitAttributeFacet);
-                            bodyContentType.propertiesFacet().forEach(this::visitPropertiesFacet);
-                            bodyContentType.exampleFacet().forEach(this::visitExampleFacet);
-                            bodyContentType.examplesFacet().forEach(this::visitExamplesFacet);
-                            bodyContentType.defaultFacet().forEach(this::visitDefaultFacet);
-                            bodyContentType.enumFacet().forEach(this::visitEnumFacet);
-                            bodyContentType.itemsFacet().forEach(this::visitItemsFacet);
-
-                            return inlineTypeDeclarationScope.eObject();
-                        });
-            }
-            bodyScope.with(TYPED_ELEMENT__TYPE).setValue(type, bodyContentType.getStart());
-
-            bodyContentType.annotationFacet().forEach(this::visitAnnotationFacet);
-            bodyContentType.propertiesFacet().forEach(this::visitPropertiesFacet);
-
-            return body;
-        });
+        return body;
     }
 
     @Override
@@ -656,7 +622,7 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
             method.setRequired(required);
             httpMethodText = required ?
                     httpMethodText :
-                    httpMethodText.substring(0, httpMethodText.length() - 1) ;
+                    httpMethodText.substring(0, httpMethodText.length() - 1);
             final HttpMethod httpMethod = (HttpMethod) ResourcesFactory.eINSTANCE.createFromString(HTTP_METHOD, httpMethodText);
             method.setMethod(httpMethod);
             methodsScope.setValue(method, methodFacet.getStart());
