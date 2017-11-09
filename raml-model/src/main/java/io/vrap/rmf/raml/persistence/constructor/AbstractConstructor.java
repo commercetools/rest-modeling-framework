@@ -197,11 +197,11 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
 
     @Override
     public Object visitBodyContentTypeFacet(final RAMLParser.BodyContentTypeFacetContext bodyContentType) {
-        final RAMLParser.BodyTypeFacetContext bodyTypeFacet = bodyContentType.bodyTypeFacet();
+        final RAMLParser.BodyFacetsContext bodyFacets = bodyContentType.bodyFacets();
 
         final Body body;
-        if (bodyTypeFacet != null) {
-            body = (Body) visitBodyTypeFacet(bodyTypeFacet);
+        if (bodyFacets != null) {
+            body = (Body) visitBodyFacets(bodyFacets);
         } else {
             body = create(BODY, bodyContentType);
             scope.setValue(body, bodyContentType.getStart());
@@ -214,17 +214,17 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
     }
 
     @Override
-    public Object visitBodyTypeFacet(RAMLParser.BodyTypeFacetContext bodyFacet) {
-        final Body body = create(BODY, bodyFacet);
-        scope.setValue(body, bodyFacet.getStart());
+    public Object visitBodyFacets(RAMLParser.BodyFacetsContext bodyFacets) {
+        final Body body = create(BODY, bodyFacets);
+        scope.setValue(body, bodyFacets.getStart());
 
         return withinScope(scope.with(body), bodyScope -> {
             AnyType type = withinScope(scope.with(TYPED_ELEMENT__TYPE),
                     typedElementTypeScope -> {
                         AnyType anyType = null;
-                        if (bodyFacet.typeFacet().size() == 1) {
-                            anyType = (AnyType) visitTypeFacet(bodyFacet.typeFacet(0));
-                        } else if (bodyFacet.propertiesFacet().size() == 1) {
+                        if (bodyFacets.typeFacet().size() == 1) {
+                            anyType = (AnyType) visitTypeFacet(bodyFacets.typeFacet(0));
+                        } else if (bodyFacets.propertiesFacet().size() == 1) {
                             anyType = (AnyType) scope.getEObjectByName(BuiltinType.OBJECT.getName());
                         }
                         if (anyType == null) {
@@ -234,28 +234,28 @@ public abstract class AbstractConstructor extends AbstractScopedVisitor<Object> 
                     });
             // inline type declaration
             final boolean isInlineTypeDeclaration =
-                    bodyFacet.attributeFacet().size() > 0 || bodyFacet.propertiesFacet().size() > 0 ||
-                            bodyFacet.exampleFacet().size() > 0 || bodyFacet.examplesFacet().size() > 0 ||
-                            bodyFacet.defaultFacet().size() > 0 || bodyFacet.enumFacet().size() > 0 ||
-                            bodyFacet.itemsFacet().size() > 0;
+                    bodyFacets.attributeFacet().size() > 0 || bodyFacets.propertiesFacet().size() > 0 ||
+                            bodyFacets.exampleFacet().size() > 0 || bodyFacets.examplesFacet().size() > 0 ||
+                            bodyFacets.defaultFacet().size() > 0 || bodyFacets.enumFacet().size() > 0 ||
+                            bodyFacets.itemsFacet().size() > 0;
             if (isInlineTypeDeclaration) {
-                type = inlineTypeDeclaration(type, bodyScope, bodyFacet);
+                type = inlineTypeDeclaration(type, bodyScope, bodyFacets);
                 withinScope(scope.with(type),
                         inlineTypeDeclarationScope -> {
-                            bodyFacet.attributeFacet().forEach(this::visitAttributeFacet);
-                            bodyFacet.propertiesFacet().forEach(this::visitPropertiesFacet);
-                            bodyFacet.exampleFacet().forEach(this::visitExampleFacet);
-                            bodyFacet.examplesFacet().forEach(this::visitExamplesFacet);
-                            bodyFacet.defaultFacet().forEach(this::visitDefaultFacet);
-                            bodyFacet.enumFacet().forEach(this::visitEnumFacet);
-                            bodyFacet.itemsFacet().forEach(this::visitItemsFacet);
+                            bodyFacets.attributeFacet().forEach(this::visitAttributeFacet);
+                            bodyFacets.propertiesFacet().forEach(this::visitPropertiesFacet);
+                            bodyFacets.exampleFacet().forEach(this::visitExampleFacet);
+                            bodyFacets.examplesFacet().forEach(this::visitExamplesFacet);
+                            bodyFacets.defaultFacet().forEach(this::visitDefaultFacet);
+                            bodyFacets.enumFacet().forEach(this::visitEnumFacet);
+                            bodyFacets.itemsFacet().forEach(this::visitItemsFacet);
 
                             return inlineTypeDeclarationScope.eObject();
                         });
             }
-            bodyScope.with(TYPED_ELEMENT__TYPE).setValue(type, bodyFacet.getStart());
+            bodyScope.with(TYPED_ELEMENT__TYPE).setValue(type, bodyFacets.getStart());
 
-            bodyFacet.annotationFacet().forEach(this::visitAnnotationFacet);
+            bodyFacets.annotationFacet().forEach(this::visitAnnotationFacet);
 
             return body;
         });
