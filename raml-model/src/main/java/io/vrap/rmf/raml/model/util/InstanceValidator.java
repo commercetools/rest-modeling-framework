@@ -50,7 +50,7 @@ public class InstanceValidator {
                 if (stringType.getMaxLength() != null && value.length() > stringType.getMaxLength()) {
                     validationResults.add(createValidationError("Value length > maxLength", stringInstance));
                 }
-                if (stringType.getPattern() != null && !RegExp.of(stringType.getPattern()).test(value)) {
+                if (stringType.getPattern() != null && !stringType.getPattern().test(value)) {
                     validationResults.add(createValidationError("Value doesn't match pattern "
                             + stringType.getPattern(), stringInstance));
                 }
