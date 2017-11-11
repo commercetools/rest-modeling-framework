@@ -1,6 +1,7 @@
 package io.vrap.rmf.raml.test
 
 import io.vrap.rmf.raml.model.RamlModelBuilder
+import io.vrap.rmf.raml.model.RamlModelResult
 import io.vrap.rmf.raml.model.modules.Api
 import org.eclipse.emf.common.util.URI
 import spock.lang.Shared
@@ -16,16 +17,16 @@ class RamlModelBuilderTest extends Specification implements ResourceFixtures {
     def "should resolve ct api"() {
         when:
         URI uri = uriFromClasspath("/commercetools-api-reference-master/api.raml")
-        Api api = modelBuilder.buildApi(uri)
+        RamlModelResult<Api> ramlModelResult = modelBuilder.buildApi(uri)
         then:
-        api != null
+        ramlModelResult.validationResults.empty == true
     }
 
     def "should resolve ct api extension"() {
         when:
         URI uri = uriFromClasspath("/commercetools-api-reference-master/update-actions.raml")
-        Api api = modelBuilder.buildApi(uri)
+        RamlModelResult<Api> ramlModelResult = modelBuilder.buildApi(uri)
         then:
-        api != null
+        ramlModelResult.validationResults.empty == true
     }
 }

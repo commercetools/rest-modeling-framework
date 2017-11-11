@@ -21,8 +21,10 @@ class RamlModelBuilderTest extends Specification implements ResourceFixtures {
     def "should resolve resource types of a resource"() {
         when:
         URI uri = uriFromClasspath("/resourcetypes/api-with-resource-types.raml")
-        Api api = modelBuilder.buildApi(uri)
+        RamlModelResult<Api> ramlModelResult = modelBuilder.buildApi(uri)
         then:
+        ramlModelResult.validationResults.empty == true
+        Api api = ramlModelResult.rootObject
         AnyType user = api.getType('User')
         AnyType userDraft = api.getType('UserDraft')
         api.resources.size() == 1
@@ -61,8 +63,10 @@ class RamlModelBuilderTest extends Specification implements ResourceFixtures {
     def "union resource type"() {
         when:
         URI uri = uriFromClasspath('/api/resource-type-application.raml')
-        Api api = modelBuilder.buildApi(uri)
+        RamlModelResult<Api> ramlModelResult = modelBuilder.buildApi(uri)
         then:
+        ramlModelResult.validationResults.empty == true
+        Api api = ramlModelResult.rootObject
         api.resources.size() == 1
         api.resources[0].getMethod(HttpMethod.GET) != null
         api.resources[0].getMethod(HttpMethod.GET).responses.size() == 1
@@ -74,8 +78,10 @@ class RamlModelBuilderTest extends Specification implements ResourceFixtures {
     def "load extension and merge it"() {
         when:
         URI uri = uriFromClasspath("/extensions/extension.raml")
-        Api api = modelBuilder.buildApi(uri)
+        RamlModelResult<Api> ramlModelResult = modelBuilder.buildApi(uri)
         then:
+        ramlModelResult.validationResults.empty == true
+        Api api = ramlModelResult.rootObject
         api.resources.size() == 1
         api.resources[0].methods.size() == 1
         api.resources[0].methods[0].method == HttpMethod.POST

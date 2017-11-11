@@ -49,10 +49,10 @@ public class StaticGenerator extends AbstractTemplateGenerator {
         st.add("vendorName", vendorName);
         final String t = staticFile.getName();
         if (staticFile.getName().equals("ResourceClassMap.php.stg")) {
-            st.add("package", TypesGenerator.PACKAGE_NAME);
+            st.add("package", TypeGenModel.TYPES);
         }
         if (staticFile.getName().equals("Config.php.stg")) {
-            final String apiUri = api.getBaseUri().toString();
+            final String apiUri = api.getBaseUri().getTemplate();
             final String authUri = api.getSecuritySchemes().stream()
                     .filter(securityScheme -> securityScheme.getSettings() instanceof OAuth20Settings)
                     .map(securityScheme -> ((OAuth20Settings)securityScheme.getSettings()).getAccessTokenUri())

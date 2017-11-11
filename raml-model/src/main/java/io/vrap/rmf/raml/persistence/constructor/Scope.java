@@ -1,6 +1,6 @@
 package io.vrap.rmf.raml.persistence.constructor;
 
-import io.vrap.rmf.raml.model.RamlError;
+import io.vrap.rmf.raml.model.RamlDiagnostic;
 import io.vrap.rmf.raml.model.modules.ApiExtension;
 import io.vrap.rmf.raml.model.modules.Library;
 import io.vrap.rmf.raml.model.modules.LibraryUse;
@@ -262,7 +262,7 @@ public class Scope {
         final String location = optionalToken.map(RamlToken::getLocation).orElse("<UNKNOWN>");
 
         resource.getErrors()
-                .add(RamlError.of(message, location, line, column));
+                .add(RamlDiagnostic.of(message, location, line, column));
     }
 
     /**

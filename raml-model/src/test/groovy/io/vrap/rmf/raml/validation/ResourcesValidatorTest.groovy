@@ -1,21 +1,15 @@
-package io.vrap.rmf.raml.model.util
+package io.vrap.rmf.raml.validation
 
-import io.vrap.rmf.raml.model.modules.Api
-import io.vrap.rmf.raml.model.modules.ModulesFactory
-import io.vrap.rmf.raml.model.modules.util.ModulesValidator
 import io.vrap.rmf.raml.model.resources.Method
 import io.vrap.rmf.raml.model.resources.Resource
 import io.vrap.rmf.raml.model.resources.ResourceType
 import io.vrap.rmf.raml.model.resources.ResourcesFactory
-import org.eclipse.emf.common.util.BasicDiagnostic
 import org.eclipse.emf.common.util.Diagnostic
-import org.eclipse.emf.ecore.util.Diagnostician
-import spock.lang.Specification
 
 /**
- * Unit tests for {@link io.vrap.rmf.raml.model.resources.util.ResourcesValidator}
+ * Unit tests for {@link io.vrap.rmf.raml.validation.ResourcesValidator}
  */
-class ResourcesValidatorTest extends Specification {
+class ResourcesValidatorTest extends BaseValidatorTest {
 
     def "should report optional methods defined in a resource"() {
         when:
@@ -23,9 +17,8 @@ class ResourcesValidatorTest extends Specification {
         Method optionalMethod = ResourcesFactory.eINSTANCE.createMethod()
         optionalMethod.setRequired(false)
         resource.methods.add(optionalMethod)
-        BasicDiagnostic diagnostic = new BasicDiagnostic()
         then:
-        Diagnostician.INSTANCE.validate(resource, diagnostic, new HashMap<Object, Object>()) == false
+        validate(resource) == false
         diagnostic.severity != Diagnostic.OK
     }
 
@@ -35,9 +28,8 @@ class ResourcesValidatorTest extends Specification {
         Method optionalMethod = ResourcesFactory.eINSTANCE.createMethod()
         optionalMethod.setRequired(false)
         resourceType.methods.add(optionalMethod)
-        BasicDiagnostic diagnostic = new BasicDiagnostic()
         then:
-        Diagnostician.INSTANCE.validate(resourceType, diagnostic, new HashMap<Object, Object>()) == true
+        validate(resourceType) == true
         diagnostic.severity == Diagnostic.OK
     }
 }

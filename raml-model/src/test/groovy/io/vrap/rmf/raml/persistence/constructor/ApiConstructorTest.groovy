@@ -1,14 +1,15 @@
 package io.vrap.rmf.raml.persistence.constructor
 
+import com.damnhandy.uri.template.Expression
+import com.damnhandy.uri.template.Literal
+import com.google.common.net.MediaType
 import io.vrap.rmf.raml.model.facets.ArrayInstance
 import io.vrap.rmf.raml.model.facets.ObjectInstance
 import io.vrap.rmf.raml.model.facets.StringInstance
 import io.vrap.rmf.raml.model.modules.Api
 import io.vrap.rmf.raml.model.resources.HttpMethod
 import io.vrap.rmf.raml.model.resources.Resource
-import io.vrap.rmf.raml.model.resources.UriTemplateExpression
-import io.vrap.rmf.raml.model.resources.UriTemplateLiteral
-import io.vrap.rmf.raml.model.responses.BodyType
+import io.vrap.rmf.raml.model.responses.Body
 import io.vrap.rmf.raml.model.security.OAuth20Settings
 import io.vrap.rmf.raml.model.types.IntegerType
 import io.vrap.rmf.raml.model.types.ObjectType
@@ -319,7 +320,7 @@ class ApiConstructorTest extends Specification {
         api.traits[0].responses[0].statusCode == '409'
         api.traits[0].responses[0].description == 'Conflict'
         api.traits[0].responses[0].bodies.size() == 1
-        api.traits[0].responses[0].bodies[0].contentTypes == [ 'application/json' ]
+        api.traits[0].responses[0].bodies[0].contentTypes == [ MediaType.parse('application/json') ]
 
         api.resources.size() == 1
         api.resources[0].methods.size() == 1
@@ -373,7 +374,7 @@ class ApiConstructorTest extends Specification {
         then:
         api.title == 'Simple API'
         api.protocols == [ 'http', 'https' ]
-        api.mediaType == ['application/json']
+        api.mediaType == [ MediaType.parse('application/json') ]
     }
 
     def "base uri and base uri parameters"() {
@@ -386,22 +387,22 @@ class ApiConstructorTest extends Specification {
         ''')
 
         then:
-        api.baseUri.parts.size() == 4
-        api.baseUri.parts[0] instanceof UriTemplateLiteral
-        UriTemplateLiteral uriTemplateLiteral = api.baseUri.parts[0]
-        uriTemplateLiteral.literal == 'https://api.simple.com/'
+        api.baseUri.components.size() == 4
+        api.baseUri.components[0] instanceof Literal
+        Literal literal = api.baseUri.components[0]
+        literal.value == 'https://api.simple.com/'
 
-        api.baseUri.parts[1] instanceof UriTemplateExpression
-        UriTemplateExpression versionTemplateExpression = api.baseUri.parts[1]
-        versionTemplateExpression.variables.size() == 1
-        versionTemplateExpression.variables[0] == 'version'
+        api.baseUri.components[1] instanceof Expression
+        Expression versionTemplateExpression = api.baseUri.components[1]
+        versionTemplateExpression.varSpecs.size() == 1
+        versionTemplateExpression.varSpecs[0].variableName == 'version'
 
-        api.baseUri.parts[2] instanceof UriTemplateLiteral
+        api.baseUri.components[2] instanceof Literal
 
-        api.baseUri.parts[3] instanceof UriTemplateExpression
-        UriTemplateExpression userIdTemplateExpression = api.baseUri.parts[3]
-        userIdTemplateExpression.variables.size() == 1
-        userIdTemplateExpression.variables[0] == 'userId'
+        api.baseUri.components[3] instanceof Expression
+        Expression userIdTemplateExpression = api.baseUri.components[3]
+        userIdTemplateExpression.varSpecs.size() == 1
+        userIdTemplateExpression.varSpecs[0].variableName == 'userId'
 
         api.baseUriParameters.size() == 1
         api.baseUriParameters[0].name == 'userId'
@@ -425,8 +426,8 @@ class ApiConstructorTest extends Specification {
         api.resources.size() == 1
         api.securitySchemes.size() == 1
         Resource resource = api.resources[0]
-        resource.relativeUri.parts.size() == 1
-        resource.relativeUri.parts[0] instanceof UriTemplateLiteral
+        resource.relativeUri.components.size() == 1
+        resource.relativeUri.components[0] instanceof Literal
         resource.description == 'User endpoint'
         resource.displayName == 'Users'
         resource.securedBy.size() == 1
@@ -445,9 +446,9 @@ class ApiConstructorTest extends Specification {
         then:
         api.resources.size() == 1
         Resource resource = api.resources[0]
-        resource.relativeUri.parts.size() == 2
-        resource.relativeUri.parts[0] instanceof UriTemplateLiteral
-        resource.relativeUri.parts[1] instanceof UriTemplateExpression
+        resource.relativeUri.components.size() == 2
+        resource.relativeUri.components[0] instanceof Literal
+        resource.relativeUri.components[1] instanceof Expression
         resource.uriParameters.size() == 1
         resource.uriParameters[0].name == 'userId'
         resource.uriParameters[0].type.name == 'integer'
@@ -471,13 +472,13 @@ class ApiConstructorTest extends Specification {
         api.resources.size() == 1
         api.securitySchemes.size() == 1
         Resource resource = api.resources[0]
-        resource.relativeUri.parts.size() == 1
-        resource.relativeUri.parts[0] instanceof UriTemplateLiteral
+        resource.relativeUri.components.size() == 1
+        resource.relativeUri.components[0] instanceof Literal
         resource.resources.size() == 1
         Resource subResource = resource.resources[0]
-        subResource.relativeUri.parts.size() == 2
-        subResource.relativeUri.parts[0] instanceof UriTemplateLiteral
-        subResource.relativeUri.parts[1] instanceof UriTemplateExpression
+        subResource.relativeUri.components.size() == 2
+        subResource.relativeUri.components[0] instanceof Literal
+        subResource.relativeUri.components[1] instanceof Expression
         subResource.uriParameters.size() == 1
         subResource.uriParameters[0].name == 'userId'
         subResource.uriParameters[0].type.name == 'integer'
@@ -503,10 +504,10 @@ class ApiConstructorTest extends Specification {
         api.resources[0].methods[0].description == 'get something'
         api.resources[0].methods[1].method == HttpMethod.POST
         api.resources[0].resources.size() == 1
-        api.resources[0].resources[0].relativeUri.parts.size() == 1
-        api.resources[0].resources[0].relativeUri.parts[0] instanceof UriTemplateLiteral
-        UriTemplateLiteral uriTemplateLiteral = api.resources[0].resources[0].relativeUri.parts[0]
-        uriTemplateLiteral.literal == '/child'
+        api.resources[0].resources[0].relativeUri.components.size() == 1
+        api.resources[0].resources[0].relativeUri.components[0] instanceof Literal
+        Literal uriTemplateLiteral = api.resources[0].resources[0].relativeUri.components[0]
+        uriTemplateLiteral.value == '/child'
     }
 
     def "resource and method with responses"() {
@@ -534,13 +535,13 @@ class ApiConstructorTest extends Specification {
 
         api.resources[0].methods[0].responses[0].statusCode == '200'
         api.resources[0].methods[0].responses[0].bodies.size() == 1
-        api.resources[0].methods[0].responses[0].bodies[0].contentTypes == [ 'application/json' ]
+        api.resources[0].methods[0].responses[0].bodies[0].contentTypes == [MediaType.parse('application/json') ]
         api.resources[0].methods[0].responses[0].bodies[0].type instanceof ObjectType
         api.resources[0].methods[0].responses[0].bodies[0].type.name == 'object'
 
         api.resources[0].methods[0].responses[1].statusCode == '401'
         api.resources[0].methods[0].responses[1].bodies.size() == 1
-        api.resources[0].methods[0].responses[1].bodies[0].contentTypes == [ 'application/json' ]
+        api.resources[0].methods[0].responses[1].bodies[0].contentTypes == [MediaType.parse('application/json') ]
         api.resources[0].methods[0].responses[1].bodies[0].type instanceof StringType
         api.resources[0].methods[0].responses[1].bodies[0].type.name == 'string'
     }
@@ -636,10 +637,10 @@ class ApiConstructorTest extends Specification {
         api.resources.size() == 1
         api.resources[0].methods.size() == 2
         api.resources[0].methods[0].bodies.size() == 1
-        api.resources[0].methods[0].bodies[0].contentTypes == [ 'application/json' ]
+        api.resources[0].methods[0].bodies[0].contentTypes == [MediaType.parse('application/json') ]
         api.resources[0].methods[0].bodies[0].type instanceof StringType
         api.resources[0].methods[1].bodies.size() == 1
-        api.resources[0].methods[1].bodies[0].contentTypes == [ 'application/xml' ]
+        api.resources[0].methods[1].bodies[0].contentTypes == [ MediaType.parse('application/xml') ]
         api.resources[0].methods[1].bodies[0].name == null
         api.resources[0].methods[1].bodies[0].type instanceof IntegerType
         IntegerType integerType = api.resources[0].methods[1].bodies[0].type
@@ -663,9 +664,9 @@ class ApiConstructorTest extends Specification {
         api.resources.size() == 1
         api.resources[0].methods.size() == 1
         api.resources[0].methods[0].bodies.size() == 2
-        api.resources[0].methods[0].bodies[0].contentTypes == [ 'application/json' ]
+        api.resources[0].methods[0].bodies[0].contentTypes == [ MediaType.parse('application/json') ]
         api.resources[0].methods[0].bodies[0].type instanceof StringType
-        api.resources[0].methods[0].bodies[1].contentTypes == [ 'application/xml' ]
+        api.resources[0].methods[0].bodies[1].contentTypes == [ MediaType.parse('application/xml') ]
         api.resources[0].methods[0].bodies[1].name == null
         api.resources[0].methods[0].bodies[1].type instanceof IntegerType
         IntegerType integerType = api.resources[0].methods[0].bodies[1].type
@@ -713,9 +714,9 @@ class ApiConstructorTest extends Specification {
         api.resources.size() == 1
         api.resources[0].methods.size() == 1
         api.resources[0].methods[0].bodies.size() == 1
-        BodyType bodyType = api.resources[0].methods[0].bodies[0]
-        bodyType.type instanceof ObjectType
-        ObjectType objectType = bodyType.type
+        Body body = api.resources[0].methods[0].bodies[0]
+        body.type instanceof ObjectType
+        ObjectType objectType = body.type
         objectType.properties.size() == 1
         objectType.getProperty('name') != null
         objectType.getProperty('name').type instanceof StringType
@@ -742,10 +743,10 @@ class ApiConstructorTest extends Specification {
         api.resources[0].is[0].trait == api.traits[0]
         api.resources[0].methods.size() == 1
         api.resources[0].methods[0].bodies.size() == 1
-        BodyType bodyType = api.resources[0].methods[0].bodies[0]
-        bodyType.contentTypes == [ 'application/json' ]
-        bodyType.type instanceof ObjectType
-        ObjectType objectType = bodyType.type
+        Body body = api.resources[0].methods[0].bodies[0]
+        body.contentTypes == [ MediaType.parse('application/json') ]
+        body.type instanceof ObjectType
+        ObjectType objectType = body.type
         objectType.properties.size() == 1
         objectType.getProperty('name') != null
         objectType.getProperty('name').type instanceof StringType

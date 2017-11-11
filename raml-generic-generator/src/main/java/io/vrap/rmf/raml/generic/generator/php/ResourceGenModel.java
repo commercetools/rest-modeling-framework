@@ -1,6 +1,9 @@
 package io.vrap.rmf.raml.generic.generator.php;
 
-import io.vrap.rmf.raml.model.resources.*;
+import com.damnhandy.uri.template.Expression;
+import com.damnhandy.uri.template.UriTemplate;
+import com.damnhandy.uri.template.impl.VarSpec;
+import io.vrap.rmf.raml.model.resources.Resource;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -51,7 +54,7 @@ public class ResourceGenModel {
     }
 
     public List<ResourceGenModel> getResourcesWithParams() {
-        return getResources().stream().filter(resourceGenModel -> resourceGenModel.getResource().getRelativeUri().getParts().size() > 1).collect(Collectors.toList());
+        return getResources().stream().filter(resourceGenModel -> resourceGenModel.getResource().getRelativeUri().getComponents().size() > 1).collect(Collectors.toList());
     }
 
     public List<RequestGenModel> getMethods() {
@@ -59,15 +62,15 @@ public class ResourceGenModel {
     }
 
     public Boolean getHasParams() {
-        return resource.getRelativeUri().getParts().size() > 1;
+        return resource.getRelativeUri().getComponents().size() > 1;
     }
 
     @Nullable
     public Set<Map.Entry<String, String>> getAllParams() {
-        Map<String, String> params = GeneratorHelper.absoluteUri(resource).getParts().stream()
-                .filter(uriTemplatePart -> uriTemplatePart instanceof UriTemplateExpression)
-                .flatMap(uriTemplatePart -> ((UriTemplateExpression)uriTemplatePart).getVariables().stream())
-                .collect(Collectors.toMap(o -> o, o -> "%s"));
+        Map<String, String> params = GeneratorHelper.absoluteUri(resource).getComponents().stream()
+                .filter(uriTemplatePart -> uriTemplatePart instanceof Expression)
+                .flatMap(uriTemplatePart -> ((Expression)uriTemplatePart).getVarSpecs().stream())
+                .collect(Collectors.toMap(VarSpec::getVariableName,o -> "%s"));
         if (params.size() > 0) {
             return params.entrySet();
         }

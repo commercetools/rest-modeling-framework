@@ -3,23 +3,19 @@ package io.vrap.rmf.raml.generic.generator;
 import io.vrap.rmf.raml.generic.generator.java.JavaGenerator;
 import io.vrap.rmf.raml.generic.generator.md.MdGenerator;
 import io.vrap.rmf.raml.generic.generator.php.PhpGenerator;
+import io.vrap.rmf.raml.model.RamlDiagnostic;
 import io.vrap.rmf.raml.model.RamlModelBuilder;
+import io.vrap.rmf.raml.model.RamlModelResult;
 import io.vrap.rmf.raml.model.modules.Api;
-import io.vrap.rmf.raml.persistence.RamlResourceSet;
-import org.eclipse.emf.common.util.EList;
+import org.apache.commons.cli.*;
 import org.eclipse.emf.common.util.URI;
-import org.eclipse.emf.ecore.EObject;
-import org.eclipse.emf.ecore.resource.Resource;
 
+import javax.annotation.Nullable;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
-
-import org.apache.commons.cli.*;
-import org.eclipse.emf.ecore.resource.ResourceSet;
-
-import javax.annotation.Nullable;
+import java.util.List;
 
 public class CodeGenerator {
     public static void main(String... args) throws Exception {
@@ -31,26 +27,18 @@ public class CodeGenerator {
         final URI fileURI = URI.createFileURI(options.getRamlPath().toString());
         final File generateTo = new File(options.getOutputPath().toString() + "/" + options.getLanguage());
 
-        Api api = new RamlModelBuilder().buildApi(fileURI);
-        ResourceSet resourceSet = new RamlResourceSet();
-        final Resource resource = resourceSet
-                .getResource(fileURI, true);
-
-        final EList<EObject> contents = resource.getContents();
-        final EList<Resource.Diagnostic> errors = resource.getErrors();
-
-        if (errors.isEmpty() && contents.size() == 1) {
+        final RamlModelResult<Api> apiRamlModelResult = new RamlModelBuilder().buildApi(fileURI);
+        final List<RamlDiagnostic> validationResults = apiRamlModelResult.getValidationResults();
+        if (validationResults.isEmpty()) {
             Generator generator = of(options.getLanguage(), options.getVendorName());
 
-            generator.generate(api, generateTo);
+            generator.generate(apiRamlModelResult.getRootObject(), generateTo);
 
             final long endTimeMillis = System.currentTimeMillis();
             final Duration duration = Duration.ofMillis(endTimeMillis - startTimeMillis);
             System.out.println("Generation took:" + duration);
-        } else if (contents.isEmpty()) {
-            System.err.println("File '" + fileURI + "' is empty");
         } else {
-            errors.forEach(diagnostic -> System.err.println(diagnostic.getMessage()));
+            validationResults.forEach(diagnostic -> System.err.println(diagnostic.getMessage()));
         }
     }
 

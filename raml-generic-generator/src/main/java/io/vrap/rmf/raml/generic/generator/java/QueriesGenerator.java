@@ -4,7 +4,7 @@ import com.squareup.javapoet.*;
 import io.vrap.rmf.raml.model.resources.HttpMethod;
 import io.vrap.rmf.raml.model.resources.Method;
 import io.vrap.rmf.raml.model.resources.Resource;
-import io.vrap.rmf.raml.model.responses.BodyType;
+import io.vrap.rmf.raml.model.responses.Body;
 import io.vrap.rmf.raml.model.responses.Response;
 import io.vrap.rmf.raml.model.types.AnyType;
 import io.vrap.rmf.raml.model.types.TypedElement;
@@ -32,7 +32,7 @@ public class QueriesGenerator {
             if (successfulResponse.isPresent()) {
                 final Response response = successfulResponse.get();
                 if (response.getBodies().size() == 1) {
-                    final BodyType body = response.getBodies().get(0);
+                    final Body body = response.getBodies().get(0);
                     final AnyType namedType = getNamedType(body);
                     if (namedType != null) {
                         ClassName resourceType = ClassName.get("types", namedType.getName());

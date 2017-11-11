@@ -1,6 +1,6 @@
 package io.vrap.rmf.raml.persistence;
 
-import io.vrap.rmf.raml.model.RamlError;
+import io.vrap.rmf.raml.model.RamlDiagnostic;
 import io.vrap.rmf.raml.persistence.antlr.*;
 import io.vrap.rmf.raml.persistence.constructor.*;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -82,7 +82,7 @@ public class RamlResource extends ResourceImpl {
             column = ramlToken.getCharPositionInLine();
             source = ramlToken.getLocation();
         }
-        getErrors().add(RamlError.of(diagnostic.getMessage(), source, line, column));
+        getErrors().add(RamlDiagnostic.of(diagnostic.getMessage(), source, line, column));
     }
 
     @Override

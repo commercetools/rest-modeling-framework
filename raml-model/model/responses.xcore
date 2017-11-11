@@ -3,12 +3,8 @@
     complianceLevel="8.0")
 package io.vrap.rmf.raml.model.responses
 
-import org.eclipse.emf.ecore.EDiagnosticChain
-import org.eclipse.emf.ecore.EMap
-import org.eclipse.emf.common.util.Diagnostic
-import org.eclipse.emf.common.util.BasicDiagnostic
-
-import io.vrap.rmf.raml.model.modules.Api
+import io.vrap.rmf.raml.model.util.ModelHelper
+import io.vrap.rmf.raml.model.facets.MediaType
 import io.vrap.rmf.raml.model.types.AnnotationsFacet
 import io.vrap.rmf.raml.model.types.HeadersFacet
 import io.vrap.rmf.raml.model.types.TypedElement
@@ -32,22 +28,11 @@ class Response extends AnnotationsFacet, HeadersFacet, BodyContainer {
 	String description
 }
 
-class BodyType extends AnnotationsFacet, TypedElement {
+class Body extends AnnotationsFacet, TypedElement {
 	/*
 	 * The content types that this body supports.
 	 */
-	String[] contentTypes
-	
-	@Ecore(invariant = "true")
-	op boolean contentTypesDefined(EDiagnosticChain diagnostics,EMap<Object,Object> context) {
-		val api = getRootContainer(false) as Api
-		val contentTypesDefined = api == null || api.mediaType.size > 0 || contentTypes.size > 0
-		if (!contentTypesDefined) {
-			diagnostics.add(new BasicDiagnostic(Diagnostic.ERROR, null, -1, "Content type missing", 
-				<Object>newArrayList(this)))		
-		} 
-		contentTypesDefined
-	}
+	MediaType[] contentTypes
 }
 
 interface BodyContainer {
@@ -55,12 +40,12 @@ interface BodyContainer {
 	/*
 	 * The body types of this element.
 	 */
-	contains BodyType[] bodies
+	contains Body[] bodies
 		
 	/*
 	 * Returns the first body with the given content type or null.
 	 */
-	op BodyType getBody(String contentType) {
-		bodies.findFirst[it.contentTypes.contains(contentType)]
+	op Body getBody(String contentType) {
+		ModelHelper.getBody(this, contentType)
 	}	
 }

@@ -1,6 +1,7 @@
 package io.vrap.rmf.raml.model.util;
 
 import com.google.common.collect.Lists;
+import com.hypertino.inflector.English;
 import io.vrap.rmf.raml.persistence.antlr.StringTemplateBaseVisitor;
 import io.vrap.rmf.raml.persistence.antlr.StringTemplateLexer;
 import io.vrap.rmf.raml.persistence.antlr.StringTemplateParser;
@@ -10,6 +11,7 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * This class represent a string template used in {@link io.vrap.rmf.raml.model.resources.Trait}s,
@@ -126,9 +128,15 @@ public class StringTemplate {
     }
 
     private static final Map<String, Function<String, String>> TRANSFORMATIONS = new HashMap<>();
-    {
-        final Function<String, String> capitalize = s -> s.substring(0, 1).toUpperCase() + s.substring(1);
-        TRANSFORMATIONS.put("uppercamelcase", capitalize);
+    static {
+        final Function<StringCaseFormat, String> toTransformationName = stringCaseFormat ->
+                stringCaseFormat.name().replace("_", "").toLowerCase();
+        Stream.of(StringCaseFormat.values())
+                .forEach(stringCaseFormat -> TRANSFORMATIONS.put(toTransformationName.apply(stringCaseFormat), stringCaseFormat));
+        TRANSFORMATIONS.put("lowercase", String::toLowerCase);
+        TRANSFORMATIONS.put("uppercase", String::toUpperCase);
+        TRANSFORMATIONS.put("singularize", English::singular);
+        TRANSFORMATIONS.put("pluralize", English::plural);
     }
 
     private static class Expression implements Part {

@@ -3,19 +3,19 @@
     complianceLevel="8.0")
 package io.vrap.rmf.raml.model.types
 
-import org.eclipse.emf.ecore.EDiagnosticChain
-import org.eclipse.emf.ecore.EMap
-
 import io.vrap.rmf.raml.model.elements.DocumentableElement
 import io.vrap.rmf.raml.model.elements.IdentifiableElement
 import io.vrap.rmf.raml.model.facets.ArrayTypeFacet
 import io.vrap.rmf.raml.model.facets.DateTimeTypeFacet
 import io.vrap.rmf.raml.model.facets.FileTypeFacet
 import io.vrap.rmf.raml.model.facets.Instance
+import io.vrap.rmf.raml.model.facets.IntegerTypeFacet
 import io.vrap.rmf.raml.model.facets.NumberTypeFacet
 import io.vrap.rmf.raml.model.facets.ObjectTypeFacet
+import io.vrap.rmf.raml.model.facets.RegExp
 import io.vrap.rmf.raml.model.facets.StringTypeFacet
 import io.vrap.rmf.raml.model.util.AllPropertiesCollector
+import io.vrap.rmf.raml.model.util.ModelHelper
 import io.vrap.rmf.raml.model.util.SuperTypeCrossReferencer
 
 /*
@@ -40,27 +40,37 @@ class AnyType extends AnnotationsFacet, DocumentableElement, IdentifiableElement
 	 */
 	contains Instance ^default
 
-	/*
-	 * Examples of instances of this type. 
-	 * This can be used, for example, by documentation generators to generate sample values for an object of this type.  
-	 */
-	contains Example[] examples
+    /*
+     * Examples of instances of this type.
+     * This can be used, for example, by documentation generators to generate sample values for an object of this type.
+     */
+    contains Example[] examples
 
-	/*
-	 * Returns true iff. this type is declared inline.
-	 */
+    /*
+     * Returns true iff. this type is declared inline.
+     */
     op boolean isInlineType() {
-    	eContainmentFeature == TypesPackage.Literals.INLINE_TYPE_CONTAINER__INLINE_TYPES
+        eContainmentFeature == TypesPackage.Literals.INLINE_TYPE_CONTAINER__INLINE_TYPES
     }
-    
+
     /*
      * If {@code inheritAnnotation} is true, this method traverses the inheritance chain to
      * find the specified annotation. Otherwise this method only tries to find the annotation
-     * in this type.  
+     * in this type.
      */
     op Annotation getAnnotation(AnyAnnotationType annotationType, boolean inheritAnnotation) {
-    	val Annotation anno = getAnnotation(annotationType)
-    	if (inheritAnnotation && anno == null && ^type != null) ^type.getAnnotation(annotationType, inheritAnnotation) else anno
+        val Annotation anno = getAnnotation(annotationType)
+        if (inheritAnnotation && anno === null && ^type !== null) ^type.getAnnotation(annotationType, inheritAnnotation) else anno
+    }
+
+    /*
+     * If {@code inheritAnnotation} is true, this method traverses the inheritance chain to
+     * find the specified annotation. Otherwise this method only tries to find the annotation
+     * in this type.
+     */
+    op Annotation getAnnotation(String name, boolean inheritAnnotation) {
+        val Annotation anno = getAnnotation(name)
+        if (inheritAnnotation && anno === null && ^type !== null) ^type.getAnnotation(name, inheritAnnotation) else anno
     }
 }
 
@@ -68,98 +78,103 @@ class AnyType extends AnnotationsFacet, DocumentableElement, IdentifiableElement
  * A type template used by traits and resource types.
  */
 class TypeTemplate extends AnyType {
-	
+
 }
 
 interface EnumFacet {
-	/*
+    /*
      * An enumeration of all the possible values of instances of this type.
      * The value is an array containing representations of these possible values.
      * An instance of this type MUST be equal to one of these values.
      */
-	contains Instance[] ^enum
+    contains Instance[] ^enum
 }
 
 class Example {
-	/*
-	 * The optional name of an example.
-	 */
-	String name
-	
-	/*
-	 * The value of the example.
-	 */
-	contains Instance value
+    /*
+     * The optional name of an example.
+     */
+    String name
+
+    /*
+     * The value of the example.
+     */
+    contains Instance value
 }
 
 interface InlineTypeContainer {
-	/*
-	 * The inline types that this element declares.
-	 */
-	contains AnyType[] inlineTypes	
+    /*
+     * The inline types that this element declares.
+     */
+    contains AnyType[] inlineTypes
 }
 
 interface TypedElement extends IdentifiableElement, InlineTypeContainer, AnnotationsFacet {
-	/*
-	 * The type of this element.
-	 */
-	refers AnyType ^type
+    /*
+     * The type of this element.
+     */
+    refers AnyType ^type
 
-	/*
-	 * Specifies if the element is required or not.
-	 */
-	Boolean required = "true"
+    /*
+     * Specifies if the element is required or not.
+     */
+    Boolean required = "true"
 }
 
 class Property extends AnnotationsFacet, TypedElement {
+    /*
+     * @return true iff. this property name equals the given name
+     */
+    op boolean matches(String name) {
+        this.name == name
+    }
 }
 
 class PatternProperty extends Property {
-	String pattern
-	
-	@Ecore(invariant="true")	
-	op boolean patternIsValid(EDiagnosticChain diagnostics,EMap<Object,Object> context) {
-		pattern !== null && pattern.length > 0
-	}
+    RegExp pattern
+
+    /*
+     * @return true iff. this property pattern matches the given name
+     */
+    op boolean matches(String name) {
+        ModelHelper.testPattern(this, name)
+    }
 }
 
 interface PropertiesFacet {
-	/*
-	 * The properties that instances of this type can or must have.
-	 */
-	contains Property[] properties
+    /*
+     * The properties that instances of this type can or must have.
+     */
+    contains Property[] properties
 
-	/*
-	 * Returns the property with the given name or null if no property 
-	 * with the given name exists.
-	 */
-	op Property getProperty(String name) {
-		for (Property property : properties) {
-			if(name == property.name) return property
-		}
-		return null
-	}
+    /*
+     * Returns the property which matches the given name or null if no property
+     * with the given name exists.
+     */
+    op Property getProperty(String name) {
+        properties.findFirst[it.matches(name)]
+    }
 }
 
 class ObjectType extends AnyType, ObjectTypeFacet, PropertiesFacet {
 
-	/*
+    /*
      * Returns all properties (with inherited) of this object type.
      *
      * If an object type specializes the type of an inherited property,
      * the specialize property will be returned by this method.
      */
-	refers derived Property[] allProperties get {
-		AllPropertiesCollector.getAllProperties(this)
-	}
+    refers derived Property[] allProperties get {
+        AllPropertiesCollector.getAllProperties(this)
+    }
 }
 
 interface ItemsFacet {
-	/*
-	 * Indicates the type that all items in the array are inherited from.
-	 * Can be a reference to an existing type or an inline type declaration.
-	 */
-	refers AnyType items
+    /*
+     * Indicates the type that all items in the array are inherited from.
+     * Can be a reference to an existing type or an inline type declaration.
+     */
+    refers AnyType items
 }
 
 /*
@@ -183,7 +198,7 @@ class NumberType extends AnyType, NumberTypeFacet {
 /*
  * A subset of JSON numbers that are positive and negative multiples of 1.
  */
-class IntegerType extends NumberType {
+class IntegerType extends AnyType, IntegerTypeFacet {
 }
 
 /*
@@ -228,7 +243,7 @@ class NilType extends AnyType {
 }
 
 interface OneOfFacet {
-	refers AnyType[] oneOf	
+	refers AnyType[] oneOf
 }
 
 /*
@@ -241,7 +256,7 @@ class UnionType extends AnyType, OneOfFacet {
  * An intersection type is the composition of all of its types.
  */
 class IntersectionType extends AnyType {
-	refers AnyType[] allOf
+    refers AnyType[] allOf
 }
 
 /*
@@ -250,92 +265,92 @@ class IntersectionType extends AnyType {
  * For example, the Method target refers to the method node, not to the method display name, description, and so on.
  */
 enum AnnotationTarget {
-	/*
-	 * The root of a RAML document
-	 */
-	API
-	,
-	/*
-	 * An item in the collection of items that is the value of the root-level documentation node.
-	 */
-	DocumentationItem
-	,
-	/*
-	 * A resource (relative URI) node, root-level or nested
-	 */
-	Resource
-	,
-	/*
-	 * A method node.
-	 */
-	Method
-	,
-	/*
-	 * A declaration of the responses node, whose key is an HTTP status code.
-	 */
-	Response
-	,
-	/*
-	 * The body node of a method.
-	 */
-	RequestBody
-	,
-	/*
-	 * The body node of a response.
-	 */
-	ResponseBody
-	,
-	/*
-	 * A data type declaration (inline or in a global type collection), header declaration,
-	 * query parameter declaration, URI parameter declaration, or a property within any of these declarations,
-	 * where the type property can be used.
-	 */
-	TypeDeclaration
-	,
-	/*
-	 * Either an example or examples node
-	 */
-	Example
-	,
-	/*
-	 * A resource type node.
-	 */
-	ResourceType
-	,
-	/*
-	 * A trait node.
-	 */
-	Trait
-	,
-	/*
-	 * A security scheme declaration.
-	 */
-	SecurityScheme
-	,
-	/*
-	 * The settings node of a security scheme declaration
-	 */
-	SecuritySchemeSettings
-	,
-	/*
-	 * A declaration of the annotationTypes node, whose key is a name of an annotation type and whose value describes the annotation.
-	 */
-	AnnotationType
-	,
-	/*
-	 * The root of a library.
-	 */
-	Library
-	,
-	/*
-	 * The root of an overlay.
-	 */
-	Overlay
-	,
-	/*
-	 * The root of an extension.
-	 */
-	Extension
+    /*
+     * The root of a RAML document
+     */
+    API
+    ,
+    /*
+     * An item in the collection of items that is the value of the root-level documentation node.
+     */
+    DocumentationItem
+    ,
+    /*
+     * A resource (relative URI) node, root-level or nested
+     */
+    Resource
+    ,
+    /*
+     * A method node.
+     */
+    Method
+    ,
+    /*
+     * A declaration of the responses node, whose key is an HTTP status code.
+     */
+    Response
+    ,
+    /*
+     * The body node of a method.
+     */
+    RequestBody
+    ,
+    /*
+     * The body node of a response.
+     */
+    ResponseBody
+    ,
+    /*
+     * A data type declaration (inline or in a global type collection), header declaration,
+     * query parameter declaration, URI parameter declaration, or a property within any of these declarations,
+     * where the type property can be used.
+     */
+    TypeDeclaration
+    ,
+    /*
+     * Either an example or examples node
+     */
+    Example
+    ,
+    /*
+     * A resource type node.
+     */
+    ResourceType
+    ,
+    /*
+     * A trait node.
+     */
+    Trait
+    ,
+    /*
+     * A security scheme declaration.
+     */
+    SecurityScheme
+    ,
+    /*
+     * The settings node of a security scheme declaration
+     */
+    SecuritySchemeSettings
+    ,
+    /*
+     * A declaration of the annotationTypes node, whose key is a name of an annotation type and whose value describes the annotation.
+     */
+    AnnotationType
+    ,
+    /*
+     * The root of a library.
+     */
+    Library
+    ,
+    /*
+     * The root of an overlay.
+     */
+    Overlay
+    ,
+    /*
+     * The root of an extension.
+     */
+    Extension
 }
 
 /*
@@ -350,11 +365,15 @@ enum AnnotationTarget {
  * can extend other data types, but annotation types themselves can neither be extended nor used anywhere data types can be used.
  */
 class AnyAnnotationType extends DocumentableElement, IdentifiableElement, AnnotationsFacet, InlineTypeContainer {
-	/*
-	 * The locations to which annotations are restricted.
-	 * If this node is specified, annotations of this type may be applied only on a node corresponding to one of the locations.
-	 */
-	AnnotationTarget[] allowedTargets
+    /*
+     * The type which this type extends.
+     */
+    refers AnyAnnotationType ^type
+    /*
+     * The locations to which annotations are restricted.
+     * If this node is specified, annotations of this type may be applied only on a node corresponding to one of the locations.
+     */
+    AnnotationTarget[] allowedTargets
 }
 
 class TimeOnlyAnnotationType extends AnyAnnotationType {
@@ -369,10 +388,10 @@ class DateTimeOnlyAnnotationType extends AnyAnnotationType {
 class DateOnlyAnnotationType extends AnyAnnotationType {
 }
 
-class NumberAnnotationType extends NumberTypeFacet, AnyAnnotationType {
+class NumberAnnotationType extends AnyAnnotationType, NumberTypeFacet {
 }
 
-class IntegerAnnotationType extends NumberAnnotationType {
+class IntegerAnnotationType extends AnyAnnotationType, IntegerTypeFacet {
 }
 
 class BooleanAnnotationType extends AnyAnnotationType {
@@ -398,80 +417,80 @@ class UnionAnnotationType extends AnyAnnotationType, OneOfFacet {
 
 
 interface AnnotationsFacet {
-	/*
-	 * The annotations of this element.
-	 */
-	contains Annotation[] annotations
-	
-	/*
-	 * Returns the annotation with the given type or null if no such
-	 * annotation exists.
-	 */
-	op Annotation getAnnotation(AnyAnnotationType annotationType) {
-		for (Annotation anno : annotations) {
-			if (anno.^type == annotationType) return anno
-		}
-		return null
-	}
-	
-	/*
-	 * Returns the annotation with the given name or null if no such
-	 * annotation exists.
-	 */
-	op Annotation getAnnotation(String name) {
-		for (Annotation anno : annotations) {
-			if (anno.^type?.name == name) return anno
-		}
-		return null
-	}
+    /*
+     * The annotations of this element.
+     */
+    contains Annotation[] annotations
+
+    /*
+     * Returns the annotation with the given type or null if no such
+     * annotation exists.
+     */
+    op Annotation getAnnotation(AnyAnnotationType annotationType) {
+        for (Annotation anno : annotations) {
+            if (anno.^type == annotationType) return anno
+        }
+        return null
+    }
+
+    /*
+     * Returns the annotation with the given name or null if no such
+     * annotation exists.
+     */
+    op Annotation getAnnotation(String name) {
+        for (Annotation anno : annotations) {
+            if (anno.^type?.name == name) return anno
+        }
+        return null
+    }
 }
 
 class Annotation {
-	/*
-	 * The annotation type of this annotation.
-	 */
-	refers AnyAnnotationType ^type
-	/*
-	 * The value of this annotation.
-	 */
-	contains Instance value
+    /*
+     * The annotation type of this annotation.
+     */
+    refers AnyAnnotationType ^type
+    /*
+     * The value of this annotation.
+     */
+    contains Instance value
 }
 
 
 class Header extends TypedElement {
-	
+
 }
 
 interface HeadersFacet {
-	/*
-	 * Detailed information about any request headers needed by this method.
-	 */
-	contains Header[] headers
-	
-	/*
-	 * Returns the header with the given name or null.
-	 */
-	op Header getHeader(String name) {
-		headers.findFirst[it.name == name]
-	}
+    /*
+     * Detailed information about any request headers needed by this method.
+     */
+    contains Header[] headers
+
+    /*
+     * Returns the header with the given name or null.
+     */
+    op Header getHeader(String name) {
+        headers.findFirst[it.name == name]
+    }
 }
 
 class QueryParameter extends TypedElement {
-	
+
 }
 
 interface QueryParametersFacet {
-	/*
-	 * Detailed information about any query parameters needed by this element. 
-	 * Mutually exclusive with queryString.
-	 */
-	contains QueryParameter[] queryParameters
-	
-	/*
-	 * Returns the query parameter with the given name or null.
-	 */
-	op QueryParameter getQueryParameter(String name) {
-		queryParameters.findFirst[it.name == name]
-	}
+    /*
+     * Detailed information about any query parameters needed by this element.
+     * Mutually exclusive with queryString.
+     */
+    contains QueryParameter[] queryParameters
+
+    /*
+     * Returns the query parameter with the given name or null.
+     */
+    op QueryParameter getQueryParameter(String name) {
+        queryParameters.findFirst[it.name == name]
+    }
 }
 

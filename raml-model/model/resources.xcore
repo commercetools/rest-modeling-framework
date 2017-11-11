@@ -3,12 +3,6 @@
     complianceLevel="8.0")
 package io.vrap.rmf.raml.model.resources
 
-import java.util.Map
-
-import org.eclipse.emf.ecore.EDiagnosticChain
-import org.eclipse.emf.ecore.EMap
-import org.eclipse.emf.common.util.Diagnostic
-import org.eclipse.emf.common.util.BasicDiagnostic
 
 import io.vrap.rmf.raml.model.facets.ProtocolsFacet
 
@@ -25,61 +19,13 @@ import io.vrap.rmf.raml.model.elements.IdentifiableElement
 import io.vrap.rmf.raml.model.responses.BodyContainer
 import io.vrap.rmf.raml.model.responses.ResponsesFacet
 import io.vrap.rmf.raml.model.facets.Instance
+import io.vrap.rmf.raml.model.util.ModelHelper
 
-class UriTemplate {
-	contains UriTemplatePart[] parts	
-	
-	op String toString() {
-		parts.join("")
-	}
-	
-	/*
-	 * Converts this uri template to a string where the variables
-	 * are replaced with the given params.
-	 */
-	op String toString(Parameters params) {
-		parts.map[it.toString(params)].join("")
-	}
-}
+import com.damnhandy.uri.template.UriTemplate
 
-type Parameters wraps Map<String, Object>
-
-interface UriTemplatePart {
-	/*
-	 * Converts this uri template part to a string where the variables
-	 * are replaced with the given params.
-	 */
-	op String toString(Parameters params)
-}
-
-class UriTemplateLiteral extends UriTemplatePart {
-	String literal	
-	
-	op String toString() {
-		literal
-	} 
-	
-	op String toString(Parameters params) {
-		toString
-	}
-}
-
-class UriTemplateExpression extends UriTemplatePart {
-	String operator
-	String[] variables
-	
-	op String toString() {
-		val opStr = if (operator === null) "" else operator
-		"{" + opStr  + variables.join(",") + "}"
-	} 	
-	
-	op String toString(Parameters params) {
-		var result = ""
-		for (String varName : variables) {
-			result += params.get(varName)
-		}
-		result
-	}
+type UriTemplate wraps UriTemplate
+create {
+	UriTemplate.fromTemplate(it)
 }
 
 class UriParameter extends TypedElement {
@@ -137,14 +83,41 @@ class Resource extends ResourceBase, ResourceContainer, ApplyTraitsFacet {
 	/*
 	 * The relative uri of this resource.
 	 */
-	contains UriTemplate relativeUri
+	UriTemplate relativeUri
 	
-	@Ecore(invariant = "true")
-	op boolean methodsMustBeRequired(EDiagnosticChain diagnostics,EMap<Object,Object> context) {
-		val optionalMethods = methods.filter[!it.required].toList
-		optionalMethods.forEach[diagnostics.add(new BasicDiagnostic(Diagnostic.ERROR, null, -1, 
-			"Optional method not allowed in resource declaration " + it, <Object>newArrayList(this)))]
-		optionalMethods.isEmpty
+	/*
+	 * The full uri does not contain the base uri.
+	 */
+	derived UriTemplate fullUri get {
+		ModelHelper.fullUri(this)
+	}
+	
+	/*
+	 * The full resource URI relative to the baseUri if there is one.
+	 */
+	derived String resourcePath get {
+		ModelHelper.resourcePath(this)	
+	}
+
+	/*
+	 * The rightmost of the non-URI-parameter-containing path fragments.
+	 */
+	derived String resourcePathName get {
+		ModelHelper.resourcePathName(this)	
+	}
+	
+	/*
+	 * @return the parent resource or null
+	 */
+	refers derived Resource parent get {
+		if (eContainer instanceof Resource) eContainer as Resource else null
+	}
+	
+	/*
+	 * @return all contained resources
+	 */
+	refers derived Resource[] allContainedResources get {
+		ModelHelper.allContainedResources(this).toEList
 	}
 }
 
@@ -187,15 +160,13 @@ class Method extends MethodBase {
 	 * but methods defined in a resource type can be optional. 
 	 */
 	boolean required = "true"
-				
-	@Ecore(invariant="true")	
-	op boolean hasValidProtocols(EDiagnosticChain diagnostics,EMap<Object,Object> context) {
-		val invalidValues = protocols.map[it.toLowerCase].filter[it != 'http' && it != 'https']
-		invalidValues.forEach[diagnostics.add(new BasicDiagnostic(Diagnostic.ERROR, null, -1, "Invalid protocol " + it, 
-			<Object>newArrayList(this)
-		))]
-		invalidValues.empty
-	}
+	
+	/*
+	 * The name of the method.
+	 */
+	derived String methodName get {
+		if (method !== null) method.getName() else ""
+	} 
 }
 
 class Trait extends IdentifiableElement, MethodBase {

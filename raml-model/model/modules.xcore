@@ -5,12 +5,8 @@
 )
 package io.vrap.rmf.raml.model.modules
 
-import org.eclipse.emf.ecore.EDiagnosticChain
-import org.eclipse.emf.ecore.EMap
-import org.eclipse.emf.common.util.Diagnostic
-import org.eclipse.emf.common.util.BasicDiagnostic
-
 import io.vrap.rmf.raml.model.facets.ProtocolsFacet
+import io.vrap.rmf.raml.model.facets.MediaType
 import io.vrap.rmf.raml.model.types.AnnotationsFacet
 import io.vrap.rmf.raml.model.types.AnyAnnotationType
 import io.vrap.rmf.raml.model.types.AnyType
@@ -25,12 +21,11 @@ import io.vrap.rmf.raml.model.resources.UriParameter
 import io.vrap.rmf.raml.model.security.SecuritySchemeContainer
 import io.vrap.rmf.raml.model.security.SecuredByFacet
 
-class Api extends AnnotationsFacet, TypeContainer, ResourceContainer, ProtocolsFacet, 
+/*
+ * Common interface for api, extension and overlay. 
+ */
+interface ApiBase extends AnnotationsFacet, TypeContainer, ResourceContainer, ProtocolsFacet, 
 		SecuritySchemeContainer, SecuredByFacet {
-	/*
-	 * A short, plain-text label for the API. Its value is a string.
-	 */
-	String title
 	/*
 	 * A substantial, human-friendly description of the API.
 	 * Its value is a string and MAY be formatted using markdown.
@@ -46,7 +41,7 @@ class Api extends AnnotationsFacet, TypeContainer, ResourceContainer, ProtocolsF
 	 * A URI that serves as the base for URIs of all resources. Often used as the base
 	 * of the URL of each resource containing the location of the API. Can be a template URI.
 	 */
-	contains UriTemplate baseUri
+	UriTemplate baseUri
 
 	/*
 	 * Specifies the uri parameters in the base URI.
@@ -57,21 +52,19 @@ class Api extends AnnotationsFacet, TypeContainer, ResourceContainer, ProtocolsF
 	 * The default media types to use for request and response bodies (payloads),
 	 * for example "application/json".
 	 */
-	String[] mediaType
+	MediaType[] mediaType
 	
 	/*
 	 * Additional overall documentation for the API.
 	 */
 	contains Document[] documentation
-			
-	@Ecore(invariant="true")	
-	op boolean hasValidProtocols(EDiagnosticChain diagnostics,EMap<Object,Object> context) {
-		val invalidValues = protocols.map[it.toLowerCase].filter[it != 'http' && it != 'https']
-		invalidValues.forEach[diagnostics.add(new BasicDiagnostic(Diagnostic.ERROR, null, -1, "Invalid protocol " + it, 
-			<Object>newArrayList(this)
-		))]
-		invalidValues.empty
-	}
+}
+
+class Api extends ApiBase {
+	/*
+	 * A short, plain-text label for the API. Its value is a string.
+	 */
+	String[1] title
 }
 
 interface ApiExtension {
@@ -80,7 +73,7 @@ interface ApiExtension {
 	 */
 	refers Api ^extends
 	
-	String usage 
+	String[1] usage 
 }
 
 /**
@@ -90,20 +83,20 @@ interface ApiExtension {
  * instance-specific nodes of an API, such as its service endpoint (URL) without altering its pure 
  * interface definition document.
  */
-class Extension extends Api, ApiExtension {
+class Extension extends ApiBase, ApiExtension {
 }
 
 class Document {
 	/*
 	 * Title of the document. Its value MUST be a non-empty string.
 	 */
-	String title	
+	String[1] title	
 	
 	/*
 	 * Content of the document. 
 	 * Its value MUST be a non-empty string and MAY be formatted using markdown.
 	 */
-	String content
+	String[1] content
 }
 
 interface TypeContainer extends InlineTypeContainer {
@@ -150,10 +143,10 @@ interface TypeContainer extends InlineTypeContainer {
 }
 
 class Library extends AnnotationsFacet, TypeContainer, SecuritySchemeContainer {
-    String usage 
+    String[1] usage 
 }
 
 class LibraryUse {
-	String name
+	String[1] name
 	refers Library library
 }

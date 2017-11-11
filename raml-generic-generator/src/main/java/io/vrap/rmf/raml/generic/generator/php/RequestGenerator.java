@@ -1,16 +1,23 @@
 package io.vrap.rmf.raml.generic.generator.php;
 
+import com.damnhandy.uri.template.Expression;
+import com.damnhandy.uri.template.UriTemplate;
+import com.damnhandy.uri.template.impl.VarSpec;
 import com.google.common.base.CaseFormat;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.common.io.Resources;
 import io.vrap.rmf.raml.generic.generator.AbstractTemplateGenerator;
 import io.vrap.rmf.raml.model.facets.ObjectInstance;
 import io.vrap.rmf.raml.model.facets.StringInstance;
-import io.vrap.rmf.raml.model.resources.*;
-import io.vrap.rmf.raml.model.responses.BodyType;
-import io.vrap.rmf.raml.model.types.*;
+import io.vrap.rmf.raml.model.resources.HttpMethod;
+import io.vrap.rmf.raml.model.resources.Method;
+import io.vrap.rmf.raml.model.resources.Resource;
+import io.vrap.rmf.raml.model.responses.Body;
+import io.vrap.rmf.raml.model.types.Annotation;
+import io.vrap.rmf.raml.model.types.AnyAnnotationType;
+import io.vrap.rmf.raml.model.types.FileType;
+import io.vrap.rmf.raml.model.types.QueryParameter;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
@@ -18,7 +25,8 @@ import org.stringtemplate.v4.STGroupFile;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.capitalize;
@@ -148,7 +156,7 @@ public class RequestGenerator extends AbstractTemplateGenerator {
         stGroup.registerRenderer(Method.class,
                 (arg, formatString, locale) -> {
                     final Method method = (Method)arg;
-                    final BodyType firstBodyType = method.getBodies().stream().findFirst().orElse(null);
+                    final Body firstBodyType = method.getBodies().stream().findFirst().orElse(null);
                     switch (Strings.nullToEmpty(formatString)) {
                         case "optionalBody":
                             if (method.getMethod().equals(HttpMethod.POST)) {
@@ -176,9 +184,9 @@ public class RequestGenerator extends AbstractTemplateGenerator {
         );
         stGroup.registerRenderer(UriTemplate.class,
                 (arg, formatString, locale) -> {
-                    final List<UriTemplateExpression> parts = ((UriTemplate)arg).getParts().stream()
-                            .filter(uriTemplatePart -> uriTemplatePart instanceof UriTemplateExpression)
-                            .map(uriTemplatePart -> (UriTemplateExpression)uriTemplatePart)
+                    final List<Expression> parts = ((UriTemplate)arg).getComponents().stream()
+                            .filter(uriTemplatePart -> uriTemplatePart instanceof Expression)
+                            .map(uriTemplatePart -> (Expression)uriTemplatePart)
                             .collect(Collectors.toList());
                     switch (Strings.nullToEmpty(formatString)) {
                         case "methodName":
@@ -191,31 +199,27 @@ public class RequestGenerator extends AbstractTemplateGenerator {
                         case "params":
                             if (parts.size() > 0) {
                                 return parts.stream().map(
-                                        uriTemplateExpression -> uriTemplateExpression.getVariables().stream().collect(Collectors.joining(", $"))
+                                        uriTemplateExpression -> uriTemplateExpression.getVarSpecs().stream().map(VarSpec::getVariableName).collect(Collectors.joining(", $"))
                                 ).collect(Collectors.joining(", $"));
                             }
                             return "";
                         case "paramArray":
                             if (parts.size() > 0) {
                                 return parts.stream().map(
-                                        uriTemplateExpression -> uriTemplateExpression.getVariables().stream().map(s -> "'" + s + "' => $" + s).collect(Collectors.joining(", "))
+                                        uriTemplateExpression -> uriTemplateExpression.getVarSpecs().stream().map(VarSpec::getVariableName).map(s -> "'" + s + "' => $" + s).collect(Collectors.joining(", "))
                                 ).collect(Collectors.joining(", "));
                             }
                             return "";
                         case "sprintf":
                             final Map<String, Object> params = parts.stream()
-                                    .flatMap(uriTemplatePart -> uriTemplatePart.getVariables().stream())
+                                    .flatMap(uriTemplatePart -> uriTemplatePart.getVarSpecs().stream().map(VarSpec::getVariableName))
                                     .collect(Collectors.toMap(o -> o, o -> "%s"));
-                            return ((UriTemplate)arg).toString(params);
+                            return ((UriTemplate)arg).expand(params);
                         case "uri":
                             if (parts.size() > 0) {
-                                return ((UriTemplate)arg).getParts().stream().map(uriTemplatePart -> {
-                                    if (uriTemplatePart instanceof UriTemplateExpression) {
-                                        Map<String, Object> t = Maps.newHashMap();
-                                        ((UriTemplateExpression) uriTemplatePart).getVariables().forEach(s -> {
-                                            t.put(s, "' . $" + s + " . '");
-                                        });
-                                        return uriTemplatePart.toString(t);
+                                return ((UriTemplate)arg).getComponents().stream().map(uriTemplatePart -> {
+                                    if (uriTemplatePart instanceof Expression) {
+                                        return ((Expression) uriTemplatePart).getVarSpecs().stream().map(VarSpec::getVariableName).map(s -> "' . $" + s + " . '").collect(Collectors.joining());
                                     }
                                     return uriTemplatePart.toString();
                                 }).collect(Collectors.joining());

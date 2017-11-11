@@ -1,12 +1,14 @@
 package io.vrap.rmf.raml.model;
 
+import com.google.common.net.MediaType;
 import io.vrap.rmf.raml.model.facets.StringInstance;
 import io.vrap.rmf.raml.model.modules.Api;
+import io.vrap.rmf.raml.model.modules.ApiBase;
 import io.vrap.rmf.raml.model.modules.ApiExtension;
 import io.vrap.rmf.raml.model.modules.util.ModulesSwitch;
 import io.vrap.rmf.raml.model.resources.*;
 import io.vrap.rmf.raml.model.resources.util.ResourcesSwitch;
-import io.vrap.rmf.raml.model.responses.BodyType;
+import io.vrap.rmf.raml.model.responses.Body;
 import io.vrap.rmf.raml.model.responses.util.ResponsesSwitch;
 import io.vrap.rmf.raml.model.types.*;
 import io.vrap.rmf.raml.model.types.util.TypesSwitch;
@@ -41,12 +43,35 @@ public class RamlModelBuilder {
      * Builds a resolved api from the RAML file given by the uri.
      *
      * @param uri the uri to build the api from
-     * @return a resolved api
+     * @return a resolved api model result
      */
-    public Api buildApi(final URI uri) {
+    public RamlModelResult<Api> buildApi(final URI uri) {
+        final EObject rootObject = load(uri);
+        final Api resolvedApi = resolveToApi(rootObject);
+        return RamlModelResult.of(resolvedApi);
+    }
+
+    /**
+     * Builds a root object from the RAML file given by the uri.
+     *
+     * @param uri the uri to build the api from
+     * @return a model result
+     */
+    public RamlModelResult<EObject> build(final URI uri) {
+        final EObject rootObject = load(uri);
+        final EObject resolved = rootObject instanceof ApiBase ?
+                resolveToApi(rootObject) :
+                rootObject;
+        return RamlModelResult.of(resolved);
+    }
+
+    private EObject load(final URI uri) {
         final RamlResourceSet resourceSet = new RamlResourceSet();
         final Resource resource = resourceSet.getResource(uri, true);
-        final EObject rootObject = resource.getContents().get(0);
+        return resource.getContents().get(0);
+    }
+
+    private Api resolveToApi(final EObject rootObject) {
         final ApiResolver apiResolver = new ApiResolver();
         final Api resolvedApi;
         if (rootObject instanceof ApiExtension) {
@@ -104,9 +129,6 @@ public class RamlModelBuilder {
             mergeAttributes(extension, extendsEObject);
             mergeCrossReferences(extension, extendsEObject, idToEObject);
             for (final EObject extensionChild : extension.eContents()) {
-                if (extensionChild instanceof UriTemplate) {
-                    continue;
-                }
                 final String uriFragment = uriFragmentBuilder.getURIFragment(extensionChild);
                 if (idToEObject.containsKey(uriFragment)) {
                     final EObject extendsChild = idToEObject.get(uriFragment);
@@ -125,7 +147,14 @@ public class RamlModelBuilder {
         }
 
         private void mergeAttributes(final EObject extension, final EObject extendsEObject) {
-            for (final EAttribute attribute : extendsEObject.eClass().getEAllAttributes()) {
+            final List<EAttribute> commonAttributes = new ArrayList<>();
+            commonAttributes.addAll(extension.eClass().getEAllAttributes());
+            commonAttributes.retainAll(extendsEObject.eClass().getEAllAttributes());
+
+            final List<EAttribute> nonDerivedAttributes = commonAttributes.stream()
+                    .filter(a -> !a.isDerived())
+                    .collect(Collectors.toList());
+            for (final EAttribute attribute : nonDerivedAttributes) {
                 if (extension.eIsSet(attribute)) {
                     final Object attributeValue = extension.eGet(attribute);
                     if (attribute.isMany()) {
@@ -145,7 +174,7 @@ public class RamlModelBuilder {
 
         private void mergeCrossReferences(final EObject extension, final EObject extendsEObject, final Map<String, EObject> idToEObject) {
             final List<EReference> allNonContainmentReferences = extendsEObject.eClass().getEAllReferences()
-                    .stream().filter(reference -> !reference.isContainment())
+                    .stream().filter(reference -> !reference.isContainment() && !reference.isDerived())
                     .collect(Collectors.toList());
             for (final EReference reference : allNonContainmentReferences) {
                 if (extension.eIsSet(reference)) {
@@ -209,36 +238,10 @@ public class RamlModelBuilder {
             this.parameters = parameters.stream()
                     .filter(p -> p.getValue() instanceof StringInstance)
                     .collect(Collectors.toMap(Parameter::getName, p -> ((StringInstance) p.getValue()).getValue()));
-            this.parameters.put("resourcePath", getResourcePath());
-            this.parameters.put("resourcePathName", getResourcePathName());
+            this.parameters.put("resourcePath", resource.getResourcePath());
+            this.parameters.put("resourcePathName", resource.getResourcePathName());
             typedElementResolver = new TypedElementResolver(resource.eResource(), this.parameters);
             stringTemplateResolver = new StringTemplateResolver(this.parameters);
-        }
-
-        private String getResourcePath() {
-            final List<io.vrap.rmf.raml.model.resources.Resource> resourcesToRoot = getResourcesToRoot();
-
-            return resourcesToRoot.stream()
-                    .map(r -> r.getRelativeUri().toString())
-                    .collect(Collectors.joining(""));
-        }
-
-        private String getResourcePathName() {
-            final List<io.vrap.rmf.raml.model.resources.Resource> resourcesToRoot = getResourcesToRoot();
-            Collections.reverse(resourcesToRoot);
-
-            for (final io.vrap.rmf.raml.model.resources.Resource r : resourcesToRoot) {
-                final List<UriTemplatePart> uriTemplateParts = new ArrayList<>(r.getRelativeUri().getParts());
-                Collections.reverse(uriTemplateParts);
-                final Optional<UriTemplateLiteral> rightMostLiteral = uriTemplateParts.stream()
-                        .filter(UriTemplateLiteral.class::isInstance)
-                        .map(UriTemplateLiteral.class::cast).findFirst();
-                if (rightMostLiteral.isPresent()) {
-                    final String pathName = rightMostLiteral.get().getLiteral();
-                    return pathName.substring(1); // remove '/' at the start
-                }
-            }
-            return null;
         }
 
         private List<io.vrap.rmf.raml.model.resources.Resource> getResourcesToRoot() {
@@ -323,7 +326,7 @@ public class RamlModelBuilder {
             this.parameters = parameters.stream()
                     .filter(p -> p.getValue() instanceof StringInstance)
                     .collect(Collectors.toMap(Parameter::getName, p -> ((StringInstance) p.getValue()).getValue()));
-            this.parameters.put("methodName", method.getMethod().getLiteral());
+            this.parameters.put("methodName", method.getMethodName());
             typedElementResolver = new TypedElementResolver(method.eResource(), this.parameters);
         }
 
@@ -439,14 +442,14 @@ public class RamlModelBuilder {
      * content type defined.
      */
     private static class BodyContentTypeResolver extends ResponsesSwitch<EObject> {
-        private final List<String> defaultMediaTypes;
+        private final List<MediaType> defaultMediaTypes;
 
-        public BodyContentTypeResolver(final List<String> defaultMediaTypes) {
+        public BodyContentTypeResolver(final List<MediaType> defaultMediaTypes) {
             this.defaultMediaTypes = defaultMediaTypes;
         }
 
         @Override
-        public EObject caseBodyType(final BodyType body) {
+        public EObject caseBody(final Body body) {
             if (body.getContentTypes().isEmpty()) {
                 body.getContentTypes().addAll(defaultMediaTypes);
             }

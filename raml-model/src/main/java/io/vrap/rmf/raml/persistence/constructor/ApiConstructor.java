@@ -1,9 +1,12 @@
 package io.vrap.rmf.raml.persistence.constructor;
 
+import com.damnhandy.uri.template.MalformedUriTemplateException;
+import com.damnhandy.uri.template.UriTemplate;
 import io.vrap.rmf.raml.model.modules.Api;
 import io.vrap.rmf.raml.model.modules.Document;
 import io.vrap.rmf.raml.model.resources.Resource;
-import io.vrap.rmf.raml.model.resources.UriTemplate;
+import io.vrap.rmf.raml.model.resources.ResourcesFactory;
+import io.vrap.rmf.raml.model.resources.ResourcesPackage;
 import io.vrap.rmf.raml.persistence.antlr.RAMLParser;
 import org.eclipse.emf.common.util.ECollections;
 import org.eclipse.emf.ecore.EObject;
@@ -16,7 +19,6 @@ import static io.vrap.rmf.raml.model.modules.ModulesPackage.Literals.*;
 import static io.vrap.rmf.raml.model.resources.ResourcesPackage.Literals.*;
 
 public class ApiConstructor extends BaseConstructor {
-    private final UriTemplateConstructor uriTemplateConstructor = new UriTemplateConstructor();
 
     @Override
     public EObject construct(final RAMLParser parser, final Scope scope) {
@@ -55,7 +57,7 @@ public class ApiConstructor extends BaseConstructor {
 
     @Override
     public Object visitDocumentationFacet(RAMLParser.DocumentationFacetContext documentationFacet) {
-        return withinScope(scope.with(API__DOCUMENTATION), documentationScope ->
+        return withinScope(scope.with(API_BASE__DOCUMENTATION), documentationScope ->
                 documentationFacet.document().stream().map(this::visitDocument).collect(Collectors.toList())
         );
     }
@@ -75,16 +77,22 @@ public class ApiConstructor extends BaseConstructor {
     @Override
     public Object visitBaseUriFacet(RAMLParser.BaseUriFacetContext ctx) {
         final String baseUriText = ctx.baseUri.getText();
-        final UriTemplate uriTemplate = uriTemplateConstructor.parse(baseUriText, scope);
-        scope.with(API__BASE_URI).setValue(uriTemplate, ctx.getStart());
+        try {
+            final UriTemplate uriTemplate = (UriTemplate) ResourcesFactory.eINSTANCE
+                    .createFromString(ResourcesPackage.Literals.URI_TEMPLATE, baseUriText);
+            scope.with(API_BASE__BASE_URI).setValue(uriTemplate, ctx.getStart());
 
-        return uriTemplate;
+            return uriTemplate;
+        } catch (final MalformedUriTemplateException uriTemplateException) {
+            scope.addError(uriTemplateException.getMessage(), ctx);
+            return null;
+        }
     }
 
 
     @Override
     public Object visitBaseUriParametersFacet(RAMLParser.BaseUriParametersFacetContext baseUriParametersFacet) {
-        return withinScope(scope.with(API__BASE_URI_PARAMETERS), baseUriParametersScope -> {
+        return withinScope(scope.with(API_BASE__BASE_URI_PARAMETERS), baseUriParametersScope -> {
             final List<Object> baseUriParameters = baseUriParametersFacet.uriParameterFacets.stream()
                     .map(this::visitTypedElementFacet)
                     .collect(Collectors.toList());
@@ -99,7 +107,7 @@ public class ApiConstructor extends BaseConstructor {
             final Resource resource = create(RESOURCE, resourceFacet);
             resourcesScope.setValue(resource, resourceFacet.getStart());
 
-            final UriTemplate relativeUri = uriTemplateConstructor.parse(resourceFacet.relativeUri.getText(), resourcesScope);
+            final UriTemplate relativeUri = (UriTemplate) ResourcesFactory.eINSTANCE.createFromString(ResourcesPackage.Literals.URI_TEMPLATE, resourceFacet.relativeUri.getText());
             resource.setRelativeUri(relativeUri);
             return withinScope(resourcesScope.with(resource), resourceScope -> {
                 resourceFacet.attributeFacet().forEach(this::visitAttributeFacet);

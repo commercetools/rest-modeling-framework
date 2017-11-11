@@ -5,6 +5,29 @@
 )
 package io.vrap.rmf.raml.model.facets
 
+import io.vrap.rmf.raml.model.util.RegExp
+import com.google.common.net.MediaType
+
+type RegExp wraps RegExp
+create {
+	RegExp.of(it)	
+}
+
+/**
+ * An integer that is >= 0.
+ */
+type UnsignedInteger wraps Integer
+
+/**
+ * An integer that is > 0.
+ */
+type PositiveInteger wraps Integer
+
+type MediaType wraps MediaType
+create {
+	MediaType.parse(it)	
+}
+
 interface EnumFacet {
 	/*
      * An enumeration of all the possible values of instances of this type.
@@ -18,12 +41,12 @@ interface ObjectTypeFacet {
 	/*
 	 * The minimum number of properties allowed for instances of this type.
 	 */
-	Integer minProperties
+	UnsignedInteger minProperties
 
 	/*
 	 * The maximum number of properties allowed for instances of this type.
 	 */
-	Integer maxProperties
+	UnsignedInteger maxProperties
 
 	/*
 	 * Boolean that indicates if an object instance has additional properties.
@@ -58,29 +81,29 @@ interface ArrayTypeFacet {
 	/*
 	 * Minimum amount of items in array. Value MUST be equal to or greater than 0.
 	 */
-	Integer minItems = "0"
+	UnsignedInteger minItems = "0"
 
 	/*
 	 * aximum amount of items in array. Value MUST be equal to or greater than 0.
 	 */
-	Integer maxItems = "2147483647"
+	UnsignedInteger maxItems = "2147483647"
 }
 
 interface StringTypeFacet {
-		/*
+	/*
 	 * Regular expression that this string SHOULD match.
 	 */
-	String pattern
+	RegExp pattern
 
 	/*
 	 * Minimum length of the string. Value MUST be equal to or greater than 0.
 	 */
-	Integer minLength = "0"
+	UnsignedInteger minLength = "0"
 
 	/*
 	 * Maximum length of the string. Value MUST be equal to or greater than 0.
 	 */
-	Integer maxLength = "2147483647"
+	UnsignedInteger maxLength = "2147483647"
 }
 
 /*
@@ -99,16 +122,7 @@ enum NumberFormat {
 	double
 }
 
-interface NumberTypeFacet {
-		/*
-	 * The minimum value of the parameter. Applicable only to parameters of type number or integer.
-	 */
-	BigDecimal minimum
-	/*
-	 * The maximum value of the parameter. Applicable only to parameters of type number or integer.
-	 */
-	BigDecimal maximum
-
+interface CommonNumberTypeFacet {
 	/*
 	 * The format of the value.
 	 */
@@ -118,7 +132,29 @@ interface NumberTypeFacet {
 	 * A numeric instance is valid against "multipleOf" if the result of dividing the instance
 	 * by this keyword's value is an integer.
 	 */
-	Integer multipleOf	
+	PositiveInteger multipleOf		
+}
+
+interface NumberTypeFacet extends CommonNumberTypeFacet {
+	/*
+	 * The minimum value of the parameter. Applicable only to parameters of type number or integer.
+	 */
+	BigDecimal minimum
+	/*
+	 * The maximum value of the parameter. Applicable only to parameters of type number or integer.
+	 */
+	BigDecimal maximum
+}
+
+interface IntegerTypeFacet extends CommonNumberTypeFacet {
+	/*
+	 * The minimum value of the parameter. Applicable only to parameters of type number or integer.
+	 */
+	BigDecimal minimum
+	/*
+	 * The maximum value of the parameter. Applicable only to parameters of type number or integer.
+	 */
+	BigDecimal maximum
 }
 
 enum DateTimeFormat {
@@ -136,20 +172,20 @@ interface DateTimeTypeFacet {
 }
 
 interface FileTypeFacet {
-	    /*
+	/*
      * A list of valid content-type strings for the file.
      */
-    String[] fileTypes
+    MediaType[] fileTypes
 
     /*
      * Specifies the minimum number of bytes for a parameter value. The value MUST be equal to or greater than 0.
      */
-    Integer minLength = "0"
+    UnsignedInteger minLength = "0"
 
     /*
      * Specifies the maximum number of bytes for a parameter value. The value MUST be equal to or greater than 0.
      */
-    Integer maxLength = "2147483647"
+    UnsignedInteger maxLength = "2147483647"
 }
 
 interface Instance {

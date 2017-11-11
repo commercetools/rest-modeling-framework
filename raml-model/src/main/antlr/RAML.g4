@@ -177,7 +177,7 @@ bodyFacet:
             SCALAR
             |   (
                     MAP_START
-                    (bodyContentTypeFacet* | bodyTypeFacet?)
+                    (bodyContentTypeFacet+ | bodyTypeFacet)
                     MAP_END
                 )
         )
@@ -186,12 +186,12 @@ bodyFacet:
 bodyContentTypeFacet:
     contentType=SCALAR
         (
-         SCALAR
-                    |   (
-                            MAP_START
-        ( attributeFacet | enumFacet | propertiesFacet | typeFacet | itemsFacet | defaultFacet | exampleFacet | examplesFacet | annotationFacet )*
-        MAP_END
-        )
+            SCALAR
+            |   (
+                    MAP_START
+                        bodyTypeFacet
+                    MAP_END
+                )
         )
     ;
 

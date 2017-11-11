@@ -1,5 +1,6 @@
 package io.vrap.rmf.raml.model.util
 
+import com.damnhandy.uri.template.UriTemplate
 import io.vrap.rmf.raml.model.modules.Api
 import io.vrap.rmf.raml.model.modules.ModulesFactory
 import io.vrap.rmf.raml.model.resources.*
@@ -46,10 +47,7 @@ class UriFragmentBuilderTest extends Specification {
     Resource createResource(String relativeUri, HttpMethod httpMethod) {
         Resource resource = ResourcesFactory.eINSTANCE.createResource()
 
-        UriTemplate uriTemplate = ResourcesFactory.eINSTANCE.createUriTemplate()
-        UriTemplateLiteral literal = ResourcesFactory.eINSTANCE.createUriTemplateLiteral()
-        literal.setLiteral(relativeUri)
-        uriTemplate.parts.add(literal)
+        UriTemplate uriTemplate = ResourcesFactory.eINSTANCE.createFromString(ResourcesPackage.Literals.URI_TEMPLATE, relativeUri);
 
         resource.setRelativeUri(uriTemplate)
 
