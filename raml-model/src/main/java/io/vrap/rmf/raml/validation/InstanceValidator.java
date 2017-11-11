@@ -1,4 +1,4 @@
-package io.vrap.rmf.raml.model.util;
+package io.vrap.rmf.raml.validation;
 
 import io.vrap.rmf.raml.model.facets.*;
 import io.vrap.rmf.raml.model.facets.util.FacetsSwitch;
@@ -10,6 +10,7 @@ import org.eclipse.emf.ecore.EObject;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Stack;
 
@@ -34,6 +35,11 @@ public class InstanceValidator {
 
         public InstanceValidatingVisitor(final EObject type) {
             types.push(type);
+        }
+
+        @Override
+        public List<Diagnostic> defaultCase(EObject object) {
+            return Collections.emptyList();
         }
 
         @Override
@@ -66,11 +72,14 @@ public class InstanceValidator {
             if (typeInstanceOf(NumberTypeFacet.class)) {
                 final NumberTypeFacet numberType = (NumberTypeFacet) types.peek();
                 final BigDecimal value = numberInstance.getValue();
-                if (numberType.getMinimum() != null && value.compareTo(numberType.getMinimum()) > 0) {
+                if (numberType.getMinimum() != null && value.compareTo(numberType.getMinimum()) < 0) {
                     validationResults.add(createValidationError("Value < minimum", numberInstance));
                 }
-                if (numberType.getMaximum() != null && value.compareTo(numberType.getMaximum()) < 0) {
+                if (numberType.getMaximum() != null && value.compareTo(numberType.getMaximum()) > 0) {
                     validationResults.add(createValidationError("Value > maximum", numberInstance));
+                }
+                if (numberType.getMultipleOf() != null && value.remainder(BigDecimal.valueOf(numberType.getMultipleOf())).compareTo(BigDecimal.ZERO) != 0) {
+                    validationResults.add(createValidationError("Value is not a multiple of " + numberType.getMultipleOf(), numberInstance));
                 }
             } else {
                 validationResults.add(createValidationError("Invalid type", numberInstance));

@@ -1,4 +1,4 @@
-package io.vrap.rmf.raml.model.util
+package io.vrap.rmf.raml.validation
 
 import io.vrap.rmf.raml.model.facets.FacetsFactory
 import io.vrap.rmf.raml.model.facets.NumberInstance
@@ -11,7 +11,7 @@ import spock.lang.Shared
 import spock.lang.Specification
 
 /**
- * Unit tests for {@link InstanceValidator}.
+ * Unit tests for {@link io.vrap.rmf.raml.validation.InstanceValidator}.
  */
 class InstanceValidatorTest extends Specification {
     @Shared
@@ -44,11 +44,16 @@ class InstanceValidatorTest extends Specification {
         NumberType numberType = TypesFactory.eINSTANCE.createNumberType()
         numberType.minimum = minimum != null ? BigDecimal.valueOf(minimum) : null
         numberType.maximum = maximum != null ? BigDecimal.valueOf(maximum) : null
+        numberType.multipleOf = multipleOf != null ? BigDecimal.valueOf(multipleOf) : null
         then:
         List<Diagnostic> validationResults = instanceValidator.validate(numberInstance, numberType)
         validationResults.size() == numErrors
         where:
-        value | minimum | maximum | numErrors
-        1     | null    | null    | 0
+        value | minimum | maximum | multipleOf | numErrors
+        6.008 | null    | null    | 3          | 1
+        6.0   | null    | null    | 3          | 0
+        2.5   | 2.5     | 5.3     | null       | 0
+        5.3   | 2.5     | 5.3     | null       | 0
+        1     | null    | null    | null       | 0
     }
 }
