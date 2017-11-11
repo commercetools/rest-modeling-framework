@@ -1,8 +1,10 @@
 package io.vrap.rmf.raml.validation
 
 import io.vrap.rmf.raml.model.facets.FacetsFactory
+import io.vrap.rmf.raml.model.facets.IntegerInstance
 import io.vrap.rmf.raml.model.facets.NumberInstance
 import io.vrap.rmf.raml.model.facets.StringInstance
+import io.vrap.rmf.raml.model.types.IntegerType
 import io.vrap.rmf.raml.model.types.NumberType
 import io.vrap.rmf.raml.model.types.StringType
 import io.vrap.rmf.raml.model.types.TypesFactory
@@ -54,6 +56,27 @@ class InstanceValidatorTest extends Specification {
         6.0   | null    | null    | 3          | 0
         2.5   | 2.5     | 5.3     | null       | 0
         5.3   | 2.5     | 5.3     | null       | 0
+        1     | null    | null    | null       | 0
+    }
+
+    def "validateIntegerInstance"() {
+        when:
+        IntegerInstance numberInstance = FacetsFactory.eINSTANCE.createIntegerInstance()
+        numberInstance.value = value
+
+        IntegerType integerType = TypesFactory.eINSTANCE.createIntegerType()
+        integerType.minimum = minimum
+        integerType.maximum = maximum
+        integerType.multipleOf = multipleOf
+        then:
+        List<Diagnostic> validationResults = instanceValidator.validate(numberInstance, integerType)
+        validationResults.size() == numErrors
+        where:
+        value | minimum | maximum | multipleOf | numErrors
+        7     | null    | null    | 3          | 1
+        6     | null    | null    | 3          | 0
+        2     | 2       | 5       | null       | 0
+        5     | 2       | 5       | null       | 0
         1     | null    | null    | null       | 0
     }
 }

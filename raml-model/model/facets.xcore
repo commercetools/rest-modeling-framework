@@ -150,11 +150,11 @@ interface IntegerTypeFacet extends CommonNumberTypeFacet {
 	/*
 	 * The minimum value of the parameter. Applicable only to parameters of type number or integer.
 	 */
-	BigDecimal minimum
+	Integer minimum
 	/*
 	 * The maximum value of the parameter. Applicable only to parameters of type number or integer.
 	 */
-	BigDecimal maximum
+	Integer maximum
 }
 
 enum DateTimeFormat {

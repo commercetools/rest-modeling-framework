@@ -87,6 +87,27 @@ public class InstanceValidator {
             return validationResults;
         }
 
+        @Override
+        public List<Diagnostic> caseIntegerInstance(IntegerInstance integerInstance) {
+            final List<Diagnostic> validationResults = new ArrayList<>();
+            if (typeInstanceOf(IntegerTypeFacet.class)) {
+                final IntegerTypeFacet integerType = (IntegerTypeFacet) types.peek();
+                final Integer value = integerInstance.getValue();
+                if (integerType.getMinimum() != null && value.compareTo(integerType.getMinimum()) < 0) {
+                    validationResults.add(createValidationError("Value < minimum", integerInstance));
+                }
+                if (integerType.getMaximum() != null && value.compareTo(integerType.getMaximum()) > 0) {
+                    validationResults.add(createValidationError("Value > maximum", integerInstance));
+                }
+                if (integerType.getMultipleOf() != null && value % integerType.getMultipleOf() != 0) {
+                    validationResults.add(createValidationError("Value is not a multiple of " + integerType.getMultipleOf(), integerInstance));
+                }
+            } else {
+                validationResults.add(createValidationError("Invalid type", integerInstance));
+            }
+            return validationResults;
+        }
+
         private boolean typeInstanceOf(final Class<?> clazz) {
             return !types.empty() && clazz.isInstance(types.peek());
         }
