@@ -8,6 +8,7 @@ import io.vrap.rmf.raml.model.types.IntegerType
 import io.vrap.rmf.raml.model.types.NumberType
 import io.vrap.rmf.raml.model.types.StringType
 import io.vrap.rmf.raml.model.types.TypesFactory
+import io.vrap.rmf.raml.model.util.RegExp
 import org.eclipse.emf.common.util.Diagnostic
 import spock.lang.Shared
 import spock.lang.Specification
@@ -27,12 +28,14 @@ class InstanceValidatorTest extends Specification {
         StringType stringType = TypesFactory.eINSTANCE.createStringType()
         stringType.minLength = minLength
         stringType.maxLength = maxLength
-        stringType.pattern = pattern
+        stringType.pattern = pattern == null ? null : RegExp.of(pattern)
         then:
         List<Diagnostic> validationResults = instanceValidator.validate(stringInstance, stringType)
         validationResults.size() == numErrors
         where:
         value | minLength | maxLength | pattern | numErrors
+        "123" | null      | null      | '[a-z]+'| 1
+        "abc" | null      | null      | '[a-z]+'| 0
         "123" | null      | null      | null    | 0
         "123" | 0         | 3         | null    | 0
         "123" | 0         | 2         | null    | 1
