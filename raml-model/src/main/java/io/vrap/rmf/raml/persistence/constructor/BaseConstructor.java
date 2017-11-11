@@ -270,8 +270,13 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
             scope.setValue(body, bodyContentType.getStart());
         }
         if (bodyContentType.contentType != null) {
-            final MediaType contentType = (MediaType) FacetsFactory.eINSTANCE.createFromString(MEDIA_TYPE, bodyContentType.contentType.getText());
-            body.getContentTypes().add(contentType);
+            final MediaType contentType;
+            try {
+                contentType = (MediaType) FacetsFactory.eINSTANCE.createFromString(MEDIA_TYPE, bodyContentType.contentType.getText());
+                body.getContentTypes().add(contentType);
+            } catch (IllegalArgumentException e) {
+                // TODO fix parsing of string template media types
+            }
         }
         return body;
     }

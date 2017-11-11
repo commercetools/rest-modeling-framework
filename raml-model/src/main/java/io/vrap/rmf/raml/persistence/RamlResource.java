@@ -77,10 +77,12 @@ public class RamlResource extends ResourceImpl {
         if (diagnostic.getData().size() > 0 && diagnostic.getData().get(0) instanceof EObject) {
             final EObject eObject = (EObject) diagnostic.getData().get(0);
             final RamlTokenProvider ramlTokenProvider = (RamlTokenProvider) EcoreUtil.getExistingAdapter(eObject, RamlTokenProvider.class);
-            final RamlToken ramlToken = ramlTokenProvider.get();
-            line = ramlToken.getLine();
-            column = ramlToken.getCharPositionInLine();
-            source = ramlToken.getLocation();
+            if (ramlTokenProvider != null) {
+                final RamlToken ramlToken = ramlTokenProvider.get();
+                line = ramlToken.getLine();
+                column = ramlToken.getCharPositionInLine();
+                source = ramlToken.getLocation();
+            }
         }
         getErrors().add(RamlDiagnostic.of(diagnostic.getMessage(), source, line, column));
     }

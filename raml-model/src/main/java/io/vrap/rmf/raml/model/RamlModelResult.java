@@ -1,6 +1,7 @@
 package io.vrap.rmf.raml.model;
 
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.resource.Resource.Diagnostic;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -26,8 +27,8 @@ public class RamlModelResult<T extends EObject> {
         return rootObject;
     }
 
-    public static <T extends EObject> RamlModelResult of(final T eObject) {
-        final List<RamlDiagnostic> validationResults = eObject.eResource().getErrors().stream()
+    public static <T extends EObject> RamlModelResult of(final List<Diagnostic> diagnostics, final T eObject) {
+        final List<RamlDiagnostic> validationResults = diagnostics.stream()
                 .filter(RamlDiagnostic.class::isInstance)
                 .map(RamlDiagnostic.class::cast)
                 .collect(Collectors.toList());

@@ -41,9 +41,18 @@ public class InstanceConstructor extends AbstractScopedVisitor<Instance> {
 
     @Override
     public Instance visitIntegerInstance(final RAMLParser.IntegerInstanceContext ctx) {
-        final IntegerInstance integerInstance = create(INTEGER_INSTANCE, ctx);
-        integerInstance.setValue(Integer.parseInt(ctx.getText()));
-        return integerInstance;
+        Instance instance;
+        try {
+            final int value = Integer.parseInt(ctx.getText());
+            final IntegerInstance integerInstance = create(INTEGER_INSTANCE, ctx);
+            integerInstance.setValue(value);
+            instance = integerInstance;
+        } catch (NumberFormatException e) {
+            final StringInstance stringInstance = create(STRING_INSTANCE, ctx);
+            stringInstance.setValue(ctx.getText());
+            instance = stringInstance;
+        }
+        return instance;
     }
 
     @Override

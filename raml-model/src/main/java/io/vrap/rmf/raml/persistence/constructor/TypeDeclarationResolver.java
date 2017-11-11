@@ -244,7 +244,7 @@ public class TypeDeclarationResolver {
         }
 
         private EObject resolveType(final ParserRuleContext ruleContext, final EObject resolvedType) {
-            if (!resolvedType.eIsProxy()) {
+            if (resolvedType != null && !resolvedType.eIsProxy()) {
                 EcoreUtil.replace(unresolved, resolvedType);
 
                 final Token nameToken = ruleContext.getStart();
@@ -270,7 +270,7 @@ public class TypeDeclarationResolver {
         }
 
         final EObject resolved = typeExpressionResolver.resolve(typeExpression, scope);
-        if (!resolved.eIsProxy()) {
+        if (resolved != null && !resolved.eIsProxy()) {
             setTypeName(resolved, typeDeclarationMap.name);
             setType(resolved, typeExpression, typeDeclarationMap.getStart(), scope);
         }
@@ -285,7 +285,7 @@ public class TypeDeclarationResolver {
                 typeExpressionToken.getText();
 
         final EObject resolved = typeExpressionResolver.resolve(typeExpression, scope);
-        if (!resolved.eIsProxy()) {
+        if (resolved != null && !resolved.eIsProxy()) {
             setTypeName(resolved, typeDeclarationTuple.name);
             setType(resolved, typeExpression, typeExpressionToken, scope);
         }

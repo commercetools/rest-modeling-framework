@@ -46,9 +46,7 @@ public class RamlModelBuilder {
      * @return a resolved api model result
      */
     public RamlModelResult<Api> buildApi(final URI uri) {
-        final EObject rootObject = load(uri);
-        final Api resolvedApi = resolveToApi(rootObject);
-        return RamlModelResult.of(resolvedApi);
+        return build(uri);
     }
 
     /**
@@ -57,18 +55,21 @@ public class RamlModelBuilder {
      * @param uri the uri to build the api from
      * @return a model result
      */
-    public RamlModelResult<EObject> build(final URI uri) {
-        final EObject rootObject = load(uri);
+    public <T extends EObject> RamlModelResult<T> build(final URI uri) {
+        final Resource resource = load(uri);
+        final EObject rootObject = resource.getContents().isEmpty() ?
+                null :
+                resource.getContents().get(0);
         final EObject resolved = rootObject instanceof ApiBase ?
                 resolveToApi(rootObject) :
                 rootObject;
-        return RamlModelResult.of(resolved);
+        return RamlModelResult.of(resource.getErrors(), resolved);
     }
 
-    private EObject load(final URI uri) {
+    private Resource load(final URI uri) {
         final RamlResourceSet resourceSet = new RamlResourceSet();
         final Resource resource = resourceSet.getResource(uri, true);
-        return resource.getContents().get(0);
+        return resource;
     }
 
     private Api resolveToApi(final EObject rootObject) {
