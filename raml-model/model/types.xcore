@@ -364,7 +364,7 @@ enum AnnotationTarget {
  * The allowedTargets node restricts the kinds of locations where the annotation can be applied. Annotation types, like data types,
  * can extend other data types, but annotation types themselves can neither be extended nor used anywhere data types can be used.
  */
-class AnyAnnotationType extends DocumentableElement, IdentifiableElement, AnnotationsFacet, InlineTypeContainer {
+class AnyAnnotationType extends DocumentableElement, EnumFacet, IdentifiableElement, AnnotationsFacet, InlineTypeContainer {
     /*
      * The type which this type extends.
      */
