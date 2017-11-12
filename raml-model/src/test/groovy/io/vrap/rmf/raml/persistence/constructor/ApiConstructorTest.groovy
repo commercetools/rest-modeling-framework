@@ -77,10 +77,10 @@ class ApiConstructorTest extends Specification {
         api.types[0].examples[0].name == ''
         api.types[0].examples[0].value instanceof ObjectInstance
         ObjectInstance example = api.types[0].examples[0].value
-        example.propertyValues.size() == 1
-        example.propertyValues[0].name == 'name'
-        example.propertyValues[0].value instanceof StringInstance
-        StringInstance stringInstance = example.propertyValues[0].value
+        example.value.size() == 1
+        example.value[0].name == 'name'
+        example.value[0].value instanceof StringInstance
+        StringInstance stringInstance = example.value[0].value
         stringInstance.value == 'Mr. X'
 
 
@@ -128,19 +128,19 @@ class ApiConstructorTest extends Specification {
         api.types[0].examples[0].name == 'Mr. X'
         api.types[0].examples[0].value instanceof ObjectInstance
         ObjectInstance exampleInstance1 = api.types[0].examples[0].value
-        exampleInstance1.propertyValues.size() == 1
-        exampleInstance1.propertyValues[0].name == 'name'
-        exampleInstance1.propertyValues[0].value instanceof StringInstance
-        StringInstance exampleValue1 = exampleInstance1.propertyValues[0].value
+        exampleInstance1.value.size() == 1
+        exampleInstance1.value[0].name == 'name'
+        exampleInstance1.value[0].value instanceof StringInstance
+        StringInstance exampleValue1 = exampleInstance1.value[0].value
         exampleValue1.value == 'Mr. X'
 
         api.types[0].examples[1].name == 'Mrs. Y'
         api.types[0].examples[1].value instanceof ObjectInstance
         ObjectInstance exampleInstance2 = api.types[0].examples[1].value
-        exampleInstance2.propertyValues.size() == 1
-        exampleInstance2.propertyValues[0].name == 'name'
-        exampleInstance2.propertyValues[0].value instanceof StringInstance
-        StringInstance exampleValue2 = exampleInstance2.propertyValues[0].value
+        exampleInstance2.value.size() == 1
+        exampleInstance2.value[0].name == 'name'
+        exampleInstance2.value[0].value instanceof StringInstance
+        StringInstance exampleValue2 = exampleInstance2.value[0].value
         exampleValue2.value == 'Mrs. Y'
     }
 
@@ -163,10 +163,10 @@ class ApiConstructorTest extends Specification {
 
         api.types[0].default instanceof ObjectInstance
         ObjectInstance default_ = api.types[0].default
-        default_.propertyValues.size() == 1
-        default_.propertyValues[0].name == 'name'
-        default_.propertyValues[0].value instanceof StringInstance
-        StringInstance stringInstance = default_.propertyValues[0].value
+        default_.value.size() == 1
+        default_.value[0].name == 'name'
+        default_.value[0].value instanceof StringInstance
+        StringInstance stringInstance = default_.value[0].value
         stringInstance.value == 'Mr. X'
 
         api.types[1].default instanceof StringInstance
@@ -271,13 +271,13 @@ class ApiConstructorTest extends Specification {
 
         api.securedBy.size() == 1
         api.securedBy[0].scheme == api.securitySchemes[0]
-        api.securedBy[0].parameters.propertyValues.size() == 1
-        api.securedBy[0].parameters.propertyValues[0].name == 'scopes'
-        api.securedBy[0].parameters.propertyValues[0].value instanceof ArrayInstance
-        ArrayInstance scopes = api.securedBy[0].parameters.propertyValues[0].value
-        scopes.values.size() == 1
-        scopes.values[0] instanceof StringInstance
-        StringInstance scope = scopes.values[0]
+        api.securedBy[0].parameters.value.size() == 1
+        api.securedBy[0].parameters.value[0].name == 'scopes'
+        api.securedBy[0].parameters.value[0].value instanceof ArrayInstance
+        ArrayInstance scopes = api.securedBy[0].parameters.value[0].value
+        scopes.value.size() == 1
+        scopes.value[0] instanceof StringInstance
+        StringInstance scope = scopes.value[0]
         scope.value == 'manage'
     }
 

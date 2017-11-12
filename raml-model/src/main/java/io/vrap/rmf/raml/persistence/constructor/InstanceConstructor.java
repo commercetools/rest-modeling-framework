@@ -13,9 +13,8 @@ import static io.vrap.rmf.raml.model.facets.FacetsPackage.Literals.*;
 public class InstanceConstructor extends AbstractScopedVisitor<Instance> {
 
     public Instance construct(RAMLParser parser, Scope scope) {
-        final Instance instance = withinScope(scope,
+        return withinScope(scope,
                 s ->visitInstance(parser.instance()));
-        return instance;
     }
 
     @Override
@@ -67,7 +66,7 @@ public class InstanceConstructor extends AbstractScopedVisitor<Instance> {
         final ObjectInstance objectInstance = create(OBJECT_INSTANCE, ctx);
         scope.setValue(objectInstance, ctx.getStart());
 
-        return withinScope(scope.with(objectInstance, OBJECT_INSTANCE__PROPERTY_VALUES), propertyValuesScope -> {
+        return withinScope(scope.with(objectInstance, OBJECT_INSTANCE__VALUE), propertyValuesScope -> {
             ctx.instanceProperty().forEach(this::createInstanceProperty);
             return objectInstance;
         });
@@ -90,7 +89,7 @@ public class InstanceConstructor extends AbstractScopedVisitor<Instance> {
         final ArrayInstance arrayInstance = create(ARRAY_INSTANCE, ctx);
         scope.setValue(arrayInstance, ctx.getStart());
 
-        return withinScope(scope.with(arrayInstance, ARRAY_INSTANCE__VALUES), arrayInstanceScope -> {
+        return withinScope(scope.with(arrayInstance, ARRAY_INSTANCE__VALUE), arrayInstanceScope -> {
             ctx.instance().forEach(this::visitInstance);
 
             return arrayInstance;

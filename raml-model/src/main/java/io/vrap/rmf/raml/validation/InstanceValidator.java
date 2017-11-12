@@ -4,15 +4,15 @@ import io.vrap.rmf.raml.model.facets.*;
 import io.vrap.rmf.raml.model.facets.util.FacetsSwitch;
 import io.vrap.rmf.raml.model.types.AnyAnnotationType;
 import io.vrap.rmf.raml.model.types.AnyType;
+import io.vrap.rmf.raml.model.types.ItemsFacet;
 import org.eclipse.emf.common.util.BasicDiagnostic;
 import org.eclipse.emf.common.util.Diagnostic;
+import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EObject;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Stack;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class InstanceValidator {
 
@@ -88,7 +88,7 @@ public class InstanceValidator {
         }
 
         @Override
-        public List<Diagnostic> caseIntegerInstance(IntegerInstance integerInstance) {
+        public List<Diagnostic> caseIntegerInstance(final IntegerInstance integerInstance) {
             final List<Diagnostic> validationResults = new ArrayList<>();
             if (typeInstanceOf(IntegerTypeFacet.class)) {
                 final IntegerTypeFacet integerType = (IntegerTypeFacet) types.peek();
@@ -104,6 +104,45 @@ public class InstanceValidator {
                 }
             } else {
                 validationResults.add(createValidationError("Invalid type", integerInstance));
+            }
+            return validationResults;
+        }
+
+        @Override
+        public List<Diagnostic> caseArrayInstance(final ArrayInstance arrayInstance) {
+            final List<Diagnostic> validationResults = new ArrayList<>();
+            if (typeInstanceOf(ArrayTypeFacet.class) && typeInstanceOf(ItemsFacet.class)) {
+                final ArrayTypeFacet arrayType = (ArrayTypeFacet) types.peek();
+                final EList<Instance> values = arrayInstance.getValue();
+                if (arrayType.getMinItems() != null && values.size() < arrayType.getMinItems()) {
+                    validationResults.add(createValidationError("Array size < minItems", arrayInstance));
+                }
+                if (arrayType.getMaxItems() != null && values.size() > arrayType.getMaxItems()) {
+                    validationResults.add(createValidationError("Array size > maxItems", arrayInstance));
+                }
+                if (arrayType.getUniqueItems() != null && arrayType.getUniqueItems()) {
+                    final Set<Object> uniqueItems = new HashSet<>();
+                    // TODO this only works for primitive values, we should extend it for object instance and array instance
+                    final Set<Instance> duplicateValues = values.stream()
+                            .filter(value -> !uniqueItems.add(value.getValue()))
+                            .collect(Collectors.toSet());
+                    if (duplicateValues.size() > 0) {
+                        validationResults.add(createValidationError("Array instance contains duplicate values", arrayInstance));
+                    }
+                }
+                final ItemsFacet itemsFacet = (ItemsFacet) types.peek();
+                if (itemsFacet.getItems() != null) {
+                    try {
+                        types.push(itemsFacet.getItems());
+                        values.stream()
+                                .flatMap(instance -> doSwitch(instance).stream())
+                                .forEach(validationResults::add);
+                    } finally {
+                        types.pop();
+                    }
+                }
+            } else {
+                validationResults.add(createValidationError("Invalid type", arrayInstance));
             }
             return validationResults;
         }

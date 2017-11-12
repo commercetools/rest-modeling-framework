@@ -1,13 +1,7 @@
 package io.vrap.rmf.raml.validation
 
-import io.vrap.rmf.raml.model.facets.FacetsFactory
-import io.vrap.rmf.raml.model.facets.IntegerInstance
-import io.vrap.rmf.raml.model.facets.NumberInstance
-import io.vrap.rmf.raml.model.facets.StringInstance
-import io.vrap.rmf.raml.model.types.IntegerType
-import io.vrap.rmf.raml.model.types.NumberType
-import io.vrap.rmf.raml.model.types.StringType
-import io.vrap.rmf.raml.model.types.TypesFactory
+import io.vrap.rmf.raml.model.facets.*
+import io.vrap.rmf.raml.model.types.*
 import io.vrap.rmf.raml.model.util.RegExp
 import org.eclipse.emf.common.util.Diagnostic
 import spock.lang.Shared
@@ -81,5 +75,44 @@ class InstanceValidatorTest extends Specification {
         2     | 2       | 5       | null       | 0
         5     | 2       | 5       | null       | 0
         1     | null    | null    | null       | 0
+    }
+
+    def "validateArrayInstance"() {
+        when:
+        ArrayInstance arrayInstance = FacetsFactory.eINSTANCE.createArrayInstance()
+        value.each {
+            Instance instance
+            switch (it) {
+                case Integer:
+                    IntegerInstance integerInstance = FacetsFactory.eINSTANCE.createIntegerInstance()
+                    integerInstance.value = it
+                    instance = integerInstance
+                    break
+                case String:
+                    StringInstance stringInstance = FacetsFactory.eINSTANCE.createStringInstance()
+                    stringInstance.value = it
+                    instance = stringInstance
+                    break
+                default:
+                    true == false
+            }
+            arrayInstance.value.add(instance)
+        }
+        ArrayType arrayType = TypesFactory.eINSTANCE.createArrayType()
+        arrayType.items = TypesFactory.eINSTANCE.createIntegerType()
+        arrayType.minItems = minItems
+        arrayType.maxItems = maxItems
+        arrayType.uniqueItems = uniqueItems
+        then:
+        List<Diagnostic> validationResults = instanceValidator.validate(arrayInstance, arrayType)
+        validationResults.size() == numErrors
+        where:
+        value   | minItems | maxItems | uniqueItems || numErrors
+        [1, ''] | null     | null     | null        || 1
+        [1, 1]  | null     | null     | true        || 1
+        [1, 1]  | null     | null     | false       || 0
+        [1, 2]  | null     | null     | null        || 0
+        [1, 2]  | 3        | null     | null        || 1
+        [1, 2]  | null     | 1        | null        || 1
     }
 }

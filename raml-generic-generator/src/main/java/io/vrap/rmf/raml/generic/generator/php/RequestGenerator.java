@@ -122,30 +122,30 @@ public class RequestGenerator extends AbstractTemplateGenerator {
                         case "methodParam":
                             if (anno != null) {
                                 ObjectInstance o = (ObjectInstance)anno.getValue();
-                                StringInstance placeholder = (StringInstance)o.getPropertyValues().stream().filter(propertyValue -> propertyValue.getName().equals("placeholder")).findFirst().orElse(null).getValue();
-                                StringInstance paramName = (StringInstance)o.getPropertyValues().stream().filter(propertyValue -> propertyValue.getName().equals("paramName")).findFirst().orElse(null).getValue();
+                                StringInstance placeholder = (StringInstance)o.getValue().stream().filter(propertyValue -> propertyValue.getName().equals("placeholder")).findFirst().orElse(null).getValue();
+                                StringInstance paramName = (StringInstance)o.getValue().stream().filter(propertyValue -> propertyValue.getName().equals("paramName")).findFirst().orElse(null).getValue();
                                 return "$" + camelize(placeholder.getValue()) + ", $" + paramName.getValue();
                             }
                             return "$" + camelize(param.getName());
                         case "methodName":
                             if (anno != null) {
                                 ObjectInstance o = (ObjectInstance)anno.getValue();
-                                StringInstance paramName = (StringInstance)o.getPropertyValues().stream().filter(propertyValue -> propertyValue.getName().equals("paramName")).findFirst().orElse(null).getValue();
+                                StringInstance paramName = (StringInstance)o.getValue().stream().filter(propertyValue -> propertyValue.getName().equals("paramName")).findFirst().orElse(null).getValue();
                                 return "with" + capitalize(paramName.getValue());
                             }
                             return "with" + capitalize(camelize(param.getName()));
                         case "paramName":
                             if (anno != null) {
                                 ObjectInstance o = (ObjectInstance)anno.getValue();
-                                StringInstance paramName = (StringInstance)o.getPropertyValues().stream().filter(propertyValue -> propertyValue.getName().equals("paramName")).findFirst().orElse(null).getValue();
+                                StringInstance paramName = (StringInstance)o.getValue().stream().filter(propertyValue -> propertyValue.getName().equals("paramName")).findFirst().orElse(null).getValue();
                                 return "$" + paramName.getValue();
                             }
                             return "$" + camelize(param.getName());
                         case "template":
                             if (anno != null) {
                                 ObjectInstance o = (ObjectInstance) anno.getValue();
-                                StringInstance template = (StringInstance) o.getPropertyValues().stream().filter(propertyValue -> propertyValue.getName().equals("template")).findFirst().orElse(null).getValue();
-                                StringInstance placeholder = (StringInstance) o.getPropertyValues().stream().filter(propertyValue -> propertyValue.getName().equals("placeholder")).findFirst().orElse(null).getValue();
+                                StringInstance template = (StringInstance) o.getValue().stream().filter(propertyValue -> propertyValue.getName().equals("template")).findFirst().orElse(null).getValue();
+                                StringInstance placeholder = (StringInstance) o.getValue().stream().filter(propertyValue -> propertyValue.getName().equals("placeholder")).findFirst().orElse(null).getValue();
                                 return "sprintf('" + template.getValue().replace("<<" + placeholder.getValue() + ">>", "%s") + "', $" + placeholder.getValue() + ")";
                             }
                             return "'" + param.getName() + "'";

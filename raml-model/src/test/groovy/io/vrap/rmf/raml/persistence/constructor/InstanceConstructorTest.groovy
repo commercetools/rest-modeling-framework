@@ -48,9 +48,9 @@ class InstanceConstructorTest extends Specification {
         then:
         instance instanceof ObjectInstance
         ObjectInstance objectInstance = instance
-        objectInstance.propertyValues.size() == 1
-        objectInstance.propertyValues[0].name == 'name'
-        objectInstance.propertyValues[0].value instanceof StringInstance
+        objectInstance.value.size() == 1
+        objectInstance.value[0].name == 'name'
+        objectInstance.value[0].value instanceof StringInstance
     }
 
     def "object instance with array"() {
@@ -65,15 +65,15 @@ class InstanceConstructorTest extends Specification {
         then:
         instance instanceof ObjectInstance
         ObjectInstance objectInstance = instance
-        objectInstance.propertyValues.size() == 1
-        objectInstance.propertyValues[0].name == 'names'
-        objectInstance.propertyValues[0].value instanceof ArrayInstance
-        ArrayInstance arrayInstance = objectInstance.propertyValues[0].value
-        arrayInstance.values.size() == 2
-        arrayInstance.values[0] instanceof StringInstance
-        StringInstance value1 = arrayInstance.values[0]
+        objectInstance.value.size() == 1
+        objectInstance.value[0].name == 'names'
+        objectInstance.value[0].value instanceof ArrayInstance
+        ArrayInstance arrayInstance = objectInstance.value[0].value
+        arrayInstance.value.size() == 2
+        arrayInstance.value[0] instanceof StringInstance
+        StringInstance value1 = arrayInstance.value[0]
         value1.value == 'Name1'
-        StringInstance value2 = arrayInstance.values[1]
+        StringInstance value2 = arrayInstance.value[1]
         value2.value == 'Name2'
     }
 
@@ -90,10 +90,10 @@ class InstanceConstructorTest extends Specification {
         then:
         instance instanceof ObjectInstance
         ObjectInstance objectInstance = instance
-        objectInstance.propertyValues.size() == 1
-        objectInstance.propertyValues[0].value instanceof ObjectInstance
-        ObjectInstance nestedObjectInstance = objectInstance.propertyValues[0].value
-        nestedObjectInstance.propertyValues.size() == 3
+        objectInstance.value.size() == 1
+        objectInstance.value[0].value instanceof ObjectInstance
+        ObjectInstance nestedObjectInstance = objectInstance.value[0].value
+        nestedObjectInstance.value.size() == 3
     }
 
     def "array instance"() {
@@ -107,11 +107,11 @@ class InstanceConstructorTest extends Specification {
         then:
         instance instanceof ArrayInstance
         ArrayInstance arrayInstance = instance
-        arrayInstance.values.size() == 2
-        arrayInstance.values[0] instanceof IntegerInstance
-        IntegerInstance value1 = arrayInstance.values[0]
+        arrayInstance.value.size() == 2
+        arrayInstance.value[0] instanceof IntegerInstance
+        IntegerInstance value1 = arrayInstance.value[0]
         value1.value == 1
-        IntegerInstance value2 = arrayInstance.values[1]
+        IntegerInstance value2 = arrayInstance.value[1]
         value2.value == 2
     }
 

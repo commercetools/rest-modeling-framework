@@ -189,6 +189,7 @@ interface FileTypeFacet {
 }
 
 interface Instance {
+	op Object getValue()
 }
 
 class StringInstance extends Instance {
@@ -208,11 +209,11 @@ class IntegerInstance extends Instance {
 }
 
 class ArrayInstance extends Instance {
-	contains Instance[] values
+	contains Instance[] value
 }
 
 class ObjectInstance extends Instance {
-	contains PropertyValue[] propertyValues
+	contains PropertyValue[] value
 }
 
 class PropertyValue {
