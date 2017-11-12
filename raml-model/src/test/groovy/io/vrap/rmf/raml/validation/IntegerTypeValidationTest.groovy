@@ -35,4 +35,15 @@ class IntegerTypeValidationTest extends BaseValidatorTest {
         0          || false
         1          || true
     }
+
+    def "validateDefault"() {
+        when:
+        integerType.default = createInstance(defaultValue)
+        then:
+        validate(integerType) == valid
+        where:
+        defaultValue || valid
+        1            || true
+        'a'          || false
+    }
 }

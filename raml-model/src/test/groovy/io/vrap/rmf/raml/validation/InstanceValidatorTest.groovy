@@ -10,7 +10,7 @@ import spock.lang.Specification
 /**
  * Unit tests for {@link io.vrap.rmf.raml.validation.InstanceValidator}.
  */
-class InstanceValidatorTest extends Specification {
+class InstanceValidatorTest extends Specification implements InstanceFixtures {
     @Shared
     InstanceValidator instanceValidator = new InstanceValidator()
 
@@ -81,22 +81,7 @@ class InstanceValidatorTest extends Specification {
         when:
         ArrayInstance arrayInstance = FacetsFactory.eINSTANCE.createArrayInstance()
         value.each {
-            Instance instance
-            switch (it) {
-                case Integer:
-                    IntegerInstance integerInstance = FacetsFactory.eINSTANCE.createIntegerInstance()
-                    integerInstance.value = it
-                    instance = integerInstance
-                    break
-                case String:
-                    StringInstance stringInstance = FacetsFactory.eINSTANCE.createStringInstance()
-                    stringInstance.value = it
-                    instance = stringInstance
-                    break
-                default:
-                    true == false
-            }
-            arrayInstance.value.add(instance)
+            arrayInstance.value.add(createInstance(it))
         }
         ArrayType arrayType = TypesFactory.eINSTANCE.createArrayType()
         arrayType.items = TypesFactory.eINSTANCE.createIntegerType()

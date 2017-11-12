@@ -1,9 +1,5 @@
 package io.vrap.rmf.raml.validation
 
-import io.vrap.rmf.raml.model.facets.FacetsFactory
-import io.vrap.rmf.raml.model.facets.Instance
-import io.vrap.rmf.raml.model.facets.IntegerInstance
-import io.vrap.rmf.raml.model.facets.StringInstance
 import io.vrap.rmf.raml.model.types.StringType
 import io.vrap.rmf.raml.model.types.TypesFactory
 
@@ -33,22 +29,7 @@ class StringTypeValidationTest extends BaseValidatorTest {
     def "validateEnumFacet"() {
         when:
         enumValues.each {
-            Instance instance
-            switch (it) {
-                case Integer:
-                    IntegerInstance integerInstance = FacetsFactory.eINSTANCE.createIntegerInstance()
-                    integerInstance.value = it
-                    instance = integerInstance
-                    break
-                case String:
-                    StringInstance stringInstance = FacetsFactory.eINSTANCE.createStringInstance()
-                    stringInstance.value = it
-                    instance = stringInstance
-                    break
-                default:
-                    true == false
-            }
-            stringType.enum.add(instance)
+            stringType.enum.add(createInstance(it))
         }
         then:
         validate(stringType) == valid

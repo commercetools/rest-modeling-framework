@@ -17,13 +17,14 @@ import io.vrap.rmf.raml.model.facets.StringTypeFacet
 import io.vrap.rmf.raml.model.util.AllPropertiesCollector
 import io.vrap.rmf.raml.model.util.ModelHelper
 import io.vrap.rmf.raml.model.util.SuperTypeCrossReferencer
+import io.vrap.rmf.raml.model.facets.DefaultFacet
 
 /*
  * Every type, whether built-in or user-defined, has the any type at the root of its inheritance tree.
  * By definition, the any type is a type which imposes no restrictions, i.e. any instance of data is
  * valid against it.
  */
-class AnyType extends AnnotationsFacet, DocumentableElement, IdentifiableElement, EnumFacet, InlineTypeContainer {
+class AnyType extends AnnotationsFacet, DocumentableElement, IdentifiableElement, EnumFacet, DefaultFacet, InlineTypeContainer {
 	/*
 	 * The type which this type extends.
 	 */
@@ -34,11 +35,6 @@ class AnyType extends AnnotationsFacet, DocumentableElement, IdentifiableElement
 	op AnyType[] subTypes() {
 		SuperTypeCrossReferencer.getSubTypes(this)
 	}
-	
-	/*
-	 * A default value for a type.
-	 */
-	contains Instance ^default
 
     /*
      * Examples of instances of this type.
@@ -364,7 +360,7 @@ enum AnnotationTarget {
  * The allowedTargets node restricts the kinds of locations where the annotation can be applied. Annotation types, like data types,
  * can extend other data types, but annotation types themselves can neither be extended nor used anywhere data types can be used.
  */
-class AnyAnnotationType extends DocumentableElement, EnumFacet, IdentifiableElement, AnnotationsFacet, InlineTypeContainer {
+class AnyAnnotationType extends DocumentableElement, EnumFacet, DefaultFacet, IdentifiableElement, AnnotationsFacet, InlineTypeContainer {
     /*
      * The type which this type extends.
      */

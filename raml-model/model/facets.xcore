@@ -37,6 +37,13 @@ interface EnumFacet {
 	String[] ^enum
 }
 
+interface DefaultFacet {
+	/*
+	 * A default value for this element.
+	 */
+	contains Instance ^default	
+}
+
 interface ObjectTypeFacet {
 	/*
 	 * The minimum number of properties allowed for instances of this type.

@@ -1,6 +1,5 @@
 package io.vrap.rmf.raml.validation
 
-import io.vrap.rmf.raml.validation.RamlValidationSetup
 import org.eclipse.emf.common.util.BasicDiagnostic
 import org.eclipse.emf.common.util.Diagnostic
 import org.eclipse.emf.ecore.EObject
@@ -10,7 +9,7 @@ import spock.lang.Specification
 /**
  * Base class for validator test, which ensures that the validators are setup correctly.
  */
-abstract class BaseValidatorTest extends Specification {
+abstract class BaseValidatorTest extends Specification implements InstanceFixtures {
     protected Diagnostic diagnostic
 
     def setupSpec() {

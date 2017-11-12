@@ -14,8 +14,11 @@ import java.util.stream.Collectors;
 
 public class TypesValidator extends AbstractRamlValidator {
     private final TypesValidatingVisitor typesValidatingVisitor = new TypesValidatingVisitor();
-    private final EnumValidatingVisitor enumValidatingVisitor = new EnumValidatingVisitor();
-    private final ExamplesValidatingVisitor examplesValidatingVisitor = new ExamplesValidatingVisitor();
+
+    private final List<ValidatingTypesSwitch> validators = Arrays.asList(
+            new EnumFacetValidator(),
+            new DefaultFacetValidator(),
+            new ExamplesValidator());
 
     @Override
     public boolean validate(final EClass eClass, final EObject eObject, final DiagnosticChain diagnostics, final Map<Object, Object> context) {
@@ -24,12 +27,11 @@ public class TypesValidator extends AbstractRamlValidator {
             diagnostics.add(diagnostic);
             return false;
         } else {
-            final List<Diagnostic> validationResults = new ArrayList<>();
-            validationResults.addAll(enumValidatingVisitor.doSwitch(eObject));
-            if (validationResults.isEmpty()) {
-                validationResults.addAll(examplesValidatingVisitor.doSwitch(eObject));
-            }
+            final List<Diagnostic> validationResults = validators.stream()
+                    .flatMap(validator -> validator.doSwitch(eObject).stream())
+                    .collect(Collectors.toList());
             validationResults.forEach(diagnostics::add);
+
             return validationResults.isEmpty();
         }
     }
@@ -87,7 +89,11 @@ public class TypesValidator extends AbstractRamlValidator {
         }
     }
 
-    private static class ExamplesValidatingVisitor extends TypesSwitch<List<Diagnostic>> {
+    private static abstract class ValidatingTypesSwitch extends TypesSwitch<List<Diagnostic>> {
+
+    }
+
+    private static class ExamplesValidator extends ValidatingTypesSwitch {
         private InstanceValidator instanceValidator = new InstanceValidator();
 
         @Override
@@ -104,7 +110,7 @@ public class TypesValidator extends AbstractRamlValidator {
         }
     }
 
-    private class EnumValidatingVisitor extends TypesSwitch<List<Diagnostic>> {
+    private class EnumFacetValidator extends ValidatingTypesSwitch  {
         private InstanceValidator instanceValidator = new InstanceValidator();
 
         @Override
@@ -149,6 +155,33 @@ public class TypesValidator extends AbstractRamlValidator {
                     validationResults.add(error("Enum facet contains duplicate values", anyAnnotationType));
                 }
             }
+            return validationResults;
+        }
+    }
+    
+    private class DefaultFacetValidator extends ValidatingTypesSwitch  {
+        private InstanceValidator instanceValidator = new InstanceValidator();
+
+        @Override
+        public List<Diagnostic> defaultCase(EObject object) {
+            return Collections.emptyList();
+        }
+
+        @Override
+        public List<Diagnostic> caseAnyType(final AnyType anyType) {
+            final List<Diagnostic> validationResults = Optional.ofNullable(anyType.getDefault())
+                    .map(value -> instanceValidator.validate(value, anyType))
+                    .orElse(Collections.emptyList());
+
+            return validationResults;
+        }
+
+        @Override
+        public List<Diagnostic> caseAnyAnnotationType(final AnyAnnotationType anyAnnotationType) {
+            final List<Diagnostic> validationResults = Optional.ofNullable(anyAnnotationType.getDefault())
+                    .map(value -> instanceValidator.validate(value, anyAnnotationType))
+                    .orElse(Collections.emptyList());
+
             return validationResults;
         }
     }

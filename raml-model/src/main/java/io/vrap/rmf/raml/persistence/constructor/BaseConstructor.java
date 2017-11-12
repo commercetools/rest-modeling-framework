@@ -23,6 +23,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static io.vrap.rmf.raml.model.elements.ElementsPackage.Literals.IDENTIFIABLE_ELEMENT__NAME;
+import static io.vrap.rmf.raml.model.facets.FacetsPackage.Literals.DEFAULT_FACET__DEFAULT;
 import static io.vrap.rmf.raml.model.facets.FacetsPackage.Literals.MEDIA_TYPE;
 import static io.vrap.rmf.raml.model.modules.ModulesPackage.Literals.*;
 import static io.vrap.rmf.raml.model.resources.ResourcesPackage.Literals.*;
@@ -68,7 +69,7 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
 
     @Override
     public Object visitDefaultFacet(RAMLParser.DefaultFacetContext defaultFacet) {
-        return instanceConstructor.withinScope(scope.with(ANY_TYPE__DEFAULT), defaultScope ->
+        return instanceConstructor.withinScope(scope.with(DEFAULT_FACET__DEFAULT), defaultScope ->
                 instanceConstructor.visitInstance(defaultFacet.instance()));
     }
 
