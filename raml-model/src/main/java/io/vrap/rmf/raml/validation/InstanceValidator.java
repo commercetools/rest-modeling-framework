@@ -30,7 +30,22 @@ public class InstanceValidator {
         return validationResults;
     }
 
-    private final static class InstanceValidatingVisitor extends FacetsSwitch<List<Diagnostic>> {
+    private List<Diagnostic> validateEnumFacet(final EnumFacet enumFacet, final Object value) {
+        final List<Diagnostic> validationResults = new ArrayList<>();
+        final Optional<Instance> enumInstance = enumFacet.getEnum().stream()
+                .filter(enumValue -> enumValue.getValue().equals(value))
+                .findFirst();
+        if (enumFacet.getEnum().size() > 0 && !enumInstance.isPresent()) {
+            validationResults.add(error("Value is not defined in enum facet", enumFacet));
+        }
+        return validationResults;
+    }
+
+    private Diagnostic error(final String message, final EObject eObject) {
+        return new BasicDiagnostic(Diagnostic.ERROR, null, -1, message, new Object[]{eObject});
+    }
+
+    private class InstanceValidatingVisitor extends FacetsSwitch<List<Diagnostic>> {
         private final Stack<EObject> types = new Stack<>();
 
         public InstanceValidatingVisitor(final EObject type) {
@@ -46,43 +61,50 @@ public class InstanceValidator {
         public List<Diagnostic> caseStringInstance(final StringInstance stringInstance) {
             final List<Diagnostic> validationResults = new ArrayList<>();
 
-            if (typeInstanceOf(StringTypeFacet.class)) {
-                final StringTypeFacet stringType = (StringTypeFacet) types.peek();
+            if (typeInstanceOf(StringTypeFacet.class) && typeInstanceOf(EnumFacet.class)) {
                 final String value = stringInstance.getValue();
 
+                final StringTypeFacet stringType = (StringTypeFacet) types.peek();
                 if (stringType.getMinLength() != null && value.length() < stringType.getMinLength()) {
-                    validationResults.add(createValidationError("Value length < minLength", stringInstance));
+                    validationResults.add(error("Value length < minLength", stringInstance));
                 }
                 if (stringType.getMaxLength() != null && value.length() > stringType.getMaxLength()) {
-                    validationResults.add(createValidationError("Value length > maxLength", stringInstance));
+                    validationResults.add(error("Value length > maxLength", stringInstance));
                 }
                 if (stringType.getPattern() != null && !stringType.getPattern().test(value)) {
-                    validationResults.add(createValidationError("Value doesn't match pattern "
+                    validationResults.add(error("Value doesn't match pattern "
                             + stringType.getPattern(), stringInstance));
                 }
+
+                final EnumFacet enumFacet = (EnumFacet) types.peek();
+                validationResults.addAll(validateEnumFacet(enumFacet, value));
             } else {
-                validationResults.add(createValidationError("Invalid type", stringInstance));
+                validationResults.add(error("Invalid type", stringInstance));
             }
             return validationResults;
         }
 
+
         @Override
         public List<Diagnostic> caseNumberInstance(final NumberInstance numberInstance) {
             final List<Diagnostic> validationResults = new ArrayList<>();
-            if (typeInstanceOf(NumberTypeFacet.class)) {
+            if (typeInstanceOf(NumberTypeFacet.class) && typeInstanceOf(EnumFacet.class)) {
                 final NumberTypeFacet numberType = (NumberTypeFacet) types.peek();
                 final BigDecimal value = numberInstance.getValue();
                 if (numberType.getMinimum() != null && value.compareTo(numberType.getMinimum()) < 0) {
-                    validationResults.add(createValidationError("Value < minimum", numberInstance));
+                    validationResults.add(error("Value < minimum", numberInstance));
                 }
                 if (numberType.getMaximum() != null && value.compareTo(numberType.getMaximum()) > 0) {
-                    validationResults.add(createValidationError("Value > maximum", numberInstance));
+                    validationResults.add(error("Value > maximum", numberInstance));
                 }
                 if (numberType.getMultipleOf() != null && value.remainder(BigDecimal.valueOf(numberType.getMultipleOf())).compareTo(BigDecimal.ZERO) != 0) {
-                    validationResults.add(createValidationError("Value is not a multiple of " + numberType.getMultipleOf(), numberInstance));
+                    validationResults.add(error("Value is not a multiple of " + numberType.getMultipleOf(), numberInstance));
                 }
+
+                final EnumFacet enumFacet = (EnumFacet) types.peek();
+                validationResults.addAll(validateEnumFacet(enumFacet, value));
             } else {
-                validationResults.add(createValidationError("Invalid type", numberInstance));
+                validationResults.add(error("Invalid type", numberInstance));
             }
             return validationResults;
         }
@@ -90,20 +112,23 @@ public class InstanceValidator {
         @Override
         public List<Diagnostic> caseIntegerInstance(final IntegerInstance integerInstance) {
             final List<Diagnostic> validationResults = new ArrayList<>();
-            if (typeInstanceOf(IntegerTypeFacet.class)) {
+            if (typeInstanceOf(IntegerTypeFacet.class) && typeInstanceOf(EnumFacet.class)) {
                 final IntegerTypeFacet integerType = (IntegerTypeFacet) types.peek();
                 final Integer value = integerInstance.getValue();
                 if (integerType.getMinimum() != null && value.compareTo(integerType.getMinimum()) < 0) {
-                    validationResults.add(createValidationError("Value < minimum", integerInstance));
+                    validationResults.add(error("Value < minimum", integerInstance));
                 }
                 if (integerType.getMaximum() != null && value.compareTo(integerType.getMaximum()) > 0) {
-                    validationResults.add(createValidationError("Value > maximum", integerInstance));
+                    validationResults.add(error("Value > maximum", integerInstance));
                 }
                 if (integerType.getMultipleOf() != null && value % integerType.getMultipleOf() != 0) {
-                    validationResults.add(createValidationError("Value is not a multiple of " + integerType.getMultipleOf(), integerInstance));
+                    validationResults.add(error("Value is not a multiple of " + integerType.getMultipleOf(), integerInstance));
                 }
+
+                final EnumFacet enumFacet = (EnumFacet) types.peek();
+                validationResults.addAll(validateEnumFacet(enumFacet, value));
             } else {
-                validationResults.add(createValidationError("Invalid type", integerInstance));
+                validationResults.add(error("Invalid type", integerInstance));
             }
             return validationResults;
         }
@@ -115,10 +140,10 @@ public class InstanceValidator {
                 final ArrayTypeFacet arrayType = (ArrayTypeFacet) types.peek();
                 final EList<Instance> values = arrayInstance.getValue();
                 if (arrayType.getMinItems() != null && values.size() < arrayType.getMinItems()) {
-                    validationResults.add(createValidationError("Array size < minItems", arrayInstance));
+                    validationResults.add(error("Array size < minItems", arrayInstance));
                 }
                 if (arrayType.getMaxItems() != null && values.size() > arrayType.getMaxItems()) {
-                    validationResults.add(createValidationError("Array size > maxItems", arrayInstance));
+                    validationResults.add(error("Array size > maxItems", arrayInstance));
                 }
                 if (arrayType.getUniqueItems() != null && arrayType.getUniqueItems()) {
                     final Set<Object> uniqueItems = new HashSet<>();
@@ -127,7 +152,7 @@ public class InstanceValidator {
                             .filter(value -> !uniqueItems.add(value.getValue()))
                             .collect(Collectors.toSet());
                     if (duplicateValues.size() > 0) {
-                        validationResults.add(createValidationError("Array instance contains duplicate values", arrayInstance));
+                        validationResults.add(error("Array instance contains duplicate values", arrayInstance));
                     }
                 }
                 final ItemsFacet itemsFacet = (ItemsFacet) types.peek();
@@ -142,17 +167,13 @@ public class InstanceValidator {
                     }
                 }
             } else {
-                validationResults.add(createValidationError("Invalid type", arrayInstance));
+                validationResults.add(error("Invalid type", arrayInstance));
             }
             return validationResults;
         }
 
         private boolean typeInstanceOf(final Class<?> clazz) {
             return !types.empty() && clazz.isInstance(types.peek());
-        }
-
-        private Diagnostic createValidationError(final String message, final EObject eObject) {
-           return new BasicDiagnostic(Diagnostic.ERROR, null, -1, message, new Object[] { eObject });
         }
     }
 }

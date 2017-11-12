@@ -29,12 +29,12 @@ create {
 }
 
 interface EnumFacet {
-	/*
+    /*
      * An enumeration of all the possible values of instances of this type.
      * The value is an array containing representations of these possible values.
      * An instance of this type MUST be equal to one of these values.
      */
-	String[] ^enum
+    contains Instance[] ^enum
 }
 
 interface DefaultFacet {

@@ -77,6 +77,25 @@ class InstanceValidatorTest extends Specification implements InstanceFixtures {
         1     | null    | null    | null       | 0
     }
 
+    def "validateIntegerInstanceEnum"() {
+        when:
+        IntegerInstance numberInstance = FacetsFactory.eINSTANCE.createIntegerInstance()
+        numberInstance.value = value
+
+        IntegerType integerType = TypesFactory.eINSTANCE.createIntegerType()
+        enumValues.each {
+            integerType.enum.add(createInstance(it))
+        }
+        then:
+        List<Diagnostic> validationResults = instanceValidator.validate(numberInstance, integerType)
+        validationResults.size() == numErrors
+        where:
+        value | enumValues || numErrors
+        7     | [1, 2]     || 1
+        1     | [1, 2]     || 0
+        1     | []         || 0
+    }
+
     def "validateArrayInstance"() {
         when:
         ArrayInstance arrayInstance = FacetsFactory.eINSTANCE.createArrayInstance()

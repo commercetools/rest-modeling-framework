@@ -7,6 +7,7 @@ import io.vrap.rmf.raml.model.elements.DocumentableElement
 import io.vrap.rmf.raml.model.elements.IdentifiableElement
 import io.vrap.rmf.raml.model.facets.ArrayTypeFacet
 import io.vrap.rmf.raml.model.facets.DateTimeTypeFacet
+import io.vrap.rmf.raml.model.facets.EnumFacet
 import io.vrap.rmf.raml.model.facets.FileTypeFacet
 import io.vrap.rmf.raml.model.facets.Instance
 import io.vrap.rmf.raml.model.facets.IntegerTypeFacet
@@ -75,15 +76,6 @@ class AnyType extends AnnotationsFacet, DocumentableElement, IdentifiableElement
  */
 class TypeTemplate extends AnyType {
 
-}
-
-interface EnumFacet {
-    /*
-     * An enumeration of all the possible values of instances of this type.
-     * The value is an array containing representations of these possible values.
-     * An instance of this type MUST be equal to one of these values.
-     */
-    contains Instance[] ^enum
 }
 
 class Example {

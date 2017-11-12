@@ -23,8 +23,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static io.vrap.rmf.raml.model.elements.ElementsPackage.Literals.IDENTIFIABLE_ELEMENT__NAME;
-import static io.vrap.rmf.raml.model.facets.FacetsPackage.Literals.DEFAULT_FACET__DEFAULT;
-import static io.vrap.rmf.raml.model.facets.FacetsPackage.Literals.MEDIA_TYPE;
+import static io.vrap.rmf.raml.model.facets.FacetsPackage.Literals.*;
 import static io.vrap.rmf.raml.model.modules.ModulesPackage.Literals.*;
 import static io.vrap.rmf.raml.model.resources.ResourcesPackage.Literals.*;
 import static io.vrap.rmf.raml.model.responses.ResponsesPackage.Literals.*;
