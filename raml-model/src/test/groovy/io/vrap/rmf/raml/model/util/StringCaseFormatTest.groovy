@@ -59,19 +59,23 @@ class StringCaseFormatTest extends Specification {
         expect:
         format.apply(value) == result
         where:
-        format                                 | value    || result
-        StringCaseFormat.LOWER_CAMEL_CASE      | ''       || ''
-        StringCaseFormat.LOWER_CAMEL_CASE      | 'ab-cd'  || 'abCd'
-        StringCaseFormat.LOWER_CAMEL_CASE      | 'AB-CD'  || 'abCd'
-        StringCaseFormat.UPPER_UNDERSCORE_CASE | 'ab-cd'  || 'AB_CD'
-        StringCaseFormat.UPPER_HYPHEN_CASE     | 'ab-cd'  || 'AB-CD'
-        StringCaseFormat.LOWER_HYPHEN_CASE     | 'aBCDEf' || 'a-bcd-ef'
-        StringCaseFormat.LOWER_HYPHEN_CASE     | 'ABCDef' || 'abc-def'
-        StringCaseFormat.LOWER_CAMEL_CASE      | 'ABCDef' || 'abcDef'
-        StringCaseFormat.UPPER_CAMEL_CASE      | 'ABCDef' || 'AbcDef'
-        StringCaseFormat.LOWER_CAMEL_CASE      | 'ABCdEf' || 'abCdEf'
-        StringCaseFormat.UPPER_CAMEL_CASE      | 'ABCdEf' || 'AbCdEf'
-        StringCaseFormat.LOWER_CAMEL_CASE      | 'aBCDEf' || 'aBcdEf'
-        StringCaseFormat.UPPER_CAMEL_CASE      | 'aBCDEf' || 'ABcdEf'
+        format                                 | value      || result
+        StringCaseFormat.LOWER_CAMEL_CASE      | ''         || ''
+        StringCaseFormat.LOWER_CAMEL_CASE      | 'ab-cd'    || 'abCd'
+        StringCaseFormat.LOWER_CAMEL_CASE      | 'AB-CD'    || 'abCd'
+        StringCaseFormat.UPPER_UNDERSCORE_CASE | 'ab-cd'    || 'AB_CD'
+        StringCaseFormat.UPPER_HYPHEN_CASE     | 'ab-cd'    || 'AB-CD'
+        StringCaseFormat.LOWER_HYPHEN_CASE     | 'aBCDEf'   || 'a-bcd-ef'
+        StringCaseFormat.LOWER_HYPHEN_CASE     | 'ABCDef'   || 'abc-def'
+        StringCaseFormat.LOWER_CAMEL_CASE      | 'ABCDef'   || 'abcDef'
+        StringCaseFormat.UPPER_CAMEL_CASE      | 'ABCDef'   || 'AbcDef'
+        StringCaseFormat.LOWER_CAMEL_CASE      | 'ABCdEf'   || 'abCdEf'
+        StringCaseFormat.UPPER_CAMEL_CASE      | 'ABCdEf'   || 'AbCdEf'
+        StringCaseFormat.LOWER_CAMEL_CASE      | 'aBCDEf'   || 'aBcdEf'
+        StringCaseFormat.UPPER_CAMEL_CASE      | 'aBCDEf'   || 'ABcdEf'
+        StringCaseFormat.LOWER_HYPHEN_CASE     | 'aBc-De_f' || 'a-bc-de-f'
+        StringCaseFormat.UPPER_UNDERSCORE_CASE | 'aBc-De_f' || 'A_BC_DE_F'
+        StringCaseFormat.LOWER_CAMEL_CASE      | 'aBc-De_F'  || 'aBcDeF'
+        StringCaseFormat.UPPER_CAMEL_CASE      | 'aBc-De_F'  || 'ABcDeF'
     }
 }
