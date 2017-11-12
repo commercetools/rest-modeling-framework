@@ -1,6 +1,7 @@
 package io.vrap.rmf.raml.validation;
 
 import io.vrap.rmf.raml.model.facets.*;
+import io.vrap.rmf.raml.model.types.Annotation;
 import io.vrap.rmf.raml.model.types.AnyAnnotationType;
 import io.vrap.rmf.raml.model.types.AnyType;
 import io.vrap.rmf.raml.model.types.util.TypesSwitch;
@@ -13,16 +14,17 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class TypesValidator extends AbstractRamlValidator {
-    private final TypesValidatingVisitor typesValidatingVisitor = new TypesValidatingVisitor();
+    private final TypeAndAnnoationTypeValidator typeAndAnnoationTypeValidator = new TypeAndAnnoationTypeValidator();
 
     private final List<ValidatingTypesSwitch> validators = Arrays.asList(
+            new AnnotationValidator(),
             new EnumFacetValidator(),
             new DefaultFacetValidator(),
             new ExamplesValidator());
 
     @Override
     public boolean validate(final EClass eClass, final EObject eObject, final DiagnosticChain diagnostics, final Map<Object, Object> context) {
-        final Diagnostic diagnostic = typesValidatingVisitor.doSwitch(eObject);
+        final Diagnostic diagnostic = typeAndAnnoationTypeValidator.doSwitch(eObject);
         if (diagnostic != null) {
             diagnostics.add(diagnostic);
             return false;
@@ -36,7 +38,7 @@ public class TypesValidator extends AbstractRamlValidator {
         }
     }
 
-    private class TypesValidatingVisitor extends TypesSwitch<Diagnostic> {
+    private class TypeAndAnnoationTypeValidator extends TypesSwitch<Diagnostic> {
 
         @Override
         public Diagnostic defaultCase(EObject object) {
@@ -91,15 +93,23 @@ public class TypesValidator extends AbstractRamlValidator {
 
     private static abstract class ValidatingTypesSwitch extends TypesSwitch<List<Diagnostic>> {
 
+        @Override
+        public final List<Diagnostic> defaultCase(EObject object) {
+            return Collections.emptyList();
+        }
+    }
+
+    private static class AnnotationValidator extends ValidatingTypesSwitch {
+        private InstanceValidator instanceValidator = new InstanceValidator();
+
+        @Override
+        public List<Diagnostic> caseAnnotation(final Annotation annotation) {
+            return instanceValidator.validate(annotation.getValue(), annotation.getType());
+        }
     }
 
     private static class ExamplesValidator extends ValidatingTypesSwitch {
         private InstanceValidator instanceValidator = new InstanceValidator();
-
-        @Override
-        public List<Diagnostic> defaultCase(EObject object) {
-            return Collections.emptyList();
-        }
 
         @Override
         public List<Diagnostic> caseAnyType(final AnyType anyType) {
@@ -112,11 +122,6 @@ public class TypesValidator extends AbstractRamlValidator {
 
     private class EnumFacetValidator extends ValidatingTypesSwitch  {
         private InstanceValidator instanceValidator = new InstanceValidator();
-
-        @Override
-        public List<Diagnostic> defaultCase(EObject object) {
-            return Collections.emptyList();
-        }
 
         @Override
         public List<Diagnostic> caseAnyType(final AnyType anyType) {
@@ -161,11 +166,6 @@ public class TypesValidator extends AbstractRamlValidator {
     
     private class DefaultFacetValidator extends ValidatingTypesSwitch  {
         private InstanceValidator instanceValidator = new InstanceValidator();
-
-        @Override
-        public List<Diagnostic> defaultCase(EObject object) {
-            return Collections.emptyList();
-        }
 
         @Override
         public List<Diagnostic> caseAnyType(final AnyType anyType) {
