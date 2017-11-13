@@ -8,11 +8,14 @@ import io.vrap.rmf.raml.model.types.ItemsFacet;
 import org.eclipse.emf.common.util.BasicDiagnostic;
 import org.eclipse.emf.common.util.Diagnostic;
 import org.eclipse.emf.common.util.EList;
+import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
 
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.ANY_TYPE;
 
 public class InstanceValidator {
 
@@ -78,7 +81,7 @@ public class InstanceValidator {
 
                 final EnumFacet enumFacet = (EnumFacet) types.peek();
                 validationResults.addAll(validateEnumFacet(enumFacet, value));
-            } else {
+            } else if (!typeIs(ANY_TYPE)) {
                 validationResults.add(error("Invalid type", stringInstance));
             }
             return validationResults;
@@ -103,7 +106,7 @@ public class InstanceValidator {
 
                 final EnumFacet enumFacet = (EnumFacet) types.peek();
                 validationResults.addAll(validateEnumFacet(enumFacet, value));
-            } else {
+            } else if (!typeIs(ANY_TYPE)) {
                 validationResults.add(error("Invalid type", numberInstance));
             }
             return validationResults;
@@ -140,7 +143,7 @@ public class InstanceValidator {
                 if (numberType.getMaximum() != null && value.compareTo(numberType.getMaximum().intValue()) > 0) {
                     validationResults.add(error("Value > maximum", integerInstance));
                 }
-            } else {
+            } else if (!typeIs(ANY_TYPE)) {
                 validationResults.add(error("Invalid type", integerInstance));
             }
             return validationResults;
@@ -179,7 +182,7 @@ public class InstanceValidator {
                         types.pop();
                     }
                 }
-            } else {
+            } else if (!typeIs(ANY_TYPE)) {
                 validationResults.add(error("Invalid type", arrayInstance));
             }
             return validationResults;
@@ -187,6 +190,10 @@ public class InstanceValidator {
 
         private boolean typeInstanceOf(final Class<?> clazz) {
             return !types.empty() && clazz.isInstance(types.peek());
+        }
+
+        private boolean typeIs(final EClass eClass) {
+            return !types.empty() && types.peek().eClass() == eClass;
         }
     }
 }

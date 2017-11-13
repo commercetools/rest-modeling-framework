@@ -14,6 +14,16 @@ class InstanceValidatorTest extends Specification implements InstanceFixtures {
     @Shared
     InstanceValidator instanceValidator = new InstanceValidator()
 
+    def "validateAgainstAnyType"() {
+        when:
+        AnyType anyType = TypesFactory.eINSTANCE.createAnyType()
+        Instance instance = createInstance(value)
+        then:
+        instanceValidator.validate(instance, anyType).empty == true
+        where:
+        value << [ 1, 'string', false, BigDecimal.ONE ]
+    }
+
     def "validateStringInstance"() {
         when:
         StringInstance stringInstance = FacetsFactory.eINSTANCE.createStringInstance();

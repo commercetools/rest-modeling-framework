@@ -1,9 +1,6 @@
 package io.vrap.rmf.raml.validation
 
-import io.vrap.rmf.raml.model.facets.FacetsFactory
-import io.vrap.rmf.raml.model.facets.Instance
-import io.vrap.rmf.raml.model.facets.IntegerInstance
-import io.vrap.rmf.raml.model.facets.StringInstance
+import io.vrap.rmf.raml.model.facets.*
 
 trait InstanceFixtures {
     def createInstance(Object value) {
@@ -19,6 +16,15 @@ trait InstanceFixtures {
                 stringInstance.value = value
                 instance = stringInstance
                 break
+            case Boolean:
+                BooleanInstance booleanInstance = FacetsFactory.eINSTANCE.createBooleanInstance()
+                booleanInstance.value = value
+                instance = booleanInstance
+                break
+            case BigDecimal:
+                NumberInstance numberInstance = FacetsFactory.eINSTANCE.createNumberInstance()
+                numberInstance.value = value
+                instance = numberInstance
             default:
                 true == false
         }
