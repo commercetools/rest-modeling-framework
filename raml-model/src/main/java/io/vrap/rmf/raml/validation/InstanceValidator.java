@@ -112,21 +112,34 @@ public class InstanceValidator {
         @Override
         public List<Diagnostic> caseIntegerInstance(final IntegerInstance integerInstance) {
             final List<Diagnostic> validationResults = new ArrayList<>();
-            if (typeInstanceOf(IntegerTypeFacet.class) && typeInstanceOf(EnumFacet.class)) {
+            final Integer value = integerInstance.getValue();
+
+            if (typeInstanceOf(EnumFacet.class)) {
+                final EnumFacet enumFacet = (EnumFacet) types.peek();
+                validationResults.addAll(validateEnumFacet(enumFacet, value));
+            }
+            if (typeInstanceOf(CommonNumberTypeFacet.class)) {
+                final CommonNumberTypeFacet commonNumberType = (CommonNumberTypeFacet) types.peek();
+                if (commonNumberType.getMultipleOf() != null && value % commonNumberType.getMultipleOf() != 0) {
+                    validationResults.add(error("Value is not a multiple of " + commonNumberType.getMultipleOf(), integerInstance));
+                }
+            }
+            if (typeInstanceOf(IntegerTypeFacet.class)) {
                 final IntegerTypeFacet integerType = (IntegerTypeFacet) types.peek();
-                final Integer value = integerInstance.getValue();
                 if (integerType.getMinimum() != null && value.compareTo(integerType.getMinimum()) < 0) {
                     validationResults.add(error("Value < minimum", integerInstance));
                 }
                 if (integerType.getMaximum() != null && value.compareTo(integerType.getMaximum()) > 0) {
                     validationResults.add(error("Value > maximum", integerInstance));
                 }
-                if (integerType.getMultipleOf() != null && value % integerType.getMultipleOf() != 0) {
-                    validationResults.add(error("Value is not a multiple of " + integerType.getMultipleOf(), integerInstance));
+            } else if (typeInstanceOf(NumberTypeFacet.class)) {
+                final NumberTypeFacet numberType = (NumberTypeFacet) types.peek();
+                if (numberType.getMinimum() != null && value.compareTo(numberType.getMinimum().intValue()) < 0) {
+                    validationResults.add(error("Value < minimum", integerInstance));
                 }
-
-                final EnumFacet enumFacet = (EnumFacet) types.peek();
-                validationResults.addAll(validateEnumFacet(enumFacet, value));
+                if (numberType.getMaximum() != null && value.compareTo(numberType.getMaximum().intValue()) > 0) {
+                    validationResults.add(error("Value > maximum", integerInstance));
+                }
             } else {
                 validationResults.add(error("Invalid type", integerInstance));
             }

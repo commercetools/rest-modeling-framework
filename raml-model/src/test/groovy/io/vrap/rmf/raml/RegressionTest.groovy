@@ -50,6 +50,22 @@ class RegressionTest extends Specification implements ResourceFixtures {
         api.baseUriParameters.get(0).type.type.eIsProxy() == true
     }
 
+    def "number-multipleof.raml"() {
+        when:
+        RamlModelResult<Api> ramlModelResult = constructApi(
+                '''\
+        #%RAML 1.0
+        title: Some API
+        types:
+            MyCustomType:
+                type: number
+                multipleOf: 3
+                example: 6
+        ''')
+        then:
+        ramlModelResult.validationResults.size() == 0
+    }
+
     RamlModelResult<Api> constructApi(String input) {
         Files.write(featureFile, input.stripIndent().getBytes(Charsets.UTF_8));
         URI i = URI.createURI(featureFile.toAbsolutePath().toUri().toString())
