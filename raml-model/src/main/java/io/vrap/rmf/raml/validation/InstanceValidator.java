@@ -2,9 +2,8 @@ package io.vrap.rmf.raml.validation;
 
 import io.vrap.rmf.raml.model.facets.*;
 import io.vrap.rmf.raml.model.facets.util.FacetsSwitch;
-import io.vrap.rmf.raml.model.types.AnyAnnotationType;
-import io.vrap.rmf.raml.model.types.AnyType;
-import io.vrap.rmf.raml.model.types.ItemsFacet;
+import io.vrap.rmf.raml.model.types.*;
+import io.vrap.rmf.raml.model.util.AllPropertiesCollector;
 import org.eclipse.emf.common.util.BasicDiagnostic;
 import org.eclipse.emf.common.util.Diagnostic;
 import org.eclipse.emf.common.util.EList;
@@ -86,7 +85,6 @@ public class InstanceValidator {
             }
             return validationResults;
         }
-
 
         @Override
         public List<Diagnostic> caseNumberInstance(final NumberInstance numberInstance) {
@@ -184,6 +182,34 @@ public class InstanceValidator {
                 }
             } else if (!typeIs(ANY_TYPE)) {
                 validationResults.add(error("Invalid type", arrayInstance));
+            }
+            return validationResults;
+        }
+
+        @Override
+        public List<Diagnostic> caseObjectInstance(final ObjectInstance objectInstance) {
+            final List<Diagnostic> validationResults = new ArrayList<>();
+
+            if (typeInstanceOf(ObjectTypeFacet.class)) {
+                final ObjectTypeFacet objectTypeFacet = (ObjectTypeFacet) types.peek();
+                final Map<String, Property> allProperties = AllPropertiesCollector.getAllPropertiesAsMap(objectTypeFacet);
+
+                for (final PropertyValue propertyValue : objectInstance.getValue()) {
+                    final String name = propertyValue.getName();
+                    final Property property = allProperties.get(name);
+
+                    if (property != null) {
+                        try {
+                            types.push(property.getType());
+                            final List<Diagnostic> propertyValidationResults = doSwitch(propertyValue.getValue());
+                            validationResults.addAll(propertyValidationResults);
+                        } finally {
+                            types.pop();
+                        }
+                    } else if (objectTypeFacet.getAdditionalProperties() == Boolean.FALSE) {
+                        error("Property '" + name + "' not defined", objectInstance);
+                    }
+                }
             }
             return validationResults;
         }

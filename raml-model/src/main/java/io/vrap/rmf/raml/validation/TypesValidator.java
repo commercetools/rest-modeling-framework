@@ -1,9 +1,11 @@
 package io.vrap.rmf.raml.validation;
 
+import com.google.common.base.Strings;
 import io.vrap.rmf.raml.model.facets.*;
 import io.vrap.rmf.raml.model.types.Annotation;
 import io.vrap.rmf.raml.model.types.AnyAnnotationType;
 import io.vrap.rmf.raml.model.types.AnyType;
+import io.vrap.rmf.raml.model.types.Property;
 import io.vrap.rmf.raml.model.types.util.TypesSwitch;
 import org.eclipse.emf.common.util.Diagnostic;
 import org.eclipse.emf.common.util.DiagnosticChain;
@@ -88,6 +90,17 @@ public class TypesValidator extends AbstractRamlValidator {
                     || fileType.getMinLength() <= fileType.getMaxLength();
 
             return rangeIsValid ? null : error("Facet 'minLength' must be <= 'maxLength'", fileType);
+        }
+
+        @Override
+        public Diagnostic caseProperty(final Property property) {
+            Diagnostic validationResult = null;
+            if (Strings.isNullOrEmpty(property.getName())) {
+                validationResult = error("Property must have a name", property);
+            } else if (property.getType() == null) {
+                validationResult = error("Property must have a type", property);
+            }
+            return validationResult;
         }
     }
 

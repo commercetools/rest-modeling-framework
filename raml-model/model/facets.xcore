@@ -44,41 +44,6 @@ interface DefaultFacet {
 	contains Instance ^default	
 }
 
-interface ObjectTypeFacet {
-	/*
-	 * The minimum number of properties allowed for instances of this type.
-	 */
-	UnsignedInteger minProperties
-
-	/*
-	 * The maximum number of properties allowed for instances of this type.
-	 */
-	UnsignedInteger maxProperties
-
-	/*
-	 * Boolean that indicates if an object instance has additional properties.
-	 */
-	Boolean additionalProperties = "true"
-
-	/*
-	 * Determines the concrete type of an individual object at runtime when, for example,
-	 * payloads contain ambiguous types due to unions or inheritance.
-	 *
-	 * The value must match the name of one of the declared properties of a type.
-	 * Unsupported practices are inline type declarations and using discriminator with non-scalar
-	 * properties.
-	 */
-	String discriminator
-
-	/*
-	 * Identifies the declaring type. Requires including a discriminator facet in the type declaration.
-	 * A valid value is an actual value that might identify the type of an individual object and is
-	 * unique in the hierarchy of the type.
-	 * Inline type declarations are not supported.
-	 */
-	String discriminatorValue
-}
-
 interface ArrayTypeFacet {
 	/*
 	 * Boolean value that indicates if items in the array MUST be unique.

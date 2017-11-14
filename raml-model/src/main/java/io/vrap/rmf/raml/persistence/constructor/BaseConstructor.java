@@ -548,7 +548,7 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
      */
     @Override
     public Object visitPropertiesFacet(final RAMLParser.PropertiesFacetContext propertiesFacet) {
-        return withinScope(scope.with(PROPERTIES_FACET__PROPERTIES), propertiesScope -> {
+        return withinScope(scope.with(OBJECT_TYPE_FACET__PROPERTIES), propertiesScope -> {
             final List<Object> properties = propertiesFacet.propertyFacets.stream()
                     .map(this::visitTypedElementFacet)
                     .collect(Collectors.toList());
