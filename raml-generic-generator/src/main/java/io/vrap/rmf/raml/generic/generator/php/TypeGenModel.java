@@ -78,10 +78,7 @@ public class TypeGenModel {
     @Nullable
     public List<TypeGenModel> getSubTypes()
     {
-        if (type.subTypes() != null) {
-            return type.subTypes().stream().map(TypeGenModel::new).collect(Collectors.toList());
-        }
-        return null;
+        return type.getSubTypes().stream().map(TypeGenModel::new).collect(Collectors.toList());
     }
 
     public List<PropertyGenModel> getTypeProperties()

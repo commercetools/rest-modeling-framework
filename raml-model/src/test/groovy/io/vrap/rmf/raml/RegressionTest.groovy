@@ -47,7 +47,7 @@ class RegressionTest extends Specification implements ResourceFixtures {
         api.types.size() == 0
         api.baseUriParameters.size() == 1
         api.baseUriParameters.get(0).type != null
-        api.baseUriParameters.get(0).type.type.eIsProxy() == true
+        api.baseUriParameters.get(0).type.type == null
     }
 
     def "number-multipleof.raml"() {

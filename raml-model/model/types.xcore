@@ -12,7 +12,6 @@ import io.vrap.rmf.raml.model.values.PositiveInteger
 import io.vrap.rmf.raml.model.values.RegExp
 import io.vrap.rmf.raml.model.util.AllPropertiesCollector
 import io.vrap.rmf.raml.model.util.ModelHelper
-import io.vrap.rmf.raml.model.util.SuperTypeCrossReferencer
 
 interface AnyTypeFacet extends AnnotationsFacet, DocumentableElement, NamedElement, InlineTypeContainer {
 	/*
@@ -207,13 +206,9 @@ class AnyType extends AnyTypeFacet {
 	/*
 	 * The type which this type extends.
 	 */
-	refers AnyType ^type
-	/*
-	 * Returns the computed sub types of this type.
-	 */
-	op AnyType[] subTypes() {
-		SuperTypeCrossReferencer.getSubTypes(this)
-	}
+	refers AnyType ^type opposite subTypes
+	
+	refers AnyType[] subTypes opposite ^type
 
     /*
      * Examples of instances of this type.
@@ -508,10 +503,6 @@ enum AnnotationTarget {
  * can extend other data types, but annotation types themselves can neither be extended nor used anywhere data types can be used.
  */
 class AnyAnnotationType extends AnyTypeFacet {
-    /*
-     * The type which this type extends.
-     */
-    refers AnyAnnotationType ^type
     /*
      * The locations to which annotations are restricted.
      * If this node is specified, annotations of this type may be applied only on a node corresponding to one of the locations.

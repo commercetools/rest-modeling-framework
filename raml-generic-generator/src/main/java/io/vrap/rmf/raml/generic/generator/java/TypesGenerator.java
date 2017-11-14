@@ -114,7 +114,7 @@ public class TypesGenerator {
                 interfaceBuilder.addModifiers(Modifier.PUBLIC);
 
 
-                final List<ObjectType> subTypes = objectType.subTypes().stream()
+                final List<ObjectType> subTypes = objectType.getSubTypes().stream()
                         .filter(ObjectType.class::isInstance)
                         .map(ObjectType.class::cast)
                         .filter(subType -> subType.getDiscriminatorValue() != null)
@@ -157,7 +157,7 @@ public class TypesGenerator {
     }
 
     private boolean subTypeHasProperty(final ObjectType objectType, final Property property) {
-        final List<ObjectType> subTypes = objectType.subTypes().stream()
+        final List<ObjectType> subTypes = objectType.getSubTypes().stream()
                 .filter(ObjectType.class::isInstance).map(ObjectType.class::cast)
                 .collect(Collectors.toList());
         for (final ObjectType subType : subTypes) {
