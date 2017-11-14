@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class ResourcesValidator extends AbstractRamlValidator {
+class ResourcesValidator extends AbstractRamlValidator {
     private final ProtocolFacetsValidator protocolFacetsValidator =
             new ProtocolFacetsValidator(this::error);
     private final ResourcesValidatingVisitor visitor = new ResourcesValidatingVisitor();

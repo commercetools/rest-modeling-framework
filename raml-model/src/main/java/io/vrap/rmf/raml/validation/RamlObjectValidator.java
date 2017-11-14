@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 /**
  * A generic validator that checks common constraints.
  */
-public class RamlObjectValidator extends AbstractRamlValidator {
+class RamlObjectValidator extends AbstractRamlValidator {
     private EObjectValidator eObjectValidator = new EObjectValidator();
     @Override
     public boolean validate(final EClass eClass, final EObject eObject, final DiagnosticChain diagnostics, final Map<Object, Object> context) {

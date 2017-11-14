@@ -14,7 +14,7 @@ import java.util.Map;
  * Since EMF only allows one validator per EPackage, we have
  * to chain different validators.
  */
-public class CompositeValidator implements EValidator {
+class CompositeValidator implements EValidator {
     private final List<EValidator> validators = new ArrayList<>();
 
     public void add(final EValidator validator) {

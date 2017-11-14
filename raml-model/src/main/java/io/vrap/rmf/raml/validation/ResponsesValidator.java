@@ -14,7 +14,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-public class ResponsesValidator extends AbstractRamlValidator {
+class ResponsesValidator extends AbstractRamlValidator {
     @Override
     public boolean validate(EClass eClass, EObject eObject, DiagnosticChain diagnostics, Map<Object, Object> context) {
         final  List<Diagnostic> validationErrors = new ResponsesValidatingVisitor().doSwitch(eObject);

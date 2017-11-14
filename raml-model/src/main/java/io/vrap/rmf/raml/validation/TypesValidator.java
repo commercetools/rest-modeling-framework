@@ -12,7 +12,7 @@ import org.eclipse.emf.ecore.EObject;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class TypesValidator extends AbstractRamlValidator {
+class TypesValidator extends AbstractRamlValidator {
     private final TypeAndAnnoationTypeValidator typeAndAnnoationTypeValidator = new TypeAndAnnoationTypeValidator();
 
     private final List<ValidatingTypesSwitch> validators = Arrays.asList(

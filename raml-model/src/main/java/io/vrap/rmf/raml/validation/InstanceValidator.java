@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 
 import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.ANY_TYPE;
 
-public class InstanceValidator {
+class InstanceValidator {
 
     public List<Diagnostic> validate(final Instance instance, final AnyType anyType) {
         return validateInternal(instance, anyType);

@@ -12,7 +12,7 @@ import org.eclipse.emf.ecore.EObject;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class ModulesValidator extends AbstractRamlValidator {
+class ModulesValidator extends AbstractRamlValidator {
     private final ProtocolFacetsValidator protocolFacetsValidator =
             new ProtocolFacetsValidator(this::error);
     private final ModulesValidatingVisitor visitor = new ModulesValidatingVisitor();
