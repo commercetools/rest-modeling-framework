@@ -1,7 +1,7 @@
 package io.vrap.rmf.raml.generic.generator.php;
 
-import io.vrap.rmf.raml.model.facets.StringInstance;
 import io.vrap.rmf.raml.model.types.Annotation;
+import io.vrap.rmf.raml.model.values.StringInstance;
 
 import javax.annotation.Nullable;
 

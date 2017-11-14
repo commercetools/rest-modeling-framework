@@ -1,6 +1,6 @@
 package io.vrap.rmf.raml.validation;
 
-import io.vrap.rmf.raml.model.facets.ProtocolsFacet;
+import io.vrap.rmf.raml.model.values.ProtocolsFacet;
 import org.eclipse.emf.common.util.Diagnostic;
 import org.eclipse.emf.ecore.EObject;
 

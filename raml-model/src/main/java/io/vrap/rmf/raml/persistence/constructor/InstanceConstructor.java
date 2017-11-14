@@ -1,11 +1,11 @@
 package io.vrap.rmf.raml.persistence.constructor;
 
-import io.vrap.rmf.raml.model.facets.*;
+import io.vrap.rmf.raml.model.values.*;
 import io.vrap.rmf.raml.persistence.antlr.RAMLParser;
 
 import java.math.BigDecimal;
 
-import static io.vrap.rmf.raml.model.facets.FacetsPackage.Literals.*;
+import static io.vrap.rmf.raml.model.values.ValuesPackage.Literals.*;
 
 /**
  * Constructs {@link Instance}s.

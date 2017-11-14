@@ -32,14 +32,6 @@
    </extension>
 
    <extension point="org.eclipse.emf.ecore.generated_package">
-      <!-- @generated facets -->
-      <package
-            uri="http://www.vrap.io/raml/facets"
-            class="io.vrap.rmf.raml.model.facets.FacetsPackage"
-            genModel="model/facets.xcore"/>
-   </extension>
-
-   <extension point="org.eclipse.emf.ecore.generated_package">
       <!-- @generated modules -->
       <package
             uri="http://www.vrap.io/raml/modules"
@@ -93,6 +85,14 @@
             uri="http://www.vrap.io/raml/responses"
             class="io.vrap.rmf.raml.model.responses.ResponsesPackage"
             genModel="model/responses.xcore"/>
+   </extension>
+
+   <extension point="org.eclipse.emf.ecore.generated_package">
+      <!-- @generated facets -->
+      <package
+            uri="http://www.vrap.io/raml/values"
+            class="io.vrap.rmf.raml.model.values.ValuesPackage"
+            genModel="model/facets.xcore"/>
    </extension>
 
 </plugin>

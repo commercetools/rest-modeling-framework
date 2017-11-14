@@ -46,7 +46,7 @@ public class TypeExpressionResolver {
 
         final EObject resolvedElement;
         final EStructuralFeature feature = scope.eFeature();
-        if (feature == TYPED_ELEMENT__TYPE || feature == ITEMS_FACET__ITEMS) {
+        if (feature == TYPED_ELEMENT__TYPE || feature == ARRAY_TYPE_FACET__ITEMS) {
             resolvedElement = new TypedElementTypeResolver(scope).visit(typeExpr);
         } else if (feature == TYPE_CONTAINER__TYPES) {
             resolvedElement = new TypeResolver(scope).visit(typeExpr);
@@ -79,7 +79,7 @@ public class TypeExpressionResolver {
             final EObject arrayType = EcoreUtil.create(ARRAY_TYPE);
             scope.addValue(INLINE_TYPE_CONTAINER__INLINE_TYPES, arrayType);
             final EObject itemsType = visit(ctx.primary_type_expr());
-            arrayType.eSet(ITEMS_FACET__ITEMS, itemsType);
+            arrayType.eSet(ARRAY_TYPE_FACET__ITEMS, itemsType);
 
             return arrayType;
         }
@@ -134,7 +134,7 @@ public class TypeExpressionResolver {
             final EObject arrayType = EcoreUtil.create(ARRAY_TYPE);
             this.nestedTypes = true;
             final EObject itemsType = visit(ctx.primary_type_expr());
-            arrayType.eSet(ITEMS_FACET__ITEMS, itemsType);
+            arrayType.eSet(ARRAY_TYPE_FACET__ITEMS, itemsType);
 
             return arrayType;
         }
@@ -218,7 +218,7 @@ public class TypeExpressionResolver {
             final EObject arrayType = EcoreUtil.create(ARRAY_ANNOTATION_TYPE);
             this.nestedTypes = true;
             final EObject itemsType = visit(ctx.primary_type_expr());
-            arrayType.eSet(ITEMS_FACET__ITEMS, itemsType);
+            arrayType.eSet(ARRAY_TYPE_FACET__ITEMS, itemsType);
 
             return arrayType;
         }

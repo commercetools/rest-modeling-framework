@@ -3,8 +3,8 @@
     complianceLevel="8.0")
 package io.vrap.rmf.raml.model.resources
 
-
-import io.vrap.rmf.raml.model.facets.ProtocolsFacet
+import io.vrap.rmf.raml.model.values.Instance
+import io.vrap.rmf.raml.model.values.ProtocolsFacet
 
 import io.vrap.rmf.raml.model.elements.DocumentableElement
 
@@ -14,11 +14,10 @@ import io.vrap.rmf.raml.model.types.QueryParametersFacet
 import io.vrap.rmf.raml.model.types.TypedElement
 
 import io.vrap.rmf.raml.model.security.SecuredByFacet
-import io.vrap.rmf.raml.model.elements.IdentifiableElement
+import io.vrap.rmf.raml.model.elements.NamedElement
 
 import io.vrap.rmf.raml.model.responses.BodyContainer
 import io.vrap.rmf.raml.model.responses.ResponsesFacet
-import io.vrap.rmf.raml.model.facets.Instance
 import io.vrap.rmf.raml.model.util.ModelHelper
 
 import com.damnhandy.uri.template.UriTemplate
@@ -121,7 +120,7 @@ class Resource extends ResourceBase, ResourceContainer, ApplyTraitsFacet {
 	}
 }
 
-class ResourceType extends ResourceBase, IdentifiableElement {
+class ResourceType extends ResourceBase, NamedElement {
 	String usage
 }
 
@@ -169,7 +168,7 @@ class Method extends MethodBase {
 	} 
 }
 
-class Trait extends IdentifiableElement, MethodBase {
+class Trait extends NamedElement, MethodBase {
 	String usage
 }
 

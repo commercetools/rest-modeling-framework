@@ -5,7 +5,7 @@
 )
 package io.vrap.rmf.raml.model.elements
 
-interface IdentifiableElement {
+interface NamedElement {
 	/*
 	 * The optional name of this element.
 	 */

@@ -23,8 +23,8 @@ import java.util.Optional;
 import java.util.Scanner;
 import java.util.stream.Collectors;
 
-import static io.vrap.rmf.raml.model.elements.ElementsPackage.Literals.IDENTIFIABLE_ELEMENT;
-import static io.vrap.rmf.raml.model.elements.ElementsPackage.Literals.IDENTIFIABLE_ELEMENT__NAME;
+import static io.vrap.rmf.raml.model.elements.ElementsPackage.Literals.NAMED_ELEMENT;
+import static io.vrap.rmf.raml.model.elements.ElementsPackage.Literals.NAMED_ELEMENT__NAME;
 import static io.vrap.rmf.raml.model.modules.ModulesPackage.Literals.TYPE_CONTAINER__ANNOTATION_TYPES;
 import static io.vrap.rmf.raml.model.modules.ModulesPackage.Literals.TYPE_CONTAINER__TYPES;
 
@@ -98,11 +98,11 @@ public class RamlResource extends ResourceImpl {
             final EReference feature = (EReference) rootObject.eClass().getEStructuralFeature(featureName);
             final EClass eReferenceType = feature.getEReferenceType();
 
-            if (IDENTIFIABLE_ELEMENT.isSuperTypeOf(eReferenceType)) {
+            if (NAMED_ELEMENT.isSuperTypeOf(eReferenceType)) {
                 @SuppressWarnings("unchecked") final EList<EObject> children = (EList<EObject>) rootObject.eGet(feature);
                 final String name = uriFragmentPath.get(1);
                 return children.stream()
-                        .filter(eObject -> name.equals(eObject.eGet(IDENTIFIABLE_ELEMENT__NAME)))
+                        .filter(eObject -> name.equals(eObject.eGet(NAMED_ELEMENT__NAME)))
                         .findFirst()
                         .orElse(null);
             }

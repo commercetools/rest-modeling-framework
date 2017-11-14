@@ -1,12 +1,9 @@
 package io.vrap.rmf.raml.validation;
 
 import com.google.common.base.Strings;
-import io.vrap.rmf.raml.model.facets.*;
-import io.vrap.rmf.raml.model.types.Annotation;
-import io.vrap.rmf.raml.model.types.AnyAnnotationType;
-import io.vrap.rmf.raml.model.types.AnyType;
-import io.vrap.rmf.raml.model.types.Property;
+import io.vrap.rmf.raml.model.types.*;
 import io.vrap.rmf.raml.model.types.util.TypesSwitch;
+import io.vrap.rmf.raml.model.values.Instance;
 import org.eclipse.emf.common.util.Diagnostic;
 import org.eclipse.emf.common.util.DiagnosticChain;
 import org.eclipse.emf.ecore.EClass;

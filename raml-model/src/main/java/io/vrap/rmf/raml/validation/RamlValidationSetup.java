@@ -1,12 +1,12 @@
 package io.vrap.rmf.raml.validation;
 
 import io.vrap.rmf.raml.model.elements.ElementsPackage;
-import io.vrap.rmf.raml.model.facets.FacetsPackage;
 import io.vrap.rmf.raml.model.modules.ModulesPackage;
 import io.vrap.rmf.raml.model.resources.ResourcesPackage;
 import io.vrap.rmf.raml.model.responses.ResponsesPackage;
 import io.vrap.rmf.raml.model.security.SecurityPackage;
 import io.vrap.rmf.raml.model.types.TypesPackage;
+import io.vrap.rmf.raml.model.values.ValuesPackage;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EValidator;
 
@@ -18,7 +18,7 @@ import java.util.List;
  */
 public interface RamlValidationSetup {
     List<EPackage> PACKAGES = Arrays.asList(
-            ElementsPackage.eINSTANCE, FacetsPackage.eINSTANCE, ModulesPackage.eINSTANCE, ResourcesPackage.eINSTANCE,
+            ElementsPackage.eINSTANCE, ValuesPackage.eINSTANCE, ModulesPackage.eINSTANCE, ResourcesPackage.eINSTANCE,
             ResponsesPackage.eINSTANCE, SecurityPackage.eINSTANCE, TypesPackage.eINSTANCE);
 
     /**

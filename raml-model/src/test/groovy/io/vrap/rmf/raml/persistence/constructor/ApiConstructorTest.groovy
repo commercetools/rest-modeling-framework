@@ -3,9 +3,6 @@ package io.vrap.rmf.raml.persistence.constructor
 import com.damnhandy.uri.template.Expression
 import com.damnhandy.uri.template.Literal
 import com.google.common.net.MediaType
-import io.vrap.rmf.raml.model.facets.ArrayInstance
-import io.vrap.rmf.raml.model.facets.ObjectInstance
-import io.vrap.rmf.raml.model.facets.StringInstance
 import io.vrap.rmf.raml.model.modules.Api
 import io.vrap.rmf.raml.model.resources.HttpMethod
 import io.vrap.rmf.raml.model.resources.Resource
@@ -15,6 +12,9 @@ import io.vrap.rmf.raml.model.types.IntegerType
 import io.vrap.rmf.raml.model.types.ObjectType
 import io.vrap.rmf.raml.model.types.StringType
 import io.vrap.rmf.raml.model.types.TypeTemplate
+import io.vrap.rmf.raml.model.values.ArrayInstance
+import io.vrap.rmf.raml.model.values.ObjectInstance
+import io.vrap.rmf.raml.model.values.StringInstance
 import io.vrap.rmf.raml.persistence.RamlResourceSet
 import io.vrap.rmf.raml.persistence.antlr.RAMLCustomLexer
 import io.vrap.rmf.raml.persistence.antlr.RAMLParser

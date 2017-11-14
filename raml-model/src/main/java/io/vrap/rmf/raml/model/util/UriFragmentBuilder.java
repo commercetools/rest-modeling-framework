@@ -2,7 +2,7 @@ package io.vrap.rmf.raml.model.util;
 
 import com.google.common.net.MediaType;
 import io.vrap.functional.utils.TypeSwitch;
-import io.vrap.rmf.raml.model.elements.IdentifiableElement;
+import io.vrap.rmf.raml.model.elements.NamedElement;
 import io.vrap.rmf.raml.model.resources.Method;
 import io.vrap.rmf.raml.model.resources.Resource;
 import io.vrap.rmf.raml.model.responses.Body;
@@ -21,7 +21,7 @@ public class UriFragmentBuilder {
 
     private final TypeSwitch<EObject, List<String>> uriFragmentsBuilderSwitch = new TypeSwitch<EObject, List<String>>()
             .on(Body.class, this::body)
-            .on(IdentifiableElement.class, this::identifiableElement)
+            .on(NamedElement.class, this::namedElement)
             .on(Annotation.class, this::annotation)
             .on(Method.class, this::method)
             .on(Resource.class, this::resource)
@@ -32,7 +32,7 @@ public class UriFragmentBuilder {
         return uriFragmentsBuilderSwitch.apply(eObject).stream().collect(SEGMENT_JOINER);
     }
 
-    private List<String> identifiableElement(final IdentifiableElement identifiableElement) {
+    private List<String> namedElement(final NamedElement identifiableElement) {
         final List<String> segments = new ArrayList<>();
         segments.add(identifiableElement.eContainmentFeature().getName());
         segments.add(identifiableElement.getName());

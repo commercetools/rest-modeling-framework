@@ -1,6 +1,6 @@
 package io.vrap.rmf.raml.validation;
 
-import io.vrap.rmf.raml.model.facets.FacetsPackage;
+import io.vrap.rmf.raml.model.values.ValuesPackage;
 import org.eclipse.emf.common.util.Diagnostic;
 import org.eclipse.emf.common.util.DiagnosticChain;
 import org.eclipse.emf.ecore.EClass;
@@ -54,7 +54,7 @@ public class RamlObjectValidator extends AbstractRamlValidator {
     private List<Diagnostic> validatePositiveIntegerAttributes(final EClass eClass, final EObject eObject, final DiagnosticChain diagnostics) {
         final List<Diagnostic> missingRequiredAttributes = eClass.getEAllAttributes().stream()
                 .filter(eAttribute -> !eAttribute.isMany()
-                        && eAttribute.getEAttributeType() == FacetsPackage.Literals.POSITIVE_INTEGER
+                        && eAttribute.getEAttributeType() == ValuesPackage.Literals.POSITIVE_INTEGER
                         && eObject.eIsSet(eAttribute) && ((Integer) eObject.eGet(eAttribute)) <= 0)
                 .map(eAttribute -> error("Facet '" + eAttribute.getName() + "' must > 0.", eObject)).collect(Collectors.toList());
 
@@ -64,7 +64,7 @@ public class RamlObjectValidator extends AbstractRamlValidator {
     private List<Diagnostic> validateUnsignedIntegerAttributes(final EClass eClass, final EObject eObject, final DiagnosticChain diagnostics) {
         final List<Diagnostic> missingRequiredAttributes = eClass.getEAllAttributes().stream()
                 .filter(eAttribute -> !eAttribute.isMany()
-                        && eAttribute.getEAttributeType() == FacetsPackage.Literals.UNSIGNED_INTEGER
+                        && eAttribute.getEAttributeType() == ValuesPackage.Literals.UNSIGNED_INTEGER
                         && eObject.eGet(eAttribute) != null && ((Integer) eObject.eGet(eAttribute)) < 0)
                 .map(eAttribute -> error("Facet '" + eAttribute.getName() + "' must >= 0.", eObject)).collect(Collectors.toList());
 

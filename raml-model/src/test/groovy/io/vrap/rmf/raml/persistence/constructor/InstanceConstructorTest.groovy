@@ -1,6 +1,6 @@
 package io.vrap.rmf.raml.persistence.constructor
 
-import io.vrap.rmf.raml.model.facets.*
+import io.vrap.rmf.raml.model.values.*
 import io.vrap.rmf.raml.persistence.RamlResourceSet
 import io.vrap.rmf.raml.persistence.antlr.RAMLCustomLexer
 import io.vrap.rmf.raml.persistence.antlr.RAMLParser

@@ -4,7 +4,7 @@
 package io.vrap.rmf.raml.model.responses
 
 import io.vrap.rmf.raml.model.util.ModelHelper
-import io.vrap.rmf.raml.model.facets.MediaType
+import io.vrap.rmf.raml.model.values.MediaType
 import io.vrap.rmf.raml.model.types.AnnotationsFacet
 import io.vrap.rmf.raml.model.types.HeadersFacet
 import io.vrap.rmf.raml.model.types.TypedElement

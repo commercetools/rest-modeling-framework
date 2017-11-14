@@ -6,13 +6,13 @@
 package io.vrap.rmf.raml.model.security
 
 import io.vrap.rmf.raml.model.elements.DocumentableElement
-import io.vrap.rmf.raml.model.elements.IdentifiableElement
+import io.vrap.rmf.raml.model.elements.NamedElement
 
 import io.vrap.rmf.raml.model.types.HeadersFacet
 import io.vrap.rmf.raml.model.types.QueryParametersFacet
 
 import io.vrap.rmf.raml.model.responses.ResponsesFacet
-import io.vrap.rmf.raml.model.facets.ObjectInstance
+import io.vrap.rmf.raml.model.values.ObjectInstance
 
 interface SecuredByFacet {
 		
@@ -38,7 +38,7 @@ enum SecuritySchemeType {
 	x_Other as "x-other"	
 }
 
-class SecurityScheme extends DocumentableElement, IdentifiableElement {
+class SecurityScheme extends DocumentableElement, NamedElement {
 	/*
 	 * Specifies the API security mechanisms. One API-supported authentication method is allowed. 
 	 */

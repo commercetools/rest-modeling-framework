@@ -1,8 +1,8 @@
 package io.vrap.rmf.raml.validation
 
-import io.vrap.rmf.raml.model.facets.*
 import io.vrap.rmf.raml.model.types.*
 import io.vrap.rmf.raml.model.util.RegExp
+import io.vrap.rmf.raml.model.values.*
 import org.eclipse.emf.common.util.Diagnostic
 import spock.lang.Shared
 import spock.lang.Specification
@@ -26,7 +26,7 @@ class InstanceValidatorTest extends Specification implements InstanceFixtures {
 
     def "validateStringInstance"() {
         when:
-        StringInstance stringInstance = FacetsFactory.eINSTANCE.createStringInstance();
+        StringInstance stringInstance = ValuesFactory.eINSTANCE.createStringInstance();
         stringInstance.value = value
 
         StringType stringType = TypesFactory.eINSTANCE.createStringType()
@@ -47,7 +47,7 @@ class InstanceValidatorTest extends Specification implements InstanceFixtures {
 
     def "validateNumberInstance"() {
         when:
-        NumberInstance numberInstance = FacetsFactory.eINSTANCE.createNumberInstance()
+        NumberInstance numberInstance = ValuesFactory.eINSTANCE.createNumberInstance()
         numberInstance.value = BigDecimal.valueOf(value)
 
         NumberType numberType = TypesFactory.eINSTANCE.createNumberType()
@@ -68,7 +68,7 @@ class InstanceValidatorTest extends Specification implements InstanceFixtures {
 
     def "validateIntegerInstance"() {
         when:
-        IntegerInstance numberInstance = FacetsFactory.eINSTANCE.createIntegerInstance()
+        IntegerInstance numberInstance = ValuesFactory.eINSTANCE.createIntegerInstance()
         numberInstance.value = value
 
         IntegerType integerType = TypesFactory.eINSTANCE.createIntegerType()
@@ -89,7 +89,7 @@ class InstanceValidatorTest extends Specification implements InstanceFixtures {
 
     def "validateIntegerInstanceEnum"() {
         when:
-        IntegerInstance numberInstance = FacetsFactory.eINSTANCE.createIntegerInstance()
+        IntegerInstance numberInstance = ValuesFactory.eINSTANCE.createIntegerInstance()
         numberInstance.value = value
 
         IntegerType integerType = TypesFactory.eINSTANCE.createIntegerType()
@@ -108,7 +108,7 @@ class InstanceValidatorTest extends Specification implements InstanceFixtures {
 
     def "validateArrayInstance"() {
         when:
-        ArrayInstance arrayInstance = FacetsFactory.eINSTANCE.createArrayInstance()
+        ArrayInstance arrayInstance = ValuesFactory.eINSTANCE.createArrayInstance()
         value.each {
             arrayInstance.value.add(createInstance(it))
         }

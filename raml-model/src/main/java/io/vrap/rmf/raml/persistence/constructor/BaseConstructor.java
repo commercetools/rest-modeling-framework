@@ -2,13 +2,13 @@ package io.vrap.rmf.raml.persistence.constructor;
 
 import com.google.common.base.Strings;
 import com.google.common.net.MediaType;
-import io.vrap.rmf.raml.model.facets.FacetsFactory;
-import io.vrap.rmf.raml.model.facets.ObjectInstance;
 import io.vrap.rmf.raml.model.resources.*;
 import io.vrap.rmf.raml.model.responses.Body;
 import io.vrap.rmf.raml.model.responses.Response;
 import io.vrap.rmf.raml.model.security.*;
 import io.vrap.rmf.raml.model.types.*;
+import io.vrap.rmf.raml.model.values.ObjectInstance;
+import io.vrap.rmf.raml.model.values.ValuesFactory;
 import io.vrap.rmf.raml.persistence.antlr.RAMLParser;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
@@ -22,13 +22,13 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import static io.vrap.rmf.raml.model.elements.ElementsPackage.Literals.IDENTIFIABLE_ELEMENT__NAME;
-import static io.vrap.rmf.raml.model.facets.FacetsPackage.Literals.*;
+import static io.vrap.rmf.raml.model.elements.ElementsPackage.Literals.NAMED_ELEMENT__NAME;
 import static io.vrap.rmf.raml.model.modules.ModulesPackage.Literals.*;
 import static io.vrap.rmf.raml.model.resources.ResourcesPackage.Literals.*;
 import static io.vrap.rmf.raml.model.responses.ResponsesPackage.Literals.*;
 import static io.vrap.rmf.raml.model.security.SecurityPackage.Literals.*;
 import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.*;
+import static io.vrap.rmf.raml.model.values.ValuesPackage.Literals.MEDIA_TYPE;
 
 public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
     private final InstanceConstructor instanceConstructor = new InstanceConstructor();
@@ -54,7 +54,7 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
 
     @Override
     public Object visitEnumFacet(RAMLParser.EnumFacetContext enumFacet) {
-        return instanceConstructor.withinScope(scope.with(ENUM_FACET__ENUM), enumScope ->
+        return instanceConstructor.withinScope(scope.with(ANY_TYPE_FACET__ENUM), enumScope ->
                 enumFacet.instance().stream()
                         .map(instanceConstructor::visitInstance)
                         .collect(Collectors.toList()));
@@ -68,7 +68,7 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
 
     @Override
     public Object visitDefaultFacet(RAMLParser.DefaultFacetContext defaultFacet) {
-        return instanceConstructor.withinScope(scope.with(DEFAULT_FACET__DEFAULT), defaultScope ->
+        return instanceConstructor.withinScope(scope.with(ANY_TYPE_FACET__DEFAULT), defaultScope ->
                 instanceConstructor.visitInstance(defaultFacet.instance()));
     }
 
@@ -272,7 +272,7 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
         if (bodyContentType.contentType != null) {
             final MediaType contentType;
             try {
-                contentType = (MediaType) FacetsFactory.eINSTANCE.createFromString(MEDIA_TYPE, bodyContentType.contentType.getText());
+                contentType = (MediaType) ValuesFactory.eINSTANCE.createFromString(MEDIA_TYPE, bodyContentType.contentType.getText());
                 body.getContentTypes().add(contentType);
             } catch (IllegalArgumentException e) {
                 // TODO fix parsing of string template media types
@@ -466,7 +466,7 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
 
     @Override
     public Object visitItemsFacet(RAMLParser.ItemsFacetContext itemsFacet) {
-        return withinScope(scope.with(ITEMS_FACET__ITEMS), itemsScope -> {
+        return withinScope(scope.with(ARRAY_TYPE_FACET__ITEMS), itemsScope -> {
             final EObject itemsType;
             if (itemsFacet.typeExpression != null) {
                 final String typeExpression = itemsFacet.typeExpression.getText();
@@ -579,7 +579,7 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
         scope.setValue(TYPED_ELEMENT__REQUIRED, isRequired, typedeElementTuple.getStart());
         final String parsedName = isRequired ? name : name.substring(0, name.length() - 1);
 
-        scope.setValue(IDENTIFIABLE_ELEMENT__NAME, parsedName, typedeElementTuple.getStart());
+        scope.setValue(NAMED_ELEMENT__NAME, parsedName, typedeElementTuple.getStart());
         scope.setValue(TYPED_ELEMENT__TYPE, propertyType, typedeElementTuple.getStart());
 
         return scope.eObject();
@@ -602,7 +602,7 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
             scope.setValue(TYPED_ELEMENT__REQUIRED, requiredValue, typedElementMap.getStart());
         }
 
-        scope.setValue(IDENTIFIABLE_ELEMENT__NAME, parsedName, typedElementMap.getStart());
+        scope.setValue(NAMED_ELEMENT__NAME, parsedName, typedElementMap.getStart());
 
         AnyType typedElementType;
         if (typedElementMap.typeFacet().size() > 0) {

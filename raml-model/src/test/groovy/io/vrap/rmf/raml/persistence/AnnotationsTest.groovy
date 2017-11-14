@@ -1,12 +1,12 @@
 package io.vrap.rmf.raml.persistence
 
-import io.vrap.rmf.raml.model.facets.ObjectInstance
-import io.vrap.rmf.raml.model.facets.StringInstance
 import io.vrap.rmf.raml.model.modules.Library
 import io.vrap.rmf.raml.model.types.Annotation
 import io.vrap.rmf.raml.model.types.AnyType
 import io.vrap.rmf.raml.model.types.ObjectAnnotationType
 import io.vrap.rmf.raml.model.types.StringAnnotationType
+import io.vrap.rmf.raml.model.values.ObjectInstance
+import io.vrap.rmf.raml.model.values.StringInstance
 import org.eclipse.emf.ecore.resource.Resource
 import spock.lang.Specification
 

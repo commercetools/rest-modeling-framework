@@ -1,9 +1,9 @@
 package io.vrap.rmf.raml.validation;
 
-import io.vrap.rmf.raml.model.facets.*;
-import io.vrap.rmf.raml.model.facets.util.FacetsSwitch;
 import io.vrap.rmf.raml.model.types.*;
 import io.vrap.rmf.raml.model.util.AllPropertiesCollector;
+import io.vrap.rmf.raml.model.values.*;
+import io.vrap.rmf.raml.model.values.util.ValuesSwitch;
 import org.eclipse.emf.common.util.BasicDiagnostic;
 import org.eclipse.emf.common.util.Diagnostic;
 import org.eclipse.emf.common.util.EList;
@@ -32,13 +32,13 @@ public class InstanceValidator {
         return validationResults;
     }
 
-    private List<Diagnostic> validateEnumFacet(final EnumFacet enumFacet, final Object value) {
+    private List<Diagnostic> validateEnumFacet(final AnyTypeFacet anyTypeFacet, final Object value) {
         final List<Diagnostic> validationResults = new ArrayList<>();
-        final Optional<Instance> enumInstance = enumFacet.getEnum().stream()
+        final Optional<Instance> enumInstance = anyTypeFacet.getEnum().stream()
                 .filter(enumValue -> enumValue.getValue().equals(value))
                 .findFirst();
-        if (enumFacet.getEnum().size() > 0 && !enumInstance.isPresent()) {
-            validationResults.add(error("Value is not defined in enum facet", enumFacet));
+        if (anyTypeFacet.getEnum().size() > 0 && !enumInstance.isPresent()) {
+            validationResults.add(error("Value is not defined in enum facet", anyTypeFacet));
         }
         return validationResults;
     }
@@ -47,7 +47,7 @@ public class InstanceValidator {
         return new BasicDiagnostic(Diagnostic.ERROR, null, -1, message, new Object[]{eObject});
     }
 
-    private class InstanceValidatingVisitor extends FacetsSwitch<List<Diagnostic>> {
+    private class InstanceValidatingVisitor extends ValuesSwitch<List<Diagnostic>> {
         private final Stack<EObject> types = new Stack<>();
 
         public InstanceValidatingVisitor(final EObject type) {
@@ -63,7 +63,7 @@ public class InstanceValidator {
         public List<Diagnostic> caseStringInstance(final StringInstance stringInstance) {
             final List<Diagnostic> validationResults = new ArrayList<>();
 
-            if (typeInstanceOf(StringTypeFacet.class) && typeInstanceOf(EnumFacet.class)) {
+            if (typeInstanceOf(StringTypeFacet.class)) {
                 final String value = stringInstance.getValue();
 
                 final StringTypeFacet stringType = (StringTypeFacet) types.peek();
@@ -78,8 +78,7 @@ public class InstanceValidator {
                             + stringType.getPattern(), stringInstance));
                 }
 
-                final EnumFacet enumFacet = (EnumFacet) types.peek();
-                validationResults.addAll(validateEnumFacet(enumFacet, value));
+                validationResults.addAll(validateEnumFacet(stringType, value));
             } else if (!typeIs(ANY_TYPE)) {
                 validationResults.add(error("Invalid type", stringInstance));
             }
@@ -89,7 +88,7 @@ public class InstanceValidator {
         @Override
         public List<Diagnostic> caseNumberInstance(final NumberInstance numberInstance) {
             final List<Diagnostic> validationResults = new ArrayList<>();
-            if (typeInstanceOf(NumberTypeFacet.class) && typeInstanceOf(EnumFacet.class)) {
+            if (typeInstanceOf(NumberTypeFacet.class)) {
                 final NumberTypeFacet numberType = (NumberTypeFacet) types.peek();
                 final BigDecimal value = numberInstance.getValue();
                 if (numberType.getMinimum() != null && value.compareTo(numberType.getMinimum()) < 0) {
@@ -102,8 +101,7 @@ public class InstanceValidator {
                     validationResults.add(error("Value is not a multiple of " + numberType.getMultipleOf(), numberInstance));
                 }
 
-                final EnumFacet enumFacet = (EnumFacet) types.peek();
-                validationResults.addAll(validateEnumFacet(enumFacet, value));
+                validationResults.addAll(validateEnumFacet(numberType, value));
             } else if (!typeIs(ANY_TYPE)) {
                 validationResults.add(error("Invalid type", numberInstance));
             }
@@ -115,15 +113,12 @@ public class InstanceValidator {
             final List<Diagnostic> validationResults = new ArrayList<>();
             final Integer value = integerInstance.getValue();
 
-            if (typeInstanceOf(EnumFacet.class)) {
-                final EnumFacet enumFacet = (EnumFacet) types.peek();
-                validationResults.addAll(validateEnumFacet(enumFacet, value));
-            }
             if (typeInstanceOf(CommonNumberTypeFacet.class)) {
                 final CommonNumberTypeFacet commonNumberType = (CommonNumberTypeFacet) types.peek();
                 if (commonNumberType.getMultipleOf() != null && value % commonNumberType.getMultipleOf() != 0) {
                     validationResults.add(error("Value is not a multiple of " + commonNumberType.getMultipleOf(), integerInstance));
                 }
+                validationResults.addAll(validateEnumFacet(commonNumberType, value));
             }
             if (typeInstanceOf(IntegerTypeFacet.class)) {
                 final IntegerTypeFacet integerType = (IntegerTypeFacet) types.peek();
@@ -150,7 +145,7 @@ public class InstanceValidator {
         @Override
         public List<Diagnostic> caseArrayInstance(final ArrayInstance arrayInstance) {
             final List<Diagnostic> validationResults = new ArrayList<>();
-            if (typeInstanceOf(ArrayTypeFacet.class) && typeInstanceOf(ItemsFacet.class)) {
+            if (typeInstanceOf(ArrayTypeFacet.class)) {
                 final ArrayTypeFacet arrayType = (ArrayTypeFacet) types.peek();
                 final EList<Instance> values = arrayInstance.getValue();
                 if (arrayType.getMinItems() != null && values.size() < arrayType.getMinItems()) {
@@ -169,10 +164,9 @@ public class InstanceValidator {
                         validationResults.add(error("Array instance contains duplicate values", arrayInstance));
                     }
                 }
-                final ItemsFacet itemsFacet = (ItemsFacet) types.peek();
-                if (itemsFacet.getItems() != null) {
+                if (arrayType.getItems() != null) {
                     try {
-                        types.push(itemsFacet.getItems());
+                        types.push(arrayType.getItems());
                         values.stream()
                                 .flatMap(instance -> doSwitch(instance).stream())
                                 .forEach(validationResults::add);

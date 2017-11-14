@@ -19,7 +19,7 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static io.vrap.rmf.raml.model.elements.ElementsPackage.Literals.IDENTIFIABLE_ELEMENT__NAME;
+import static io.vrap.rmf.raml.model.elements.ElementsPackage.Literals.NAMED_ELEMENT__NAME;
 import static io.vrap.rmf.raml.model.modules.ModulesPackage.Literals.*;
 import static io.vrap.rmf.raml.model.resources.ResourcesPackage.Literals.RESOURCE_TYPE;
 import static io.vrap.rmf.raml.model.resources.ResourcesPackage.Literals.TRAIT;
@@ -249,7 +249,7 @@ public class TypeDeclarationResolver {
 
                 final Token nameToken = ruleContext.getStart();
                 final String name = nameToken.getText();
-                final Scope typeScope = scope.with(resolvedType, IDENTIFIABLE_ELEMENT__NAME);
+                final Scope typeScope = scope.with(resolvedType, NAMED_ELEMENT__NAME);
 
                 typeScope.setValue(name, nameToken);
             }
@@ -306,6 +306,6 @@ public class TypeDeclarationResolver {
 
     private void setTypeName(final EObject resolved, final Token nameToken) {
         final String name = nameToken.getText();
-        resolved.eSet(IDENTIFIABLE_ELEMENT__NAME, name);
+        resolved.eSet(NAMED_ELEMENT__NAME, name);
     }
 }
