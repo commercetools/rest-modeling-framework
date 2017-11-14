@@ -53,6 +53,10 @@ class ArrayInstance extends Instance {
 
 class ObjectInstance extends Instance {
 	contains PropertyValue[] value
+	
+	op Instance getValue(String name) {
+		value.findFirst[it.name == name]?.value
+	}
 }
 
 class PropertyValue {

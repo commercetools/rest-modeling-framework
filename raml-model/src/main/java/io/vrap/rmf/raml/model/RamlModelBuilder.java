@@ -12,17 +12,11 @@ import io.vrap.rmf.raml.model.responses.util.ResponsesSwitch;
 import io.vrap.rmf.raml.model.types.*;
 import io.vrap.rmf.raml.model.types.util.TypesSwitch;
 import io.vrap.rmf.raml.model.util.UriFragmentBuilder;
-import io.vrap.rmf.raml.model.values.Instance;
 import io.vrap.rmf.raml.model.values.StringInstance;
 import io.vrap.rmf.raml.model.values.StringTemplate;
 import io.vrap.rmf.raml.persistence.RamlResourceSet;
-import io.vrap.rmf.raml.persistence.antlr.RAMLCustomLexer;
-import io.vrap.rmf.raml.persistence.antlr.RAMLParser;
-import io.vrap.rmf.raml.persistence.constructor.InstanceConstructor;
 import io.vrap.rmf.raml.persistence.constructor.Scope;
 import io.vrap.rmf.raml.persistence.constructor.TypeExpressionResolver;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.TokenStream;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.common.util.URI;
@@ -32,8 +26,6 @@ import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
-import org.eclipse.emf.ecore.resource.URIConverter;
-import org.eclipse.emf.ecore.util.Diagnostician;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
 import java.util.ArrayList;
@@ -75,27 +67,6 @@ public class RamlModelBuilder {
                 resolveToApi(rootObject) :
                 rootObject;
         return RamlModelResult.of(resource.getErrors(), resolved);
-    }
-
-    public RamlModelResult<Instance> validateInstance(final String text, final AnyType type) {
-        final ResourceSet resourceSet = new RamlResourceSet();
-        final URIConverter uriConverter = resourceSet.getURIConverter();
-        final URI uri = URI.createURI("validate.json");
-        final RAMLCustomLexer lexer = new RAMLCustomLexer(text, uri, uriConverter);
-        final TokenStream tokenStream = new CommonTokenStream(lexer);
-        final RAMLParser parser = new RAMLParser(tokenStream);
-        final Scope scope = Scope.of(resourceSet.createResource(uri));
-        final Instance instance = new InstanceConstructor().construct(parser, scope);
-        org.eclipse.emf.common.util.Diagnostic diagnostic = Diagnostician.INSTANCE.validate(instance);
-
-        final List<Resource.Diagnostic> validationResults = new ArrayList<>();
-        if (diagnostic.getSeverity() != org.eclipse.emf.common.util.Diagnostic.OK) {
-            validationResults.addAll(diagnostic.getChildren().stream()
-                    .map(RamlDiagnostic::of)
-                    .collect(Collectors.toList()));
-        }
-
-        return RamlModelResult.of(validationResults, instance);
     }
 
     private Resource load(final URI uri) {

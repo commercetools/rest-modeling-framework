@@ -114,7 +114,7 @@ class TypesValidator extends AbstractRamlValidator {
 
         @Override
         public List<Diagnostic> caseAnnotation(final Annotation annotation) {
-            return instanceValidator.validate(annotation.getValue(), annotation.getType());
+            return instanceValidator.validate(annotation);
         }
     }
 

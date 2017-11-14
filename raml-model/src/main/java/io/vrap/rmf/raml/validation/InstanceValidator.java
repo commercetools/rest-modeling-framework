@@ -2,7 +2,7 @@ package io.vrap.rmf.raml.validation;
 
 import com.google.common.base.Strings;
 import io.vrap.rmf.raml.model.types.*;
-import io.vrap.rmf.raml.model.util.AllPropertiesCollector;
+import io.vrap.rmf.raml.model.util.ModelHelper;
 import io.vrap.rmf.raml.model.values.*;
 import io.vrap.rmf.raml.model.values.util.ValuesSwitch;
 import org.eclipse.emf.common.util.BasicDiagnostic;
@@ -17,10 +17,14 @@ import java.util.stream.Collectors;
 
 import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.ANY_TYPE;
 
-class InstanceValidator {
+public class InstanceValidator {
 
     public List<Diagnostic> validate(final Instance instance, final AnyType anyType) {
         return validateInternal(instance, anyType);
+    }
+
+    public List<Diagnostic> validate(final Annotation annotation) {
+        return validateInternal(annotation.getValue(), annotation.getType());
     }
 
     public List<Diagnostic> validate(final Instance instance, final AnyAnnotationType anyAnnotationType) {
@@ -197,7 +201,7 @@ class InstanceValidator {
                     actualObjectTypeFacet = subType == null ? objectTypeFacet : subType;
                 }
 
-                final Map<String, Property> allProperties = AllPropertiesCollector.getAllPropertiesAsMap(actualObjectTypeFacet);
+                final Map<String, Property> allProperties = ModelHelper.getAllPropertiesAsMap(actualObjectTypeFacet);
 
                 for (final PropertyValue propertyValue : objectInstance.getValue()) {
                     final String name = propertyValue.getName();

@@ -10,7 +10,6 @@ import io.vrap.rmf.raml.model.values.MediaType
 import io.vrap.rmf.raml.model.values.UnsignedInteger
 import io.vrap.rmf.raml.model.values.PositiveInteger
 import io.vrap.rmf.raml.model.values.RegExp
-import io.vrap.rmf.raml.model.util.AllPropertiesCollector
 import io.vrap.rmf.raml.model.util.ModelHelper
 
 interface AnyTypeFacet extends AnnotationsFacet, DocumentableElement, NamedElement, InlineTypeContainer {
@@ -330,7 +329,7 @@ class ObjectType extends AnyType, ObjectTypeFacet {
      * the specialize property will be returned by this method.
      */
     refers derived Property[] allProperties get {
-        AllPropertiesCollector.getAllProperties(this)
+        ModelHelper.getAllProperties(this)
     }
     
     /*
