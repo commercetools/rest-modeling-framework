@@ -52,7 +52,7 @@ interface ObjectTypeFacet extends AnyTypeFacet {
 	 * properties.
 	 */
 	String discriminator
-
+	
 	/*
 	 * Identifies the declaring type. Requires including a discriminator facet in the type declaration.
 	 * A valid value is an actual value that might identify the type of an individual object and is
@@ -66,6 +66,10 @@ interface ObjectTypeFacet extends AnyTypeFacet {
      */
     contains Property[] properties
 
+	op ObjectType getSubType(String discriminatorValue) {
+		null
+	}
+	
     /*
      * Returns the property which matches the given name or null if no property
      * with the given name exists.
@@ -73,6 +77,14 @@ interface ObjectTypeFacet extends AnyTypeFacet {
     op Property getProperty(String name) {
         properties.findFirst[it.matches(name)]
     }
+    
+	op String discriminator() {
+		getDiscriminator	
+	}
+	
+	op String discriminatorValueOrDefault() {
+		if (discriminatorValue == null) name else discriminatorValue
+	}
 }
  
 interface ArrayTypeFacet extends AnyTypeFacet {
@@ -304,6 +316,13 @@ class PatternProperty extends Property {
 
 class ObjectType extends AnyType, ObjectTypeFacet {
 
+	op String discriminator() {
+		if (getDiscriminator == null && ^type instanceof ObjectType) 
+			(^type as ObjectType).discriminator() 
+		else 
+			getDiscriminator	
+	}
+
     /*
      * Returns all properties (with inherited) of this object type.
      *
@@ -312,6 +331,19 @@ class ObjectType extends AnyType, ObjectTypeFacet {
      */
     refers derived Property[] allProperties get {
         AllPropertiesCollector.getAllProperties(this)
+    }
+    
+    /*
+     * Returns the sub type of this type with the given discriminator value.
+     * Traverses the whole inheritance tree.
+     */
+    op ObjectType getSubType(String discriminatorValue) {
+    	val ObjectType subType = subTypes.filter(ObjectType).findFirst[it.discriminatorValue == discriminatorValue]
+    	
+    	if (subType == null) 
+    		subTypes.filter(ObjectType).map[it.getSubType(discriminatorValue)].findFirst[]
+    	else
+    		subType
     }
 }
 

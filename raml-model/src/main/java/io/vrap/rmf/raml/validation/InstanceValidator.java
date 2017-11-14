@@ -1,5 +1,6 @@
 package io.vrap.rmf.raml.validation;
 
+import com.google.common.base.Strings;
 import io.vrap.rmf.raml.model.types.*;
 import io.vrap.rmf.raml.model.util.AllPropertiesCollector;
 import io.vrap.rmf.raml.model.values.*;
@@ -79,7 +80,7 @@ public class InstanceValidator {
                 }
 
                 validationResults.addAll(validateEnumFacet(stringType, value));
-            } else if (!typeIs(ANY_TYPE)) {
+            } else if (!typeIs(ANY_TYPE) && !typeInstanceOf(DateTimeTypeFacet.class) && !typeInstanceOf(TypeTemplate.class)) {
                 validationResults.add(error("Invalid type", stringInstance));
             }
             return validationResults;
@@ -186,7 +187,17 @@ public class InstanceValidator {
 
             if (typeInstanceOf(ObjectTypeFacet.class)) {
                 final ObjectTypeFacet objectTypeFacet = (ObjectTypeFacet) types.peek();
-                final Map<String, Property> allProperties = AllPropertiesCollector.getAllPropertiesAsMap(objectTypeFacet);
+                final ObjectTypeFacet actualObjectTypeFacet;
+                final String discriminator = objectTypeFacet.discriminator();
+                if (Strings.isNullOrEmpty(discriminator)) {
+                    actualObjectTypeFacet = objectTypeFacet;
+                } else {
+                    final String discriminatorValue = objectTypeFacet.discriminatorValueOrDefault();
+                    final ObjectType subType = objectTypeFacet.getSubType(discriminatorValue);
+                    actualObjectTypeFacet = subType == null ? objectTypeFacet : subType;
+                }
+
+                final Map<String, Property> allProperties = AllPropertiesCollector.getAllPropertiesAsMap(actualObjectTypeFacet);
 
                 for (final PropertyValue propertyValue : objectInstance.getValue()) {
                     final String name = propertyValue.getName();
