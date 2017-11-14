@@ -3,7 +3,6 @@ package io.vrap.rmf.raml.generic.generator.php;
 import com.damnhandy.uri.template.Expression;
 import com.damnhandy.uri.template.UriTemplate;
 import com.damnhandy.uri.template.impl.VarSpec;
-import com.google.common.base.CaseFormat;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
@@ -16,6 +15,7 @@ import io.vrap.rmf.raml.model.types.Annotation;
 import io.vrap.rmf.raml.model.types.AnyAnnotationType;
 import io.vrap.rmf.raml.model.types.FileType;
 import io.vrap.rmf.raml.model.types.QueryParameter;
+import io.vrap.rmf.raml.model.util.StringCaseFormat;
 import io.vrap.rmf.raml.model.values.ObjectInstance;
 import io.vrap.rmf.raml.model.values.StringInstance;
 import org.stringtemplate.v4.ST;
@@ -108,7 +108,7 @@ public class RequestGenerator extends AbstractTemplateGenerator {
 
     private String camelize(String arg)
     {
-        return CaseFormat.LOWER_HYPHEN.to(CaseFormat.LOWER_CAMEL, CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_HYPHEN, arg).replace(".", "-"));
+        return StringCaseFormat.LOWER_CAMEL_CASE.apply(arg.replace('.', '-'));
     }
 
     @Override
@@ -191,11 +191,11 @@ public class RequestGenerator extends AbstractTemplateGenerator {
                     switch (Strings.nullToEmpty(formatString)) {
                         case "methodName":
                             if (parts.size() > 0) {
-                                return CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, GeneratorHelper.toParamName((UriTemplate)arg, "With", "Value"));
+                                return StringCaseFormat.LOWER_CAMEL_CASE.apply(GeneratorHelper.toParamName((UriTemplate)arg, "With", "Value"));
                             }
 
                             final String uri = arg.toString();
-                            return CaseFormat.LOWER_HYPHEN.to(CaseFormat.LOWER_CAMEL, uri.replaceFirst("/", ""));
+                            return StringCaseFormat.LOWER_CAMEL_CASE.apply(uri.replaceFirst("/", ""));
                         case "params":
                             if (parts.size() > 0) {
                                 return parts.stream().map(

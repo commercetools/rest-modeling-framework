@@ -2,12 +2,12 @@ package io.vrap.rmf.raml.generic.generator.php;
 
 import com.damnhandy.uri.template.Expression;
 import com.damnhandy.uri.template.UriTemplate;
-import com.google.common.base.CaseFormat;
 import com.google.common.collect.Lists;
 import io.vrap.rmf.raml.model.resources.Method;
 import io.vrap.rmf.raml.model.resources.Resource;
 import io.vrap.rmf.raml.model.types.*;
 import io.vrap.rmf.raml.model.types.util.TypesSwitch;
+import io.vrap.rmf.raml.model.util.StringCaseFormat;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.emf.ecore.EObject;
 
@@ -43,7 +43,7 @@ public class GeneratorHelper {
                         return ((Expression)uriTemplatePart).getVarSpecs().stream()
                                 .map(s -> delimiter + StringUtils.capitalize(s.getVariableName()) + suffix).collect(Collectors.joining());
                     }
-                    return CaseFormat.LOWER_HYPHEN.to(CaseFormat.LOWER_CAMEL, uriTemplatePart.toString().replace("/", "-"));
+                    return StringCaseFormat.LOWER_CAMEL_CASE.apply(uriTemplatePart.toString().replace("/", "-"));
                 }
         ).collect(Collectors.joining())).replaceAll("[^\\p{L}\\p{Nd}]+", "");
     }
