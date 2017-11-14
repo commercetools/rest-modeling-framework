@@ -1,7 +1,8 @@
-package io.vrap.rmf.raml.model.util;
+package io.vrap.rmf.raml.model.values;
 
 import com.google.common.collect.Lists;
 import com.hypertino.inflector.English;
+import io.vrap.rmf.raml.model.util.StringCaseFormat;
 import io.vrap.rmf.raml.persistence.antlr.StringTemplateBaseVisitor;
 import io.vrap.rmf.raml.persistence.antlr.StringTemplateLexer;
 import io.vrap.rmf.raml.persistence.antlr.StringTemplateParser;

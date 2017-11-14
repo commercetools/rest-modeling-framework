@@ -1,9 +1,9 @@
-package io.vrap.rmf.raml.model.util
+package io.vrap.rmf.raml.model.values
 
 import spock.lang.Specification
 
 /**
- * Unit tests for {@link StringTemplate}.
+ * Unit tests for {@link io.vrap.rmf.raml.model.values.StringTemplate}.
  */
 class StringTemplateTest extends Specification {
 

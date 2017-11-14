@@ -1,7 +1,9 @@
 package io.vrap.rmf.raml.persistence;
 
 import io.vrap.rmf.raml.model.RamlDiagnostic;
-import io.vrap.rmf.raml.persistence.antlr.*;
+import io.vrap.rmf.raml.persistence.antlr.ParserErrorCollector;
+import io.vrap.rmf.raml.persistence.antlr.RAMLCustomLexer;
+import io.vrap.rmf.raml.persistence.antlr.RAMLParser;
 import io.vrap.rmf.raml.persistence.constructor.*;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.TokenStream;
@@ -12,7 +14,6 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.resource.impl.ResourceImpl;
 import org.eclipse.emf.ecore.util.Diagnostician;
-import org.eclipse.emf.ecore.util.EcoreUtil;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -65,26 +66,9 @@ public class RamlResource extends ResourceImpl {
         for (final EObject eObject : getContents()) {
             org.eclipse.emf.common.util.Diagnostic diagnostic = Diagnostician.INSTANCE.validate(eObject);
             if (diagnostic.getSeverity() != org.eclipse.emf.common.util.Diagnostic.OK) {
-                diagnostic.getChildren().forEach(this::addValidationError);
+                diagnostic.getChildren().stream().map(RamlDiagnostic::of).forEach(getErrors()::add);
             }
         }
-    }
-
-    private void addValidationError(final org.eclipse.emf.common.util.Diagnostic diagnostic) {
-        int line = -1;
-        int column = -1;
-        String source = diagnostic.getSource();
-        if (diagnostic.getData().size() > 0 && diagnostic.getData().get(0) instanceof EObject) {
-            final EObject eObject = (EObject) diagnostic.getData().get(0);
-            final RamlTokenProvider ramlTokenProvider = (RamlTokenProvider) EcoreUtil.getExistingAdapter(eObject, RamlTokenProvider.class);
-            if (ramlTokenProvider != null) {
-                final RamlToken ramlToken = ramlTokenProvider.get();
-                line = ramlToken.getLine();
-                column = ramlToken.getCharPositionInLine();
-                source = ramlToken.getLocation();
-            }
-        }
-        getErrors().add(RamlDiagnostic.of(diagnostic.getMessage(), source, line, column));
     }
 
     @Override

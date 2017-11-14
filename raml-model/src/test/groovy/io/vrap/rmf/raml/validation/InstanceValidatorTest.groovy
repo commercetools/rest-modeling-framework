@@ -1,7 +1,6 @@
 package io.vrap.rmf.raml.validation
 
 import io.vrap.rmf.raml.model.types.*
-import io.vrap.rmf.raml.model.util.RegExp
 import io.vrap.rmf.raml.model.values.*
 import org.eclipse.emf.common.util.Diagnostic
 import spock.lang.Shared

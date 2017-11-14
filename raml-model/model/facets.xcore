@@ -5,10 +5,9 @@
 )
 package io.vrap.rmf.raml.model.values
 
-import io.vrap.rmf.raml.model.util.RegExp
 import com.google.common.net.MediaType
 
-type RegExp wraps RegExp
+type RegExp wraps io.vrap.rmf.raml.model.values.RegExp
 create {
 	RegExp.of(it)	
 }

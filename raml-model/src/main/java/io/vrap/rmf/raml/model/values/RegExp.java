@@ -1,4 +1,4 @@
-package io.vrap.rmf.raml.model.util;
+package io.vrap.rmf.raml.model.values;
 
 import javax.script.Bindings;
 import javax.script.ScriptEngine;
