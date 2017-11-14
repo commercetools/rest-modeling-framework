@@ -23,6 +23,19 @@ class InstanceValidatorTest extends Specification implements InstanceFixtures {
         value << [ 1, 'string', false, BigDecimal.ONE ]
     }
 
+    def "validateAgainstNilType"() {
+        when:
+        NilType nilType = TypesFactory.eINSTANCE.createNilType()
+        Instance instance = createInstance(value)
+        then:
+        instanceValidator.validate(instance, nilType).empty == valid
+        where:
+
+        value     || valid
+        ''        || true
+        'string'  || false
+    }
+
     def "validateStringInstance"() {
         when:
         StringInstance stringInstance = ValuesFactory.eINSTANCE.createStringInstance();

@@ -68,9 +68,8 @@ public class InstanceValidator {
         public List<Diagnostic> caseStringInstance(final StringInstance stringInstance) {
             final List<Diagnostic> validationResults = new ArrayList<>();
 
+            final String value = stringInstance.getValue();
             if (typeInstanceOf(StringTypeFacet.class)) {
-                final String value = stringInstance.getValue();
-
                 final StringTypeFacet stringType = (StringTypeFacet) types.peek();
                 if (stringType.getMinLength() != null && value.length() < stringType.getMinLength()) {
                     validationResults.add(error("Value length < minLength", stringInstance));
@@ -84,7 +83,12 @@ public class InstanceValidator {
                 }
 
                 validationResults.addAll(validateEnumFacet(stringType, value));
-            } else if (!typeIs(ANY_TYPE) && !typeInstanceOf(DateTimeTypeFacet.class) && !typeInstanceOf(TypeTemplate.class)) {
+            } else if (typeInstanceOf(NilType.class)) {
+                if (!Strings.isNullOrEmpty(value)) {
+                    validationResults.add(error("Value must be empty", stringInstance));
+                }
+            }
+            else if (!typeIs(ANY_TYPE) && !typeInstanceOf(DateTimeTypeFacet.class) && !typeInstanceOf(TypeTemplate.class)) {
                 validationResults.add(error("Invalid type", stringInstance));
             }
             return validationResults;
