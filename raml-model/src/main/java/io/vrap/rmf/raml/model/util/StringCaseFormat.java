@@ -14,14 +14,14 @@ import java.util.stream.Stream;
  * in string template transformations.
  */
 public enum StringCaseFormat implements Predicate<String>, Function<String, String> {
-    LOWER_CAMEL_CASE(s -> s.matches("\\p{Lower}(\\p{Lower}|\\p{Upper})*"), s -> Arrays.asList(s.split("(?<!(^|[A-Z]))(?=[A-Z])|(?<!^)(?=[A-Z][a-z])")), StringCaseFormat::lcFirst, StringCaseFormat::ucFirst),
-    UPPER_CAMEL_CASE(s -> s.matches("\\p{Upper}(\\p{Lower}|\\p{Upper})*"), s -> Arrays.asList(s.split("(?<!(^|[A-Z]))(?=[A-Z])|(?<!^)(?=[A-Z][a-z])")), StringCaseFormat::ucFirst, StringCaseFormat::ucFirst),
+    LOWER_CAMEL_CASE(s -> s.matches("\\p{Lower}(\\p{Lower}|\\p{Upper})*"), StringCaseFormat::split, StringCaseFormat::lcFirst, StringCaseFormat::ucFirst),
+    UPPER_CAMEL_CASE(s -> s.matches("\\p{Upper}(\\p{Lower}|\\p{Upper})*"), StringCaseFormat::split, StringCaseFormat::ucFirst, StringCaseFormat::ucFirst),
 
-    LOWER_HYPHEN_CASE(s -> s.matches("\\p{Lower}(-|\\p{Lower})+"), s -> Arrays.asList(s.split("-")), "-", String::toLowerCase),
-    UPPER_HYPHEN_CASE(s -> s.matches("\\p{Upper}(-|\\p{Upper})+"), s -> Arrays.asList(s.split("-")), "-", String::toUpperCase),
+    LOWER_HYPHEN_CASE(s -> s.matches("\\p{Lower}(-|\\p{Lower})+"), StringCaseFormat::split, "-", String::toLowerCase),
+    UPPER_HYPHEN_CASE(s -> s.matches("\\p{Upper}(-|\\p{Upper})+"), StringCaseFormat::split, "-", String::toUpperCase),
 
-    LOWER_UNDERSCORE_CASE(s -> s.matches("\\p{Lower}(_|\\p{Lower})+"), s -> Arrays.asList(s.split("_")), "_", String::toLowerCase),
-    UPPER_UNDERSCORE_CASE(s -> s.matches("\\p{Upper}(_|\\p{Upper})+"), s -> Arrays.asList(s.split("_")), "_", String::toUpperCase)
+    LOWER_UNDERSCORE_CASE(s -> s.matches("\\p{Lower}(_|\\p{Lower})+"), StringCaseFormat::split, "_", String::toLowerCase),
+    UPPER_UNDERSCORE_CASE(s -> s.matches("\\p{Upper}(_|\\p{Upper})+"), StringCaseFormat::split, "_", String::toUpperCase)
     ;
 
 
@@ -73,7 +73,11 @@ public enum StringCaseFormat implements Predicate<String>, Function<String, Stri
                 .findFirst();
         return sourceFormat
                 .map(source ->  render(source.compoundWords(value)))
-                .orElse(value);
+                .orElse(render(compoundWords(value)));
+    }
+
+    static List<String> split(final String value) {
+        return Arrays.asList(value.split("(?<!(^|[A-Z]))(?=[A-Z])|(?<!^)(?=[A-Z][a-z])|[-_]"));
     }
 
     @VisibleForTesting
@@ -82,6 +86,9 @@ public enum StringCaseFormat implements Predicate<String>, Function<String, Stri
         Function<String, String> transform = firstWordTransform;
         String separator = "";
         for (final String word : compoundWords) {
+            if (word.equals("")) {
+                continue;
+            }
             buffer.append(separator).append(transform.apply(word));
             separator = delimiter;
             transform = otherWordTransform;
