@@ -27,4 +27,13 @@ class RegExpTest extends Specification {
         then:
         regExp.test('a') == true
     }
+
+    def "test should work with empty pattern"() {
+        when:
+        RegExp regExp = RegExp.of('')
+        then:
+        regExp.test(value) == true
+        where:
+        value << [ '', 'a', "1"]
+    }
 }
