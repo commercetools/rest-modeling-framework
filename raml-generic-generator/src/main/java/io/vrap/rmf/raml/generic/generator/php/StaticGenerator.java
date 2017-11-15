@@ -57,8 +57,7 @@ public class StaticGenerator extends AbstractTemplateGenerator {
                     .filter(securityScheme -> securityScheme.getSettings() instanceof OAuth20Settings)
                     .map(securityScheme -> ((OAuth20Settings)securityScheme.getSettings()).getAccessTokenUri())
                     .findFirst().orElse("");
-            st.add("apiUri", apiUri);
-            st.add("authUri", authUri);
+            st.add("api", new ApiGenModel(api));
         }
         return st.render();
     }

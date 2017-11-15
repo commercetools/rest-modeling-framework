@@ -1,15 +1,15 @@
-import "../../../generic.stg"
+<?php
+/**
+ * This file has been auto generated
+ * Do not change it
+ */
 
-main(vendorName, api) ::=<<
-\<?php
-<generatorInfo()>
-
-namespace <vendorName>\Client;
+namespace Test\Client;
 
 class Config
 {
-    const API_URI = '<api.baseUri>';
-    const AUTH_URI = '<api.authUri>';
+    const API_URI = 'https://{region}.api.example.com/{project}';
+    const AUTH_URI = '';
 
     const OPT_BASE_URI = 'base_uri';
     const OPT_AUTH_URI = 'auth_uri';
@@ -17,7 +17,9 @@ class Config
     const OPT_CREDENTIALS = 'credentials';
     const OPT_CLIENT_OPTIONS = 'options';
 
-    <api.baseUriVariables: {p |<uriVariable(p)>}>
+    const OPT_REGION='region';
+    const OPT_PROJECT='project';
+
     /**
      * @var string
      */
@@ -45,13 +47,10 @@ class Config
 
     public function __construct(array $config = [])
     {
-        <if(api.hasBaseUriVariables)>
         $apiUrl = isset($config[self::OPT_BASE_URI]) ? $config[self::OPT_BASE_URI] : static::API_URI;
-        <api.baseUriVariables: {p |<replaceVariable(p)>}>
+        $apiUrl = str_replace('{region}', (isset($config[self::OPT_REGION]) ? $config[self::OPT_REGION] : '{region}'), $apiUrl);
+        $apiUrl = str_replace('{project}', (isset($config[self::OPT_PROJECT]) ? $config[self::OPT_PROJECT] : '{project}'), $apiUrl);
         $this->apiUrl = $apiUrl;
-        <else>
-        $this->apiUrl = isset($config[self::OPT_BASE_URI]) ? $config[self::OPT_BASE_URI] : static::API_URI;
-        <endif>
         $this->authUrl = isset($config[self::OPT_AUTH_URI]) ? $config[self::OPT_AUTH_URI] : static::AUTH_URI;
         $this->cacheDir = isset($config[self::OPT_CACHE_DIR]) ? $config[self::OPT_CACHE_DIR] : getcwd();
         $this->credentials = new Credentials();
@@ -164,15 +163,3 @@ class Config
         );
     }
 }
-
->>
-
-replaceVariable(name) ::=<<
-
-$apiUrl = str_replace('{<p>}', (isset($config[self::OPT_<p; format="upperUnderscore">]) ? $config[self::OPT_<p; format="upperUnderscore">] : '{<p>}'), $apiUrl);
->>
-
-uriVariable(name) ::=<<
-const OPT_<p; format="upperUnderscore">='<p>';
-
->>
