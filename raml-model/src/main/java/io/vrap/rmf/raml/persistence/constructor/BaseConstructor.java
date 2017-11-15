@@ -260,29 +260,24 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
 
     @Override
     public Object visitBodyContentTypeFacet(final RAMLParser.BodyContentTypeFacetContext bodyContentType) {
-        final RAMLParser.BodyTypeFacetContext bodyTypeFacet = bodyContentType.bodyTypeFacet();
+        final RAMLParser.BodyFacetsContext bodyFacets = bodyContentType.bodyFacets();
 
         final Body body;
-        if (bodyTypeFacet != null) {
-            body = (Body) visitBodyTypeFacet(bodyTypeFacet);
+        if (bodyFacets != null) {
+            body = (Body) visitBodyFacets(bodyFacets);
         } else {
             body = create(BODY, bodyContentType);
             scope.setValue(body, bodyContentType.getStart());
         }
         if (bodyContentType.contentType != null) {
-            final MediaType contentType;
-            try {
-                contentType = (MediaType) ValuesFactory.eINSTANCE.createFromString(MEDIA_TYPE, bodyContentType.contentType.getText());
-                body.getContentTypes().add(contentType);
-            } catch (IllegalArgumentException e) {
-                // TODO fix parsing of string template media types
-            }
+            final MediaType contentType = (MediaType) ValuesFactory.eINSTANCE.createFromString(MEDIA_TYPE, bodyContentType.contentType.getText());
+            body.getContentTypes().add(contentType);
         }
         return body;
     }
 
     @Override
-    public Object visitBodyTypeFacet(RAMLParser.BodyTypeFacetContext bodyFacet) {
+    public Object visitBodyFacets(final RAMLParser.BodyFacetsContext bodyFacet) {
         final Body body = create(BODY, bodyFacet);
         scope.setValue(body, bodyFacet.getStart());
 
