@@ -1,10 +1,10 @@
 package io.vrap.rmf.raml.generic.generator.php;
 
-import com.google.common.base.CaseFormat;
 import io.vrap.rmf.raml.model.types.Annotation;
 import io.vrap.rmf.raml.model.types.AnyAnnotationType;
 import io.vrap.rmf.raml.model.types.ObjectType;
 import io.vrap.rmf.raml.model.types.Property;
+import io.vrap.rmf.raml.model.util.StringCaseFormat;
 
 import javax.annotation.Nullable;
 
@@ -36,7 +36,7 @@ public class PropertyGenModel {
     }
 
     public String getConstantName() {
-        return CONSTANT_PREFIX +  CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, getPatternName());
+        return CONSTANT_PREFIX +  StringCaseFormat.UPPER_UNDERSCORE_CASE.apply(getPatternName());
     }
 
     public GetterGenModel getGetter()

@@ -1,9 +1,9 @@
 package io.vrap.rmf.raml.generic.generator.php;
 
-import com.google.common.base.CaseFormat;
 import io.vrap.rmf.raml.generic.generator.Generator;
 import io.vrap.rmf.raml.model.modules.Api;
 import io.vrap.rmf.raml.model.types.AnyAnnotationType;
+import io.vrap.rmf.raml.model.util.StringCaseFormat;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.apache.commons.io.filefilter.TrueFileFilter;
@@ -24,7 +24,7 @@ public class PhpGenerator implements Generator {
     }
 
     public void generate(final Api api, final File outputPath) throws IOException {
-        String title = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, api.getTitle());
+        String title = StringCaseFormat.UPPER_CAMEL_CASE.apply(api.getTitle());
         String vendorName = Optional.ofNullable(this.vendorName).orElse(title);
         if (!outputPath.exists()) {
             Files.createDirectories(outputPath.toPath());

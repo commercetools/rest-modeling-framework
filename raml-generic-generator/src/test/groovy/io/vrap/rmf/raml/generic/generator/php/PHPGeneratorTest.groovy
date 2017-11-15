@@ -284,6 +284,20 @@ class PHPGeneratorTest extends Specification implements ResourceFixtures {
         file << files
     }
 
+    def "test baseUri with parameter"() {
+        given:
+        expect:
+        Api api = constructApi(
+                '''\
+        title: Test
+        baseUri: https://{region}.api.example.com/{project}
+        ''')
+        File file = new File(Resources.getResource("templates/php/statics/src/Client/Config.php.stg").getFile());
+        StaticGenerator generator = new StaticGenerator( "Test")
+        String result = generator.generateContent(file, api);
+        result == fileContent("ConfigBaseUriParameter.php")
+    }
+
     String generate(final String generateType, final AnyType type) {
         TypesGenerator generator = new TypesGenerator("Test")
         return generator.generateType(generator.createVisitor(generateType), type);
