@@ -291,6 +291,15 @@ interface TypedElement extends NamedElement, InlineTypeContainer, AnnotationsFac
      * Specifies if the element is required or not.
      */
     Boolean required = "true"
+    
+    RegExp pattern
+
+    /*
+     * @return true iff. this property pattern matches the given name
+     */
+    op boolean matches(String name) {
+        if (pattern != null) ModelHelper.testPattern(this, name) else this.name === name
+    }
 }
 
 class Property extends AnnotationsFacet, TypedElement {
@@ -299,17 +308,6 @@ class Property extends AnnotationsFacet, TypedElement {
      */
     op boolean matches(String name) {
         this.name == name
-    }
-}
-
-class PatternProperty extends Property {
-    RegExp pattern
-
-    /*
-     * @return true iff. this property pattern matches the given name
-     */
-    op boolean matches(String name) {
-        ModelHelper.testPattern(this, name)
     }
 }
 

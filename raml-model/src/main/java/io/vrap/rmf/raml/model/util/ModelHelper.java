@@ -7,8 +7,8 @@ import io.vrap.rmf.raml.model.responses.Body;
 import io.vrap.rmf.raml.model.responses.BodyContainer;
 import io.vrap.rmf.raml.model.types.ObjectType;
 import io.vrap.rmf.raml.model.types.ObjectTypeFacet;
-import io.vrap.rmf.raml.model.types.PatternProperty;
 import io.vrap.rmf.raml.model.types.Property;
+import io.vrap.rmf.raml.model.types.TypedElement;
 import org.eclipse.emf.common.util.ECollections;
 import org.eclipse.emf.common.util.EList;
 
@@ -26,8 +26,8 @@ public class ModelHelper {
     private ModelHelper() {
     }
 
-    public static boolean testPattern(final PatternProperty property, final String value) {
-        return property.getPattern().test(value);
+    public static boolean testPattern(final TypedElement typedElement, final String value) {
+        return typedElement.getPattern().test(value);
     }
 
     public static UriTemplate fullUri(final Resource resource) {

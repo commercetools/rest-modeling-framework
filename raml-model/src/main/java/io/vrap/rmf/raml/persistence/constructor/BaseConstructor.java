@@ -8,6 +8,7 @@ import io.vrap.rmf.raml.model.responses.Response;
 import io.vrap.rmf.raml.model.security.*;
 import io.vrap.rmf.raml.model.types.*;
 import io.vrap.rmf.raml.model.values.ObjectInstance;
+import io.vrap.rmf.raml.model.values.RegExp;
 import io.vrap.rmf.raml.model.values.ValuesFactory;
 import io.vrap.rmf.raml.persistence.antlr.RAMLParser;
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -575,9 +576,18 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
         final String parsedName = isRequired ? name : name.substring(0, name.length() - 1);
 
         scope.setValue(NAMED_ELEMENT__NAME, parsedName, typedeElementTuple.getStart());
+        setTypedElementPattern(name, typedeElementTuple.getStart());
+
         scope.setValue(TYPED_ELEMENT__TYPE, propertyType, typedeElementTuple.getStart());
 
         return scope.eObject();
+    }
+
+    private void setTypedElementPattern(final String name, final Token nameStart) {
+        if (name.startsWith("/") && name.endsWith("/")) {
+            final RegExp pattern = RegExp.of(name.substring(1, name.length() - 1));
+            scope.setValue(TYPED_ELEMENT__PATTERN, pattern, nameStart);
+        }
     }
 
     @Override
@@ -598,6 +608,7 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
         }
 
         scope.setValue(NAMED_ELEMENT__NAME, parsedName, typedElementMap.getStart());
+        setTypedElementPattern(name, typedElementMap.getStart());
 
         AnyType typedElementType;
         if (typedElementMap.typeFacet().size() > 0) {
