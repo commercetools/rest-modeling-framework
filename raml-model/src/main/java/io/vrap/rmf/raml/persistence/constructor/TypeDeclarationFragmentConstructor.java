@@ -36,9 +36,9 @@ public class TypeDeclarationFragmentConstructor extends BaseConstructor {
             final RAMLParser.TypeFacetContext typeFacet = typeDeclarationFragment.typeFacet().get(0);
             superType = (EObject) visitTypeFacet(typeFacet);
         } else if (typeDeclarationFragment.propertiesFacet().size() > 0) {
-            superType = scope.getEObjectByName(BuiltinType.OBJECT.getName());
+            superType = BuiltinType.OBJECT.getType(scope.getResourceSet());
         } else {
-            superType = scope.getEObjectByName(BuiltinType.STRING.getName());
+            superType = BuiltinType.STRING.getType(scope.getResourceSet());
         }
 
         final EClass eClass = superType.eClass();

@@ -48,7 +48,7 @@ class TypeDeclarationFragmentConstructorTest extends Specification {
         ''')
         then:
         type.name == null
-        StringType stringType = BuiltinType.STRING.getEObject(resourceSet)
+        StringType stringType = BuiltinType.STRING.getType(resourceSet)
         type != stringType
         type.displayName == 'Simple'
         type.examples.size() == 1
@@ -72,7 +72,7 @@ class TypeDeclarationFragmentConstructorTest extends Specification {
         objectType.properties[0].type instanceof StringType
         StringType namePropertyType = objectType.properties[0].type
 
-        StringType stringType = BuiltinType.STRING.getEObject(resourceSet)
+        StringType stringType = BuiltinType.STRING.getType(resourceSet)
         namePropertyType != stringType
         namePropertyType.examples.size() == 1
         namePropertyType.examples[0].value instanceof StringInstance
@@ -95,7 +95,7 @@ class TypeDeclarationFragmentConstructorTest extends Specification {
         objectType.properties[0].type instanceof StringType
         StringType namePropertyType = objectType.properties[0].type
 
-        StringType stringType = BuiltinType.STRING.getEObject(resourceSet)
+        StringType stringType = BuiltinType.STRING.getType(resourceSet)
         namePropertyType != stringType
         namePropertyType.default instanceof StringInstance
     }

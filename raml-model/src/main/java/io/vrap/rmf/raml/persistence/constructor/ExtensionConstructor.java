@@ -4,10 +4,10 @@ import io.vrap.rmf.raml.model.modules.Api;
 import io.vrap.rmf.raml.model.modules.ApiExtension;
 import io.vrap.rmf.raml.model.modules.Extension;
 import io.vrap.rmf.raml.model.modules.ModulesPackage;
-import io.vrap.rmf.raml.persistence.RamlResource;
 import io.vrap.rmf.raml.persistence.antlr.RAMLParser;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.resource.Resource;
 
 import java.util.function.Predicate;
 
@@ -55,7 +55,7 @@ public class ExtensionConstructor extends ApiConstructor {
     @Override
     public Object visitExtendsFacet(final RAMLParser.ExtendsFacetContext extendsFacet) {
         final String extendsUri = extendsFacet.uri.getText();
-        final RamlResource extendsResource = (RamlResource) scope.getResource(extendsUri);
+        final Resource extendsResource = scope.getResource(extendsUri);
         final EList<org.eclipse.emf.ecore.resource.Resource.Diagnostic> errors = extendsResource.getErrors();
         if (errors.isEmpty()) {
             final EList<EObject> contents = extendsResource.getContents();

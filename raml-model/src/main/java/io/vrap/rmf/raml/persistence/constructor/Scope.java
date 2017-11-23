@@ -53,17 +53,16 @@ public class Scope {
         return resource;
     }
 
-    public EObject eObject() {
+    public ResourceSet getResourceSet() {
+        return resource.getResourceSet();
+    }
+
+    public EObject getEObject() {
         return eObject;
     }
 
-    public EStructuralFeature eFeature() {
+    public EStructuralFeature getFeature() {
         return feature;
-    }
-
-    public URI resolve(final String relativePath) {
-        final String[] segments = URI.createURI(relativePath).segments();
-        return getBaseUri().appendSegments(segments);
     }
 
     private URI getBaseUri() {
@@ -73,6 +72,11 @@ public class Scope {
     public Resource getResource(final String relativePath) {
         final URI uri = resolve(relativePath);
         return getResourceSet().getResource(uri, true);
+    }
+
+    private URI resolve(final String relativePath) {
+        final String[] segments = URI.createURI(relativePath).segments();
+        return getBaseUri().appendSegments(segments);
     }
 
     public EObject getEObjectByName(final String name) {
@@ -87,10 +91,6 @@ public class Scope {
         final EObject resolvedType = Optional.ofNullable(builtinTypeResource.getEObject(uriFragment))
                 .orElseGet(() -> getEObjectByName(this.resource, name, type));
         return resolvedType;
-    }
-
-    private ResourceSet getResourceSet() {
-        return resource.getResourceSet();
     }
 
     private String getUriFragment(final String id, final EClass type) {
@@ -191,7 +191,7 @@ public class Scope {
      */
     @SuppressWarnings("unchecked")
     public <T> T setValue(final T value, final Token token) {
-        final EStructuralFeature feature = eFeature();
+        final EStructuralFeature feature = getFeature();
         return feature == null ? setValue(resource, value, token) : setValue(feature, value, token);
     }
 

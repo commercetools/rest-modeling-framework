@@ -122,7 +122,8 @@ public class TypeDeclarationResolver {
 
         @Override
         public Object visitLibraryUse(final RAMLParser.LibraryUseContext libraryUseFacet) {
-            final Resource libraryResource = scope.getResource(libraryUseFacet.libraryUri.getText());
+            final String libraryUri = libraryUseFacet.libraryUri.getText();
+            final Resource libraryResource = scope.getResource(libraryUri);
             final EList<EObject> contents = libraryResource.getContents();
             final LibraryUse libraryUse = create(LIBRARY_USE, libraryUseFacet);
 

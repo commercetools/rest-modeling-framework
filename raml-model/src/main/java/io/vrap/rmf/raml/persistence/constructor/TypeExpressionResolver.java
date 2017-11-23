@@ -45,7 +45,7 @@ public class TypeExpressionResolver {
         final TypeExpressionParser.Type_exprContext typeExpr = typeExpressionParser.type_expr();
 
         final EObject resolvedElement;
-        final EStructuralFeature feature = scope.eFeature();
+        final EStructuralFeature feature = scope.getFeature();
         if (feature == TYPED_ELEMENT__TYPE || feature == ARRAY_TYPE_FACET__ITEMS) {
             resolvedElement = new TypedElementTypeResolver(scope).visit(typeExpr);
         } else if (feature == TYPE_CONTAINER__TYPES) {

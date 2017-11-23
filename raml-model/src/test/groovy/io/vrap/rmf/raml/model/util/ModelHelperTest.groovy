@@ -30,7 +30,7 @@ class ModelHelperTest extends Specification {
     ObjectType objectTypeWithProperty(String propertyName, BuiltinType propertyType) {
         Property property = TypesFactory.eINSTANCE.createProperty()
         property.name = propertyName
-        property.type = propertyType.getEObject(resourceSet)
+        property.type = propertyType.getType(resourceSet)
 
         ObjectType objectType = TypesFactory.eINSTANCE.createObjectType()
         objectType.properties.add(property)

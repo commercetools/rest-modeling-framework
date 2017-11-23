@@ -19,6 +19,7 @@ import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -207,7 +208,7 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
                                     .map(this::visitSecuritySchemeSettingsFacet)
                                     .collect(Collectors.toList()));
                 }
-                return securitySchemeScope.eObject();
+                return securitySchemeScope.getEObject();
             });
             scope.with(SECURITY_SCHEME_CONTAINER__SECURITY_SCHEMES).setValue(securityScheme, securitySchemeFacet.getStart());
         }
@@ -289,10 +290,10 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
                         if (bodyFacet.typeFacet().size() == 1) {
                             anyType = (AnyType) visitTypeFacet(bodyFacet.typeFacet(0));
                         } else if (bodyFacet.propertiesFacet().size() == 1) {
-                            anyType = (AnyType) scope.getEObjectByName(BuiltinType.OBJECT.getName());
+                            anyType = BuiltinType.OBJECT.getType(scope.getResourceSet());
                         }
                         if (anyType == null) {
-                            anyType = (AnyType) scope.getEObjectByName(BuiltinType.ANY.getName());
+                            anyType = BuiltinType.ANY.getType(scope.getResourceSet());
                         }
                         return anyType;
                     });
@@ -314,7 +315,7 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
                             bodyFacet.enumFacet().forEach(this::visitEnumFacet);
                             bodyFacet.itemsFacet().forEach(this::visitItemsFacet);
 
-                            return inlineTypeDeclarationScope.eObject();
+                            return inlineTypeDeclarationScope.getEObject();
                         });
             }
             bodyScope.with(TYPED_ELEMENT__TYPE).setValue(type, bodyFacet.getStart());
@@ -372,7 +373,7 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
     @Override
     public Object visitSecuritySchemeSettingsFacet(RAMLParser.SecuritySchemeSettingsFacetContext securitySchemeSettingsFacet) {
         securitySchemeSettingsFacet.attributeFacet().forEach(this::visitAttributeFacet);
-        return scope.eObject();
+        return scope.getEObject();
     }
 
     @Override
@@ -474,9 +475,9 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
                     typedElementType = (EObject) withinScope(scope.with(TYPED_ELEMENT__TYPE),
                             propertyTypeScope -> visitTypeFacet(typeFacet));
                 } else if (itemsFacet.propertiesFacet().size() == 1) {
-                    typedElementType = scope.getEObjectByName(BuiltinType.OBJECT.getName());
+                    typedElementType = BuiltinType.OBJECT.getType(scope.getResourceSet());
                 } else {
-                    typedElementType = scope.getEObjectByName(BuiltinType.STRING.getName());
+                    typedElementType = BuiltinType.STRING.getType(scope.getResourceSet());
                 }
                 // inline type declaration
                 final boolean isInlineTypeDeclaration =
@@ -497,7 +498,7 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
                                 itemsFacet.enumFacet().forEach(this::visitEnumFacet);
                                 itemsFacet.itemsFacet().forEach(this::visitItemsFacet);
 
-                                return inlineTypeDeclarationScope.eObject();
+                                return inlineTypeDeclarationScope.getEObject();
                             });
                 }
                 itemsType = typedElementType;
@@ -555,7 +556,7 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
 
     @Override
     public Object visitTypedElementFacet(RAMLParser.TypedElementFacetContext typedElementFacet) {
-        final EClass eType = (EClass) scope.eFeature().getEType();
+        final EClass eType = (EClass) scope.getFeature().getEType();
         final EObject typedElement = create(eType, typedElementFacet);
         scope.setValue(typedElement, typedElementFacet.getStart());
 
@@ -569,7 +570,7 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
         final String name = typedeElementTuple.name.getText();
 
         final EObject propertyType = Strings.isNullOrEmpty(type.getText()) ?
-                scope.getEObjectByName(BuiltinType.STRING.getName()) :
+                BuiltinType.STRING.getType(scope.getResourceSet()) :
                 typeExpressionResolver.resolve(type.getText(), scope);
         final boolean isRequired = !name.endsWith("?");
         scope.setValue(TYPED_ELEMENT__REQUIRED, isRequired, typedeElementTuple.getStart());
@@ -580,7 +581,7 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
 
         scope.setValue(TYPED_ELEMENT__TYPE, propertyType, typedeElementTuple.getStart());
 
-        return scope.eObject();
+        return scope.getEObject();
     }
 
     private void setTypedElementPattern(final String name, final Token nameStart) {
@@ -616,9 +617,9 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
             typedElementType = (AnyType) withinScope(scope.with(TYPED_ELEMENT__TYPE),
                     propertyTypeScope -> visitTypeFacet(typeFacet));
         } else if (typedElementMap.propertiesFacet().size() == 1) {
-            typedElementType = (AnyType) scope.getEObjectByName(BuiltinType.OBJECT.getName());
+            typedElementType = BuiltinType.OBJECT.getType(scope.getResourceSet());
         } else {
-            typedElementType = (AnyType) scope.getEObjectByName(BuiltinType.STRING.getName());
+            typedElementType = BuiltinType.STRING.getType(scope.getResourceSet());
         }
 
         // inline type declaration
@@ -640,19 +641,19 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
                         typedElementMap.enumFacet().forEach(this::visitEnumFacet);
                         typedElementMap.itemsFacet().forEach(this::visitItemsFacet);
 
-                        return inlineTypeDeclarationScope.eObject();
+                        return inlineTypeDeclarationScope.getEObject();
                     });
         }
 
         typedElementMap.annotationFacet().forEach(this::visitAnnotationFacet);
         scope.setValue(TYPED_ELEMENT__TYPE, typedElementType, typedElementMap.getStart());
 
-        return scope.eObject();
+        return scope.getEObject();
     }
 
     @Override
     public Object visitAttributeFacet(final RAMLParser.AttributeFacetContext attributeFacet) {
-        final Object value = setAttribute(attributeFacet, scope.eObject());
+        final Object value = setAttribute(attributeFacet, scope.getEObject());
         return value;
     }
 
@@ -724,10 +725,79 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
                 methodFacet.responsesFacet().forEach(this::visitResponsesFacet);
                 methodFacet.isFacet().forEach(this::visitIsFacet);
 
-                return methodScope.eObject();
+                return methodScope.getEObject();
             });
 
             return method;
         });
+    }
+
+    /**
+     * Sets an attribute given by the attribute facet on the given eobject.
+     *
+     * @param attributeFacet the attribute facet
+     * @param eObject        the object to set the attribute
+     */
+    private Object setAttribute(final RAMLParser.AttributeFacetContext attributeFacet, final EObject eObject) {
+        final EClass eClass = eObject.eClass();
+        final String attributeName = attributeFacet.facet.getText();
+        final EAttribute eAttribute = eClass.getEAllAttributes().stream()
+                .filter(a -> a.getName().equals(attributeName))
+                .findFirst()
+                .orElse(null);
+
+        final Object value;
+        if (eAttribute == null) {
+            scope.addError("Unknown attribute {0} at {1}", attributeName, attributeFacet.getStart());
+            value = null;
+        } else {
+            value = attributeFacet.facetValue().value == null ?
+                    attributeFacet.facetValue().values :
+                    attributeFacet.facetValue().value;
+
+            if (attributeFacet.facetValue().anyValue().size() == 1) {
+                setAttribute(eObject, eAttribute, attributeFacet.facetValue().anyValue().get(0));
+            } else {
+                setAttribute(eObject, eAttribute, attributeFacet.facetValue().anyValue());
+            }
+        }
+        return value;
+    }
+
+    private void setAttribute(final EObject eObject, final EAttribute eAttribute, final List<RAMLParser.AnyValueContext> valueTokens) {
+        if (eAttribute.isMany()) {
+            final List<Object> values = valueTokens.stream()
+                    .map(v -> createFromString(eAttribute, v))
+                    .collect(Collectors.toList());
+
+            eObject.eSet(eAttribute, values);
+        } else {
+            final String messagePattern = "Trying to set attribute {0} with many values";
+            if (valueTokens.isEmpty()) {
+                scope.addError(messagePattern, eAttribute);
+            } else {
+                scope.addError(messagePattern + " at {1}", eAttribute, valueTokens.get(0).getStart());
+            }
+        }
+    }
+
+    private void setAttribute(final EObject eObject, final EAttribute eAttribute, final RAMLParser.AnyValueContext anyValueContext) {
+        if (anyValueContext.getText().length() > 0) {
+            final Object value = createFromString(eAttribute, anyValueContext);
+            if (eAttribute.isMany()) {
+                eObject.eSet(eAttribute, Collections.singletonList(value));
+            } else {
+                eObject.eSet(eAttribute, value);
+            }
+        }
+    }
+
+    private Object createFromString(final EAttribute eAttribute, final RAMLParser.AnyValueContext anyValueContext) {
+        try {
+            return EcoreUtil.createFromString(eAttribute.getEAttributeType(), anyValueContext.getText());
+        } catch (IllegalArgumentException e) {
+            scope.addError("{0} at {1}", e.getMessage(), anyValueContext.getStart());
+            return null;
+        }
     }
 }
