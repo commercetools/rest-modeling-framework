@@ -76,11 +76,16 @@ public class Scope {
     }
 
     public EObject getEObjectByName(final String name) {
-        final String uriFragment = getUriFragment(name);
+        final EClass type = (EClass) feature.getEType();
+        return getEObjectByName(name, type);
+    }
+
+    public EObject getEObjectByName(final String name, final EClass type) {
+        final String uriFragment = getUriFragment(name, type);
 
         final Resource builtinTypeResource = getResourceSet().getResource(BuiltinType.RESOURCE_URI, true);
         final EObject resolvedType = Optional.ofNullable(builtinTypeResource.getEObject(uriFragment))
-                .orElseGet(() -> getEObjectByName(this.resource, name));
+                .orElseGet(() -> getEObjectByName(this.resource, name, type));
         return resolvedType;
     }
 
@@ -88,8 +93,7 @@ public class Scope {
         return resource.getResourceSet();
     }
 
-    public String getUriFragment(final String id) {
-        final EClass type = (EClass) feature.getEType();
+    private String getUriFragment(final String id, final EClass type) {
         // TODO replace ternary with visitor
         final String fragment = ANY_ANNOTATION_TYPE.isSuperTypeOf(type) ?
                 TYPE_CONTAINER__ANNOTATION_TYPES.getName() :
@@ -104,21 +108,12 @@ public class Scope {
                 .collect(Collectors.joining("/", "/", ""));
     }
 
-    private EObject getEObjectByName(final Resource resource, final String name) {
-        final EClass type = (EClass) feature.getEType();
-        final String uriFragment = getUriFragment(name);
-
+    private EObject getEObjectByName(final Resource resource, final String name, final EClass type) {
         final EObject resolvedType;
         final String[] segments = name.split("\\.");
         if (segments.length == 1) {
-            final EObject eObject = getEObject(uriFragment);
-            if (eObject != null) {
-                resolvedType = eObject;
-            } else {
-                final InternalEObject internalEObject = (InternalEObject) EcoreUtil.create(type);
-                internalEObject.eSetProxyURI(resource.getURI().appendFragment(uriFragment));
-                resolvedType = internalEObject;
-            }
+            final String uriFragment = getUriFragment(name, type);
+            resolvedType = getEObject(resource, type, uriFragment);
         } else if (segments.length == 2) {
             final String libraryName = segments[0];
             final Library usedLibrary = getUsedLibrary(libraryName);
@@ -133,6 +128,19 @@ public class Scope {
         } else {
             addError("Uses has invalid format {0}", name);
             resolvedType = null;
+        }
+        return resolvedType;
+    }
+
+    private EObject getEObject(final Resource resource, final EClass type, final String uriFragment) {
+        EObject resolvedType;
+        final EObject eObject = getEObject(uriFragment);
+        if (eObject != null) {
+            resolvedType = eObject;
+        } else {
+            final InternalEObject internalEObject = (InternalEObject) EcoreUtil.create(type);
+            internalEObject.eSetProxyURI(resource.getURI().appendFragment(uriFragment));
+            resolvedType = internalEObject;
         }
         return resolvedType;
     }

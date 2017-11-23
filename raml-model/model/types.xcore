@@ -13,6 +13,8 @@ import io.vrap.rmf.raml.model.values.RegExp
 import io.vrap.rmf.raml.model.util.ModelHelper
 
 interface AnyTypeFacet extends AnnotationsFacet, DocumentableElement, NamedElement, InlineTypeContainer {
+	op AnyType getType()
+
 	/*
      * An enumeration of all the possible values of instances of this type.
      * The value is an array containing representations of these possible values.
@@ -82,7 +84,7 @@ interface ObjectTypeFacet extends AnyTypeFacet {
 	}
 	
 	op String discriminatorValueOrDefault() {
-		if (discriminatorValue == null) name else discriminatorValue
+		if (discriminatorValue === null) name else discriminatorValue
 	}
 }
  
@@ -298,7 +300,7 @@ interface TypedElement extends NamedElement, InlineTypeContainer, AnnotationsFac
      * @return true iff. this property pattern matches the given name
      */
     op boolean matches(String name) {
-        if (pattern != null) ModelHelper.testPattern(this, name) else this.name === name
+        if (pattern !== null) ModelHelper.testPattern(this, name) else this.name === name
     }
 }
 
@@ -314,7 +316,7 @@ class Property extends AnnotationsFacet, TypedElement {
 class ObjectType extends AnyType, ObjectTypeFacet {
 
 	op String discriminator() {
-		if (getDiscriminator == null && ^type instanceof ObjectType) 
+		if (getDiscriminator === null && ^type instanceof ObjectType) 
 			(^type as ObjectType).discriminator() 
 		else 
 			getDiscriminator	
@@ -337,7 +339,7 @@ class ObjectType extends AnyType, ObjectTypeFacet {
     op ObjectType getSubType(String discriminatorValue) {
     	val ObjectType subType = subTypes.filter(ObjectType).findFirst[it.discriminatorValue == discriminatorValue]
     	
-    	if (subType == null) 
+    	if (subType === null) 
     		subTypes.filter(ObjectType).map[it.getSubType(discriminatorValue)].findFirst[]
     	else
     		subType
@@ -532,6 +534,11 @@ enum AnnotationTarget {
  * can extend other data types, but annotation types themselves can neither be extended nor used anywhere data types can be used.
  */
 class AnyAnnotationType extends AnyTypeFacet {
+	/*
+	 * The type which this type extends.
+	 */
+	refers AnyType ^type
+	
     /*
      * The locations to which annotations are restricted.
      * If this node is specified, annotations of this type may be applied only on a node corresponding to one of the locations.

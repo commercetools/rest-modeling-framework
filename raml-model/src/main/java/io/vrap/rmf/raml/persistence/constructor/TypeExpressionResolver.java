@@ -52,7 +52,7 @@ public class TypeExpressionResolver {
             resolvedElement = new TypeResolver(scope).visit(typeExpr);
         } else if (feature == TYPE_CONTAINER__ANNOTATION_TYPES) {
             resolvedElement = new AnnotationTypeResolver(scope).visit(typeExpr);
-        } else if (feature == ANY_TYPE__TYPE) {
+        } else if (feature == ANY_TYPE__TYPE || feature == ANY_ANNOTATION_TYPE__TYPE) {
             resolvedElement = new AnyTypeTypeResolver(scope).visit(typeExpr);
         } else {
             resolvedElement = null; // TODO report error/throw exception
@@ -176,29 +176,6 @@ public class TypeExpressionResolver {
         }
     }
 
-
-    private final static class AnyTypeTypeResolver extends TypeExpressionBaseVisitor<EObject> {
-        private final Scope scope;
-
-        public AnyTypeTypeResolver(final Scope scope) {
-            this.scope = scope;
-        }
-
-        @Override
-        public EObject visitParens(TypeExpressionParser.ParensContext ctx) {
-            return super.visit(ctx.type_expr());
-        }
-
-        @Override
-        public EObject visitTypeReference(final TypeExpressionParser.TypeReferenceContext ctx) {
-            final String typeName = ctx.getText();
-
-            return BuiltinType.of(typeName).isPresent() ?
-                    null :
-                    scope.getEObjectByName(typeName);
-        }
-    }
-
     private final static class AnnotationTypeResolver extends TypeExpressionBaseVisitor<EObject> {
         private final Scope scope;
         private boolean nestedTypes;
@@ -247,16 +224,38 @@ public class TypeExpressionResolver {
         public EObject visitTypeReference(final TypeExpressionParser.TypeReferenceContext ctx) {
             final String typeName = ctx.getText();
             final BuiltinType builtinType = BuiltinType.of(typeName).orElse(null);
-            final EObject annotationType;
-            if (builtinType == null) {
-                scope.addError("Type {0} can't be used as annotation type", typeName);
-                annotationType = null;
+            final EObject resolved;
+            if (nestedTypes) {
+                resolved = scope.getEObjectByName(typeName, ANY_TYPE);
+            } else if (builtinType == null) {
+                final EObject eObject = scope.getEObjectByName(typeName);
+                resolved = eObject.eIsProxy() ? eObject : EcoreUtil.create(eObject.eClass());
             } else {
-                annotationType = nestedTypes ?
-                        builtinType.getEObject(scope.getResource().getResourceSet()) :
-                        EcoreUtil.create(builtinType.getAnnotationTypeDeclarationType());
+                resolved = EcoreUtil.create(builtinType.getAnnotationTypeDeclarationType());
             }
-            return annotationType;
+            return resolved;
+        }
+    }
+
+    private final static class AnyTypeTypeResolver extends TypeExpressionBaseVisitor<EObject> {
+        private final Scope scope;
+
+        public AnyTypeTypeResolver(final Scope scope) {
+            this.scope = scope;
+        }
+
+        @Override
+        public EObject visitParens(TypeExpressionParser.ParensContext ctx) {
+            return super.visit(ctx.type_expr());
+        }
+
+        @Override
+        public EObject visitTypeReference(final TypeExpressionParser.TypeReferenceContext ctx) {
+            final String typeName = ctx.getText();
+
+            return BuiltinType.of(typeName).isPresent() ?
+                    null :
+                    scope.getEObjectByName(typeName);
         }
     }
 }

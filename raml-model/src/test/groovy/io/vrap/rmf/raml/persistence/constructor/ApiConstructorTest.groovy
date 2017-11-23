@@ -8,10 +8,7 @@ import io.vrap.rmf.raml.model.resources.HttpMethod
 import io.vrap.rmf.raml.model.resources.Resource
 import io.vrap.rmf.raml.model.responses.Body
 import io.vrap.rmf.raml.model.security.OAuth20Settings
-import io.vrap.rmf.raml.model.types.IntegerType
-import io.vrap.rmf.raml.model.types.ObjectType
-import io.vrap.rmf.raml.model.types.StringType
-import io.vrap.rmf.raml.model.types.TypeTemplate
+import io.vrap.rmf.raml.model.types.*
 import io.vrap.rmf.raml.model.values.ArrayInstance
 import io.vrap.rmf.raml.model.values.ObjectInstance
 import io.vrap.rmf.raml.model.values.StringInstance
@@ -829,6 +826,50 @@ class ApiConstructorTest extends Specification {
                 type: X[]''')
         then:
         api.types.size() == 1
+    }
+
+    def "annotation array type"() {
+        when:
+        Api api = constructApi(
+                '''\
+        #%RAML 1.0
+        title: Test
+        types:
+            Person:
+                type: object
+        annotationTypes:
+            Roles: Person[]
+        ''')
+        then:
+        api.types.size() == 1
+        api.annotationTypes.size() == 1
+        api.annotationTypes[0] instanceof ArrayAnnotationType
+        ArrayAnnotationType rolesAnnotationType = api.annotationTypes[0]
+        rolesAnnotationType.items instanceof ObjectType
+        rolesAnnotationType.items.name == 'Person'
+    }
+
+    def "annotation union type"() {
+        when:
+        Api api = constructApi(
+                '''\
+        #%RAML 1.0
+        title: Test
+        types:
+            Admin:
+                type: object
+            User:
+                type: object
+        annotationTypes:
+            Roles: Admin | User
+        ''')
+        then:
+        api.types.size() == 2
+        api.annotationTypes.size() == 1
+        api.annotationTypes[0] instanceof UnionAnnotationType
+        UnionAnnotationType rolesAnnotationType = api.annotationTypes[0]
+        rolesAnnotationType.oneOf.size() == 2
+        rolesAnnotationType.oneOf == api.types
     }
 
     Api constructApi(String input) {
