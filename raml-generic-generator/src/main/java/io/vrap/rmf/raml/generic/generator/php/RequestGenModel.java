@@ -4,6 +4,7 @@ import com.damnhandy.uri.template.Expression;
 import com.damnhandy.uri.template.UriTemplate;
 import com.damnhandy.uri.template.impl.VarSpec;
 import com.google.common.collect.Lists;
+import com.google.common.net.MediaType;
 import io.vrap.rmf.raml.model.resources.Method;
 import io.vrap.rmf.raml.model.resources.Resource;
 import io.vrap.rmf.raml.model.responses.Body;
@@ -41,7 +42,7 @@ public class RequestGenModel {
         Response response = method.getResponses().stream().filter(response1 -> response1.getStatusCode().matches("^2[0-9]{2}$")).findFirst().orElse(null);
         if (response != null) {
             Body bodyType = response.getBodies().stream()
-                    .filter(bodyType1 -> bodyType1.getContentTypes().size() == 0 || bodyType1.getContentTypes().contains("application/json"))
+                    .filter(bodyType1 -> bodyType1.getContentTypes().size() == 0 || bodyType1.getContentTypes().contains(MediaType.parse("application/json")))
                     .findFirst().orElse(null);
             if (bodyType != null && !BuiltinType.of(bodyType.getName()).isPresent()) {
                 return new TypeGenModel(bodyType.getType());
