@@ -1,0 +1,102 @@
+main(vendorName, api) ::= <<
+{
+    "info": {
+        "name": "<vendorName> API",
+        "description": "",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        <authorization(api.oAuth)>,
+        <trunc(api.resources): {r |<folder(r)>,}>
+        <folder(last(api.resources))>
+    ]
+}
+>>
+
+authorization(oauth) ::=<<
+{
+    "name": "Authorization",
+    "description": "",
+    "item": [
+        {
+            "name": "Obtain access token",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "tests[\"Status code is 200\"] = responseCode.code === 200;",
+                            "var data = JSON.parse(responseBody);",
+                            "if(data.access_token){",
+                            "    postman.setEnvironmentVariable(\"access_token\", data.access_token);",
+                            "}"
+                        ]
+                    }
+                }
+            ],
+            "request": {
+                "auth": {
+                    "type": "basic",
+                    "basic": [
+                        {
+                            "key": "username",
+                            "value": "{{client_id}}",
+                            "type": "string"
+                        },
+                        {
+                            "key": "password",
+                            "value": "{{client_secret}}",
+                            "type": "string"
+                        },
+                        {
+                            "key": "saveHelperData",
+                            "type": "any"
+                        },
+                        {
+                            "key": "showPassword",
+                            "value": false,
+                            "type": "boolean"
+                        }
+                    ]
+                },
+                "method": "POST",
+                "header": [],
+                "body": {
+                    "mode": "raw",
+                    "raw": ""
+                },
+                "url": {
+                    "raw": "https://{{auth_url}}<oauth.uri.path>?grant_type=client_credentials",
+                    "protocol": "https",
+                    "host": [
+                        "{{auth_url}}"
+                    ],
+                    "path": [
+                        "<oauth.uri.pathElements; separator="\",\"">"
+                    ],
+                    "query": [
+                        {
+                            "key": "grant_type",
+                            "value": "client_credentials",
+                            "equals": true
+                        }
+                    ]
+                },
+                "description": "Use this request to obtain an access token for your <vendorName> platform project via Client Credentials Flow. As a prerequisite you must have filled out environment variables in Postman for projectKey, client_id and client_secret to use this."
+            },
+            "response": []
+        }
+    ]
+}
+>>
+
+folder(resource) ::=<<
+
+{
+    "name": "<resource.name>",
+    "description": "",
+    "items": [
+    ]
+}
+>>

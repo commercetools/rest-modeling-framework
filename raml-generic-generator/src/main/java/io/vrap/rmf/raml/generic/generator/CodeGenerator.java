@@ -3,6 +3,7 @@ package io.vrap.rmf.raml.generic.generator;
 import io.vrap.rmf.raml.generic.generator.java.JavaGenerator;
 import io.vrap.rmf.raml.generic.generator.md.MdGenerator;
 import io.vrap.rmf.raml.generic.generator.php.PhpGenerator;
+import io.vrap.rmf.raml.generic.generator.postman.PostmanGenerator;
 import io.vrap.rmf.raml.model.RamlDiagnostic;
 import io.vrap.rmf.raml.model.RamlModelBuilder;
 import io.vrap.rmf.raml.model.RamlModelResult;
@@ -48,6 +49,8 @@ public class CodeGenerator {
                 return new PhpGenerator(vendorName);
             case "md":
                 return new MdGenerator();
+            case "postman":
+                return new PostmanGenerator(vendorName);
             case "java":
                 return new JavaGenerator();
             default:
@@ -81,7 +84,7 @@ public class CodeGenerator {
             }
 
             language = cmd.getOptionValue(getLangOption().getOpt(), "php");
-            vendorName = cmd.getOptionValue(getLangOption().getOpt());
+            vendorName = cmd.getOptionValue(getVendorNameOption().getOpt());
             outputPath = Paths.get(cmd.getOptionValue(getOutputPathOption().getOpt(), "../demo/src/generated/")).toAbsolutePath();
 
             if (cmd.hasOption(getHelpOption().getOpt())) {
@@ -127,7 +130,7 @@ public class CodeGenerator {
                     .build();
         }
 
-        private Option getNamespaceOption()
+        private Option getVendorNameOption()
         {
             return Option.builder("v")
                     .longOpt("vendor")
