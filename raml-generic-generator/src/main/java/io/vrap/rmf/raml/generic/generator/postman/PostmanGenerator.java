@@ -1,6 +1,5 @@
 package io.vrap.rmf.raml.generic.generator.postman;
 
-import com.google.common.base.CaseFormat;
 import io.vrap.rmf.raml.generic.generator.Generator;
 import io.vrap.rmf.raml.generic.generator.Helper;
 import io.vrap.rmf.raml.model.modules.Api;
@@ -19,14 +18,14 @@ public class PostmanGenerator implements Generator {
     }
 
     @Override
-    public void generate(Api api, File outputPath) throws IOException {
-        String title = StringCaseFormat.UPPER_CAMEL_CASE.apply(api.getTitle());
-        String vendorName = Optional.ofNullable(this.vendorName).orElse(title);
+    public void generate(final Api api, final File outputPath) throws IOException {
+        final String title = StringCaseFormat.UPPER_CAMEL_CASE.apply(api.getTitle());
+        final String vendorName = Optional.ofNullable(this.vendorName).orElse(title);
 
         Helper.ensureDirectory(outputPath);
 
-        CollectionGenerator generator = new CollectionGenerator(vendorName);
-        List<File> f = generator.generate(outputPath, api);
+        final CollectionGenerator generator = new CollectionGenerator(vendorName);
+        final List<File> f = generator.generate(outputPath, api);
 
         Helper.deleteObsoleteFiles(outputPath, f);
     }

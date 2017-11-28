@@ -1,5 +1,6 @@
-main(vendorName, api) ::= <<
+main(vendorName, api, id) ::= <<
 {
+  "id": "<id>",
   "name": "<vendorName>.template",
   "values": [
     {

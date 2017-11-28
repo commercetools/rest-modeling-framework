@@ -6,9 +6,9 @@ import io.vrap.rmf.raml.model.util.StringCaseFormat;
 import java.util.Optional;
 
 public class ResourceGenModel {
-    private Resource resource;
+    private final Resource resource;
 
-    public ResourceGenModel(Resource resource) {
+    public ResourceGenModel(final Resource resource) {
         this.resource = resource;
     }
 

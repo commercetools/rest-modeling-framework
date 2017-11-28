@@ -6,13 +6,13 @@ import java.net.URI;
 import java.util.List;
 
 public class UriGenModel {
-    private URI uri;
+    private final URI uri;
 
-    public UriGenModel(URI uri) {
+    public UriGenModel(final URI uri) {
         this.uri = uri;
     }
 
-    public UriGenModel(String uri) {
+    public UriGenModel(final String uri) {
         this(URI.create(uri));
     }
 

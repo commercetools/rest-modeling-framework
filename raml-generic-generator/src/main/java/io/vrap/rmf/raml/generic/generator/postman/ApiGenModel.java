@@ -1,18 +1,15 @@
 package io.vrap.rmf.raml.generic.generator.postman;
 
 import io.vrap.rmf.raml.model.modules.Api;
-import io.vrap.rmf.raml.model.resources.Resource;
 import io.vrap.rmf.raml.model.security.OAuth20Settings;
-import io.vrap.rmf.raml.model.security.SecurityScheme;
 
-import java.net.URI;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class ApiGenModel {
-    private Api api;
+    private final Api api;
 
-    public ApiGenModel(Api api) {
+    public ApiGenModel(final Api api) {
         this.api = api;
     }
 

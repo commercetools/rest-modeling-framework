@@ -1,6 +1,7 @@
-main(vendorName, api) ::= <<
+main(vendorName, api, id) ::= <<
 {
     "info": {
+        "_postman_id": "<id>",
         "name": "<vendorName> API",
         "description": "",
         "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"

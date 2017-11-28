@@ -36,6 +36,7 @@ dependencies {
     compile 'com.google.guava:guava:22.0'
     compile 'org.apache.commons:commons-lang3:3.4'
     compile 'com.fasterxml.jackson.core:jackson-annotations:2.8.9'
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.0'
 }
 
 task downloadCtpApiZipFile(type: Download) {
