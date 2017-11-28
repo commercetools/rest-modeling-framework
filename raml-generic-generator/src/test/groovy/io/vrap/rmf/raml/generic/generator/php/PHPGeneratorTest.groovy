@@ -3,6 +3,7 @@ package io.vrap.rmf.raml.generic.generator.php
 import com.google.common.io.Resources
 import io.vrap.raml.generic.generator.ResourceFixtures
 import io.vrap.rmf.raml.model.modules.Api
+import io.vrap.rmf.raml.model.types.AnyAnnotationType
 import io.vrap.rmf.raml.model.types.AnyType
 import io.vrap.rmf.raml.persistence.RamlResourceSet
 import io.vrap.rmf.raml.persistence.antlr.RAMLCustomLexer
@@ -260,6 +261,27 @@ class PHPGeneratorTest extends Specification implements ResourceFixtures {
 
         String attributeClass = generate(TypesGenerator.TYPE_MODEL, api.types.get(0));
         attributeClass == fileContent("ContainerModel.php")
+    }
+
+    def "generate request object"() {
+        when:
+        Api api = constructApi(
+                '''\
+        /{project}:
+            /categories:
+                /{id}:
+                    get:
+            get:
+        ''')
+        then:
+        AnyAnnotationType placeholderParamAnnotation = api.getAnnotationType("placeholderParam");
+        RequestGenerator generator = new RequestGenerator("Test", placeholderParamAnnotation)
+
+        String requestClass = generator.generateRequest(new RequestGenModel(api.resources.get(0).methods.get(0)))
+        requestClass == fileContent("ByProjectGet.php")
+
+        String request2Class = generator.generateRequest(new RequestGenModel(api.resources.get(0).resources.get(0).resources.get(0).methods.get(0)))
+        request2Class == fileContent("ByProjectCategoriesByIdGet.php")
     }
 
     @Unroll
