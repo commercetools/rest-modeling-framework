@@ -194,7 +194,7 @@ public class RequestGenerator extends AbstractTemplateGenerator {
                                 return CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, GeneratorHelper.toParamName((UriTemplate)arg, "With", "Value"));
                             }
 
-                            final String uri = arg.toString();
+                            final String uri = ((UriTemplate) arg).getTemplate();
                             return CaseFormat.LOWER_HYPHEN.to(CaseFormat.LOWER_CAMEL, uri.replaceFirst("/", ""));
                         case "params":
                             if (parts.size() > 0) {
@@ -214,7 +214,7 @@ public class RequestGenerator extends AbstractTemplateGenerator {
                             final Map<String, Object> params = parts.stream()
                                     .flatMap(uriTemplatePart -> uriTemplatePart.getVarSpecs().stream().map(VarSpec::getVariableName))
                                     .collect(Collectors.toMap(o -> o, o -> "%s"));
-                            return ((UriTemplate)arg).expand(params);
+                            return ((UriTemplate)arg).expand(params).replace("%25s", "%s");
                         case "uri":
                             if (parts.size() > 0) {
                                 return ((UriTemplate)arg).getComponents().stream().map(uriTemplatePart -> {

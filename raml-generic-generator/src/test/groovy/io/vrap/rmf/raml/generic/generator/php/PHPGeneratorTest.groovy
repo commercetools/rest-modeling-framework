@@ -1,8 +1,10 @@
 package io.vrap.rmf.raml.generic.generator.php
 
+import com.google.common.collect.Lists
 import com.google.common.io.Resources
 import io.vrap.raml.generic.generator.ResourceFixtures
 import io.vrap.rmf.raml.model.modules.Api
+import io.vrap.rmf.raml.model.resources.Resource
 import io.vrap.rmf.raml.model.types.AnyAnnotationType
 import io.vrap.rmf.raml.model.types.AnyType
 import io.vrap.rmf.raml.persistence.RamlResourceSet
@@ -24,6 +26,8 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 import java.nio.charset.StandardCharsets
+import java.util.stream.Collectors
+
 import static org.apache.commons.lang3.StringUtils.capitalize;
 
 //@Ignore
@@ -282,6 +286,30 @@ class PHPGeneratorTest extends Specification implements ResourceFixtures {
 
         String request2Class = generator.generateRequest(new RequestGenModel(api.resources.get(0).resources.get(0).resources.get(0).methods.get(0)))
         request2Class == fileContent("ByProjectCategoriesByIdGet.php")
+    }
+
+    def "generate request builder"() {
+        when:
+        Api api = constructApi(
+                '''\
+        /{project}:
+            /categories:
+                /{id}:
+                    get:
+            get:
+        ''')
+        then:
+        List<Resource> resources = api.resources
+        List<ResourceGenModel> flatResources = GeneratorHelper.flattenResources(resources);
+        RootResourceGenModel root = new RootResourceGenModel(flatResources.findAll {resources.contains(it.resource)});
+        AnyAnnotationType placeholderParamAnnotation = api.getAnnotationType("placeholderParam");
+        RequestGenerator generator = new RequestGenerator("Test", placeholderParamAnnotation)
+
+        String requestBuilderClass = generator.generateBuilder(root)
+        requestBuilderClass == fileContent("RequestBuilder.php")
+
+        String resourceClass = generator.generateResource(flatResources.get(0))
+        resourceClass == fileContent("Resource0.php")
     }
 
     @Unroll

@@ -23,7 +23,7 @@ class ByProjectGet extends ApiRequest
      */
     public function __construct($project, $body = null, array $headers = [])
     {
-        $uri = sprintf('/%25s', $project);
+        $uri = sprintf('/%s', $project);
         parent::__construct('get', $uri, $headers, !is_null($body) ? json_encode($body) : null);
     }
 

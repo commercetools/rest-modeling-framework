@@ -24,7 +24,7 @@ class ByProjectCategoriesByIdGet extends ApiRequest
      */
     public function __construct($project, $id, $body = null, array $headers = [])
     {
-        $uri = sprintf('/%25s/categories/%25s', $project, $id);
+        $uri = sprintf('/%s/categories/%s', $project, $id);
         parent::__construct('get', $uri, $headers, !is_null($body) ? json_encode($body) : null);
     }
 
