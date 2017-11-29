@@ -2,7 +2,6 @@ package io.vrap.rmf.raml.generic.generator.postman;
 
 import com.google.common.collect.Lists;
 import io.vrap.rmf.raml.model.resources.HttpMethod;
-import io.vrap.rmf.raml.model.resources.Method;
 import io.vrap.rmf.raml.model.resources.Resource;
 import io.vrap.rmf.raml.model.util.StringCaseFormat;
 
@@ -33,6 +32,14 @@ public class ResourceGenModel {
         }
         if (resource.getMethod(HttpMethod.POST) != null) {
             items.add(new ItemGenModel(resource, "create", resource.getMethod(HttpMethod.POST)));
+        }
+        Resource byId = resource.getResources().stream().filter(resource1 -> resource1.getUriParameter("ID") != null).findFirst().orElse(null);
+        if (byId != null && byId.getMethod(HttpMethod.GET) != null) {
+            items.add(new ItemGenModel(resource, "getById", byId.getMethod(HttpMethod.GET)));
+        }
+        Resource byKey = resource.getResources().stream().filter(resource1 -> resource1.getUriParameter("key") != null).findFirst().orElse(null);
+        if (byKey != null && byKey.getMethod(HttpMethod.GET) != null) {
+            items.add(new ItemGenModel(resource, "getByKey", byKey.getMethod(HttpMethod.GET)));
         }
 
         return items;

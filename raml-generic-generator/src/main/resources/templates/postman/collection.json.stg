@@ -13,6 +13,213 @@ main(api, id) ::= <<
 }
 >>
 
+folder(resource) ::=<<
+
+{
+    "name": "<resource.name>",
+    "description": "",
+    "items": [
+        <resource.items: {item |<(item.template)(item)>}; separator=",">
+    ]
+}
+>>
+
+query(item) ::=<<
+
+{
+    "name": "Query <item.name>",
+    "event": [
+        {
+            "listen": "test",
+            "script": {
+                "type": "text/javascript",
+                "exec": [
+                    "tests[\"Status code is 200\"] = responseCode.code === 200;"
+                ]
+            }
+        }
+    ],
+    "request": {
+        "method": "<item.method.method>",
+        "header": [
+            {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+            }
+        ],
+        "body": {
+            "mode": "raw",
+            "raw": ""
+        },
+        "url": {
+            "raw": "{{host}}/{{projectKey}}<item.resource.relativeUri.template>",
+            "host": [
+                "{{host}}"
+            ],
+            "path": [
+                "{{projectKey}}",
+                "<item.resource.resourcePathName>"
+            ]
+        },
+        "description": ""
+    },
+    "response": []
+}
+>>
+
+create(item) ::=<<
+
+{
+    "name": "Create <item.name; format="singularize">",
+    "event": [
+        {
+            "listen": "test",
+            "script": {
+                "type": "text/javascript",
+                "exec": [
+                    "tests[\"Status code \" + responseCode.code] = responseCode.code === 200 || responseCode.code === 201;",
+                    "var data = JSON.parse(responseBody);",
+                    "if(data.id && data.version){",
+                    "    postman.setEnvironmentVariable(\"<item.resource.resourcePathName; format="singularize">-id\", data.id); ",
+                    "    postman.setEnvironmentVariable(\"<item.resource.resourcePathName; format="singularize">-version\", data.version);",
+                    "}"
+                ]
+            }
+        }
+    ],
+    "request": {
+        "method": "<item.method.method>",
+        "header": [
+            {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+            },
+            {
+                "key": "Content-Type",
+                "value": "application/json"
+            }
+        ],
+        "body": {
+            "mode": "raw",
+            "raw": ""
+        },
+        "url": {
+            "raw": "{{host}}/{{projectKey}}<item.resource.relativeUri.template>",
+            "host": [
+                "{{host}}"
+            ],
+            "path": [
+                "{{projectKey}}",
+                "<item.resource.resourcePathName>"
+            ]
+        },
+        "description": ""
+    },
+    "response": []
+}
+>>
+
+getById(item) ::=<<
+{
+    "name": "Get <item.name; format="singularize"> by ID",
+    "event": [
+        {
+            "listen": "test",
+            "script": {
+                "type": "text/javascript",
+                "exec": [
+                    "tests[\"Status code \" + responseCode.code] = responseCode.code === 200 || responseCode.code === 201;",
+                    "var data = JSON.parse(responseBody);",
+                    "if(data.id && data.version){",
+                    "    postman.setEnvironmentVariable(\"<item.resource.resourcePathName; format="singularize">-id\", data.id); ",
+                    "    postman.setEnvironmentVariable(\"<item.resource.resourcePathName; format="singularize">-version\", data.version);",
+                    "}"
+                ]
+            }
+        }
+    ],
+    "request": {
+        "method": "<item.method.method>",
+        "header": [
+            {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+            }
+        ],
+        "body": {
+            "mode": "raw",
+            "raw": ""
+        },
+        "url": {
+            "raw": "{{host}}/{{projectKey}}<item.resource.relativeUri.template>/{{<item.resource.resourcePathName; format="singularize">-id}}",
+            "host": [
+                "{{host}}"
+            ],
+            "path": [
+                "{{projectKey}}",
+                "<item.resource.resourcePathName>",
+                "{{<item.resource.resourcePathName; format="singularize">-id}}"
+            ]
+        },
+        "description": ""
+    },
+    "response": []
+}
+>>
+
+getByKey(item) ::=<<
+<getByParam(item, "key")>
+>>
+
+getByParam(item, param) ::=<<
+{
+    "name": "Get <item.name; format="singularize"> by <param>",
+    "event": [
+        {
+            "listen": "test",
+            "script": {
+                "type": "text/javascript",
+                "exec": [
+                    "tests[\"Status code \" + responseCode.code] = responseCode.code === 200 || responseCode.code === 201;",
+                    "var data = JSON.parse(responseBody);",
+                    "if(data.id && data.version){",
+                    "    postman.setEnvironmentVariable(\"<item.resource.resourcePathName; format="singularize">-id\", data.id); ",
+                    "    postman.setEnvironmentVariable(\"<item.resource.resourcePathName; format="singularize">-<param>\", data.<param>); ",
+                    "    postman.setEnvironmentVariable(\"<item.resource.resourcePathName; format="singularize">-version\", data.version);",
+                    "}"
+                ]
+            }
+        }
+    ],
+    "request": {
+        "method": "<item.method.method>",
+        "header": [
+            {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+            }
+        ],
+        "body": {
+            "mode": "raw",
+            "raw": ""
+        },
+        "url": {
+            "raw": "{{host}}/{{projectKey}}<item.resource.relativeUri.template>/<param>={{<item.resource.resourcePathName; format="singularize">-<param>}}",
+            "host": [
+                "{{host}}"
+            ],
+            "path": [
+                "{{projectKey}}",
+                "<item.resource.resourcePathName>",
+                "<param>={{<item.resource.resourcePathName; format="singularize">-<param>}}"
+            ]
+        },
+        "description": ""
+    },
+    "response": []
+}
+>>
+
 authorization(oauth) ::=<<
 {
     "name": "Authorization",
@@ -598,111 +805,5 @@ authorization(oauth) ::=<<
             ]
         }
     ]
-}
->>
-
-folder(resource) ::=<<
-
-{
-    "name": "<resource.name>",
-    "description": "",
-    "items": [
-        <resource.items: {item |<(item.template)(item)>}; separator=",">
-    ]
-}
->>
-
-query(item) ::=<<
-
-{
-    "name": "Query <item.name>",
-    "event": [
-        {
-            "listen": "test",
-            "script": {
-                "type": "text/javascript",
-                "exec": [
-                    "tests[\"Status code is 200\"] = responseCode.code === 200;"
-                ]
-            }
-        }
-    ],
-    "request": {
-        "method": "<item.method.method>",
-        "header": [
-            {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-            }
-        ],
-        "body": {
-            "mode": "raw",
-            "raw": ""
-        },
-        "url": {
-            "raw": "{{host}}/{{projectKey}}<item.resource.relativeUri.template>",
-            "host": [
-                "{{host}}"
-            ],
-            "path": [
-                "{{projectKey}}",
-                "<item.resource.resourcePathName>"
-            ]
-        },
-        "description": ""
-    },
-    "response": []
-}
->>
-
-create(item) ::=<<
-
-{
-    "name": "Create <item.name>",
-    "event": [
-        {
-            "listen": "test",
-            "script": {
-                "type": "text/javascript",
-                "exec": [
-                    "tests[\"Status code \" + responseCode.code] = responseCode.code === 200 || responseCode.code === 201;",
-                    "var data = JSON.parse(responseBody);",
-                    "if(data.id && data.version){",
-                    "    postman.setEnvironmentVariable(\"id\", data.id); ",
-                    "    postman.setEnvironmentVariable(\"version\", data.version);",
-                    "}"
-                ]
-            }
-        }
-    ],
-    "request": {
-        "method": "<item.method.method>",
-        "header": [
-            {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-            },
-            {
-                "key": "Content-Type",
-                "value": "application/json"
-            }
-        ],
-        "body": {
-            "mode": "raw",
-            "raw": ""
-        },
-        "url": {
-            "raw": "{{host}}/{{projectKey}}<item.resource.relativeUri.template>",
-            "host": [
-                "{{host}}"
-            ],
-            "path": [
-                "{{projectKey}}",
-                "<item.resource.resourcePathName>"
-            ]
-        },
-        "description": ""
-    },
-    "response": []
 }
 >>

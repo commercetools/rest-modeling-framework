@@ -1,6 +1,5 @@
 package io.vrap.rmf.raml.generic.generator.postman;
 
-import io.vrap.rmf.raml.model.resources.HttpMethod;
 import io.vrap.rmf.raml.model.resources.Method;
 import io.vrap.rmf.raml.model.resources.Resource;
 import io.vrap.rmf.raml.model.util.StringCaseFormat;

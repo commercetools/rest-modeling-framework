@@ -2,11 +2,7 @@ package io.vrap.rmf.raml.generic.generator;
 
 import com.google.common.base.CaseFormat;
 import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
-import io.vrap.rmf.raml.model.types.AnyType;
-import io.vrap.rmf.raml.model.types.BuiltinType;
-import io.vrap.rmf.raml.model.types.ObjectType;
-import io.vrap.rmf.raml.model.types.Property;
+import com.hypertino.inflector.English;
 import org.apache.commons.lang3.StringUtils;
 import org.stringtemplate.v4.STGroupFile;
 
@@ -15,8 +11,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.List;
-import java.util.stream.Collectors;
 
 public abstract class AbstractTemplateGenerator {
     protected File generateFile(final String content, final File outputFile) throws IOException {
@@ -38,6 +32,10 @@ public abstract class AbstractTemplateGenerator {
                     switch (Strings.nullToEmpty(formatString)) {
                         case "capitalize":
                             return StringUtils.capitalize(arg.toString());
+                        case "singularize":
+                            return English.singular(arg.toString());
+                        case "pluralize":
+                            return English.plural(arg.toString());
                         case "upperUnderscore":
                             return CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, arg.toString());
                         case "lowerHyphen":
