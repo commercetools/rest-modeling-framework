@@ -63,8 +63,12 @@ public class ResourceGenModel {
                 Property actions = ((ObjectType)body.getType()).getProperty("actions");
                 if (actions != null) {
                     ArrayType actionsType = (ArrayType)actions.getType();
-                    ObjectType actionParentType = (ObjectType)((UnionType)actionsType.getItems()).getOneOf().get(0);
-                    List<AnyType> updateActions = actionParentType.subTypes();
+                    List<AnyType> updateActions;
+                    if (actionsType.getItems() instanceof UnionType) {
+                        updateActions = ((UnionType)actionsType.getItems()).getOneOf().get(0).subTypes();
+                    } else {
+                        updateActions = actionsType.getItems().subTypes();
+                    }
                     for (AnyType action: updateActions) {
                         items.add(new ActionGenModel((ObjectType)action, resource, "action", method));
                     }
