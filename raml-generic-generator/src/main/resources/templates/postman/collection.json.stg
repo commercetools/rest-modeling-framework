@@ -34,7 +34,15 @@ query(item) ::=<<
             "script": {
                 "type": "text/javascript",
                 "exec": [
-                    "tests[\"Status code is 200\"] = responseCode.code === 200;"
+                    "tests[\"Status code is 200\"] = responseCode.code === 200;",
+                    "var data = JSON.parse(responseBody);",
+                    "if(data.results && data.results[0] && data.results[0].id && data.results[0].version){",
+                    "    postman.setEnvironmentVariable(\"<item.resource.resourcePathName; format="singularize">-id\", data.results[0].id); ",
+                    "    postman.setEnvironmentVariable(\"<item.resource.resourcePathName; format="singularize">-version\", data.results[0].version);",
+                    "}",
+                    "if(data.results && data.results[0] && data.results[0].key){",
+                    "    postman.setEnvironmentVariable(\"<item.resource.resourcePathName; format="singularize">-key\", data.results[0].key); ",
+                    "}"
                 ]
             }
         }
@@ -59,11 +67,26 @@ query(item) ::=<<
             "path": [
                 "{{projectKey}}",
                 "<item.resource.resourcePathName>"
+            <if (item.method.queryParameters)>
+            ],
+            "query": [
+                <item.method.queryParameters: {param |<queryParam(param)>}; separator=",">
+            <endif>
             ]
         },
         "description": ""
     },
     "response": []
+}
+>>
+
+queryParam(param) ::=<<
+
+{
+    "key": "<param.name>",
+    "value": "",
+    "equals": true,
+    "disabled": true
 }
 >>
 
@@ -77,12 +100,7 @@ create(item) ::=<<
             "script": {
                 "type": "text/javascript",
                 "exec": [
-                    "tests[\"Status code \" + responseCode.code] = responseCode.code === 200 || responseCode.code === 201;",
-                    "var data = JSON.parse(responseBody);",
-                    "if(data.id && data.version){",
-                    "    postman.setEnvironmentVariable(\"<item.resource.resourcePathName; format="singularize">-id\", data.id); ",
-                    "    postman.setEnvironmentVariable(\"<item.resource.resourcePathName; format="singularize">-version\", data.version);",
-                    "}"
+                    <test(item, false)>
                 ]
             }
         }
@@ -111,6 +129,11 @@ create(item) ::=<<
             "path": [
                 "{{projectKey}}",
                 "<item.resource.resourcePathName>"
+            <if (item.method.queryParameters)>
+            ],
+            "query": [
+                <item.method.queryParameters: {param |<queryParam(param)>}; separator=",">
+            <endif>
             ]
         },
         "description": ""
@@ -119,52 +142,8 @@ create(item) ::=<<
 }
 >>
 
-getById(item) ::=<<
-{
-    "name": "Get <item.name; format="singularize"> by ID",
-    "event": [
-        {
-            "listen": "test",
-            "script": {
-                "type": "text/javascript",
-                "exec": [
-                    "tests[\"Status code \" + responseCode.code] = responseCode.code === 200 || responseCode.code === 201;",
-                    "var data = JSON.parse(responseBody);",
-                    "if(data.id && data.version){",
-                    "    postman.setEnvironmentVariable(\"<item.resource.resourcePathName; format="singularize">-id\", data.id); ",
-                    "    postman.setEnvironmentVariable(\"<item.resource.resourcePathName; format="singularize">-version\", data.version);",
-                    "}"
-                ]
-            }
-        }
-    ],
-    "request": {
-        "method": "<item.method.method>",
-        "header": [
-            {
-                "key": "Authorization",
-                "value": "Bearer {{access_token}}"
-            }
-        ],
-        "body": {
-            "mode": "raw",
-            "raw": ""
-        },
-        "url": {
-            "raw": "{{host}}/{{projectKey}}<item.resource.relativeUri.template>/{{<item.resource.resourcePathName; format="singularize">-id}}",
-            "host": [
-                "{{host}}"
-            ],
-            "path": [
-                "{{projectKey}}",
-                "<item.resource.resourcePathName>",
-                "{{<item.resource.resourcePathName; format="singularize">-id}}"
-            ]
-        },
-        "description": ""
-    },
-    "response": []
-}
+getByID(item) ::=<<
+<getByParam(item, false)>
 >>
 
 getByKey(item) ::=<<
@@ -173,20 +152,14 @@ getByKey(item) ::=<<
 
 getByParam(item, param) ::=<<
 {
-    "name": "Get <item.name; format="singularize"> by <param>",
+    "name": "Get <item.name; format="singularize"> by <if(param)><param><else>ID<endif>",
     "event": [
         {
             "listen": "test",
             "script": {
                 "type": "text/javascript",
                 "exec": [
-                    "tests[\"Status code \" + responseCode.code] = responseCode.code === 200 || responseCode.code === 201;",
-                    "var data = JSON.parse(responseBody);",
-                    "if(data.id && data.version){",
-                    "    postman.setEnvironmentVariable(\"<item.resource.resourcePathName; format="singularize">-id\", data.id); ",
-                    "    postman.setEnvironmentVariable(\"<item.resource.resourcePathName; format="singularize">-<param>\", data.<param>); ",
-                    "    postman.setEnvironmentVariable(\"<item.resource.resourcePathName; format="singularize">-version\", data.version);",
-                    "}"
+                    <test(item, param)>
                 ]
             }
         }
@@ -204,20 +177,226 @@ getByParam(item, param) ::=<<
             "raw": ""
         },
         "url": {
+            <if (param)>
             "raw": "{{host}}/{{projectKey}}<item.resource.relativeUri.template>/<param>={{<item.resource.resourcePathName; format="singularize">-<param>}}",
+            <else>
+            "raw": "{{host}}/{{projectKey}}<item.resource.relativeUri.template>/{{<item.resource.resourcePathName; format="singularize">-id}}",
+            <endif>
             "host": [
                 "{{host}}"
             ],
             "path": [
                 "{{projectKey}}",
                 "<item.resource.resourcePathName>",
+                <if (param)>
                 "<param>={{<item.resource.resourcePathName; format="singularize">-<param>}}"
+                <else>
+                "{{<item.resource.resourcePathName; format="singularize">-id}}"
+                <endif>
+            <if (item.method.queryParameters)>
+            ],
+            "query": [
+                <item.method.queryParameters: {param |<queryParam(param)>}; separator=",">
+            <endif>
             ]
         },
         "description": ""
     },
     "response": []
 }
+>>
+
+updateByID(item) ::=<<
+<updateByParam(item, false)>
+>>
+
+updateByKey(item) ::=<<
+<updateByParam(item, "key")>
+>>
+
+updateByParam(item, param) ::=<<
+{
+    "name": "Update <item.name; format="singularize"> by <if(param)><param><else>ID<endif>",
+    "event": [
+        {
+            "listen": "test",
+            "script": {
+                "type": "text/javascript",
+                "exec": [
+                    <test(item, param)>
+                ]
+            }
+        }
+    ],
+    "request": {
+        "method": "<item.method.method>",
+        "header": [
+            {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+            }
+        ],
+        "body": {
+            "mode": "raw",
+            "raw": ""
+        },
+        "url": {
+            <if (param)>
+            "raw": "{{host}}/{{projectKey}}<item.resource.relativeUri.template>/<param>={{<item.resource.resourcePathName; format="singularize">-<param>}}",
+            <else>
+            "raw": "{{host}}/{{projectKey}}<item.resource.relativeUri.template>/{{<item.resource.resourcePathName; format="singularize">-id}}",
+            <endif>
+            "host": [
+                "{{host}}"
+            ],
+            "path": [
+                "{{projectKey}}",
+                "<item.resource.resourcePathName>",
+                <if (param)>
+                "<param>={{<item.resource.resourcePathName; format="singularize">-<param>}}"
+                <else>
+                "{{<item.resource.resourcePathName; format="singularize">-id}}"
+                <endif>
+            <if (item.method.queryParameters)>
+            ],
+            "query": [
+                <item.method.queryParameters: {param |<queryParam(param)>}; separator=",">
+            <endif>
+            ]
+        },
+        "description": ""
+    },
+    "response": []
+}
+>>
+
+deleteByID(item) ::=<<
+<deleteByParam(item, false)>
+>>
+
+deleteByKey(item) ::=<<
+<deleteByParam(item, "key")>
+>>
+
+deleteByParam(item, param) ::=<<
+{
+    "name": "Delete <item.name; format="singularize"> by <if(param)><param><else>ID<endif>",
+    "event": [
+        {
+            "listen": "test",
+            "script": {
+                "type": "text/javascript",
+                "exec": [
+                    <test(item, param)>
+                ]
+            }
+        }
+    ],
+    "request": {
+        "method": "<item.method.method>",
+        "header": [
+            {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+            }
+        ],
+        "body": {
+            "mode": "raw",
+            "raw": ""
+        },
+        "url": {
+            <if (param)>
+            "raw": "{{host}}/{{projectKey}}<item.resource.relativeUri.template>/<param>={{<item.resource.resourcePathName; format="singularize">-<param>}}",
+            <else>
+            "raw": "{{host}}/{{projectKey}}<item.resource.relativeUri.template>/{{<item.resource.resourcePathName; format="singularize">-id}}",
+            <endif>
+            "host": [
+                "{{host}}"
+            ],
+            "path": [
+                "{{projectKey}}",
+                "<item.resource.resourcePathName>",
+                <if (param)>
+                "<param>={{<item.resource.resourcePathName; format="singularize">-<param>}}"
+                <else>
+                "{{<item.resource.resourcePathName; format="singularize">-id}}"
+                <endif>
+            <if (item.method.queryParameters)>
+            ],
+            "query": [
+                <item.method.queryParameters: {param |<queryParam(param)>}; separator=",">
+            <endif>
+            ]
+        },
+        "description": ""
+    },
+    "response": []
+}
+>>
+
+action(action, param) ::=<<
+{
+    "name": "<action.name>",
+    "event": [
+        {
+            "listen": "test",
+            "script": {
+                "type": "text/javascript",
+                "exec": [
+                    <test(item, param)>
+                ]
+            }
+        }
+    ],
+    "request": {
+        "method": "POST",
+        "header": [
+            {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+            },
+            {
+                "key": "Content-Type",
+                "value": "application/json"
+            }
+        ],
+        "body": {
+            "mode": "raw",
+            "raw": ""
+        },
+        "url": {
+            "raw": "{{host}}/{{projectKey}}/carts/{{id}}",
+            "host": [
+                "{{host}}"
+            ],
+            "path": [
+                "{{projectKey}}",
+                "carts",
+                "{{id}}"
+            ]
+        },
+        "description": "http://dev.commercetools.com/http-api-projects-carts.html#add-lineitem"
+    },
+    "response": []
+},
+>>
+
+test(item, param) ::=<<
+"tests[\"Status code \" + responseCode.code] = responseCode.code === 200 || responseCode.code === 201;",
+"var data = JSON.parse(responseBody);",
+"if(data.id && data.version){",
+"    postman.setEnvironmentVariable(\"<item.resource.resourcePathName; format="singularize">-id\", data.id); ",
+"    postman.setEnvironmentVariable(\"<item.resource.resourcePathName; format="singularize">-version\", data.version);",
+"}",
+"if(data.key){",
+"    postman.setEnvironmentVariable(\"<item.resource.resourcePathName; format="singularize">-key\", data.key); ",
+<if (param)>
+"}",
+"if(data.<param>){",
+"    postman.setEnvironmentVariable(\"<item.resource.resourcePathName; format="singularize">-<param>\", data.<param>); ",
+<endif>
+"}"
+
 >>
 
 authorization(oauth) ::=<<

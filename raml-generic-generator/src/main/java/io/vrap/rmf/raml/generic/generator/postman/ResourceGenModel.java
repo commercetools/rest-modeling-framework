@@ -34,12 +34,24 @@ public class ResourceGenModel {
             items.add(new ItemGenModel(resource, "create", resource.getMethod(HttpMethod.POST)));
         }
         Resource byId = resource.getResources().stream().filter(resource1 -> resource1.getUriParameter("ID") != null).findFirst().orElse(null);
-        if (byId != null && byId.getMethod(HttpMethod.GET) != null) {
-            items.add(new ItemGenModel(resource, "getById", byId.getMethod(HttpMethod.GET)));
-        }
         Resource byKey = resource.getResources().stream().filter(resource1 -> resource1.getUriParameter("key") != null).findFirst().orElse(null);
+        if (byId != null && byId.getMethod(HttpMethod.GET) != null) {
+            items.add(new ItemGenModel(resource, "getByID", byId.getMethod(HttpMethod.GET)));
+        }
         if (byKey != null && byKey.getMethod(HttpMethod.GET) != null) {
             items.add(new ItemGenModel(resource, "getByKey", byKey.getMethod(HttpMethod.GET)));
+        }
+        if (byId != null && byId.getMethod(HttpMethod.POST) != null) {
+            items.add(new ItemGenModel(resource, "updateByID", byId.getMethod(HttpMethod.POST)));
+        }
+        if (byKey != null && byKey.getMethod(HttpMethod.POST) != null) {
+            items.add(new ItemGenModel(resource, "updateByKey", byKey.getMethod(HttpMethod.POST)));
+        }
+        if (byId != null && byId.getMethod(HttpMethod.DELETE) != null) {
+            items.add(new ItemGenModel(resource, "deleteByID", byId.getMethod(HttpMethod.DELETE)));
+        }
+        if (byKey != null && byKey.getMethod(HttpMethod.DELETE) != null) {
+            items.add(new ItemGenModel(resource, "deleteByKey", byKey.getMethod(HttpMethod.DELETE)));
         }
 
         return items;
