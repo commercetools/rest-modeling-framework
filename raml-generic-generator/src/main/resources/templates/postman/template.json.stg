@@ -1,7 +1,7 @@
-main(vendorName, api, id) ::= <<
+main(api, id) ::= <<
 {
   "id": "<id>",
-  "name": "<vendorName>.template",
+  "name": "Commercetools.template",
   "values": [
     {
       "enabled": true,
