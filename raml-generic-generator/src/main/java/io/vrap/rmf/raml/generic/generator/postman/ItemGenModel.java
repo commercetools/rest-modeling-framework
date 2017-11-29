@@ -1,19 +1,21 @@
 package io.vrap.rmf.raml.generic.generator.postman;
 
-import com.google.common.collect.Lists;
 import io.vrap.rmf.raml.model.resources.HttpMethod;
 import io.vrap.rmf.raml.model.resources.Method;
 import io.vrap.rmf.raml.model.resources.Resource;
 import io.vrap.rmf.raml.model.util.StringCaseFormat;
 
-import java.util.List;
 import java.util.Optional;
 
-public class ResourceGenModel {
+public class ItemGenModel {
     private final Resource resource;
+    private final String template;
+    private final Method method;
 
-    public ResourceGenModel(final Resource resource) {
+    public ItemGenModel(final Resource resource, final String template, final Method method) {
         this.resource = resource;
+        this.template = template;
+        this.method = method;
     }
 
     public String getName()
@@ -25,16 +27,12 @@ public class ResourceGenModel {
         return resource;
     }
 
-    public List<ItemGenModel> getItems() {
-        List<ItemGenModel> items = Lists.newArrayList();
+    public Method getMethod() {
+        return method;
+    }
 
-        if (resource.getMethod(HttpMethod.GET) != null) {
-            items.add(new ItemGenModel(resource, "query", resource.getMethod(HttpMethod.GET)));
-        }
-        if (resource.getMethod(HttpMethod.POST) != null) {
-            items.add(new ItemGenModel(resource, "create", resource.getMethod(HttpMethod.POST)));
-        }
-
-        return items;
+    public String getTemplate()
+    {
+        return template;
     }
 }

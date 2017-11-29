@@ -8,8 +8,7 @@ main(vendorName, api, id) ::= <<
     },
     "item": [
         <authorization(api.oAuth)>,
-        <trunc(api.resources): {r |<folder(r)>,}>
-        <folder(last(api.resources))>
+        <api.resources: {r|<folder(r)>}; separator=",">
     ]
 }
 >>
@@ -98,6 +97,102 @@ folder(resource) ::=<<
     "name": "<resource.name>",
     "description": "",
     "items": [
+        <resource.items: {item |<(item.template)(item)>}; separator=",">
     ]
+}
+>>
+
+query(item) ::=<<
+
+{
+    "name": "Query <item.name>",
+    "event": [
+        {
+            "listen": "test",
+            "script": {
+                "type": "text/javascript",
+                "exec": [
+                    "tests[\"Status code is 200\"] = responseCode.code === 200;"
+                ]
+            }
+        }
+    ],
+    "request": {
+        "method": "<item.method.method>",
+        "header": [
+            {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+            }
+        ],
+        "body": {
+            "mode": "raw",
+            "raw": ""
+        },
+        "url": {
+            "raw": "{{host}}/{{projectKey}}<item.resource.relativeUri.template>",
+            "host": [
+                "{{host}}"
+            ],
+            "path": [
+                "{{projectKey}}",
+                "<item.resource.resourcePathName>"
+            ]
+        },
+        "description": ""
+    },
+    "response": []
+}
+>>
+
+create(item) ::=<<
+
+{
+    "name": "Create <item.name>",
+    "event": [
+        {
+            "listen": "test",
+            "script": {
+                "type": "text/javascript",
+                "exec": [
+                    "tests[\"Status code \" + responseCode.code] = responseCode.code === 200 || responseCode.code === 201;",
+                    "var data = JSON.parse(responseBody);",
+                    "if(data.id && data.version){",
+                    "    postman.setEnvironmentVariable(\"id\", data.id); ",
+                    "    postman.setEnvironmentVariable(\"version\", data.version);",
+                    "}"
+                ]
+            }
+        }
+    ],
+    "request": {
+        "method": "<item.method.method>",
+        "header": [
+            {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+            },
+            {
+                "key": "Content-Type",
+                "value": "application/json"
+            }
+        ],
+        "body": {
+            "mode": "raw",
+            "raw": ""
+        },
+        "url": {
+            "raw": "{{host}}/{{projectKey}}<item.resource.relativeUri.template>",
+            "host": [
+                "{{host}}"
+            ],
+            "path": [
+                "{{projectKey}}",
+                "<item.resource.resourcePathName>"
+            ]
+        },
+        "description": ""
+    },
+    "response": []
 }
 >>
