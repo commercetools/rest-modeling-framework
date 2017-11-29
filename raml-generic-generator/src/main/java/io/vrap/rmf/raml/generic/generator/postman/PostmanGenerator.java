@@ -11,20 +11,14 @@ import java.util.List;
 import java.util.Optional;
 
 public class PostmanGenerator implements Generator {
-    private final String vendorName;
-
-    public PostmanGenerator(final String vendorName) {
-        this.vendorName = vendorName;
-    }
 
     @Override
     public void generate(final Api api, final File outputPath) throws IOException {
         final String title = StringCaseFormat.UPPER_CAMEL_CASE.apply(api.getTitle());
-        final String vendorName = Optional.ofNullable(this.vendorName).orElse(title);
 
         Helper.ensureDirectory(outputPath);
 
-        final CollectionGenerator generator = new CollectionGenerator(vendorName);
+        final CollectionGenerator generator = new CollectionGenerator();
         final List<File> f = generator.generate(outputPath, api);
 
         Helper.deleteObsoleteFiles(outputPath, f);

@@ -50,7 +50,7 @@ public class CodeGenerator {
             case "md":
                 return new MdGenerator();
             case "postman":
-                return new PostmanGenerator(vendorName);
+                return new PostmanGenerator();
             case "java":
                 return new JavaGenerator();
             default:

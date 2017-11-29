@@ -18,11 +18,6 @@ import java.util.Collection;
 import java.util.List;
 
 public class CollectionGenerator extends AbstractTemplateGenerator {
-    private final String vendorName;
-
-    public CollectionGenerator(final String vendorName) {
-        this.vendorName = vendorName;
-    }
 
     public List<File> generate(final File outputPath, Api api) throws IOException {
         final File resourcePath = new File(Resources.getResource("templates/postman/").getFile());
@@ -57,7 +52,6 @@ public class CollectionGenerator extends AbstractTemplateGenerator {
         final STGroupFile stGroup = createSTGroup(staticFile.toURI().toURL());
 
         final ST st = stGroup.getInstanceOf("main");
-        st.add("vendorName", vendorName);
         st.add("api", new ApiGenModel(api));
         if (staticFile.getName().equals("collection.json.stg")) {
             st.add("id", "f367b534-c9ea-e7c5-1f46-7a27dc6a30ba");
