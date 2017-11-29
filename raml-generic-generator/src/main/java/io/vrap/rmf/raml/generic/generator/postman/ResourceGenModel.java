@@ -2,7 +2,10 @@ package io.vrap.rmf.raml.generic.generator.postman;
 
 import com.google.common.collect.Lists;
 import io.vrap.rmf.raml.model.resources.HttpMethod;
+import io.vrap.rmf.raml.model.resources.Method;
 import io.vrap.rmf.raml.model.resources.Resource;
+import io.vrap.rmf.raml.model.responses.Body;
+import io.vrap.rmf.raml.model.types.*;
 import io.vrap.rmf.raml.model.util.StringCaseFormat;
 
 import java.util.List;
@@ -52,6 +55,21 @@ public class ResourceGenModel {
         }
         if (byKey != null && byKey.getMethod(HttpMethod.DELETE) != null) {
             items.add(new ItemGenModel(resource, "deleteByKey", byKey.getMethod(HttpMethod.DELETE)));
+        }
+        if (byId != null && byId.getMethod(HttpMethod.POST) != null) {
+            Method method = byId.getMethod(HttpMethod.POST);
+            Body body = method.getBody("application/json");
+            if (body != null && body.getType() instanceof ObjectType) {
+                Property actions = ((ObjectType)body.getType()).getProperty("actions");
+                if (actions != null) {
+                    ArrayType actionsType = (ArrayType)actions.getType();
+                    ObjectType actionParentType = (ObjectType)((UnionType)actionsType.getItems()).getOneOf().get(0);
+                    List<AnyType> updateActions = actionParentType.subTypes();
+                    for (AnyType action: updateActions) {
+                        items.add(new ActionGenModel((ObjectType)action, resource, "action", method));
+                    }
+                }
+            }
         }
 
         return items;

@@ -334,22 +334,22 @@ deleteByParam(item, param) ::=<<
 }
 >>
 
-action(action, param) ::=<<
+action(action) ::=<<
 {
-    "name": "<action.name>",
+    "name": "<action.type.discriminatorValue; format="capitalize">",
     "event": [
         {
             "listen": "test",
             "script": {
                 "type": "text/javascript",
                 "exec": [
-                    <test(item, param)>
+                    <test(item, false)>
                 ]
             }
         }
     ],
     "request": {
-        "method": "POST",
+        "method": "<item.method.method>",
         "header": [
             {
                 "key": "Authorization",
@@ -362,23 +362,28 @@ action(action, param) ::=<<
         ],
         "body": {
             "mode": "raw",
-            "raw": ""
+            "raw": "{\n  \"version\": {{<item.resource.resourcePathName; format="singularize">-version}},\n  \"actions\": [<if (item.example)><item.example><else>{\n    \"action\": \"<action.type.discriminatorValue>\"\n  }<endif>]\n}"
         },
         "url": {
-            "raw": "{{host}}/{{projectKey}}/carts/{{id}}",
+            "raw": "{{host}}/{{projectKey}}/<item.resource.relativeUri.template>/{{<item.resource.resourcePathName; format="singularize">-id}}",
             "host": [
                 "{{host}}"
             ],
             "path": [
                 "{{projectKey}}",
-                "carts",
-                "{{id}}"
+                "<item.resource.resourcePathName>",
+                "{{<item.resource.resourcePathName; format="singularize">-id}}"
+            <if (item.method.queryParameters)>
+            ],
+            "query": [
+                <item.method.queryParameters: {param |<queryParam(param)>}; separator=",">
+            <endif>
             ]
         },
-        "description": "http://dev.commercetools.com/http-api-projects-carts.html#add-lineitem"
+        "description": " "
     },
     "response": []
-},
+}
 >>
 
 test(item, param) ::=<<

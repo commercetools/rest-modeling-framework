@@ -3,6 +3,7 @@ package io.vrap.rmf.raml.generic.generator;
 import com.google.common.base.CaseFormat;
 import com.google.common.base.Strings;
 import com.hypertino.inflector.English;
+import io.vrap.rmf.raml.model.util.StringCaseFormat;
 import org.apache.commons.lang3.StringUtils;
 import org.stringtemplate.v4.STGroupFile;
 
@@ -37,15 +38,15 @@ public abstract class AbstractTemplateGenerator {
                         case "pluralize":
                             return English.plural(arg.toString());
                         case "upperUnderscore":
-                            return CaseFormat.LOWER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, arg.toString());
+                            return StringCaseFormat.UPPER_UNDERSCORE_CASE.apply(arg.toString());
                         case "lowerHyphen":
-                            return CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_HYPHEN, arg.toString());
+                            return StringCaseFormat.LOWER_HYPHEN_CASE.apply(arg.toString());
                         case "lowercase":
                             return StringUtils.lowerCase(arg.toString());
                         case "lowercamel":
-                            return CaseFormat.LOWER_HYPHEN.to(CaseFormat.LOWER_CAMEL, arg.toString().replace(".", "-"));
+                            return StringCaseFormat.LOWER_CAMEL_CASE.apply(arg.toString().replace(".", "-"));
                         case "uppercamel":
-                            return CaseFormat.LOWER_HYPHEN.to(CaseFormat.UPPER_CAMEL, arg.toString().replace(".", "-"));
+                            return StringCaseFormat.UPPER_CAMEL_CASE.apply(arg.toString().replace(".", "-"));
                         default:
                             return arg.toString();
                     }
