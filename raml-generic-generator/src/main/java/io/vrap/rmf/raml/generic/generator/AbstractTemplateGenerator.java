@@ -43,6 +43,8 @@ public abstract class AbstractTemplateGenerator {
                             return StringCaseFormat.LOWER_HYPHEN_CASE.apply(arg.toString());
                         case "lowercase":
                             return StringUtils.lowerCase(arg.toString());
+                        case "uppercase":
+                            return StringUtils.upperCase(arg.toString());
                         case "lowercamel":
                             return StringCaseFormat.LOWER_CAMEL_CASE.apply(arg.toString().replace(".", "-"));
                         case "uppercamel":

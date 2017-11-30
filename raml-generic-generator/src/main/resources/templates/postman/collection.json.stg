@@ -2,7 +2,7 @@ main(api, id) ::= <<
 {
     "info": {
         "_postman_id": "<id>",
-        "name": "commercetools platform API",
+        "name": "commercetools platform API (generated)",
         "description": "This Postman collection contains examples for requests and responses of most endpoints and commands of the commercetools platform API. For every command the smallest possible payload is given. Please find optional fields in the related official documentation. Additionally the collection provides example requests and responses for specific tasks and more complex data models. \n\n## Disclaimer\n\nThis is not the official commercetools platform API documentation. Please see http://dev.commercetools.com/ for a complete and approved documentation of the commercetools platform API.\n\n## How to use\n\nTo use this collection in Postman please perform the following steps:\n1. Download and install the Postman Client\n2. Click the \"Run in Postman\"-button in the header of this page to clone this collection to your Postman client\n3. Duplicate the environment \"commercetools Plattform.template\" and fill out your commercetools client credentials\n4. Obtain an access token by sending the \"Obtain access token\" request at the bottom of the request list. Now you can use all other endpoints. \n\nFeel free to clone and modify this collection to your needs.\n\nTo automate frequent tasks the collection automatically manages commonly required values and parameters such as access tokens or resource ids and versions in Postman environment variables for you.\n\n## Contribute\n\nIf you want to contribute please visit the Github repository: https://github.com/commercetools/commercetools-postman-api-examples\n\nPlease see http://dev.commercetools.com/ for further information about the commercetools Plattform.",
         "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
     },
@@ -18,7 +18,7 @@ folder(resource) ::=<<
 {
     "name": "<resource.name>",
     "description": "<resource.description>",
-    "items": [
+    "item": [
         <resource.items: {item |<(item.template)(item)>}; separator=",">
     ]
 }
@@ -48,7 +48,7 @@ query(item) ::=<<
         }
     ],
     "request": {
-        "method": "<item.method.method>",
+        "method": "<item.method.methodName; format="uppercase">",
         "header": [
             {
                 "key": "Authorization",
@@ -106,7 +106,7 @@ create(item) ::=<<
         }
     ],
     "request": {
-        "method": "<item.method.method>",
+        "method": "<item.method.methodName; format="uppercase">",
         "header": [
             {
                 "key": "Authorization",
@@ -165,7 +165,7 @@ getByParam(item, param) ::=<<
         }
     ],
     "request": {
-        "method": "<item.method.method>",
+        "method": "<item.method.methodName; format="uppercase">",
         "header": [
             {
                 "key": "Authorization",
@@ -229,7 +229,7 @@ updateByParam(item, param) ::=<<
         }
     ],
     "request": {
-        "method": "<item.method.method>",
+        "method": "<item.method.methodName; format="uppercase">",
         "header": [
             {
                 "key": "Authorization",
@@ -293,7 +293,7 @@ deleteByParam(item, param) ::=<<
         }
     ],
     "request": {
-        "method": "<item.method.method>",
+        "method": "<item.method.methodName; format="uppercase">",
         "header": [
             {
                 "key": "Authorization",
@@ -349,7 +349,7 @@ action(action) ::=<<
         }
     ],
     "request": {
-        "method": "<item.method.method>",
+        "method": "<item.method.methodName; format="uppercase">",
         "header": [
             {
                 "key": "Authorization",
@@ -439,15 +439,6 @@ authorization(oauth) ::=<<
                             "key": "password",
                             "value": "{{client_secret}}",
                             "type": "string"
-                        },
-                        {
-                            "key": "saveHelperData",
-                            "type": "any"
-                        },
-                        {
-                            "key": "showPassword",
-                            "value": false,
-                            "type": "boolean"
                         }
                     ]
                 },
@@ -504,15 +495,6 @@ authorization(oauth) ::=<<
                             "key": "password",
                             "value": "{{client_secret}}",
                             "type": "string"
-                        },
-                        {
-                            "key": "saveHelperData",
-                            "type": "any"
-                        },
-                        {
-                            "key": "showPassword",
-                            "value": false,
-                            "type": "boolean"
                         }
                     ]
                 },
@@ -593,15 +575,6 @@ authorization(oauth) ::=<<
                             "key": "password",
                             "value": "{{client_secret}}",
                             "type": "string"
-                        },
-                        {
-                            "key": "saveHelperData",
-                            "type": "any"
-                        },
-                        {
-                            "key": "showPassword",
-                            "value": false,
-                            "type": "boolean"
                         }
                     ]
                 },
@@ -666,15 +639,6 @@ authorization(oauth) ::=<<
                             "key": "password",
                             "value": "{{client_secret}}",
                             "type": "string"
-                        },
-                        {
-                            "key": "saveHelperData",
-                            "type": "any"
-                        },
-                        {
-                            "key": "showPassword",
-                            "value": false,
-                            "type": "boolean"
                         }
                     ]
                 },
