@@ -28,8 +28,8 @@ public class ActionGenModel extends ItemGenModel{
                 nodes.put("action", type.getDiscriminatorValue());
 
                 example = Arrays.stream(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(nodes)
-                        .split("\n")).map(s -> "  " + s.replace("\"", "\\\""))
-                        .collect(Collectors.joining("\\n"))
+                        .split("\n")).map(s -> "  " + s)
+                        .collect(Collectors.joining("\n"))
                         .trim();
             } catch (IOException e) {}
         }
@@ -41,7 +41,7 @@ public class ActionGenModel extends ItemGenModel{
     }
 
     public String getExample() {
-        return example;
+        return StringEscapeUtils.escapeJson(example);
     }
 
     @Override
