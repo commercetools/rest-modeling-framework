@@ -17,7 +17,7 @@ folder(resource) ::=<<
 
 {
     "name": "<resource.name>",
-    "description": "",
+    "description": "<resource.description>",
     "items": [
         <resource.items: {item |<(item.template)(item)>}; separator=",">
     ]
@@ -74,7 +74,7 @@ query(item) ::=<<
             <endif>
             ]
         },
-        "description": ""
+        "description": "<item.description>"
     },
     "response": []
 }
@@ -136,7 +136,7 @@ create(item) ::=<<
             <endif>
             ]
         },
-        "description": ""
+        "description": "<item.description>"
     },
     "response": []
 }
@@ -200,7 +200,7 @@ getByParam(item, param) ::=<<
             <endif>
             ]
         },
-        "description": ""
+        "description": "<item.description>"
     },
     "response": []
 }
@@ -264,7 +264,7 @@ updateByParam(item, param) ::=<<
             <endif>
             ]
         },
-        "description": ""
+        "description": "<item.description>"
     },
     "response": []
 }
@@ -328,7 +328,7 @@ deleteByParam(item, param) ::=<<
             <endif>
             ]
         },
-        "description": ""
+        "description": "<item.description>"
     },
     "response": []
 }
@@ -380,7 +380,7 @@ action(action) ::=<<
             <endif>
             ]
         },
-        "description": " "
+        "description": "<item.description>"
     },
     "response": []
 }

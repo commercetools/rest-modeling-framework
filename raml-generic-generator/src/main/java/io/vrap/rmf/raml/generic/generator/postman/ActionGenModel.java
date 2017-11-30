@@ -1,14 +1,12 @@
 package io.vrap.rmf.raml.generic.generator.postman;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import io.vrap.rmf.raml.model.facets.Instance;
 import io.vrap.rmf.raml.model.facets.StringInstance;
 import io.vrap.rmf.raml.model.resources.Method;
 import io.vrap.rmf.raml.model.resources.Resource;
 import io.vrap.rmf.raml.model.types.ObjectType;
+import org.apache.commons.lang3.StringEscapeUtils;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -44,5 +42,10 @@ public class ActionGenModel extends ItemGenModel{
 
     public String getExample() {
         return example;
+    }
+
+    @Override
+    public String getDescription() {
+        return StringEscapeUtils.escapeJson(type.getDescription());
     }
 }

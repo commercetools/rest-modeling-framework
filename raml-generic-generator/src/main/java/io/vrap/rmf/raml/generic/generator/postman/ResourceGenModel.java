@@ -1,5 +1,6 @@
 package io.vrap.rmf.raml.generic.generator.postman;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.collect.Lists;
 import io.vrap.rmf.raml.model.resources.HttpMethod;
 import io.vrap.rmf.raml.model.resources.Method;
@@ -7,6 +8,7 @@ import io.vrap.rmf.raml.model.resources.Resource;
 import io.vrap.rmf.raml.model.responses.Body;
 import io.vrap.rmf.raml.model.types.*;
 import io.vrap.rmf.raml.model.util.StringCaseFormat;
+import org.apache.commons.lang3.StringEscapeUtils;
 
 import java.util.List;
 import java.util.Optional;
@@ -21,6 +23,10 @@ public class ResourceGenModel {
     public String getName()
     {
         return StringCaseFormat.UPPER_CAMEL_CASE.apply(Optional.ofNullable(resource.getDisplayName()).orElse(resource.getResourcePathName()));
+    }
+
+    public String getDescription() throws JsonProcessingException {
+        return StringEscapeUtils.escapeJson(resource.getDescription());
     }
 
     public Resource getResource() {
