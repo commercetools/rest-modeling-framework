@@ -26,21 +26,18 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 import java.nio.charset.StandardCharsets
-import java.util.stream.Collectors
-
-import static org.apache.commons.lang3.StringUtils.capitalize;
 
 //@Ignore
 class PHPGeneratorTest extends Specification implements ResourceFixtures {
     @Shared
     ResourceSet resourceSet = new RamlResourceSet()
     @Shared
-    URI uri = URI.createURI("test.raml");
+    URI uri = URI.createURI("test.raml")
 
     @Shared
-    File resourcePath = new File(Resources.getResource("templates/php/statics/").getFile());
+    File resourcePath = new File(Resources.getResource("templates/php/statics/").getFile())
     @Shared
-    Collection<File> files = FileUtils.listFiles(resourcePath, TrueFileFilter.INSTANCE, TrueFileFilter.INSTANCE);
+    Collection<File> files = FileUtils.listFiles(resourcePath, TrueFileFilter.INSTANCE, TrueFileFilter.INSTANCE)
 
     def "generate simple interface"() {
         when:
@@ -52,7 +49,7 @@ class PHPGeneratorTest extends Specification implements ResourceFixtures {
                     name: string
         ''')
         then:
-        String result = generate(TypesGenerator.TYPE_INTERFACE, api.types.get(0));
+        String result = generate(TypesGenerator.TYPE_INTERFACE, api.types.get(0))
         result == fileContent("Person.php")
     }
 
@@ -66,10 +63,10 @@ class PHPGeneratorTest extends Specification implements ResourceFixtures {
                     createdAt: datetime
         ''')
         then:
-        String documentModel = generate(TypesGenerator.TYPE_MODEL, api.types.get(0));
+        String documentModel = generate(TypesGenerator.TYPE_MODEL, api.types.get(0))
         documentModel == fileContent("DocumentModel.php")
 
-        String document = generate(TypesGenerator.TYPE_INTERFACE, api.types.get(0));
+        String document = generate(TypesGenerator.TYPE_INTERFACE, api.types.get(0))
         document == fileContent("Document.php")
     }
 
@@ -88,7 +85,7 @@ class PHPGeneratorTest extends Specification implements ResourceFixtures {
                     role: string
         ''')
         then:
-        String result = generate(TypesGenerator.TYPE_INTERFACE, api.types.get(1));
+        String result = generate(TypesGenerator.TYPE_INTERFACE, api.types.get(1))
         result == fileContent("User.php")
     }
 
@@ -106,7 +103,7 @@ class PHPGeneratorTest extends Specification implements ResourceFixtures {
                     role: string
         ''')
         then:
-        String result = generate(TypesGenerator.TYPE_MODEL, api.types.get(0));
+        String result = generate(TypesGenerator.TYPE_MODEL, api.types.get(0))
         result == fileContent("PersonModel.php")
     }
 
@@ -124,7 +121,7 @@ class PHPGeneratorTest extends Specification implements ResourceFixtures {
                     role: string
         ''')
         then:
-        String result = generate(TypesGenerator.TYPE_MODEL, api.types.get(1));
+        String result = generate(TypesGenerator.TYPE_MODEL, api.types.get(1))
         result == fileContent("UserModel.php")
     }
 
@@ -141,10 +138,10 @@ class PHPGeneratorTest extends Specification implements ResourceFixtures {
                     street: string
         ''')
         then:
-        String result = generate(TypesGenerator.TYPE_INTERFACE, api.types.get(0));
+        String result = generate(TypesGenerator.TYPE_INTERFACE, api.types.get(0))
         result == fileContent("Customer.php")
 
-        String address = generate(TypesGenerator.TYPE_INTERFACE, api.types.get(1));
+        String address = generate(TypesGenerator.TYPE_INTERFACE, api.types.get(1))
         address == fileContent("Address.php")
     }
 
@@ -161,7 +158,7 @@ class PHPGeneratorTest extends Specification implements ResourceFixtures {
                     street: string
         ''')
         then:
-        String result = generate(TypesGenerator.TYPE_MODEL, api.types.get(0));
+        String result = generate(TypesGenerator.TYPE_MODEL, api.types.get(0))
         result == fileContent("CustomerModel.php")
     }
 
@@ -179,7 +176,7 @@ class PHPGeneratorTest extends Specification implements ResourceFixtures {
         ''')
         then:
         TypesGenerator generator = new TypesGenerator("Test")
-        String result = generator.generateMap(api.types);
+        String result = generator.generateMap(api.types)
         result == fileContent("ModelClassMap.php")
     }
 
@@ -197,16 +194,16 @@ class PHPGeneratorTest extends Specification implements ResourceFixtures {
                 discriminatorValue: cat
         ''')
         then:
-        String baseInterface = generate(TypesGenerator.TYPE_INTERFACE, api.types.get(0));
+        String baseInterface = generate(TypesGenerator.TYPE_INTERFACE, api.types.get(0))
         baseInterface == fileContent("Animal.php")
 
-        String baseClass = generate(TypesGenerator.TYPE_MODEL, api.types.get(0));
+        String baseClass = generate(TypesGenerator.TYPE_MODEL, api.types.get(0))
         baseClass == fileContent("AnimalModel.php")
 
-        String kindInterface = generate(TypesGenerator.TYPE_INTERFACE, api.types.get(1));
+        String kindInterface = generate(TypesGenerator.TYPE_INTERFACE, api.types.get(1))
         kindInterface == fileContent("Cat.php")
 
-        String kindClass = generate(TypesGenerator.TYPE_MODEL, api.types.get(1));
+        String kindClass = generate(TypesGenerator.TYPE_MODEL, api.types.get(1))
         kindClass == fileContent("CatModel.php")
     }
 
@@ -231,22 +228,22 @@ class PHPGeneratorTest extends Specification implements ResourceFixtures {
                     label: string
         ''')
         then:
-        String attributeInterface = generate(TypesGenerator.TYPE_INTERFACE, api.types.get(0));
+        String attributeInterface = generate(TypesGenerator.TYPE_INTERFACE, api.types.get(0))
         attributeInterface == fileContent("Attribute.php")
 
-        String attributeClass = generate(TypesGenerator.TYPE_MODEL, api.types.get(0));
+        String attributeClass = generate(TypesGenerator.TYPE_MODEL, api.types.get(0))
         attributeClass == fileContent("AttributeModel.php")
 
-        String enumInterface = generate(TypesGenerator.TYPE_INTERFACE, api.types.get(1));
+        String enumInterface = generate(TypesGenerator.TYPE_INTERFACE, api.types.get(1))
         enumInterface == fileContent("Money.php")
 
-        String enumClass = generate(TypesGenerator.TYPE_MODEL, api.types.get(1));
+        String enumClass = generate(TypesGenerator.TYPE_MODEL, api.types.get(1))
         enumClass == fileContent("MoneyModel.php")
 
-        String referenceInterface = generate(TypesGenerator.TYPE_INTERFACE, api.types.get(2));
+        String referenceInterface = generate(TypesGenerator.TYPE_INTERFACE, api.types.get(2))
         referenceInterface == fileContent("Enum.php")
 
-        String referenceClass = generate(TypesGenerator.TYPE_MODEL, api.types.get(2));
+        String referenceClass = generate(TypesGenerator.TYPE_MODEL, api.types.get(2))
         referenceClass == fileContent("EnumModel.php")
     }
 
@@ -327,7 +324,7 @@ class PHPGeneratorTest extends Specification implements ResourceFixtures {
                     accessTokenUri: https://auth.example.com/oauth/token
         ''')
         StaticGenerator generator = new StaticGenerator( "Test")
-        String result = generator.generateContent(file, api);
+        String result = generator.generateContent(file.toURI().toURL(), api);
         result == fileContent(file.getName().replace(".stg", ""))
 
         where:
@@ -336,7 +333,7 @@ class PHPGeneratorTest extends Specification implements ResourceFixtures {
 
     String generate(final String generateType, final AnyType type) {
         TypesGenerator generator = new TypesGenerator("Test")
-        return generator.generateType(generator.createVisitor(generateType), type);
+        return generator.generateType(generator.createVisitor(generateType), type)
     }
 
     Api constructApi(final String input) {
@@ -349,8 +346,8 @@ class PHPGeneratorTest extends Specification implements ResourceFixtures {
     RAMLParser parser(final String input) {
         final URIConverter uriConverter = resourceSet.getURIConverter();
         def strippedInput = input.stripIndent()
-        final RAMLCustomLexer lexer = new RAMLCustomLexer(strippedInput, uri, uriConverter);
-        final TokenStream tokenStream = new CommonTokenStream(lexer);
+        final RAMLCustomLexer lexer = new RAMLCustomLexer(strippedInput, uri, uriConverter)
+        final TokenStream tokenStream = new CommonTokenStream(lexer)
         return new RAMLParser(tokenStream)
     }
 

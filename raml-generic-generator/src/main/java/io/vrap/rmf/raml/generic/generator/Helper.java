@@ -1,15 +1,22 @@
 package io.vrap.rmf.raml.generic.generator;
 
+import com.google.common.collect.Lists;
+import io.vrap.rmf.raml.generic.generator.postman.CollectionGenerator;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.apache.commons.io.filefilter.TrueFileFilter;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
+import java.net.URI;
+import java.net.URL;
+import java.nio.file.*;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Helper {
     public static void ensureDirectory(File directory) throws IOException
@@ -37,5 +44,29 @@ public class Helper {
                 Files.deleteIfExists(file.toPath());
             }
         }
+    }
+
+    public static List<URL> getTemplatesFromDirectory(final String dir)
+    {
+        final List<URL> files = Lists.newArrayList();
+        try {
+            URI uri = CollectionGenerator.class.getClassLoader().getResource(dir).toURI();
+            Path myPath;
+            if (uri.getScheme().equals("jar")) {
+                FileSystem fileSystem = FileSystems.newFileSystem(uri, Collections.<String, Object>emptyMap());
+                myPath = fileSystem.getPath(dir);
+            } else {
+                myPath = Paths.get(uri);
+            }
+            Stream<Path> walk = Files.walk(myPath, 1);
+            for (Iterator<Path> it = walk.iterator(); it.hasNext();) {
+                final String name = it.next().toString();
+                final File f = new File(name);
+                if (f.getName().endsWith(".stg")) {
+                    files.add(CollectionGenerator.class.getClassLoader().getResource(dir + f.getName()));
+                }
+            }
+        } catch (Exception e) {}
+        return files;
     }
 }

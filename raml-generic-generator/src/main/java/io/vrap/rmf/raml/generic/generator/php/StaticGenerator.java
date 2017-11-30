@@ -4,15 +4,15 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
 import io.vrap.rmf.raml.generic.generator.AbstractTemplateGenerator;
+import io.vrap.rmf.raml.generic.generator.Helper;
 import io.vrap.rmf.raml.model.modules.Api;
 import io.vrap.rmf.raml.model.security.OAuth20Settings;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.util.*;
 
 public class StaticGenerator extends AbstractTemplateGenerator {
@@ -23,11 +23,11 @@ public class StaticGenerator extends AbstractTemplateGenerator {
     }
 
     public List<File> generate(final File outputPath, Api api) throws IOException {
-        File resourcePath = new File(Resources.getResource("templates/php/statics/").getFile());
-        Collection<File> files = FileUtils.listFiles(resourcePath, TrueFileFilter.INSTANCE, TrueFileFilter.INSTANCE);
+        final URL resourcePath = Resources.getResource("templates/php/statics/");
+        final List<URL> files = Helper.getTemplatesFromDirectory("templates/php/statics/");
 
         final List<File> f = Lists.newArrayList();
-        for (File staticFile : files) {
+        for (URL staticFile : files) {
             final String content = generateContent(staticFile, api);
             final File outputFile = new File(
                     outputPath,
@@ -42,16 +42,16 @@ public class StaticGenerator extends AbstractTemplateGenerator {
     }
 
     @VisibleForTesting
-    String generateContent(File staticFile, Api api) throws IOException {
-        final STGroupFile stGroup = createSTGroup(staticFile.toURI().toURL());
+    String generateContent(URL staticFile, Api api) throws IOException {
+        final STGroupFile stGroup = createSTGroup(staticFile);
+        final String fileName = new File(staticFile.getPath()).getName();
 
         final ST st = stGroup.getInstanceOf("main");
         st.add("vendorName", vendorName);
-        final String t = staticFile.getName();
-        if (staticFile.getName().equals("ResourceClassMap.php.stg")) {
+        if (fileName.equals("ResourceClassMap.php.stg")) {
             st.add("package", TypeGenModel.TYPES);
         }
-        if (staticFile.getName().equals("Config.php.stg")) {
+        if (fileName.equals("Config.php.stg")) {
             final String apiUri = api.getBaseUri().getTemplate();
             final String authUri = api.getSecuritySchemes().stream()
                     .filter(securityScheme -> securityScheme.getSettings() instanceof OAuth20Settings)

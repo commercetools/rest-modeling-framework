@@ -85,7 +85,7 @@ public class CodeGenerator {
 
             language = cmd.getOptionValue(getLangOption().getOpt(), "php");
             vendorName = cmd.getOptionValue(getVendorNameOption().getOpt());
-            outputPath = Paths.get(cmd.getOptionValue(getOutputPathOption().getOpt(), "../demo/src/generated/")).toAbsolutePath();
+            outputPath = Paths.get(cmd.getOptionValue(getOutputPathOption().getOpt(), ".")).toAbsolutePath();
 
             if (cmd.hasOption(getHelpOption().getOpt())) {
                 printHelp();
