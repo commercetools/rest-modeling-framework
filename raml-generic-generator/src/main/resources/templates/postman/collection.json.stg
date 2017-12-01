@@ -1,0 +1,648 @@
+main(api, id) ::= <<
+{
+    "info": {
+        "_postman_id": "<id>",
+        "name": "commercetools platform API (generated)",
+        "description": "This Postman collection contains examples for requests and responses of most endpoints and commands of the commercetools platform API. For every command the smallest possible payload is given. Please find optional fields in the related official documentation. Additionally the collection provides example requests and responses for specific tasks and more complex data models. \n\n## Disclaimer\n\nThis is not the official commercetools platform API documentation. Please see http://dev.commercetools.com/ for a complete and approved documentation of the commercetools platform API.\n\n## How to use\n\nTo use this collection in Postman please perform the following steps:\n1. Download and install the Postman Client\n2. Click the \"Run in Postman\"-button in the header of this page to clone this collection to your Postman client\n3. Duplicate the environment \"commercetools Plattform.template\" and fill out your commercetools client credentials\n4. Obtain an access token by sending the \"Obtain access token\" request at the bottom of the request list. Now you can use all other endpoints. \n\nFeel free to clone and modify this collection to your needs.\n\nTo automate frequent tasks the collection automatically manages commonly required values and parameters such as access tokens or resource ids and versions in Postman environment variables for you.\n\n## Contribute\n\nIf you want to contribute please visit the Github repository: https://github.com/commercetools/commercetools-postman-api-examples\n\nPlease see http://dev.commercetools.com/ for further information about the commercetools Plattform.",
+        "schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+    },
+    "item": [
+        <authorization(api.oAuth)>,
+        <api.resources: {r|<folder(r)>}; separator=",">
+    ]
+}
+>>
+
+folder(resource) ::=<<
+
+{
+    "name": "<resource.name>",
+    "description": "<resource.description>",
+    "item": [
+        <resource.items: {item |<(item.template)(item)>}; separator=",">
+    ]
+}
+>>
+
+query(item) ::=<<
+
+{
+    "name": "Query <item.name>",
+    "event": [
+        {
+            "listen": "test",
+            "script": {
+                "type": "text/javascript",
+                "exec": [
+                    "tests[\"Status code is 200\"] = responseCode.code === 200;",
+                    "var data = JSON.parse(responseBody);",
+                    "if(data.results && data.results[0] && data.results[0].id && data.results[0].version){",
+                    "    postman.setEnvironmentVariable(\"<item.resource.resourcePathName; format="singularize">-id\", data.results[0].id); ",
+                    "    postman.setEnvironmentVariable(\"<item.resource.resourcePathName; format="singularize">-version\", data.results[0].version);",
+                    "}",
+                    "if(data.results && data.results[0] && data.results[0].key){",
+                    "    postman.setEnvironmentVariable(\"<item.resource.resourcePathName; format="singularize">-key\", data.results[0].key); ",
+                    "}"
+                ]
+            }
+        }
+    ],
+    "request": {
+        "method": "<item.method.methodName; format="uppercase">",
+        "header": [
+            {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+            }
+        ],
+        "body": {
+            "mode": "raw",
+            "raw": ""
+        },
+        "url": {
+            "raw": "{{host}}/{{projectKey}}<item.resource.relativeUri.template>",
+            "host": [
+                "{{host}}"
+            ],
+            "path": [
+                "{{projectKey}}",
+                "<item.resource.resourcePathName>"
+            <if (item.method.queryParameters)>
+            ],
+            "query": [
+                <item.method.queryParameters: {param |<queryParam(param)>}; separator=",">
+            <endif>
+            ]
+        },
+        "description": "<item.description>"
+    },
+    "response": []
+}
+>>
+
+queryParam(param) ::=<<
+
+{
+    "key": "<param.name>",
+    "value": "",
+    "equals": true,
+    "disabled": true
+}
+>>
+
+create(item) ::=<<
+
+{
+    "name": "Create <item.name; format="singularize">",
+    "event": [
+        {
+            "listen": "test",
+            "script": {
+                "type": "text/javascript",
+                "exec": [
+                    <test(item, false)>
+                ]
+            }
+        }
+    ],
+    "request": {
+        "method": "<item.method.methodName; format="uppercase">",
+        "header": [
+            {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+            },
+            {
+                "key": "Content-Type",
+                "value": "application/json"
+            }
+        ],
+        "body": {
+            "mode": "raw",
+            "raw": ""
+        },
+        "url": {
+            "raw": "{{host}}/{{projectKey}}<item.resource.relativeUri.template>",
+            "host": [
+                "{{host}}"
+            ],
+            "path": [
+                "{{projectKey}}",
+                "<item.resource.resourcePathName>"
+            <if (item.method.queryParameters)>
+            ],
+            "query": [
+                <item.method.queryParameters: {param |<queryParam(param)>}; separator=",">
+            <endif>
+            ]
+        },
+        "description": "<item.description>"
+    },
+    "response": []
+}
+>>
+
+getByID(item) ::=<<
+<getByParam(item, false)>
+>>
+
+getByKey(item) ::=<<
+<getByParam(item, "key")>
+>>
+
+getByParam(item, param) ::=<<
+{
+    "name": "Get <item.name; format="singularize"> by <if(param)><param><else>ID<endif>",
+    "event": [
+        {
+            "listen": "test",
+            "script": {
+                "type": "text/javascript",
+                "exec": [
+                    <test(item, param)>
+                ]
+            }
+        }
+    ],
+    "request": {
+        "method": "<item.method.methodName; format="uppercase">",
+        "header": [
+            {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+            }
+        ],
+        "body": {
+            "mode": "raw",
+            "raw": ""
+        },
+        "url": {
+            <if (param)>
+            "raw": "{{host}}/{{projectKey}}<item.resource.relativeUri.template>/<param>={{<item.resource.resourcePathName; format="singularize">-<param>}}",
+            <else>
+            "raw": "{{host}}/{{projectKey}}<item.resource.relativeUri.template>/{{<item.resource.resourcePathName; format="singularize">-id}}",
+            <endif>
+            "host": [
+                "{{host}}"
+            ],
+            "path": [
+                "{{projectKey}}",
+                "<item.resource.resourcePathName>",
+                <if (param)>
+                "<param>={{<item.resource.resourcePathName; format="singularize">-<param>}}"
+                <else>
+                "{{<item.resource.resourcePathName; format="singularize">-id}}"
+                <endif>
+            <if (item.method.queryParameters)>
+            ],
+            "query": [
+                <item.method.queryParameters: {param |<queryParam(param)>}; separator=",">
+            <endif>
+            ]
+        },
+        "description": "<item.description>"
+    },
+    "response": []
+}
+>>
+
+updateByID(item) ::=<<
+<updateByParam(item, false)>
+>>
+
+updateByKey(item) ::=<<
+<updateByParam(item, "key")>
+>>
+
+updateByParam(item, param) ::=<<
+{
+    "name": "Update <item.name; format="singularize"> by <if(param)><param><else>ID<endif>",
+    "event": [
+        {
+            "listen": "test",
+            "script": {
+                "type": "text/javascript",
+                "exec": [
+                    <test(item, param)>
+                ]
+            }
+        }
+    ],
+    "request": {
+        "method": "<item.method.methodName; format="uppercase">",
+        "header": [
+            {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+            }
+        ],
+        "body": {
+            "mode": "raw",
+            "raw": ""
+        },
+        "url": {
+            <if (param)>
+            "raw": "{{host}}/{{projectKey}}<item.resource.relativeUri.template>/<param>={{<item.resource.resourcePathName; format="singularize">-<param>}}",
+            <else>
+            "raw": "{{host}}/{{projectKey}}<item.resource.relativeUri.template>/{{<item.resource.resourcePathName; format="singularize">-id}}",
+            <endif>
+            "host": [
+                "{{host}}"
+            ],
+            "path": [
+                "{{projectKey}}",
+                "<item.resource.resourcePathName>",
+                <if (param)>
+                "<param>={{<item.resource.resourcePathName; format="singularize">-<param>}}"
+                <else>
+                "{{<item.resource.resourcePathName; format="singularize">-id}}"
+                <endif>
+            <if (item.method.queryParameters)>
+            ],
+            "query": [
+                <item.method.queryParameters: {param |<queryParam(param)>}; separator=",">
+            <endif>
+            ]
+        },
+        "description": "<item.description>"
+    },
+    "response": []
+}
+>>
+
+deleteByID(item) ::=<<
+<deleteByParam(item, false)>
+>>
+
+deleteByKey(item) ::=<<
+<deleteByParam(item, "key")>
+>>
+
+deleteByParam(item, param) ::=<<
+{
+    "name": "Delete <item.name; format="singularize"> by <if(param)><param><else>ID<endif>",
+    "event": [
+        {
+            "listen": "test",
+            "script": {
+                "type": "text/javascript",
+                "exec": [
+                    <test(item, param)>
+                ]
+            }
+        }
+    ],
+    "request": {
+        "method": "<item.method.methodName; format="uppercase">",
+        "header": [
+            {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+            }
+        ],
+        "body": {
+            "mode": "raw",
+            "raw": ""
+        },
+        "url": {
+            <if (param)>
+            "raw": "{{host}}/{{projectKey}}<item.resource.relativeUri.template>/<param>={{<item.resource.resourcePathName; format="singularize">-<param>}}",
+            <else>
+            "raw": "{{host}}/{{projectKey}}<item.resource.relativeUri.template>/{{<item.resource.resourcePathName; format="singularize">-id}}",
+            <endif>
+            "host": [
+                "{{host}}"
+            ],
+            "path": [
+                "{{projectKey}}",
+                "<item.resource.resourcePathName>",
+                <if (param)>
+                "<param>={{<item.resource.resourcePathName; format="singularize">-<param>}}"
+                <else>
+                "{{<item.resource.resourcePathName; format="singularize">-id}}"
+                <endif>
+            <if (item.method.queryParameters)>
+            ],
+            "query": [
+                <item.method.queryParameters: {param |<queryParam(param)>}; separator=",">
+            <endif>
+            ]
+        },
+        "description": "<item.description>"
+    },
+    "response": []
+}
+>>
+
+action(action) ::=<<
+{
+    "name": "<action.type.discriminatorValue; format="capitalize">",
+    "event": [
+        {
+            "listen": "test",
+            "script": {
+                "type": "text/javascript",
+                "exec": [
+                    <test(item, false)>
+                ]
+            }
+        }
+    ],
+    "request": {
+        "method": "<item.method.methodName; format="uppercase">",
+        "header": [
+            {
+                "key": "Authorization",
+                "value": "Bearer {{access_token}}"
+            },
+            {
+                "key": "Content-Type",
+                "value": "application/json"
+            }
+        ],
+        "body": {
+            "mode": "raw",
+            "raw": "{\n  \"version\": {{<item.resource.resourcePathName; format="singularize">-version}},\n  \"actions\": [<if (item.example)><item.example><else>{\n    \"action\": \"<action.type.discriminatorValue>\"\n  }<endif>]\n}"
+        },
+        "url": {
+            "raw": "{{host}}/{{projectKey}}/<item.resource.relativeUri.template>/{{<item.resource.resourcePathName; format="singularize">-id}}",
+            "host": [
+                "{{host}}"
+            ],
+            "path": [
+                "{{projectKey}}",
+                "<item.resource.resourcePathName>",
+                "{{<item.resource.resourcePathName; format="singularize">-id}}"
+            <if (item.method.queryParameters)>
+            ],
+            "query": [
+                <item.method.queryParameters: {param |<queryParam(param)>}; separator=",">
+            <endif>
+            ]
+        },
+        "description": "<item.description>"
+    },
+    "response": []
+}
+>>
+
+test(item, param) ::=<<
+"tests[\"Status code \" + responseCode.code] = responseCode.code === 200 || responseCode.code === 201;",
+"var data = JSON.parse(responseBody);",
+"if(data.id && data.version){",
+"    postman.setEnvironmentVariable(\"<item.resource.resourcePathName; format="singularize">-id\", data.id); ",
+"    postman.setEnvironmentVariable(\"<item.resource.resourcePathName; format="singularize">-version\", data.version);",
+"}",
+"if(data.key){",
+"    postman.setEnvironmentVariable(\"<item.resource.resourcePathName; format="singularize">-key\", data.key); ",
+<if (param)>
+"}",
+"if(data.<param>){",
+"    postman.setEnvironmentVariable(\"<item.resource.resourcePathName; format="singularize">-<param>\", data.<param>); ",
+<endif>
+"}"
+
+>>
+
+authorization(oauth) ::=<<
+{
+    "name": "Authorization",
+    "description": "",
+    "item": [
+        {
+            "name": "Obtain access token",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "tests[\"Status code is 200\"] = responseCode.code === 200;",
+                            "var data = JSON.parse(responseBody);",
+                            "if(data.access_token){",
+                            "    postman.setEnvironmentVariable(\"access_token\", data.access_token);",
+                            "}"
+                        ]
+                    }
+                }
+            ],
+            "request": {
+                "auth": {
+                    "type": "basic",
+                    "basic": {
+                        "username": "{{client_id}}",
+                        "password": "{{client_secret}}"
+                    }
+                },
+                "method": "POST",
+                "header": [],
+                "body": {
+                    "mode": "raw",
+                    "raw": ""
+                },
+                "url": {
+                    "raw": "https://{{auth_url}}<oauth.uri.path>?grant_type=client_credentials",
+                    "protocol": "https",
+                    "host": [
+                        "{{auth_url}}"
+                    ],
+                    "path": [
+                        "<oauth.uri.pathElements; separator="\",\"">"
+                    ],
+                    "query": [
+                        {
+                            "key": "grant_type",
+                            "value": "client_credentials",
+                            "equals": true
+                        }
+                    ]
+                },
+                "description": "Use this request to obtain an access token for your commercetools platform project via Client Credentials Flow. As a prerequisite you must have filled out environment variables in Postman for projectKey, client_id and client_secret to use this."
+            },
+            "response": []
+        },
+        {
+            "name": "Obtain access token through password flow",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "tests[\"Status code is 200\"] = responseCode.code === 200;"
+                        ]
+                    }
+                }
+            ],
+            "request": {
+                "auth": {
+                    "type": "basic",
+                    "basic": {
+                        "username": "{{client_id}}",
+                        "password": "{{client_secret}}"
+                    }
+                },
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "",
+                        "value": "",
+                        "disabled": true
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": ""
+                },
+                "url": {
+                    "raw": "https://{{auth_url}}/oauth/{{projectKey}}/customers/token?grant_type=password&username={{user_email}}&password={{user_password}}",
+                    "protocol": "https",
+                    "host": [
+                        "{{auth_url}}"
+                    ],
+                    "path": [
+                        "oauth",
+                        "{{projectKey}}",
+                        "customers",
+                        "token"
+                    ],
+                    "query": [
+                        {
+                            "key": "grant_type",
+                            "value": "password",
+                            "equals": true
+                        },
+                        {
+                            "key": "username",
+                            "value": "{{user_email}}",
+                            "equals": true
+                        },
+                        {
+                            "key": "password",
+                            "value": "{{user_password}}",
+                            "equals": true
+                        },
+                        {
+                            "key": "scope",
+                            "value": "manage_project:{{projectKey}}",
+                            "equals": true
+                        }
+                    ]
+                },
+                "description": "Use this request to obtain an access token for your commercetools platform project via Password Flow. As a prerequisite you must have filled out environment variables in Postman for projectKey, client_id, client_secret, user_email and user_password to use this."
+            },
+            "response": []
+        },
+        {
+            "name": "Token for Anonymous Sessions",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "tests[\"Status code is 200\"] = responseCode.code === 200;"
+                        ]
+                    }
+                }
+            ],
+            "request": {
+                "auth": {
+                    "type": "basic",
+                    "basic": {
+                        "username": "{{client_id}}",
+                        "password": "{{client_secret}}"
+                    }
+                },
+                "method": "POST",
+                "header": [],
+                "body": {
+                    "mode": "raw",
+                    "raw": ""
+                },
+                "url": {
+                    "raw": "https://{{auth_url}}/oauth/{{projectKey}}/anonymous/token?grant_type=client_credentials&scope=manage_my_profile:{{projectKey}}",
+                    "protocol": "https",
+                    "host": [
+                        "{{auth_url}}"
+                    ],
+                    "path": [
+                        "oauth",
+                        "{{projectKey}}",
+                        "anonymous",
+                        "token"
+                    ],
+                    "query": [
+                        {
+                            "key": "grant_type",
+                            "value": "client_credentials",
+                            "equals": true
+                        },
+                        {
+                            "key": "scope",
+                            "value": "manage_my_profile:{{projectKey}}",
+                            "equals": true
+                        }
+                    ]
+                },
+                "description": "Use this request to obtain an access token for a anonymous session. As a prerequisite you must have filled out environment variables in Postman for projectKey, client_id and client_secret to use this."
+            },
+            "response": []
+        },
+        {
+            "name": "Token Introspection",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "tests[\"Status code is 200\"] = responseCode.code === 200;"
+                        ]
+                    }
+                }
+            ],
+            "request": {
+                "auth": {
+                    "type": "basic",
+                    "basic": {
+                        "username": "{{client_id}}",
+                        "password": "{{client_secret}}"
+                    }
+                },
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": ""
+                },
+                "url": {
+                    "raw": "https://{{auth_url}}/oauth/introspect?token={{access_token}}",
+                    "protocol": "https",
+                    "host": [
+                        "{{auth_url}}"
+                    ],
+                    "path": [
+                        "oauth",
+                        "introspect"
+                    ],
+                    "query": [
+                        {
+                            "key": "token",
+                            "value": "{{access_token}}",
+                            "equals": true
+                        }
+                    ]
+                },
+                "description": "Token introspection allows to determine the active state of an OAuth 2.0 access token and to determine meta-information about this accces token, such as the `scope`."
+            },
+            "response": []
+        }
+    ]
+}
+>>

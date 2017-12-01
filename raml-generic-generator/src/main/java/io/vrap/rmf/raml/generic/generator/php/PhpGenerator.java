@@ -2,6 +2,7 @@ package io.vrap.rmf.raml.generic.generator.php;
 
 import com.google.common.base.CaseFormat;
 import io.vrap.rmf.raml.generic.generator.Generator;
+import io.vrap.rmf.raml.generic.generator.Helper;
 import io.vrap.rmf.raml.model.modules.Api;
 import io.vrap.rmf.raml.model.types.AnyAnnotationType;
 import org.apache.commons.io.FileUtils;
@@ -26,9 +27,8 @@ public class PhpGenerator implements Generator {
     public void generate(final Api api, final File outputPath) throws IOException {
         String title = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, api.getTitle());
         String vendorName = Optional.ofNullable(this.vendorName).orElse(title);
-        if (!outputPath.exists()) {
-            Files.createDirectories(outputPath.toPath());
-        }
+
+        Helper.ensureDirectory(outputPath);
 
         AnyAnnotationType placeholderParamAnnotation = api.getAnnotationType("placeholderParam");
         TypesGenerator generator = new TypesGenerator(vendorName);
@@ -39,6 +39,8 @@ public class PhpGenerator implements Generator {
 
         RequestGenerator requestGenerator = new RequestGenerator(vendorName, placeholderParamAnnotation);
         f.addAll(requestGenerator.generate(api.getResources(), new File(outputPath, "src/Request")));
+
+        Helper.deleteObsoleteFiles(outputPath, f);
         Collection<File> files = FileUtils.listFiles(
                 outputPath,
                 TrueFileFilter.INSTANCE,

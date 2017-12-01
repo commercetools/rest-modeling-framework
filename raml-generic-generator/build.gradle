@@ -1,6 +1,15 @@
+buildscript {
+    dependencies {
+        classpath "com.github.jengelman.gradle.plugins:shadow:1.2.3"
+    }
+}
+
 plugins {
     id "de.undercouch.download" version "3.2.0"
 }
+
+apply plugin: 'application'
+apply plugin: "com.github.johnrengelman.shadow"
 
 import de.undercouch.gradle.tasks.download.Download
 
@@ -36,7 +45,11 @@ dependencies {
     compile 'com.google.guava:guava:22.0'
     compile 'org.apache.commons:commons-lang3:3.4'
     compile 'com.fasterxml.jackson.core:jackson-annotations:2.8.9'
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.0'
+    compile 'com.hypertino:inflector_2.12:1.0.7'
 }
+
+mainClassName = "io.vrap.rmf.raml.generic.generator.CodeGenerator"
 
 task downloadCtpApiZipFile(type: Download) {
     src 'https://github.com/commercetools/commercetools-api-reference/archive/master.zip'
@@ -54,3 +67,7 @@ test.dependsOn(':raml-model:build')
 build.dependsOn(downloadAndUnzipCtpApiFile)
 downloadCtpApiZipFile.onlyIf { project.hasProperty(apiProperty) }
 downloadAndUnzipCtpApiFile.onlyIf { project.hasProperty(apiProperty) }
+
+shadowJar {
+    append 'plugin.properties'
+}
