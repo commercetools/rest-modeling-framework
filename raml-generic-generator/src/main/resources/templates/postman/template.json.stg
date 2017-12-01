@@ -1,7 +1,7 @@
 main(api, id) ::= <<
 {
   "id": "<id>",
-  "name": "Commercetools.template",
+  "name": "Commercetools.template (generated)",
   "values": [
     {
       "enabled": true,
