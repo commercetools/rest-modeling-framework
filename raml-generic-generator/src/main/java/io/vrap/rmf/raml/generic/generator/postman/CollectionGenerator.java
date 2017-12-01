@@ -57,7 +57,7 @@ public class CollectionGenerator extends AbstractTemplateGenerator {
             st.add("id", "f367b534-c9ea-e7c5-1f46-7a27dc6a30ba");
         }
         if (fileName.equals("template.json.stg"))  {
-            st.add("id", "d7d6443c-6f61-4b12-972e-5fd97532b432");
+            st.add("id", "5bb74f05-5e78-4aee-b59e-492c947bc160");
         }
         return st.render();
     }
