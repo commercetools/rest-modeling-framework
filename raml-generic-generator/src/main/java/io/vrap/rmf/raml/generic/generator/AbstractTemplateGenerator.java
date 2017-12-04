@@ -1,17 +1,19 @@
 package io.vrap.rmf.raml.generic.generator;
 
-import com.google.common.base.CaseFormat;
 import com.google.common.base.Strings;
 import com.hypertino.inflector.English;
 import io.vrap.rmf.raml.model.util.StringCaseFormat;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.stringtemplate.v4.STGroupFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 
 public abstract class AbstractTemplateGenerator {
     protected File generateFile(final String content, final File outputFile) throws IOException {
@@ -23,6 +25,11 @@ public abstract class AbstractTemplateGenerator {
             return Files.write(outputFile.toPath(), content.getBytes(StandardCharsets.UTF_8)).toFile();
         }
         return null;
+    }
+
+    protected File copyFile(final InputStream file, final File outputFile) throws IOException {
+        Files.copy(file, outputFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+        return outputFile;
     }
 
     protected STGroupFile createSTGroup(final URL resource) {
@@ -49,6 +56,8 @@ public abstract class AbstractTemplateGenerator {
                             return StringCaseFormat.LOWER_CAMEL_CASE.apply(arg.toString().replace(".", "-"));
                         case "uppercamel":
                             return StringCaseFormat.UPPER_CAMEL_CASE.apply(arg.toString().replace(".", "-"));
+                        case "jsonescape":
+                            return StringEscapeUtils.escapeJson(arg.toString());
                         default:
                             return arg.toString();
                     }

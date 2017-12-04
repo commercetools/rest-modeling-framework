@@ -8,7 +8,6 @@ import io.vrap.rmf.raml.model.util.StringCaseFormat;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
 
 public class PostmanGenerator implements Generator {
 

@@ -12,7 +12,7 @@ main(api, id) ::= <<
     {
       "enabled": true,
       "key": "auth_url",
-      "value": "<api.oAuth.uri.host>",
+      "value": "<api.oAuth.uri.uri>",
       "type": "text"
     },
     {
