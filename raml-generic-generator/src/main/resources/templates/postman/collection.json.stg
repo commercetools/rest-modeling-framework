@@ -7,6 +7,7 @@ main(api, id, readme) ::= <<
         "schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
     },
     "item": [
+        <authorization(api.OAuth)>,
         <api.resources: {r|<folder(api.oAuth, r)>}; separator=",">
     ]
 }
@@ -400,9 +401,253 @@ auth(oauth) ::=<<
 {
     "type": "oauth2",
     "oauth2": {
-        "accessTokenUrl": "https://{{auth_url}}<oauth.uri.path>",
-        "grantType": "client_credentials",
-        "addTokenTo": "header"
+        "accessToken": "{{access_token}}",
+        "addTokenTo": "header",
+        "tokenType": "Bearer"
     }
+}
+>>
+
+authorization(oauth) ::=<<
+
+{
+    "name": "Authorization",
+    "description": "",
+    "item": [
+        {
+            "name": "Obtain access token",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "tests[\"Status code is 200\"] = responseCode.code === 200;",
+                            "var data = JSON.parse(responseBody);",
+                            "if(data.access_token){",
+                            "    postman.setEnvironmentVariable(\"access_token\", data.access_token);",
+                            "}"
+                        ]
+                    }
+                }
+            ],
+            "request": {
+                "auth": {
+                    "type": "basic",
+                    "basic": {
+                        "username": "\<your client id\>",
+                        "password": "\<your client secret\>"
+                    }
+                },
+                "method": "POST",
+                "header": [],
+                "body": {
+                    "mode": "raw",
+                    "raw": ""
+                },
+                "url": {
+                    "raw": "https://{{auth_url}}<oauth.uri.path>?grant_type=client_credentials",
+                    "protocol": "https",
+                    "host": [
+                        "{{auth_url}}"
+                    ],
+                    "path": [
+                        "<oauth.uri.pathElements; separator="\",\"">"
+                    ],
+                    "query": [
+                        {
+                            "key": "grant_type",
+                            "value": "client_credentials",
+                            "equals": true
+                        }
+                    ]
+                },
+                "description": "Use this request to obtain an access token for your commercetools platform project via Client Credentials Flow. As a prerequisite you must have filled out environment variables in Postman for projectKey, client_id and client_secret to use this."
+            },
+            "response": []
+        },
+        {
+            "name": "Obtain access token through password flow",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "tests[\"Status code is 200\"] = responseCode.code === 200;"
+                        ]
+                    }
+                }
+            ],
+            "request": {
+                "auth": {
+                    "type": "basic",
+                    "basic": {
+                        "username": "\<your client id\>",
+                        "password": "\<your client secret\>"
+                    }
+                },
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "",
+                        "value": "",
+                        "disabled": true
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": ""
+                },
+                "url": {
+                    "raw": "https://{{auth_url}}/oauth/{{projectKey}}/customers/token?grant_type=password&username={{user_email}}&password={{user_password}}",
+                    "protocol": "https",
+                    "host": [
+                        "{{auth_url}}"
+                    ],
+                    "path": [
+                        "oauth",
+                        "{{projectKey}}",
+                        "customers",
+                        "token"
+                    ],
+                    "query": [
+                        {
+                            "key": "grant_type",
+                            "value": "password",
+                            "equals": true
+                        },
+                        {
+                            "key": "username",
+                            "value": "",
+                            "equals": true
+                        },
+                        {
+                            "key": "password",
+                            "value": "",
+                            "equals": true
+                        },
+                        {
+                            "key": "scope",
+                            "value": "manage_project:{{projectKey}}",
+                            "equals": true
+                        }
+                    ]
+                },
+                "description": "Use this request to obtain an access token for your commercetools platform project via Password Flow. As a prerequisite you must have filled out environment variables in Postman for projectKey, client_id, client_secret, user_email and user_password to use this."
+            },
+            "response": []
+        },
+        {
+            "name": "Token for Anonymous Sessions",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "tests[\"Status code is 200\"] = responseCode.code === 200;"
+                        ]
+                    }
+                }
+            ],
+            "request": {
+                "auth": {
+                    "type": "basic",
+                    "basic": {
+                        "username": "\<your client id\>",
+                        "password": "\<your client secret\>"
+                    }
+                },
+                "method": "POST",
+                "header": [],
+                "body": {
+                    "mode": "raw",
+                    "raw": ""
+                },
+                "url": {
+                    "raw": "https://{{auth_url}}/oauth/{{projectKey}}/anonymous/token?grant_type=client_credentials&scope=manage_my_profile:{{projectKey}}",
+                    "protocol": "https",
+                    "host": [
+                        "{{auth_url}}"
+                    ],
+                    "path": [
+                        "oauth",
+                        "{{projectKey}}",
+                        "anonymous",
+                        "token"
+                    ],
+                    "query": [
+                        {
+                            "key": "grant_type",
+                            "value": "client_credentials",
+                            "equals": true
+                        },
+                        {
+                            "key": "scope",
+                            "value": "manage_my_profile:{{projectKey}}",
+                            "equals": true
+                        }
+                    ]
+                },
+                "description": "Use this request to obtain an access token for a anonymous session. As a prerequisite you must have filled out environment variables in Postman for projectKey, client_id and client_secret to use this."
+            },
+            "response": []
+        },
+        {
+            "name": "Token Introspection",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "type": "text/javascript",
+                        "exec": [
+                            "tests[\"Status code is 200\"] = responseCode.code === 200;"
+                        ]
+                    }
+                }
+            ],
+            "request": {
+                "auth": {
+                    "type": "basic",
+                    "basic": {
+                        "username": "\<your client id\>",
+                        "password": "\<your client secret\>"
+                    }
+                },
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": ""
+                },
+                "url": {
+                    "raw": "https://{{auth_url}}/oauth/introspect?token={{access_token}}",
+                    "protocol": "https",
+                    "host": [
+                        "{{auth_url}}"
+                    ],
+                    "path": [
+                        "oauth",
+                        "introspect"
+                    ],
+                    "query": [
+                        {
+                            "key": "token",
+                            "value": "{{access_token}}",
+                            "equals": true
+                        }
+                    ]
+                },
+                "description": "Token introspection allows to determine the active state of an OAuth 2.0 access token and to determine meta-information about this accces token, such as the `scope`."
+            },
+            "response": []
+        }
+    ]
 }
 >>

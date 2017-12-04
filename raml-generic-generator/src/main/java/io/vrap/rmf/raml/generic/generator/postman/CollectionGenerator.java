@@ -43,7 +43,7 @@ public class CollectionGenerator extends AbstractTemplateGenerator {
                 }
             }
         }
-        f.add(copyFile(Resources.getResource("templates/postman/oauth_settings.png").openStream(), new File(outputPath, "oauth_settings.png")));
+        f.add(copyFile(Resources.getResource("templates/postman/connection_settings.png").openStream(), new File(outputPath, "connection_settings.png")));
 
         return f;
     }

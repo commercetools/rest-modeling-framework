@@ -12,7 +12,7 @@ main(api, id) ::= <<
     {
       "enabled": true,
       "key": "auth_url",
-      "value": "<api.oAuth.uri.uri>",
+      "value": "<api.oAuth.host>",
       "type": "text"
     },
     {
@@ -23,25 +23,7 @@ main(api, id) ::= <<
     },
     {
       "enabled": true,
-      "key": "client_id",
-      "value": "",
-      "type": "text"
-    },
-    {
-      "enabled": true,
-      "key": "client_secret",
-      "value": "",
-      "type": "text"
-    },
-    {
-      "enabled": true,
       "key": "access_token",
-      "value": "",
-      "type": "text"
-    },
-    {
-      "enabled": true,
-      "key": "refresh_token",
       "value": "",
       "type": "text"
     }
