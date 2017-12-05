@@ -1,23 +1,19 @@
 package io.vrap.rmf.raml.generic.generator;
 
-import com.google.common.base.CaseFormat;
 import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
-import io.vrap.rmf.raml.model.types.AnyType;
-import io.vrap.rmf.raml.model.types.BuiltinType;
-import io.vrap.rmf.raml.model.types.ObjectType;
-import io.vrap.rmf.raml.model.types.Property;
+import com.hypertino.inflector.English;
 import io.vrap.rmf.raml.model.util.StringCaseFormat;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.stringtemplate.v4.STGroupFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.List;
-import java.util.stream.Collectors;
+import java.nio.file.StandardCopyOption;
 
 public abstract class AbstractTemplateGenerator {
     protected File generateFile(final String content, final File outputFile) throws IOException {
@@ -31,6 +27,11 @@ public abstract class AbstractTemplateGenerator {
         return null;
     }
 
+    protected File copyFile(final InputStream file, final File outputFile) throws IOException {
+        Files.copy(file, outputFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+        return outputFile;
+    }
+
     protected STGroupFile createSTGroup(final URL resource) {
         final STGroupFile stGroup = new STGroupFile(resource, "UTF-8", '<', '>');
         stGroup.load();
@@ -39,16 +40,24 @@ public abstract class AbstractTemplateGenerator {
                     switch (Strings.nullToEmpty(formatString)) {
                         case "capitalize":
                             return StringUtils.capitalize(arg.toString());
+                        case "singularize":
+                            return English.singular(arg.toString());
+                        case "pluralize":
+                            return English.plural(arg.toString());
                         case "upperUnderscore":
                             return StringCaseFormat.UPPER_UNDERSCORE_CASE.apply(arg.toString());
                         case "lowerHyphen":
                             return StringCaseFormat.LOWER_HYPHEN_CASE.apply(arg.toString());
                         case "lowercase":
                             return StringUtils.lowerCase(arg.toString());
+                        case "uppercase":
+                            return StringUtils.upperCase(arg.toString());
                         case "lowercamel":
                             return StringCaseFormat.LOWER_CAMEL_CASE.apply(arg.toString().replace(".", "-"));
                         case "uppercamel":
                             return StringCaseFormat.UPPER_CAMEL_CASE.apply(arg.toString().replace(".", "-"));
+                        case "jsonescape":
+                            return StringEscapeUtils.escapeJson(arg.toString());
                         default:
                             return arg.toString();
                     }

@@ -138,7 +138,7 @@ resourceMethod(resource) ::=<<
  */
 public function <resource.relativeUri; format="methodName">(<if(resource.hasParams)>$<resource.relativeUri; format="params"><endif>) {
     <if(resource.hasParams)>$args = array_merge($this->getArgs(), [<resource.relativeUri; format="paramArray">]);<endif>
-    return new Resource<resource.index>($this->getUri() . '<resource.relativeUri>', <if(resource.hasParams)>$args<else>$this->getArgs()<endif>);
+    return new Resource<resource.index>($this->getUri() . '<resource.relativeUri.template>', <if(resource.hasParams)>$args<else>$this->getArgs()<endif>);
 }
 
 >>
