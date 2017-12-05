@@ -2,10 +2,10 @@ package io.vrap.rmf.raml.generic.generator.postman;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import io.vrap.rmf.raml.model.facets.StringInstance;
 import io.vrap.rmf.raml.model.resources.Method;
 import io.vrap.rmf.raml.model.resources.Resource;
 import io.vrap.rmf.raml.model.types.ObjectType;
+import io.vrap.rmf.raml.model.values.StringInstance;
 import org.apache.commons.lang3.StringEscapeUtils;
 
 import java.io.IOException;
@@ -21,10 +21,10 @@ public class ActionGenModel extends ItemGenModel{
         this.type = type;
         String example = null;
 
-        if (type.getExample() != null && (type.getExample().getValue() instanceof StringInstance)) {
+        if (type.getExamples().size() == 1 && (type.getExamples().get(0).getValue() instanceof StringInstance)) {
             ObjectMapper mapper = new ObjectMapper();
             try {
-                ObjectNode nodes = (ObjectNode)mapper.readTree(((StringInstance)type.getExample().getValue()).getValue());
+                ObjectNode nodes = (ObjectNode)mapper.readTree(((StringInstance)type.getExamples().get(0).getValue()).getValue());
                 nodes.put("action", type.getDiscriminatorValue());
 
                 example = Arrays.stream(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(nodes)

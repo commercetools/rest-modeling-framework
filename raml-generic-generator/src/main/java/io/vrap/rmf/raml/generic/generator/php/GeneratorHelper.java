@@ -43,7 +43,7 @@ public class GeneratorHelper {
                         return ((Expression)uriTemplatePart).getVarSpecs().stream()
                                 .map(s -> delimiter + StringUtils.capitalize(s.getVariableName()) + suffix).collect(Collectors.joining());
                     }
-                    return StringCaseFormat.LOWER_CAMEL_CASE.apply(uriTemplatePart.toString().replace("/", "-"));
+                    return StringCaseFormat.UPPER_CAMEL_CASE.apply(uriTemplatePart.toString().replace("/", "-"));
                 }
         ).collect(Collectors.joining())).replaceAll("[^\\p{L}\\p{Nd}]+", "");
     }

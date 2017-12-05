@@ -1,6 +1,5 @@
 package io.vrap.rmf.raml.generic.generator.php
 
-import com.google.common.collect.Lists
 import com.google.common.io.Resources
 import io.vrap.raml.generic.generator.ResourceFixtures
 import io.vrap.rmf.raml.model.modules.Api
@@ -20,7 +19,6 @@ import org.assertj.core.util.Files
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.resource.ResourceSet
 import org.eclipse.emf.ecore.resource.URIConverter
-import spock.lang.Ignore
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -339,7 +337,7 @@ class PHPGeneratorTest extends Specification implements ResourceFixtures {
         title: Test
         baseUri: https://{region}.api.example.com/{project}
         ''')
-        File file = new File(Resources.getResource("templates/php/statics/src/Client/Config.php.stg").getFile());
+        URL file = Resources.getResource("templates/php/statics/src/Client/Config.php.stg");
         StaticGenerator generator = new StaticGenerator( "Test")
         String result = generator.generateContent(file, api);
         result == fileContent("ConfigBaseUriParameter.php")
