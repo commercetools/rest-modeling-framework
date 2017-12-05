@@ -6,9 +6,11 @@ main(api, id, readme) ::= <<
         "description": "<readme; format="jsonescape">",
         "schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
     },
+    "auth":
+        <auth(api.OAuth)>,
     "item": [
         <authorization(api.OAuth)>,
-        <api.resources: {r|<folder(api.oAuth, r)>}; separator=",">
+        <api.resources: {r|<folder(api.OAuth, r)>}; separator=",">
     ]
 }
 >>
@@ -20,6 +22,17 @@ folder(oauth, resource) ::=<<
     "description": "<resource.description>",
     "item": [
         <resource.items: {item |<(item.template)(oauth, item)>}; separator=",">
+    ],
+    "event": [
+        {
+            "listen": "test",
+            "script": {
+                "type": "text/javascript",
+                "exec": [
+                    <test(first(resource.items), false)>
+                ]
+            }
+        }
     ]
 }
 >>
@@ -48,7 +61,8 @@ query(oauth, item) ::=<<
         }
     ],
     "request": {
-        "auth": <auth(oauth)>,
+        "auth":
+            <auth(oauth)>,
         "method": "<item.method.methodName; format="uppercase">",
         "header": [
             {
@@ -163,7 +177,8 @@ getByParam(oauth, item, param) ::=<<
         }
     ],
     "request": {
-        "auth": <auth(oauth)>,
+        "auth":
+            <auth(oauth)>,
         "method": "<item.method.methodName; format="uppercase">",
         "header": [
             {
@@ -228,7 +243,8 @@ updateByParam(oauth, item, param) ::=<<
         }
     ],
     "request": {
-        "auth": <auth(oauth)>,
+        "auth":
+            <auth(oauth)>,
         "method": "<item.method.methodName; format="uppercase">",
         "header": [
             {
@@ -293,7 +309,8 @@ deleteByParam(oauth, item, param) ::=<<
         }
     ],
     "request": {
-        "auth": <auth(oauth)>,
+        "auth":
+            <auth(oauth)>,
         "method": "<item.method.methodName; format="uppercase">",
         "header": [
             {
@@ -350,7 +367,8 @@ action(oauth, action) ::=<<
         }
     ],
     "request": {
-        "auth": <auth(oauth)>,
+        "auth":
+            <auth(oauth)>,
         "method": "<item.method.methodName; format="uppercase">",
         "body": {
             "mode": "raw",
@@ -401,7 +419,7 @@ auth(oauth) ::=<<
 {
     "type": "oauth2",
     "oauth2": {
-        "accessToken": "{{access_token}}",
+        "accessToken": "{{ctp_access_token}}",
         "addTokenTo": "header",
         "tokenType": "Bearer"
     }
@@ -444,8 +462,8 @@ authorization(oauth) ::=<<
                 "auth": {
                     "type": "basic",
                     "basic": {
-                        "username": "\<your client id\>",
-                        "password": "\<your client secret\>"
+                        "username": "{{ctp_client_id}}",
+                        "password": "{{ctp_client_secret}}"
                     }
                 },
                 "method": "POST",
@@ -492,8 +510,8 @@ authorization(oauth) ::=<<
                 "auth": {
                     "type": "basic",
                     "basic": {
-                        "username": "\<your client id\>",
-                        "password": "\<your client secret\>"
+                        "username": "{{ctp_client_id}}",
+                        "password": "{{ctp_client_secret}}"
                     }
                 },
                 "method": "POST",
@@ -564,8 +582,8 @@ authorization(oauth) ::=<<
                 "auth": {
                     "type": "basic",
                     "basic": {
-                        "username": "\<your client id\>",
-                        "password": "\<your client secret\>"
+                        "username": "{{ctp_client_id}}",
+                        "password": "{{ctp_client_secret}}"
                     }
                 },
                 "method": "POST",
@@ -620,8 +638,8 @@ authorization(oauth) ::=<<
                 "auth": {
                     "type": "basic",
                     "basic": {
-                        "username": "\<your client id\>",
-                        "password": "\<your client secret\>"
+                        "username": "{{ctp_client_id}}",
+                        "password": "{{ctp_client_secret}}"
                     }
                 },
                 "method": "POST",
@@ -636,7 +654,7 @@ authorization(oauth) ::=<<
                     "raw": ""
                 },
                 "url": {
-                    "raw": "https://{{auth_url}}/oauth/introspect?token={{access_token}}",
+                    "raw": "https://{{auth_url}}/oauth/introspect?token={{ctp_access_token}}",
                     "protocol": "https",
                     "host": [
                         "{{auth_url}}"
@@ -648,7 +666,7 @@ authorization(oauth) ::=<<
                     "query": [
                         {
                             "key": "token",
-                            "value": "{{access_token}}",
+                            "value": "{{ctp_access_token}}",
                             "equals": true
                         }
                     ]
