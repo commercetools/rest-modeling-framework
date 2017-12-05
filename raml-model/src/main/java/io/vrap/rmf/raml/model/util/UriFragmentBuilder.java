@@ -45,6 +45,7 @@ public class UriFragmentBuilder {
             final List<String> segments = uriFragmentsBuilderSwitch.apply(annotation.eContainer());
             segments.add(annotation.eContainmentFeature().getName());
             segments.add(annotation.getType().getName());
+            return segments;
         }
         return new ArrayList<>();
     }

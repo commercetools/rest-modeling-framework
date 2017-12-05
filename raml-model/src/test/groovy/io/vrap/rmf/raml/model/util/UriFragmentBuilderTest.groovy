@@ -4,7 +4,9 @@ import com.damnhandy.uri.template.UriTemplate
 import io.vrap.rmf.raml.model.modules.Api
 import io.vrap.rmf.raml.model.modules.ModulesFactory
 import io.vrap.rmf.raml.model.resources.*
+import io.vrap.rmf.raml.model.types.Annotation
 import io.vrap.rmf.raml.model.types.AnyType
+import io.vrap.rmf.raml.model.types.StringAnnotationType
 import io.vrap.rmf.raml.model.types.TypesFactory
 import spock.lang.Shared
 import spock.lang.Specification
@@ -29,6 +31,21 @@ class UriFragmentBuilderTest extends Specification {
         api.types.add(anyType)
         then:
         uriFragmentBuilder.getURIFragment(anyType) == '/types/Type'
+    }
+
+    def "annotation"() {
+        when:
+        AnyType anyType = TypesFactory.eINSTANCE.createAnyType()
+        anyType.setName("Type")
+        api.types.add(anyType)
+        StringAnnotationType annotationType = TypesFactory.eINSTANCE.createStringAnnotationType()
+        annotationType.setName("AnnotatedName")
+        api.annotationTypes.add(annotationType)
+        Annotation annotation = TypesFactory.eINSTANCE.createAnnotation()
+        annotation.type = annotationType
+        anyType.annotations.add(annotation)
+        then:
+        uriFragmentBuilder.getURIFragment(annotation) == '/types/Type/annotations/AnnotatedName'
     }
 
     def "resources"() {
