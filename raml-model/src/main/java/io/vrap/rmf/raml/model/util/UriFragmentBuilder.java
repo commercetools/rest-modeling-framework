@@ -8,6 +8,7 @@ import io.vrap.rmf.raml.model.resources.Resource;
 import io.vrap.rmf.raml.model.responses.Body;
 import io.vrap.rmf.raml.model.responses.Response;
 import io.vrap.rmf.raml.model.types.Annotation;
+import io.vrap.rmf.raml.model.values.StringInstance;
 import org.eclipse.emf.ecore.EObject;
 
 import java.util.ArrayList;
@@ -26,6 +27,7 @@ public class UriFragmentBuilder {
             .on(Method.class, this::method)
             .on(Resource.class, this::resource)
             .on(Response.class, this::response)
+            .on(StringInstance.class, this::stringInstance)
             .fallthrough(eObject -> new ArrayList<>());
 
     public String getURIFragment(final EObject eObject) {
@@ -94,5 +96,9 @@ public class UriFragmentBuilder {
         } else {
             return segments;
         }
+    }
+
+    private List<String> stringInstance(final StringInstance stringInstance) {
+        return uriFragmentsBuilderSwitch.apply(stringInstance.eContainer());
     }
 }
