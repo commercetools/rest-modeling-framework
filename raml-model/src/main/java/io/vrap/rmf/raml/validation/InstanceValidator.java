@@ -2,6 +2,7 @@ package io.vrap.rmf.raml.validation;
 
 import com.google.common.base.Strings;
 import io.vrap.rmf.raml.model.types.*;
+import io.vrap.rmf.raml.model.util.InstanceHelper;
 import io.vrap.rmf.raml.model.util.ModelHelper;
 import io.vrap.rmf.raml.model.values.*;
 import io.vrap.rmf.raml.model.values.util.ValuesSwitch;
@@ -16,6 +17,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.ANY_TYPE;
+import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.ARRAY_TYPE;
+import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.OBJECT_TYPE;
 
 public class InstanceValidator {
 
@@ -87,8 +90,12 @@ public class InstanceValidator {
                 if (!Strings.isNullOrEmpty(value)) {
                     validationResults.add(error("Value must be empty", stringInstance));
                 }
-            }
-            else if (!typeIs(ANY_TYPE) && !typeInstanceOf(DateTimeTypeFacet.class) && !typeInstanceOf(TypeTemplate.class)) {
+            // try to parse and validate the string instance as array or object if applicable
+            } else if (typeIs(ARRAY_TYPE) && value.trim().startsWith("[") && value.trim().endsWith("]")) {
+                return doSwitch(InstanceHelper.parse(value));
+            } else if (typeIs(OBJECT_TYPE) && value.trim().startsWith("{") && value.trim().endsWith("}")) {
+                return doSwitch(InstanceHelper.parse(value));
+            } else if (!typeIs(ANY_TYPE) && !typeInstanceOf(DateTimeTypeFacet.class) && !typeInstanceOf(TypeTemplate.class)) {
                 validationResults.add(error("Invalid type", stringInstance));
             }
             return validationResults;

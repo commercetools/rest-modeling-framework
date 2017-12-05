@@ -28,7 +28,7 @@ class InstanceHelperTest extends Specification {
         when:
         String json = '{ test: "Me" }'
         then:
-        RamlModelResult<Instance> result = InstanceHelper.parse(json, objectType)
+        RamlModelResult<Instance> result = InstanceHelper.parseAndValidate(json, objectType)
         result.validationResults.empty == true
         result.rootObject instanceof ObjectInstance
         ObjectInstance objectInstance = result.rootObject
@@ -39,7 +39,7 @@ class InstanceHelperTest extends Specification {
         when:
         String json = '{ test: 1 }'
         then:
-        RamlModelResult<Instance> result = InstanceHelper.parse(json, objectType)
+        RamlModelResult<Instance> result = InstanceHelper.parseAndValidate(json, objectType)
         result.validationResults.empty == false
     }
 }

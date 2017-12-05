@@ -12,6 +12,7 @@ import io.vrap.rmf.raml.persistence.constructor.Scope;
 import io.vrap.rmf.raml.validation.InstanceValidator;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.TokenStream;
+import org.eclipse.emf.common.util.Diagnostic;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
@@ -33,7 +34,17 @@ public interface InstanceHelper {
      *
      * @return the parsed and validated instance
      */
-    static RamlModelResult<Instance> parse(final String text, final AnyType type) {
+    static RamlModelResult<Instance> parseAndValidate(final String text, final AnyType type) {
+        final Instance instance = parse(text);
+
+        final List<Resource.Diagnostic> validationResults = validate(instance, type).stream()
+                .map(RamlDiagnostic::of)
+                .collect(Collectors.toList());
+
+        return RamlModelResult.of(validationResults, instance);
+    }
+
+    static Instance parse(final String text) {
         final ResourceSet resourceSet = new RamlResourceSet();
         final URIConverter uriConverter = resourceSet.getURIConverter();
         final URI uri = URI.createURI("validate.raml");
@@ -41,12 +52,10 @@ public interface InstanceHelper {
         final TokenStream tokenStream = new CommonTokenStream(lexer);
         final RAMLParser parser = new RAMLParser(tokenStream);
         final Scope scope = Scope.of(resourceSet.createResource(uri));
-        final Instance instance = new InstanceConstructor().construct(parser, scope);
+        return new InstanceConstructor().construct(parser, scope);
+    }
 
-        final List<Resource.Diagnostic> validationResults = new InstanceValidator().validate(instance, type).stream()
-                .map(RamlDiagnostic::of)
-                .collect(Collectors.toList());
-
-        return RamlModelResult.of(validationResults, instance);
+    static List<Diagnostic> validate(final Instance instance, final AnyType type) {
+        return new InstanceValidator().validate(instance, type);
     }
 }
