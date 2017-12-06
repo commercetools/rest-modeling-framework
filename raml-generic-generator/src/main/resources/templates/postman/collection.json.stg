@@ -410,8 +410,12 @@ test(item, param) ::=<<
 "if(data.<param>){",
 "    postman.setEnvironmentVariable(\"<item.resource.resourcePathName; format="singularize">-<param>\", data.<param>); ",
 <endif>
+<if (item.testScript)>
+"}",
+<item.testScript: {t |"<t; format="jsonescape">"}; separator=",\n">
+<else>
 "}"
-
+<endif>
 >>
 
 auth(oauth) ::=<<
