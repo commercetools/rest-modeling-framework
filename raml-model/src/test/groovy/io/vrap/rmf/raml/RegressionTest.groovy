@@ -14,18 +14,16 @@ import java.nio.file.Path
 import java.nio.file.Paths
 
 class RegressionTest extends Specification implements ResourceFixtures {
-    Path featureFile
+    List<Path> featureFiles = new ArrayList<>()
     RamlModelBuilder modelBuilder = new RamlModelBuilder()
 
-    def setup() {
-        String testFileName = StringCaseFormat.LOWER_HYPHEN_CASE.apply(specificationContext.currentFeature.getName());
-        featureFile = Paths.get("./tmp-${testFileName}");
-    }
-
     def cleanup() {
-        if (featureFile.toFile().exists()) {
-            featureFile.toFile().delete()
+        featureFiles.each {
+            if (it.toFile().exists()) {
+                it.toFile().delete()
+            }
         }
+        featureFiles.clear()
     }
 
     def "baseuriparameter-with-invalid-type.raml"() {
@@ -66,8 +64,60 @@ class RegressionTest extends Specification implements ResourceFixtures {
         ramlModelResult.validationResults.size() == 0
     }
 
+    def "nested discriminator example validation.raml"() {
+        when:
+        RamlModelResult<Api> ramlModelResult = constructApi(
+                '''\
+        #%RAML 1.0
+        title: Some API
+        types:
+            UpdateAction:
+                type: object
+                discriminator: action
+                properties:
+                    action:
+                        type: string
+            CartDiscountChangeTargetAction:
+                type: UpdateAction
+                discriminatorValue: changeTarget
+                example:
+                    {
+                        "action": "changeTarget",
+                        "target": {
+                            "type": "lineItems",
+                            "predicate": "sku = \\"mySKU\\""
+                        }
+                    }
+                properties:
+                    target:
+                        type: CartDiscountTarget
+            CartDiscountTarget:
+                type: object
+                discriminator: type
+                properties:
+                    type:
+                        type: string
+            CartDiscountLineItemsTarget:
+                type: CartDiscountTarget
+                discriminatorValue: lineItems
+                properties:
+                    predicate:
+                        type: string
+        ''')
+        then:
+        ramlModelResult.validationResults.size() == 0
+    }
+
     RamlModelResult<Api> constructApi(String input) {
+        constructApi('default', input)
+    }
+
+    RamlModelResult<Api> constructApi(String fileName, String input) {
+        String testFileName = StringCaseFormat.LOWER_HYPHEN_CASE.apply(specificationContext.currentFeature.getName());
+        Path featureFile = Paths.get("./tmp-${fileName}-${testFileName}");
+
         Files.write(featureFile, input.stripIndent().getBytes(Charsets.UTF_8));
+        featureFiles.add(featureFile)
         URI i = URI.createURI(featureFile.toAbsolutePath().toUri().toString())
         return modelBuilder.buildApi(i)
     }
