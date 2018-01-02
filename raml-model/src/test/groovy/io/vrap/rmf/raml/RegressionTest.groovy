@@ -259,6 +259,33 @@ class RegressionTest extends Specification implements ResourceFixtures {
         annotation.value.value == "{{version}}"
     }
 
+    def "multi-extension"() {
+        when:
+        writeFile("api.raml",
+                '''\
+                #%RAML 1.0
+                title: Some API
+                ''')
+        writeFile("extend.raml",
+                Arrays.asList("api.raml"),
+                '''\
+                #%RAML 1.0 Extension
+                extends: api.raml
+                title: Extended API
+                ''')
+        RamlModelResult<Api> ramlModelResult = constructApi(
+                "final.raml",
+                Arrays.asList("extend.raml"),
+                '''\
+                #%RAML 1.0 Extension
+                extends: extend.raml
+                title: Final API
+                ''')
+        then:
+        ramlModelResult.validationResults.size() == 0
+        ramlModelResult.rootObject.title == "Final API"
+    }
+
     RamlModelResult<Api> constructApi(String input) {
         constructApi('api.raml', input)
     }
