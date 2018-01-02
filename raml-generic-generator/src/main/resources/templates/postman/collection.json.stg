@@ -82,10 +82,10 @@ query(oauth, item) ::=<<
             "path": [
                 "{{projectKey}}",
                 "<item.resource.resourcePathName>"
-            <if (item.method.queryParameters)>
+            <if (item.queryParameters)>
             ],
             "query": [
-                <item.method.queryParameters: {param |<queryParam(param)>}; separator=",">
+                <item.queryParameters: {param |<queryParam(param)>}; separator=",">
             <endif>
             ]
         },
@@ -99,9 +99,9 @@ queryParam(param) ::=<<
 
 {
     "key": "<param.name>",
-    "value": "",
+    "value": "<param.default>",
     "equals": true,
-    "disabled": true
+    "disabled": <param.disabled>
 }
 >>
 
@@ -141,10 +141,10 @@ create(oauth, item) ::=<<
             "path": [
                 "{{projectKey}}",
                 "<item.resource.resourcePathName>"
-            <if (item.method.queryParameters)>
+            <if (item.queryParameters)>
             ],
             "query": [
-                <item.method.queryParameters: {param |<queryParam(param)>}; separator=",">
+                <item.queryParameters: {param |<queryParam(param)>}; separator=",">
             <endif>
             ]
         },
@@ -207,10 +207,10 @@ getByParam(oauth, item, param) ::=<<
                 <else>
                 "{{<item.resource.resourcePathName; format="singularize">-id}}"
                 <endif>
-            <if (item.method.queryParameters)>
+            <if (item.queryParameters)>
             ],
             "query": [
-                <item.method.queryParameters: {param |<queryParam(param)>}; separator=",">
+                <item.queryParameters: {param |<queryParam(param)>}; separator=",">
             <endif>
             ]
         },
@@ -273,10 +273,10 @@ updateByParam(oauth, item, param) ::=<<
                 <else>
                 "{{<item.resource.resourcePathName; format="singularize">-id}}"
                 <endif>
-            <if (item.method.queryParameters)>
+            <if (item.queryParameters)>
             ],
             "query": [
-                <item.method.queryParameters: {param |<queryParam(param)>}; separator=",">
+                <item.queryParameters: {param |<queryParam(param)>}; separator=",">
             <endif>
             ]
         },
@@ -324,9 +324,9 @@ deleteByParam(oauth, item, param) ::=<<
         },
         "url": {
             <if (param)>
-            "raw": "{{host}}/{{projectKey}}<item.resource.relativeUri.template>/<param>={{<item.resource.resourcePathName; format="singularize">-<param>}}",
+            "raw": "{{host}}/{{projectKey}}<item.resource.relativeUri.template>/<param>={{<item.resource.resourcePathName; format="singularize">-<param>}}?version={{<item.resource.resourcePathName; format="singularize">-version}}",
             <else>
-            "raw": "{{host}}/{{projectKey}}<item.resource.relativeUri.template>/{{<item.resource.resourcePathName; format="singularize">-id}}",
+            "raw": "{{host}}/{{projectKey}}<item.resource.relativeUri.template>/{{<item.resource.resourcePathName; format="singularize">-id}}?version={{<item.resource.resourcePathName; format="singularize">-version}}",
             <endif>
             "host": [
                 "{{host}}"
@@ -339,10 +339,10 @@ deleteByParam(oauth, item, param) ::=<<
                 <else>
                 "{{<item.resource.resourcePathName; format="singularize">-id}}"
                 <endif>
-            <if (item.method.queryParameters)>
+            <if (item.queryParameters)>
             ],
             "query": [
-                <item.method.queryParameters: {param |<queryParam(param)>}; separator=",">
+                <item.queryParameters: {param |<queryParam(param)>}; separator=",">
             <endif>
             ]
         },
@@ -383,10 +383,10 @@ action(oauth, action) ::=<<
                 "{{projectKey}}",
                 "<item.resource.resourcePathName>",
                 "{{<item.resource.resourcePathName; format="singularize">-id}}"
-            <if (item.method.queryParameters)>
+            <if (item.queryParameters)>
             ],
             "query": [
-                <item.method.queryParameters: {param |<queryParam(param)>}; separator=",">
+                <item.queryParameters: {param |<queryParam(param)>}; separator=",">
             <endif>
             ]
         },
@@ -447,7 +447,7 @@ authorization(oauth) ::=<<
                             "tests[\"Status code is 200\"] = responseCode.code === 200;",
                             "var data = JSON.parse(responseBody);",
                             "if(data.access_token){",
-                            "    postman.setEnvironmentVariable(\"access_token\", data.access_token);",
+                            "    postman.setEnvironmentVariable(\"ctp_access_token\", data.access_token);",
                             "}",
                             "if (data.scope) {",
                             "    parts = data.scope.split(\" \");",

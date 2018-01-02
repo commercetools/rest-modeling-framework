@@ -1,11 +1,14 @@
 package io.vrap.rmf.raml.generic.generator.postman;
 
+import io.vrap.rmf.raml.model.resources.HttpMethod;
 import io.vrap.rmf.raml.model.resources.Method;
 import io.vrap.rmf.raml.model.resources.Resource;
 import io.vrap.rmf.raml.model.util.StringCaseFormat;
 import org.apache.commons.lang3.StringEscapeUtils;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class ItemGenModel {
     private final Resource resource;
@@ -33,6 +36,10 @@ public class ItemGenModel {
 
     public Method getMethod() {
         return method;
+    }
+
+    public List<ParamGenModel> getQueryParameters() {
+        return method.getQueryParameters().stream().map(queryParameter -> new ParamGenModel(resource, queryParameter)).collect(Collectors.toList());
     }
 
     public String getTemplate()
