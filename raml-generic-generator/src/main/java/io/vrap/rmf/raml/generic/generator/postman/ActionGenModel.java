@@ -74,6 +74,10 @@ public class ActionGenModel extends ItemGenModel{
         return type;
     }
 
+    public String getDiscriminatorValue() {
+        return type.getDiscriminatorValue();
+    }
+
     public List<String> getTestScript() {
         return testScript;
     }
