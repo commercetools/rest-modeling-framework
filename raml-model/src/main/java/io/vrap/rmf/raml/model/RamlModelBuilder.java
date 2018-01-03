@@ -113,7 +113,13 @@ public class RamlModelBuilder {
 
         @Override
         public Api caseApiExtension(final ApiExtension apiExtension) {
-            final Api resolvedApi = caseApi(apiExtension.getExtends());
+            final ApiBase extend = apiExtension.getExtends();
+            final Api resolvedApi;
+            if (extend instanceof ApiExtension) {
+                resolvedApi = caseApiExtension((ApiExtension)extend);
+            } else {
+                resolvedApi = caseApi((Api)extend);
+            }
             merge(apiExtension, resolvedApi);
             return resolvedApi;
         }

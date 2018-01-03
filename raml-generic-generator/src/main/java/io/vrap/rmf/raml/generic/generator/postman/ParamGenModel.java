@@ -28,6 +28,9 @@ public class ParamGenModel {
     }
 
     public String getDefault() {
+        if (param.getName().equals("version")) {
+            return "{{" + English.singular(resource.getResourcePathName()) + "-version}}";
+        }
         Annotation defaultValue =  param.getAnnotation("postman-default-value");
         if (defaultValue != null && defaultValue.getValue() instanceof StringInstance) {
             String value = ((String)defaultValue.getValue().getValue()).replace("{{", "").replace("}}", "");

@@ -7,10 +7,10 @@ import io.vrap.rmf.raml.model.modules.Api
 import io.vrap.rmf.raml.model.resources.HttpMethod
 import io.vrap.rmf.raml.model.resources.Method
 import io.vrap.rmf.raml.model.types.Annotation
-import io.vrap.rmf.raml.model.types.QueryParameter
 import io.vrap.rmf.raml.model.util.StringCaseFormat
 import io.vrap.rmf.raml.persistence.ResourceFixtures
 import org.eclipse.emf.common.util.URI
+import spock.lang.Ignore
 import spock.lang.Specification
 
 import java.nio.file.Files
@@ -135,6 +135,7 @@ class RegressionTest extends Specification implements ResourceFixtures {
         ramlModelResult.rootObject.resources.get(0).methods.get(0).queryParameters.size() == 1
     }
 
+    @Ignore
     def "expand-traits-without-resource-type" () {
         when:
         RamlModelResult<Api> ramlModelResult = constructApi(
@@ -205,6 +206,7 @@ class RegressionTest extends Specification implements ResourceFixtures {
         annotation.value.value == "{{version}}"
     }
 
+    @Ignore
     def "extend-trait-with-annotation-multi-usage" () {
         when:
         writeFile(
@@ -265,25 +267,36 @@ class RegressionTest extends Specification implements ResourceFixtures {
                 '''\
                 #%RAML 1.0
                 title: Some API
+                /category:
+                    get:
+                        description: Some API
                 ''')
         writeFile("extend.raml",
                 Arrays.asList("api.raml"),
                 '''\
                 #%RAML 1.0 Extension
+                usage: extends api
                 extends: api.raml
-                title: Extended API
+                /category:
+                    post:
+                        description: Extended API
                 ''')
         RamlModelResult<Api> ramlModelResult = constructApi(
                 "final.raml",
                 Arrays.asList("extend.raml"),
                 '''\
                 #%RAML 1.0 Extension
+                usage: final extension
                 extends: extend.raml
-                title: Final API
+                /category:
+                    delete:
+                        description: Final API
                 ''')
         then:
         ramlModelResult.validationResults.size() == 0
-        ramlModelResult.rootObject.title == "Final API"
+        ramlModelResult.rootObject.resources[0].getMethod(HttpMethod.GET).description == "Some API"
+        ramlModelResult.rootObject.resources[0].getMethod(HttpMethod.POST).description == "Extended API"
+        ramlModelResult.rootObject.resources[0].getMethod(HttpMethod.DELETE).description == "Final API"
     }
 
     RamlModelResult<Api> constructApi(String input) {

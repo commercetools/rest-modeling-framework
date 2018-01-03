@@ -71,7 +71,7 @@ interface ApiExtension {
 	/**
 	 * The api that this object extends.
 	 */
-	refers Api ^extends
+	refers ApiBase ^extends
 	
 	String[1] usage 
 }

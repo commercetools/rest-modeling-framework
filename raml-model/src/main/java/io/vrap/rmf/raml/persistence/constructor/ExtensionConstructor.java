@@ -63,7 +63,7 @@ public class ExtensionConstructor extends ApiConstructor {
                 scope.addError("Extended api definition is invalid at {0}", extendsFacet);
             } else {
                 final EObject extendsEObject = contents.get(0);
-                if (extendsEObject instanceof Api && !(extendsEObject instanceof ApiExtension)) {
+                if (extendsEObject instanceof Api || extendsEObject instanceof ApiExtension) {
                     scope.setValue(ModulesPackage.Literals.API_EXTENSION__EXTENDS, extendsEObject, extendsFacet.uri);
                 } else {
                     scope.addError("Extended api definition has invalid type {0} at {1}",
