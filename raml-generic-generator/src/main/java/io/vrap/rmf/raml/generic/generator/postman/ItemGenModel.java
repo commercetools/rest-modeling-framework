@@ -36,7 +36,11 @@ public class ItemGenModel {
 
     public String getResourcePathName() {
         final String resourcePathName = resource.getResourcePathName();
-        return Optional.ofNullable(resourcePathName).filter(x -> !x.equals("")).orElse(resource.getDisplayName().toLowerCase());
+
+        if (resourcePathName.isEmpty()) {
+            return resource.getDisplayName().toLowerCase();
+        }
+        return resourcePathName;
     }
 
     public Method getMethod() {
