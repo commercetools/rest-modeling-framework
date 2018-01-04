@@ -1,0 +1,30 @@
+import "generic.stg"
+
+/*
+ * implementation template functions
+ */
+builder(vendorName, builder)::=<<
+\<?php
+<generatorInfo()>
+
+namespace <vendorName>\\Builder;
+
+use Commercetools\Base\ActionBuilder;
+<builder.typeImports: {ti |<useTypeImport(vendorName, ti)>}>
+
+class <builder.resourceType.name>ActionBuilder extends ActionBuilder {
+    <builder.updates: {u |<update(u)>}>
+}
+
+>>
+
+update(action)::=<<
+
+/**
+ * @return <action.typeName>
+ */
+public function <action.discriminatorValue>()
+{
+    return $this->mapData(<action.typeName>::class, null);
+}
+>>

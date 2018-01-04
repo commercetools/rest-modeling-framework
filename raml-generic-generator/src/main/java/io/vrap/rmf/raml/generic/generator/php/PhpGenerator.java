@@ -41,6 +41,8 @@ public class PhpGenerator implements Generator {
         RequestGenerator requestGenerator = new RequestGenerator(vendorName, placeholderParamAnnotation);
         f.addAll(requestGenerator.generate(api.getResources(), new File(outputPath, "src/Request")));
 
+        BuilderGenerator builderGenerator = new BuilderGenerator(vendorName);
+        f.addAll(builderGenerator.generate(api, new File(outputPath, "src/" + BuilderGenerator.BUILDER)));
         Helper.deleteObsoleteFiles(outputPath, f);
         Collection<File> files = FileUtils.listFiles(
                 outputPath,

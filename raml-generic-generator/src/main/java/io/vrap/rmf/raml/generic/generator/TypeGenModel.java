@@ -38,6 +38,10 @@ public class TypeGenModel {
         return new TypeGenModel(type.getType());
     }
 
+    public AnyType getType() {
+        return type;
+    }
+
     @Nullable
     public String getDiscriminator()
     {

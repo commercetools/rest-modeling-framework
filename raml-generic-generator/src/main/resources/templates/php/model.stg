@@ -268,7 +268,7 @@ property(property) ::= <<
 /**
  * @var <property.type.typeName>
  */
-private $<property.name>;
+protected $<property.name>;
 
 >>
 
