@@ -7,7 +7,7 @@ model(vendorName, type) ::= <<
 \<?php
 <generatorInfo()>
 
-namespace <vendorName>\\<type.package.name>;
+namespace <vendorName>\\<type.package.parts; separator="\\">;
 
 <if(type.hasBuiltinParent)>
 use <vendorName>\\Base\\JsonObjectModel;

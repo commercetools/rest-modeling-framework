@@ -4,10 +4,11 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
 import io.vrap.rmf.raml.generic.generator.AbstractTemplateGenerator;
+import io.vrap.rmf.raml.generic.generator.CollectionGenModel;
+import io.vrap.rmf.raml.generic.generator.TypeGenModel;
 import io.vrap.rmf.raml.model.types.*;
 import io.vrap.rmf.raml.model.types.impl.TypesFactoryImpl;
 import io.vrap.rmf.raml.model.types.util.TypesSwitch;
-import org.eclipse.emf.ecore.EObject;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 

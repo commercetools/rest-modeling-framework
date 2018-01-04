@@ -4,7 +4,7 @@ interface(vendorName, type) ::= <<
 \<?php
 <generatorInfo()>
 
-namespace <vendorName>\\<type.package.name>;
+namespace <vendorName>\\<type.package.parts; separator="\\">;
 
 <if(type.hasBuiltinParent)>
 use <vendorName>\\Base\\JsonObject;
@@ -33,7 +33,7 @@ interface <type.name> extends <if(!type.hasBuiltinParent)><type.parent.name><els
 >>
 
 discriminatorMapping(type) ::= <<
-'<type.discriminatorValue>' => <if(type.package.hasPackage)><type.package.name>\\<endif><type.name>::class,
+'<type.discriminatorValue>' => <if(type.package.hasPackage)><type.package.parts; separator="\\">\\<endif><type.name>::class,
 
 >>
 

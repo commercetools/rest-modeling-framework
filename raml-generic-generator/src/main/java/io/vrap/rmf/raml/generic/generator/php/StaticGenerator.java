@@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
 import io.vrap.rmf.raml.generic.generator.AbstractTemplateGenerator;
 import io.vrap.rmf.raml.generic.generator.Helper;
+import io.vrap.rmf.raml.generic.generator.TypeGenModel;
 import io.vrap.rmf.raml.model.modules.Api;
 import io.vrap.rmf.raml.model.security.OAuth20Settings;
 import org.stringtemplate.v4.ST;

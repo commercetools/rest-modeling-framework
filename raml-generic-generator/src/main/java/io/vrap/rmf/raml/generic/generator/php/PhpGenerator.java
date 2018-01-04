@@ -2,6 +2,7 @@ package io.vrap.rmf.raml.generic.generator.php;
 
 import io.vrap.rmf.raml.generic.generator.Generator;
 import io.vrap.rmf.raml.generic.generator.Helper;
+import io.vrap.rmf.raml.generic.generator.TypeGenModel;
 import io.vrap.rmf.raml.model.modules.Api;
 import io.vrap.rmf.raml.model.types.AnyAnnotationType;
 import io.vrap.rmf.raml.model.util.StringCaseFormat;

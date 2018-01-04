@@ -1,4 +1,4 @@
-package io.vrap.rmf.raml.generic.generator.php;
+package io.vrap.rmf.raml.generic.generator;
 
 import io.vrap.rmf.raml.model.types.Annotation;
 import io.vrap.rmf.raml.model.types.AnyAnnotationType;
@@ -32,7 +32,7 @@ public class PropertyGenModel {
 
     public String getParamType()
     {
-        return new GeneratorHelper.ParamVisitor(property).doSwitch(property.getType());
+        return GeneratorHelper.getParamVisitor(property).doSwitch(property.getType());
     }
 
     public String getConstantName() {
@@ -41,12 +41,12 @@ public class PropertyGenModel {
 
     public GetterGenModel getGetter()
     {
-        return new GeneratorHelper.PropertyGetterVisitor(this).doSwitch(property.getType());
+        return GeneratorHelper.getPropertyGetterVisitor(this).doSwitch(property.getType());
     }
 
     public SetterGenModel getSetter()
     {
-        return new GeneratorHelper.PropertySetterVisitor(this).doSwitch(property.getType());
+        return GeneratorHelper.getPropertySetterVisitor(this).doSwitch(property.getType());
     }
 
     public String getPatternName()

@@ -3,6 +3,7 @@ package io.vrap.rmf.raml.generic.generator;
 import io.vrap.rmf.raml.generic.generator.java.JavaGenerator;
 import io.vrap.rmf.raml.generic.generator.md.MdGenerator;
 import io.vrap.rmf.raml.generic.generator.php.PhpGenerator;
+import io.vrap.rmf.raml.generic.generator.php.PhpGeneratorHelper;
 import io.vrap.rmf.raml.generic.generator.postman.PostmanGenerator;
 import io.vrap.rmf.raml.model.RamlDiagnostic;
 import io.vrap.rmf.raml.model.RamlModelBuilder;
@@ -46,6 +47,7 @@ public class CodeGenerator {
     private static Generator of(String language, String vendorName) throws Exception {
         switch (language) {
             case "php":
+                GeneratorHelper.setInstance(new PhpGeneratorHelper());
                 return new PhpGenerator(vendorName);
             case "md":
                 return new MdGenerator();

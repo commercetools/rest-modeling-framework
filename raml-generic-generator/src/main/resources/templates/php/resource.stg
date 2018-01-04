@@ -4,7 +4,7 @@ builder(vendorName, resource) ::=<<
 \<?php
 <generatorInfo()>
 
-namespace <vendorName>\\<resource.package.name>;
+namespace <vendorName>\\<resource.package.parts; separator="\\">;
 
 use <vendorName>\\Client\\Resource;
 use <vendorName>\\Client\\ApiRequest;
@@ -39,7 +39,7 @@ request(vendorName, request) ::=<<
 \<?php
 <generatorInfo()>
 
-namespace <vendorName>\\<request.package.name>;
+namespace <vendorName>\\<request.package.parts; separator="\\">;
 
 use <vendorName>\\Client\\ApiRequest;
 <if(first(request.returnType.oneOf).isClass)>
@@ -111,7 +111,7 @@ resource(vendorName, resource) ::=<<
 \<?php
 <generatorInfo()>
 
-namespace <vendorName>\\<resource.package.name>;
+namespace <vendorName>\\<resource.package.parts; separator="\\">;
 
 use <vendorName>\\Client\\Resource;
 <resource.methods: {m |<methodUse(m)>}>

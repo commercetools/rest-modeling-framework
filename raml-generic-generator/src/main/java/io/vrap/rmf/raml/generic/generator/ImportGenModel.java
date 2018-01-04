@@ -1,29 +1,32 @@
-package io.vrap.rmf.raml.generic.generator.php;
+package io.vrap.rmf.raml.generic.generator;
+
+import com.google.common.collect.Lists;
 
 import javax.annotation.Nullable;
+import java.util.List;
 
 public class ImportGenModel {
-    private final PackageGenModel packageGenModel;
-    private final String name;
-
+    private final List<String> parts;
 
     public ImportGenModel(final PackageGenModel packageGenModel) {
         this(packageGenModel, null);
     }
 
     public ImportGenModel(final PackageGenModel packageGenModel, final String name) {
-        this.packageGenModel = packageGenModel;
-        this.name = name;
+        parts = Lists.newArrayList();
+        if (packageGenModel != null) {
+            parts.addAll(packageGenModel.getParts());
+        }
+        parts.add(name);
     }
 
-    public PackageGenModel getPackage()
-    {
-        return packageGenModel;
+    public List<String> getParts() {
+        return parts;
     }
 
     @Nullable
     public String getName() {
-        return name;
+        return parts.get(parts.size() - 1);
     }
 
     @Override
@@ -33,14 +36,11 @@ public class ImportGenModel {
 
         ImportGenModel that = (ImportGenModel) o;
 
-        if (!packageGenModel.equals(that.packageGenModel)) return false;
-        return name != null ? name.equals(that.name) : that.name == null;
+        return parts.equals(that.parts);
     }
 
     @Override
     public int hashCode() {
-        int result = packageGenModel.hashCode();
-        result = 31 * result + (name != null ? name.hashCode() : 0);
-        return result;
+        return parts.hashCode();
     }
 }

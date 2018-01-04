@@ -1,115 +1,41 @@
 package io.vrap.rmf.raml.generic.generator.php;
 
-import com.damnhandy.uri.template.Expression;
-import com.damnhandy.uri.template.UriTemplate;
-import com.google.common.collect.Lists;
-import io.vrap.rmf.raml.model.resources.Method;
-import io.vrap.rmf.raml.model.resources.Resource;
+import io.vrap.rmf.raml.generic.generator.*;
 import io.vrap.rmf.raml.model.types.*;
-import io.vrap.rmf.raml.model.types.util.TypesSwitch;
-import io.vrap.rmf.raml.model.util.StringCaseFormat;
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.emf.ecore.EObject;
 
-import javax.annotation.Nullable;
-import java.util.List;
-import java.util.stream.Collectors;
-
-public class GeneratorHelper {
-    static Property getBaseProperty(final Property property) {
-        final AnyType anyType = (AnyType)property.eContainer();
-        if (!(anyType instanceof ObjectType)) {
-            return property;
-        }
-        final List<ObjectType> t = getParentTypes(anyType).stream().map(ObjectType.class::cast).collect(Collectors.toList());
-        if (t.size() <= 1) {
-            return property;
-        }
-        return t.stream()
-                .filter(anyType1 -> anyType1.getProperty(property.getName()) != null)
-                .map(objectType -> objectType.getProperty(property.getName()))
-                .findFirst()
-                .orElse(property);
-    }
-
-    static String toParamName(final UriTemplate uri, final String delimiter) {
-        return toParamName(uri, delimiter, "");
-    }
-
-    static String toParamName(final UriTemplate uri, final String delimiter, final String suffix) {
-        return StringUtils.capitalize(uri.getComponents().stream().map(
-                uriTemplatePart -> {
-                    if (uriTemplatePart instanceof Expression) {
-                        return ((Expression)uriTemplatePart).getVarSpecs().stream()
-                                .map(s -> delimiter + StringUtils.capitalize(s.getVariableName()) + suffix).collect(Collectors.joining());
-                    }
-                    return StringCaseFormat.UPPER_CAMEL_CASE.apply(uriTemplatePart.toString().replace("/", "-"));
-                }
-        ).collect(Collectors.joining())).replaceAll("[^\\p{L}\\p{Nd}]+", "");
-    }
-
-    static String toRequestName(UriTemplate uri, Method method) {
-        return toParamName(uri, "By") + StringUtils.capitalize(method.getMethod().toString());
-    }
-
-    @Nullable
-    static <T> T getParent(EObject object, Class<T> parentClass)
+public class PhpGeneratorHelper extends GeneratorHelper {
+    @Override
+    public TypeNameVisitor typeNameVisitor()
     {
-        if (object.eContainer() == null) {
-            return null;
-        }
-        if (parentClass.isInstance(object.eContainer())) {
-            @SuppressWarnings("unchecked")
-            T parent = (T)object.eContainer();
-            return parent;
-        }
-        return getParent(object.eContainer(), parentClass);
+        return new TypeNameVisitor();
     }
 
-    static UriTemplate absoluteUri(final Resource resource)
+    @Override
+    public ParamVisitor paramVisitor(final Property property)
     {
-        if (resource.eContainer() instanceof Resource) {
-            final Resource parent = (Resource) resource.eContainer();
-            return UriTemplate.fromTemplate(absoluteUri(parent).getTemplate() + resource.getRelativeUri().getTemplate());
-        } else {
-            return resource.getRelativeUri();
-        }
+        return new ParamVisitor(property);
     }
 
-    static List<ResourceGenModel> flattenResources(final List<Resource> resources)
+    @Override
+    public SerializerVisitor serializerVisitor(final PropertyGenModel propertyGenModel)
     {
-        final List<Resource> r = flatten(resources);
-        final List<ResourceGenModel> m = Lists.newArrayList();
-
-        return r.stream().map(resource -> new ResourceGenModel(resource, r)).collect(Collectors.toList());
+        return new SerializerVisitor(propertyGenModel);
     }
 
-    private static List<Resource> flatten(final List<Resource> resources)
+    @Override
+    public PropertyGetterVisitor propertyGetterVisitor(final PropertyGenModel propertyGenModel)
     {
-        final List<Resource> r = Lists.newArrayList();
-        for (final Resource resource : resources) {
-            r.add(resource);
-            if (resource.getResources() != null) {
-                r.addAll(flatten(resource.getResources()));
-            }
-        }
-        return r;
+        return new PropertyGetterVisitor(propertyGenModel);
     }
 
-    private static List<AnyType> getParentTypes(final AnyType anyType) {
-        if (anyType == null) {
-            return Lists.newArrayList();
-        }
-        if (BuiltinType.of(anyType.getName()).isPresent()) {
-            return Lists.newArrayList();
-        }
-        List<AnyType> t = getParentTypes(anyType.getType());
-        t.add(anyType);
-
-        return t;
+    @Override
+    public PropertySetterVisitor propertySetterVisitor(final PropertyGenModel propertyGenModel)
+    {
+        return new PropertySetterVisitor(propertyGenModel);
     }
 
-    static abstract class TypeVisitor extends TypesSwitch<String> {
+    static class TypeNameVisitor extends GeneratorHelper.TypeNameVisitor {
         @Override
         public String caseStringType(StringType object) {
             return scalarMapper("string");
@@ -132,11 +58,6 @@ public class GeneratorHelper {
         public String caseIntegerType(IntegerType object) {
             return scalarMapper("int");
         }
-
-        abstract String scalarMapper(final String scalarType);
-    }
-
-    static class TypeNameVisitor extends TypeVisitor {
 
         @Override
         public String caseTimeOnlyType(TimeOnlyType object) {
@@ -187,11 +108,35 @@ public class GeneratorHelper {
         }
     }
 
-    static class ParamVisitor extends TypeVisitor {
+    static class ParamVisitor extends GeneratorHelper.ParamVisitor {
         final Property property;
 
         ParamVisitor(final Property property) {
+            super(property);
             this.property = property;
+        }
+
+        @Override
+        public String caseStringType(StringType object) {
+            return scalarMapper("string");
+        }
+
+        @Override
+        public String caseNumberType(NumberType object) {
+            switch (object.getFormat()) {
+                case INT:
+                case INT8:
+                case INT16:
+                case INT32:
+                case INT64:
+                    return scalarMapper("int");
+                default:
+                    return scalarMapper("float");
+            }
+        }
+
+        public String caseIntegerType(IntegerType object) {
+            return scalarMapper("int");
         }
 
         String scalarMapper(final String scalarType)
@@ -229,10 +174,11 @@ public class GeneratorHelper {
         }
     }
 
-    static class SerializerVisitor extends TypesSwitch<SerializerGenModel> {
+    static class SerializerVisitor extends GeneratorHelper.SerializerVisitor {
         final PropertyGenModel property;
 
         SerializerVisitor(final PropertyGenModel property) {
+            super(property);
             this.property = property;
         }
 
@@ -252,10 +198,11 @@ public class GeneratorHelper {
         }
     }
 
-    static class PropertyGetterVisitor extends TypesSwitch<GetterGenModel> {
+    static class PropertyGetterVisitor extends GeneratorHelper.PropertyGetterVisitor {
         final PropertyGenModel property;
 
         PropertyGetterVisitor(final PropertyGenModel property) {
+            super(property);
             this.property = property;
         }
 
@@ -326,10 +273,11 @@ public class GeneratorHelper {
         }
     }
 
-    static class PropertySetterVisitor extends TypesSwitch<SetterGenModel> {
+    static class PropertySetterVisitor extends GeneratorHelper.PropertySetterVisitor {
         final PropertyGenModel property;
 
         PropertySetterVisitor(final PropertyGenModel property) {
+            super(property);
             this.property = property;
         }
         @Override

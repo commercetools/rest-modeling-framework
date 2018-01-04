@@ -58,12 +58,13 @@ public class Helper {
             } else {
                 myPath = Paths.get(uri);
             }
-            Stream<Path> walk = Files.walk(myPath, 1);
+            Stream<Path> walk = Files.walk(myPath, 10);
             for (Iterator<Path> it = walk.iterator(); it.hasNext();) {
                 final String name = it.next().toString();
                 final File f = new File(name);
                 if (f.getName().endsWith(".stg")) {
-                    files.add(CollectionGenerator.class.getClassLoader().getResource(dir + f.getName()));
+                    String resourcePath = f.getPath().substring(f.getPath().indexOf(dir));
+                    files.add(CollectionGenerator.class.getClassLoader().getResource(resourcePath));
                 }
             }
         } catch (Exception e) {}

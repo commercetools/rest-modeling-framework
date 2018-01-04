@@ -5,6 +5,10 @@ import com.damnhandy.uri.template.UriTemplate;
 import com.damnhandy.uri.template.impl.VarSpec;
 import com.google.common.collect.Lists;
 import com.google.common.net.MediaType;
+import io.vrap.rmf.raml.generic.generator.GeneratorHelper;
+import io.vrap.rmf.raml.generic.generator.ImportGenModel;
+import io.vrap.rmf.raml.generic.generator.PackageGenModel;
+import io.vrap.rmf.raml.generic.generator.TypeGenModel;
 import io.vrap.rmf.raml.model.resources.Method;
 import io.vrap.rmf.raml.model.resources.Resource;
 import io.vrap.rmf.raml.model.responses.Body;
@@ -73,12 +77,12 @@ public class RequestGenModel {
     public String getBodyType()
     {
         final Body firstBodyType = getFirstBodyType();
-        if (firstBodyType != null) {
+        if (firstBodyType != null && firstBodyType.getType() != null) {
             if (firstBodyType.getType() instanceof FileType) {
                 return "UploadedFileInterface ";
             }
             if (!BuiltinType.of(firstBodyType.getType().getName()).isPresent()) {
-                final String t = (new GeneratorHelper.TypeNameVisitor()).doSwitch(firstBodyType.getType());
+                final String t = GeneratorHelper.getTypeNameVisitor().doSwitch(firstBodyType.getType());
                 if (!Lists.newArrayList("mixed", "null", "bool", "string", "float", "int").contains(t)) {
                     return t + " ";
                 }

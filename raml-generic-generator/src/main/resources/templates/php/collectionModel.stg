@@ -4,7 +4,7 @@ collectionModel(vendorName, type) ::= <<
 \<?php
 <generatorInfo()>
 
-namespace <vendorName>\\<type.package.name>;
+namespace <vendorName>\\<type.package.parts; separator="\\">;
 
 use <vendorName>\\Base\\JsonCollection;
 <if(type.discriminator)>

@@ -1,4 +1,4 @@
-package io.vrap.rmf.raml.generic.generator.php;
+package io.vrap.rmf.raml.generic.generator;
 
 import javax.annotation.Nullable;
 

@@ -1,4 +1,4 @@
-package io.vrap.rmf.raml.generic.generator.php;
+package io.vrap.rmf.raml.generic.generator;
 
 import com.google.common.collect.Lists;
 import io.vrap.rmf.raml.model.modules.Api;
@@ -71,7 +71,7 @@ public class TypeGenModel {
 
     public ImportGenModel getImport()
     {
-        final String name = (new GeneratorHelper.TypeNameVisitor()).doSwitch(type);
+        final String name = GeneratorHelper.getTypeNameVisitor().doSwitch(type);
         return new ImportGenModel(getPackage(), name);
     }
 
@@ -123,7 +123,7 @@ public class TypeGenModel {
     {
         if (type instanceof ObjectType) {
             return ((ObjectType)type).getProperties().stream().map(property -> {
-                    return new GeneratorHelper.SerializerVisitor(new PropertyGenModel(property)).doSwitch(property.getType());
+                    return GeneratorHelper.getSerializerVisitor(new PropertyGenModel(property)).doSwitch(property.getType());
                 }).filter(Objects::nonNull).collect(Collectors.toList());
         }
         return null;
@@ -143,12 +143,12 @@ public class TypeGenModel {
 
     public String getTypeName()
     {
-        return new GeneratorHelper.TypeNameVisitor().doSwitch(type);
+        return GeneratorHelper.getTypeNameVisitor().doSwitch(type);
     }
 
     public String getReturnTypeName()
     {
-        return new GeneratorHelper.TypeNameVisitor().doSwitch(type);
+        return GeneratorHelper.getTypeNameVisitor().doSwitch(type);
     }
 
     public Set<ImportGenModel> getTypeImports()
@@ -160,7 +160,7 @@ public class TypeGenModel {
                     .filter(property -> property.getType() instanceof ObjectType || property.getType() instanceof ArrayType && ((ArrayType) property.getType()).getItems() instanceof ObjectType)
                     .filter(property -> {
                         AnyType t = property.getType() instanceof ArrayType ? ((ArrayType) property.getType()).getItems() : property.getType();
-                        return !new TypeGenModel(t).getPackage().getName().equals(getPackage().getName());
+                        return !new TypeGenModel(t).getPackage().equals(getPackage());
                     })
                     .map(property -> {
                         AnyType t = property.getType() instanceof ArrayType ? ((ArrayType) property.getType()).getItems() : property.getType();
@@ -173,12 +173,12 @@ public class TypeGenModel {
                             .filter(property -> property.getType() instanceof ObjectType || property.getType() instanceof ArrayType && ((ArrayType) property.getType()).getItems() instanceof ObjectType)
                             .filter(property -> {
                                 AnyType t = property.getType() instanceof ArrayType ? ((ArrayType) property.getType()).getItems() : property.getType();
-                                return !new TypeGenModel(t).getPackage().getName().equals(getPackage().getName());
+                                return !new TypeGenModel(t).getPackage().equals(getPackage());
                             })
                             .map(property -> new TypeGenModel(property.getType()).getImport())
                             .collect(Collectors.toSet())
             );
-            if (!getHasBuiltinParent() && !getParent().getPackage().getName().equals(getPackage().getName())) {
+            if (!getHasBuiltinParent() && !getParent().getPackage().equals(getPackage())) {
                 uses.add(getParent().getImport());
             }
             if (getDiscriminator() != null && getPackage().getHasPackage()) {

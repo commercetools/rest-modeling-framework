@@ -1,4 +1,6 @@
-package io.vrap.rmf.raml.generic.generator.php;
+package io.vrap.rmf.raml.generic.generator;
+
+import io.vrap.rmf.raml.generic.generator.PropertyGenModel;
 
 public class SerializerGenModel {
     final private PropertyGenModel property;

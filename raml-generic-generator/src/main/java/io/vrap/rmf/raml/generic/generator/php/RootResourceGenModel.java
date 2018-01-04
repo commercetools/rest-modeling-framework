@@ -1,5 +1,7 @@
 package io.vrap.rmf.raml.generic.generator.php;
 
+import io.vrap.rmf.raml.generic.generator.PackageGenModel;
+
 import javax.annotation.Nullable;
 import java.util.List;
 

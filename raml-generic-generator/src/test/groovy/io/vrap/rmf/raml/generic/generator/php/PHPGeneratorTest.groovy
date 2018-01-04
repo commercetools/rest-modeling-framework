@@ -2,6 +2,7 @@ package io.vrap.rmf.raml.generic.generator.php
 
 import com.google.common.io.Resources
 import io.vrap.raml.generic.generator.ResourceFixtures
+import io.vrap.rmf.raml.generic.generator.GeneratorHelper
 import io.vrap.rmf.raml.model.modules.Api
 import io.vrap.rmf.raml.model.resources.Resource
 import io.vrap.rmf.raml.model.types.AnyAnnotationType
@@ -36,6 +37,10 @@ class PHPGeneratorTest extends Specification implements ResourceFixtures {
     File resourcePath = new File(Resources.getResource("templates/php/statics/").getFile())
     @Shared
     Collection<File> files = FileUtils.listFiles(resourcePath, TrueFileFilter.INSTANCE, TrueFileFilter.INSTANCE)
+
+    void setup() {
+        GeneratorHelper.setInstance(new PhpGeneratorHelper());
+    }
 
     def "generate simple interface"() {
         when:

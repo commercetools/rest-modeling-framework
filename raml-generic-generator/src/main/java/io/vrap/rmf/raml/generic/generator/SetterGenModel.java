@@ -1,4 +1,4 @@
-package io.vrap.rmf.raml.generic.generator.php;
+package io.vrap.rmf.raml.generic.generator;
 
 import javax.annotation.Nullable;
 
@@ -38,6 +38,6 @@ public class SetterGenModel {
     }
 
     public Boolean getParamCheck() {
-        return !docType.equals(paramType);
+        return docType != null && !docType.equals(paramType);
     }
 }
