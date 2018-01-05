@@ -12,11 +12,11 @@ class AttributeModel extends JsonObjectModel implements Attribute {
     /**
      * @var string
      */
-    private $name;
+    protected $name;
     /**
      * @var mixed
      */
-    private $value;
+    protected $value;
 
     /**
      * @return string

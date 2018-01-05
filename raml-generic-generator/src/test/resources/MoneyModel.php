@@ -12,11 +12,11 @@ class MoneyModel extends JsonObjectModel implements Money {
     /**
      * @var string
      */
-    private $centAmount;
+    protected $centAmount;
     /**
      * @var string
      */
-    private $currencyCode;
+    protected $currencyCode;
 
     /**
      * @return string

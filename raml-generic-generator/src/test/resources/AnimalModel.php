@@ -19,7 +19,7 @@ class AnimalModel extends JsonObjectModel implements Animal {
     /**
      * @var string
      */
-    private $kind;
+    protected $kind;
 
     /**
      * @return string

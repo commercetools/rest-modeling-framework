@@ -12,11 +12,11 @@ class EnumModel extends JsonObjectModel implements Enum {
     /**
      * @var string
      */
-    private $key;
+    protected $key;
     /**
      * @var string
      */
-    private $label;
+    protected $label;
 
     /**
      * @return string

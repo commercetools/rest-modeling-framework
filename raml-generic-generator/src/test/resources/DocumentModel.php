@@ -12,7 +12,7 @@ class DocumentModel extends JsonObjectModel implements Document {
     /**
      * @var \DateTimeImmutable
      */
-    private $createdAt;
+    protected $createdAt;
 
     /**
      * @return \DateTimeImmutable

@@ -12,7 +12,7 @@ class UserModel extends PersonModel implements User {
     /**
      * @var string
      */
-    private $role;
+    protected $role;
 
     /**
      * @return string

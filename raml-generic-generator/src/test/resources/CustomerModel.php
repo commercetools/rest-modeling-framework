@@ -12,7 +12,7 @@ class CustomerModel extends JsonObjectModel implements Customer {
     /**
      * @var Address
      */
-    private $address;
+    protected $address;
 
     /**
      * @return Address

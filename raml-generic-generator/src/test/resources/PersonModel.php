@@ -12,7 +12,7 @@ class PersonModel extends JsonObjectModel implements Person {
     /**
      * @var string
      */
-    private $name;
+    protected $name;
 
     /**
      * @return string

@@ -39,8 +39,10 @@ public class BuilderGenerator extends AbstractTemplateGenerator {
         final List<File> f = Lists.newArrayList();
 
         final List<BuilderGenModel> builders = Lists.newArrayList();
+        // project resource
         builders.add(new BuilderGenModel(api.getResources().get(0).getMethod(HttpMethod.POST)));
 
+        // everything under /project
         builders.addAll(
                 api.getResources().get(0).getResources().stream().flatMap(
                         resource -> resource.getResources().stream()
