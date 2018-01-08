@@ -503,7 +503,12 @@ typedElementMap:
     ;
 
 instance:
-    simpleInstance | arrayInstance | objectInstance
+    annotatedInstance | simpleInstance | arrayInstance | objectInstance
+    ;
+
+annotatedInstance:
+    'value' (simpleInstance | arrayInstance | objectInstance)
+    annotationFacet*
     ;
 
 simpleInstance:
@@ -559,6 +564,7 @@ id:
     |   'responses'
     |   'securedBy' | 'securitySchemes' | 'settings'
     |   'traits'
+    |   'value'
     |   SCALAR
     ;
 
