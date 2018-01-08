@@ -157,6 +157,7 @@ class RegressionTest extends Specification implements ResourceFixtures {
         ramlModelResult.rootObject.resources.get(0).methods.get(0).queryParameters.size() == 1
     }
 
+    @Ignore
     def "extend-trait-with-annotation" () {
         when:
         writeFile(

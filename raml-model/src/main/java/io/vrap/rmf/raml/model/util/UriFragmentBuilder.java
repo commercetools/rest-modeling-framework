@@ -5,9 +5,11 @@ import io.vrap.functional.utils.TypeSwitch;
 import io.vrap.rmf.raml.model.elements.NamedElement;
 import io.vrap.rmf.raml.model.resources.Method;
 import io.vrap.rmf.raml.model.resources.Resource;
+import io.vrap.rmf.raml.model.resources.Trait;
 import io.vrap.rmf.raml.model.responses.Body;
 import io.vrap.rmf.raml.model.responses.Response;
 import io.vrap.rmf.raml.model.types.Annotation;
+import io.vrap.rmf.raml.model.types.AnyAnnotationType;
 import io.vrap.rmf.raml.model.values.StringInstance;
 import org.eclipse.emf.ecore.EObject;
 
@@ -35,7 +37,13 @@ public class UriFragmentBuilder {
     }
 
     private List<String> namedElement(final NamedElement identifiableElement) {
-        final List<String> segments = new ArrayList<>();
+        final List<String> segments;
+        if (identifiableElement.eContainer() != null) {
+            segments = uriFragmentsBuilderSwitch.apply(identifiableElement.eContainer());
+        } else {
+            segments = new ArrayList<>();
+        }
+
         segments.add(identifiableElement.eContainmentFeature().getName());
         segments.add(identifiableElement.getName());
 
