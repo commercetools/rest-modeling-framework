@@ -28,6 +28,17 @@ public class InstanceConstructor extends AbstractScopedVisitor<Instance> {
     }
 
     @Override
+    public Instance visitAnnotatedExampleInstance(RAMLParser.AnnotatedExampleInstanceContext ctx) {
+        final Instance instance = visitBaseInstance(ctx.baseInstance(0));
+        scope.setValue(instance, ctx.getStart());
+
+        return withinScope(scope.with(instance), objectInstanceScope -> {
+            ctx.annotationFacet().forEach(this::visitAnnotationFacet);
+            return instance;
+        });
+    }
+
+    @Override
     public Instance visitAnnotatedSimpleInstance(RAMLParser.AnnotatedSimpleInstanceContext ctx) {
         final Instance instance = super.visitAnnotatedSimpleInstance(ctx);
         scope.setValue(instance, ctx.getStart());

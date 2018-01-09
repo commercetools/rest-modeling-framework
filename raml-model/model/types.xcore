@@ -6,6 +6,8 @@ package io.vrap.rmf.raml.model.types
 import io.vrap.rmf.raml.model.elements.DocumentableElement
 import io.vrap.rmf.raml.model.elements.NamedElement
 import io.vrap.rmf.raml.model.values.Instance
+import io.vrap.rmf.raml.model.values.StringInstance
+import io.vrap.rmf.raml.model.values.BooleanInstance
 import io.vrap.rmf.raml.model.values.MediaType
 import io.vrap.rmf.raml.model.values.UnsignedInteger
 import io.vrap.rmf.raml.model.values.PositiveInteger
@@ -264,11 +266,17 @@ class TypeTemplate extends AnyType {
 
 }
 
-class Example {
+class Example extends AnnotationsFacet {
     /*
      * The optional name of an example.
      */
     String name
+
+    contains StringInstance displayName
+
+    contains StringInstance description
+
+    contains BooleanInstance strict
 
     /*
      * The value of the example.

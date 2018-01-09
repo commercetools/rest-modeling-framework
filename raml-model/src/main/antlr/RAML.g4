@@ -348,7 +348,7 @@ resourceTypesFacet:
     ;
 
 attributeFacet:
-    facet=SCALAR value=facetValue
+    facet=('description' | 'displayName' | SCALAR ) value=facetValue
     ;
 
 facetValue:
@@ -450,9 +450,24 @@ defaultFacet:
     ;
 
 exampleFacet:
-    'example' instance
+    'example' exampleInstance
     ;
 
+annotatedExampleInstance:
+    MAP_START
+        (
+            'value' baseInstance
+            | 'strict' strict=annotatedBooleanInstance
+            | 'displayName' displayName=annotatedStringInstance
+            | 'description' description=annotatedStringInstance
+            | annotationFacet
+        )+
+    MAP_END
+    ;
+
+exampleInstance:
+    simpleInstance | arrayInstance | annotatedExampleInstance | objectInstance
+    ;
 
 examplesFacet:
     'examples'
@@ -467,7 +482,7 @@ examplesFacet:
     ;
 
 namedExample:
-    name=id instance
+    name=id exampleInstance
     ;
 
 propertiesFacet:
@@ -626,6 +641,7 @@ id:
     |   'securedBy' | 'securitySchemes' | 'settings'
     |   'traits'
     |   'value'
+    |   'strict' | 'displayName' | 'description'
     |   SCALAR
     ;
 

@@ -7,9 +7,7 @@ import io.vrap.rmf.raml.model.responses.Body;
 import io.vrap.rmf.raml.model.responses.Response;
 import io.vrap.rmf.raml.model.security.*;
 import io.vrap.rmf.raml.model.types.*;
-import io.vrap.rmf.raml.model.values.ObjectInstance;
-import io.vrap.rmf.raml.model.values.RegExp;
-import io.vrap.rmf.raml.model.values.ValuesFactory;
+import io.vrap.rmf.raml.model.values.*;
 import io.vrap.rmf.raml.persistence.antlr.RAMLParser;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
@@ -30,7 +28,9 @@ import static io.vrap.rmf.raml.model.resources.ResourcesPackage.Literals.*;
 import static io.vrap.rmf.raml.model.responses.ResponsesPackage.Literals.*;
 import static io.vrap.rmf.raml.model.security.SecurityPackage.Literals.*;
 import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.*;
+import static io.vrap.rmf.raml.model.values.ValuesPackage.Literals.BOOLEAN_INSTANCE;
 import static io.vrap.rmf.raml.model.values.ValuesPackage.Literals.MEDIA_TYPE;
+import static io.vrap.rmf.raml.model.values.ValuesPackage.Literals.STRING_INSTANCE;
 
 public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
     private final InstanceConstructor instanceConstructor = new InstanceConstructor();
@@ -76,12 +76,70 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
 
     @Override
     public Object visitExampleFacet(RAMLParser.ExampleFacetContext exampleFacet) {
-        final Example example = create(EXAMPLE, exampleFacet);
+        final Example example = (Example)visitExampleInstance(exampleFacet.exampleInstance());
         example.setName("");
         return withinScope(scope.with(ANY_TYPE__EXAMPLES), exampleScope -> {
             scope.setValue(example, exampleFacet.getStart());
-            instanceConstructor.withinScope(exampleScope.with(example, EXAMPLE__VALUE), exampleValueScope ->
-                    instanceConstructor.visitInstance(exampleFacet.instance()));
+            return example;
+        });
+    }
+
+    @Override
+    public Object visitExampleInstance(RAMLParser.ExampleInstanceContext ctx) {
+        if (ctx.annotatedExampleInstance() != null) {
+            return visitAnnotatedExampleInstance(ctx.annotatedExampleInstance());
+        }
+
+        final Example example = create(EXAMPLE, ctx);
+        example.setValue(instanceConstructor.withinScope(scope.with(example, EXAMPLE__VALUE), exampleValueScope ->
+                instanceConstructor.visitExampleInstance(ctx)
+        ));
+        StringInstance displayName = ((StringInstance)create(STRING_INSTANCE, ctx));
+        displayName.setValue("");
+        StringInstance description = ((StringInstance)create(STRING_INSTANCE, ctx));
+        description.setValue("");
+        BooleanInstance strict = ((BooleanInstance)create(BOOLEAN_INSTANCE, ctx));
+        strict.setValue(true);
+        example.setDisplayName(displayName);
+        example.setDescription(description);
+        example.setStrict(strict);
+        return withinScope(scope.with(example), exampleScope -> example);
+    }
+
+    @Override
+    public Object visitAnnotatedExampleInstance(RAMLParser.AnnotatedExampleInstanceContext ctx) {
+        final Example example = create(EXAMPLE, ctx);
+
+        example.setValue(instanceConstructor.withinScope(scope.with(example, EXAMPLE__VALUE), exampleValueScope ->
+                instanceConstructor.visitBaseInstance(ctx.baseInstance(0))
+        ));
+
+        return withinScope(scope.with(example), exampleScope -> {
+            ctx.annotationFacet().forEach(this::visitAnnotationFacet);
+            final StringInstance displayName;
+            final StringInstance description;
+            final BooleanInstance strict;
+            if (ctx.displayName != null)
+                displayName = (StringInstance)instanceConstructor.visitAnnotatedStringInstance(ctx.displayName);
+            else {
+                displayName = create(STRING_INSTANCE, ctx);
+                displayName.setValue("");
+            }
+            if (ctx.description != null)
+                description = (StringInstance)instanceConstructor.visitAnnotatedStringInstance(ctx.description);
+            else {
+                description = create(STRING_INSTANCE, ctx);
+                description.setValue("");
+            }
+            if (ctx.strict != null)
+                strict = (BooleanInstance)instanceConstructor.visitAnnotatedBooleanInstance(ctx.strict);
+            else {
+                strict = create(BOOLEAN_INSTANCE, ctx);
+                strict.setValue(true);
+            }
+            example.setDisplayName(displayName);
+            example.setDescription(description);
+            example.setStrict(strict);
             return example;
         });
     }
@@ -97,12 +155,10 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
 
     @Override
     public Object visitNamedExample(RAMLParser.NamedExampleContext namedExample) {
-        final Example example = create(EXAMPLE, namedExample);
+        final Example example = (Example)visitExampleInstance(namedExample.exampleInstance());
         example.setName(namedExample.name.getText());
         scope.setValue(example, namedExample.getStart());
-        return instanceConstructor.withinScope(scope.with(example, EXAMPLE__VALUE), exampleValueScope ->
-                instanceConstructor.visitInstance(namedExample.instance())
-        );
+        return example;
     }
 
     public abstract EObject construct(final RAMLParser parser, final Scope scope);

@@ -178,9 +178,14 @@ class RegressionTest extends Specification implements ResourceFixtures {
                     get:
                         body:
                             application/json:
+                                example:
+                                    (condition): test
+                                    value: |
+                                        {a:1}
                                 examples:
                                     example1:
                                         (condition): test
+                                        strict: true
                                         value: |
                                             {a:1}
                                     example2:
@@ -209,35 +214,52 @@ class RegressionTest extends Specification implements ResourceFixtures {
                                         value:
                                             - foo
                                             - bar
+                                    example10:
+                                        displayName: Example10
+                                        description: Lorem ipsum
+                                        strict: false
+                                        (condition): test
+                                        value:
+                                            - foo
+                                            - bar
                 ''')
         then:
         ramlModelResult.validationResults.size() == 0
         List<Example> examples = ramlModelResult.rootObject.resources[0].getMethod(HttpMethod.GET).getBody('application/json').type.examples;
 
-        examples[0].value.value.trim() == "{a:1}".trim()
-        examples[1].value.value.trim() == "{a:2}".trim()
-        examples[2].value.value.trim() == "a:3".trim()
-        examples[3].value.value.trim() == "{a:4}".trim()
-
-        ((ObjectInstance)examples[4].value).value[0].name == "name";
-        ((ObjectInstance)examples[4].value).value[0].value.value == "foo";
+        examples[1].value.value.trim() == "{a:1}".trim()
+        examples[2].value.value.trim() == "{a:2}".trim()
+        examples[3].value.value.trim() == "a:3".trim()
+        examples[4].value.value.trim() == "{a:4}".trim()
 
         ((ObjectInstance)examples[5].value).value[0].name == "name";
         ((ObjectInstance)examples[5].value).value[0].value.value == "foo";
 
-        ((ObjectInstance)examples[5].value).value[1].name == "value";
-        ((ObjectInstance)examples[5].value).value[1].value.value == "bar";
+        ((ObjectInstance)examples[6].value).value[0].name == "name";
+        ((ObjectInstance)examples[6].value).value[0].value.value == "foo";
+        ((ObjectInstance)examples[6].value).value[1].name == "value";
+        ((ObjectInstance)examples[6].value).value[1].value.value == "bar";
 
-        ((ArrayInstance)examples[6].value).value[0].value.trim() == "foo";
-        ((ArrayInstance)examples[6].value).value[1].value.trim() == "bar";
         ((ArrayInstance)examples[7].value).value[0].value.trim() == "foo";
         ((ArrayInstance)examples[7].value).value[1].value.trim() == "bar";
         ((ArrayInstance)examples[8].value).value[0].value.trim() == "foo";
         ((ArrayInstance)examples[8].value).value[1].value.trim() == "bar";
+        ((ArrayInstance)examples[9].value).value[0].value.trim() == "foo";
+        ((ArrayInstance)examples[9].value).value[1].value.trim() == "bar";
 
-        examples[0].value.getAnnotation('condition').value.value == 'test'
-        examples[5].value.getAnnotation('condition').value.value == 'test'
-        examples[6].value.getAnnotation('condition').value.value == 'test'
+        ((ArrayInstance)examples[10].value).value[0].value.trim() == "foo";
+        ((ArrayInstance)examples[10].value).value[1].value.trim() == "bar";
+        examples[10].displayName.value == 'Example10'
+        examples[10].description.value == 'Lorem ipsum'
+
+        examples[0].strict.value
+        examples[1].strict.value
+        !examples[10].strict.value
+
+        examples[1].getAnnotation('condition').value.value == 'test'
+        examples[6].getAnnotation('condition').value.value == 'test'
+        examples[7].getAnnotation('condition').value.value == 'test'
+        examples[10].getAnnotation('condition').value.value == 'test'
     }
 
     def "expand-traits-with-resource-type" () {
