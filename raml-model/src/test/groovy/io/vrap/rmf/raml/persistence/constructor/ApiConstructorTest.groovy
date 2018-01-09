@@ -384,20 +384,20 @@ class ApiConstructorTest extends Specification {
         ''')
 
         then:
-        api.baseUri.components.size() == 4
-        api.baseUri.components[0] instanceof Literal
-        Literal literal = api.baseUri.components[0]
+        api.baseUri.value.components.size() == 4
+        api.baseUri.value.components[0] instanceof Literal
+        Literal literal = api.baseUri.value.components[0]
         literal.value == 'https://api.simple.com/'
 
-        api.baseUri.components[1] instanceof Expression
-        Expression versionTemplateExpression = api.baseUri.components[1]
+        api.baseUri.value.components[1] instanceof Expression
+        Expression versionTemplateExpression = api.baseUri.value.components[1]
         versionTemplateExpression.varSpecs.size() == 1
         versionTemplateExpression.varSpecs[0].variableName == 'version'
 
-        api.baseUri.components[2] instanceof Literal
+        api.baseUri.value.components[2] instanceof Literal
 
-        api.baseUri.components[3] instanceof Expression
-        Expression userIdTemplateExpression = api.baseUri.components[3]
+        api.baseUri.value.components[3] instanceof Expression
+        Expression userIdTemplateExpression = api.baseUri.value.components[3]
         userIdTemplateExpression.varSpecs.size() == 1
         userIdTemplateExpression.varSpecs[0].variableName == 'userId'
 

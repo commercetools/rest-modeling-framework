@@ -265,7 +265,7 @@ uriParametersFacet:
     ;
 
 baseUriFacet:
-    'baseUri' baseUri=SCALAR
+    'baseUri' baseUri=annotatedStringInstance
     ;
 
 baseUriParametersFacet:
@@ -503,7 +503,7 @@ typedElementMap:
     ;
 
 instance:
-    annotatedSimpleInstance | annotatedArrayInstance | annotatedObjectInstance| arrayInstance | objectInstance
+    annotatedSimpleInstance | annotatedArrayInstance | annotatedObjectInstance | arrayInstance | objectInstance
     ;
 
 baseInstance:

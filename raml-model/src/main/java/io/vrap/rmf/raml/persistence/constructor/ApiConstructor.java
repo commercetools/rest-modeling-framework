@@ -4,6 +4,7 @@ import com.damnhandy.uri.template.MalformedUriTemplateException;
 import com.damnhandy.uri.template.UriTemplate;
 import io.vrap.rmf.raml.model.modules.Api;
 import io.vrap.rmf.raml.model.modules.Document;
+import io.vrap.rmf.raml.model.resources.AnnotatedUriTemplate;
 import io.vrap.rmf.raml.model.resources.Resource;
 import io.vrap.rmf.raml.model.resources.ResourcesFactory;
 import io.vrap.rmf.raml.model.resources.ResourcesPackage;
@@ -76,17 +77,21 @@ public class ApiConstructor extends BaseConstructor {
 
     @Override
     public Object visitBaseUriFacet(RAMLParser.BaseUriFacetContext ctx) {
-        final String baseUriText = ctx.baseUri.getText();
+        final String baseUriText = ctx.baseUri.id(0).getText();
+        final AnnotatedUriTemplate annotatedUriTemplate = create(ANNOTATED_URI_TEMPLATE, ctx);
         try {
             final UriTemplate uriTemplate = (UriTemplate) ResourcesFactory.eINSTANCE
                     .createFromString(ResourcesPackage.Literals.URI_TEMPLATE, baseUriText);
-            scope.with(API_BASE__BASE_URI).setValue(uriTemplate, ctx.getStart());
-
-            return uriTemplate;
+            annotatedUriTemplate.setValue(uriTemplate);
+            scope.with(API_BASE__BASE_URI).setValue(annotatedUriTemplate, ctx.getStart());
         } catch (final MalformedUriTemplateException uriTemplateException) {
             scope.addError(uriTemplateException.getMessage(), ctx);
             return null;
         }
+        return withinScope(scope.with(annotatedUriTemplate), annotatedUriTemplateScope -> {
+            ctx.baseUri.annotationFacet().forEach(this::visitAnnotationFacet);
+            return annotatedUriTemplate;
+        });
     }
 
 

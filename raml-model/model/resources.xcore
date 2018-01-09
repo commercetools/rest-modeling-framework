@@ -27,6 +27,18 @@ create {
 	UriTemplate.fromTemplate(it)
 }
 
+class AnnotatedUriTemplate extends AnnotationsFacet {
+    UriTemplate value
+
+    op String getTemplate() {
+        return value.getTemplate();
+    }
+
+    op String expand() {
+        return value.expand();
+    }
+}
+
 class UriParameter extends TypedElement {
 }
 

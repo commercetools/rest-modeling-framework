@@ -33,10 +33,10 @@ public class ApiGenModel {
     }
 
     public String[] getBaseUriVariables() {
-        return api.getBaseUri().getVariables();
+        return api.getBaseUri().getValue().getVariables();
     }
 
-    public Boolean getHasBaseUriVariables() { return api.getBaseUri().getVariables().length > 0; }
+    public Boolean getHasBaseUriVariables() { return api.getBaseUri().getValue().getVariables().length > 0; }
 
     public List<UriParameter> getBaseUriParameters() {
         return api.getBaseUriParameters();

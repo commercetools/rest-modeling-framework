@@ -55,6 +55,55 @@ class RegressionTest extends Specification implements ResourceFixtures {
         api.baseUriParameters.get(0).type.type == null
     }
 
+    def "simple-baseuri"() {
+        when:
+        RamlModelResult<Api> ramlModelResult = constructApi(
+                '''\
+        #%RAML 1.0
+        title: Test
+        baseUri: http://example.com
+        ''')
+        then:
+        ramlModelResult.validationResults.size() == 0
+        Api api = ramlModelResult.rootObject
+        api.baseUri.expand() == "http://example.com"
+    }
+
+    def "baseuri-with-value"() {
+        when:
+        RamlModelResult<Api> ramlModelResult = constructApi(
+                '''\
+        #%RAML 1.0
+        title: Test
+        baseUri:
+            value: http://example.com
+        ''')
+        then:
+        ramlModelResult.validationResults.size() == 0
+        Api api = ramlModelResult.rootObject
+        api.baseUri.expand() == "http://example.com"
+    }
+
+    def "baseuri-with-annotation"() {
+        when:
+        RamlModelResult<Api> ramlModelResult = constructApi(
+                '''\
+        #%RAML 1.0
+        title: Test
+        annotationTypes:
+            condition : string
+                
+        baseUri:
+            (condition): test
+            value: http://example.com
+        ''')
+        then:
+        ramlModelResult.validationResults.size() == 0
+        Api api = ramlModelResult.rootObject
+        api.baseUri.expand() == "http://example.com"
+        api.baseUri.getAnnotation('condition').value.value == 'test'
+    }
+
     def "number-multipleof"() {
         when:
         RamlModelResult<Api> ramlModelResult = constructApi(

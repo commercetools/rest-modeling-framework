@@ -15,7 +15,7 @@ import io.vrap.rmf.raml.model.types.InlineTypeContainer
 import io.vrap.rmf.raml.model.resources.ResourceContainer
 import io.vrap.rmf.raml.model.resources.ResourceType
 import io.vrap.rmf.raml.model.resources.Trait
-import io.vrap.rmf.raml.model.resources.UriTemplate
+import io.vrap.rmf.raml.model.resources.AnnotatedUriTemplate
 import io.vrap.rmf.raml.model.resources.UriParameter
 
 import io.vrap.rmf.raml.model.security.SecuritySchemeContainer
@@ -41,7 +41,7 @@ interface ApiBase extends AnnotationsFacet, TypeContainer, ResourceContainer, Pr
 	 * A URI that serves as the base for URIs of all resources. Often used as the base
 	 * of the URL of each resource containing the location of the API. Can be a template URI.
 	 */
-	UriTemplate baseUri
+	contains AnnotatedUriTemplate baseUri
 
 	/*
 	 * Specifies the uri parameters in the base URI.
