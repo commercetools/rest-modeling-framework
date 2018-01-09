@@ -1,10 +1,13 @@
 package io.vrap.rmf.raml.persistence.constructor;
 
+import io.vrap.rmf.raml.model.types.Annotation;
+import io.vrap.rmf.raml.model.types.AnyAnnotationType;
 import io.vrap.rmf.raml.model.values.*;
 import io.vrap.rmf.raml.persistence.antlr.RAMLParser;
 
 import java.math.BigDecimal;
 
+import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.*;
 import static io.vrap.rmf.raml.model.values.ValuesPackage.Literals.*;
 
 /**
@@ -14,7 +17,7 @@ public class InstanceConstructor extends AbstractScopedVisitor<Instance> {
 
     public Instance construct(RAMLParser parser, Scope scope) {
         return withinScope(scope,
-                s ->visitInstance(parser.instance()));
+                s -> visitInstance(parser.instance()));
     }
 
     @Override
@@ -22,6 +25,86 @@ public class InstanceConstructor extends AbstractScopedVisitor<Instance> {
         final Instance instance = super.visitSimpleInstance(ctx);
         scope.setValue(instance, ctx.getStart());
         return instance;
+    }
+
+    @Override
+    public Instance visitAnnotatedSimpleInstance(RAMLParser.AnnotatedSimpleInstanceContext ctx) {
+        final Instance instance = super.visitAnnotatedSimpleInstance(ctx);
+        scope.setValue(instance, ctx.getStart());
+        return instance;
+    }
+
+    @Override
+    public Instance visitAnnotatedObjectInstance(RAMLParser.AnnotatedObjectInstanceContext ctx) {
+        final ObjectInstance objectInstance = (ObjectInstance)visitObjectInstance(ctx.objectInstance(0));
+        scope.setValue(objectInstance, ctx.getStart());
+
+        return withinScope(scope.with(objectInstance), objectInstanceScope -> {
+            ctx.annotationFacet().forEach(this::visitAnnotationFacet);
+            return objectInstance;
+        });
+    }
+
+    @Override
+    public Instance visitAnnotatedArrayInstance(RAMLParser.AnnotatedArrayInstanceContext ctx) {
+        final ArrayInstance arrayInstance = (ArrayInstance)visitArrayInstance(ctx.arrayInstance(0));
+        scope.setValue(arrayInstance, ctx.getStart());
+
+        return withinScope(scope.with(arrayInstance), arrayInstanceScope -> {
+            ctx.annotationFacet().forEach(this::visitAnnotationFacet);
+            return arrayInstance;
+        });
+    }
+
+    @Override
+    public Instance visitAnnotatedBooleanInstance(RAMLParser.AnnotatedBooleanInstanceContext ctx) {
+        final BooleanInstance booleanInstance = create(BOOLEAN_INSTANCE, ctx);
+        booleanInstance.setValue(Boolean.valueOf(ctx.BOOL(0).getText()));
+        return withinScope(scope.with(booleanInstance), booleanInstanceScope -> {
+            ctx.annotationFacet().forEach(this::visitAnnotationFacet);
+            return booleanInstance;
+        });
+    }
+
+    @Override
+    public Instance visitAnnotatedStringInstance(RAMLParser.AnnotatedStringInstanceContext ctx) {
+        final StringInstance stringInstance = create(STRING_INSTANCE, ctx);
+        stringInstance.setValue(ctx.id(0).getText());
+        return withinScope(scope.with(stringInstance), stringInstanceScope -> {
+            ctx.annotationFacet().forEach(this::visitAnnotationFacet);
+            return stringInstance;
+        });
+    }
+
+    @Override
+    public Instance visitAnnotatedIntegerInstance(RAMLParser.AnnotatedIntegerInstanceContext ctx) {
+        Instance instance;
+        try {
+            final int value = Integer.parseInt(ctx.INT(0).getText());
+            final IntegerInstance integerInstance = create(INTEGER_INSTANCE, ctx);
+            integerInstance.setValue(value);
+            instance = integerInstance;
+        } catch (NumberFormatException e) {
+            final StringInstance stringInstance = create(STRING_INSTANCE, ctx);
+            stringInstance.setValue(ctx.INT(0).getText());
+            instance = stringInstance;
+        }
+
+        final Instance integerInstance = instance;
+        return withinScope(scope.with(integerInstance), integerInstanceScope -> {
+            ctx.annotationFacet().forEach(this::visitAnnotationFacet);
+            return integerInstance;
+        });
+    }
+
+    @Override
+    public Instance visitAnnotatedNumberInstance(RAMLParser.AnnotatedNumberInstanceContext ctx) {
+        final NumberInstance numberInstance = create(NUMBER_INSTANCE, ctx);
+        numberInstance.setValue(new BigDecimal(ctx.FLOAT(0).getText()));
+        return withinScope(scope.with(numberInstance), numberInstanceScope -> {
+            ctx.annotationFacet().forEach(this::visitAnnotationFacet);
+            return numberInstance;
+        });
     }
 
     @Override
@@ -79,7 +162,7 @@ public class InstanceConstructor extends AbstractScopedVisitor<Instance> {
         propertyValue.setName(ctx.name.getText());
 
         withinScope(scope.with(propertyValue, PROPERTY_VALUE__VALUE), propertyValueScope -> {
-            visitInstance(ctx.value);
+            visitBaseInstance(ctx.value);
             return propertyValue;
         });
     }
@@ -93,6 +176,25 @@ public class InstanceConstructor extends AbstractScopedVisitor<Instance> {
             ctx.instance().forEach(this::visitInstance);
 
             return arrayInstance;
+        });
+    }
+
+    @Override
+    public Instance visitAnnotationFacet(final RAMLParser.AnnotationFacetContext annotationFacet) {
+        return withinScope(scope.with(ANNOTATIONS_FACET__ANNOTATIONS), annotationsScope -> {
+            final Annotation annotation = create(ANNOTATION, annotationFacet);
+            scope.setValue(annotation, annotationFacet.getStart());
+
+            final String annotationTypeRef = annotationFacet.ANNOTATION_TYPE_REF().getText();
+            final Scope annotationTypeScope = annotationsScope.with(ANNOTATION__TYPE);
+            final AnyAnnotationType annotationType = (AnyAnnotationType)
+                    annotationTypeScope.getEObjectByName(annotationTypeRef);
+            annotation.setType(annotationType);
+
+            withinScope(annotationsScope.with(annotation, ANNOTATION__VALUE),
+                    annotationValueScope -> visitInstance(annotationFacet.value));
+
+            return (Instance)annotationsScope.getEObject();
         });
     }
 }

@@ -503,16 +503,77 @@ typedElementMap:
     ;
 
 instance:
-    annotatedInstance | simpleInstance | arrayInstance | objectInstance
+    annotatedSimpleInstance | annotatedArrayInstance | annotatedObjectInstance| arrayInstance | objectInstance
     ;
 
-annotatedInstance:
-    'value' (simpleInstance | arrayInstance | objectInstance)
-    annotationFacet*
+baseInstance:
+    simpleInstance | arrayInstance | objectInstance
     ;
 
 simpleInstance:
     stringInstance | booleanInstance | integerInstance | numberInstance
+    ;
+
+annotatedSimpleInstance:
+    annotatedStringInstance | annotatedBooleanInstance | annotatedIntegerInstance | annotatedNumberInstance
+    ;
+
+annotatedStringInstance:
+    value=id |
+    MAP_START
+        (
+            ('value' value=id)
+            | annotationFacet
+        )+
+    MAP_END
+    ;
+
+annotatedBooleanInstance:
+    value=BOOL|
+    MAP_START
+        (
+            ('value' value=BOOL)
+            | annotationFacet
+        )+
+    MAP_END
+    ;
+
+annotatedIntegerInstance:
+    value=INT |
+    MAP_START
+        (
+            ('value' value=INT)
+            | annotationFacet
+        )+
+    MAP_END
+    ;
+
+annotatedNumberInstance:
+    value=FLOAT
+    MAP_START
+        (
+            ('value' value=FLOAT)
+            | annotationFacet
+        )+
+    MAP_END
+    ;
+
+annotatedArrayInstance:
+    MAP_START
+        (
+            'value' arrayInstance
+            | annotationFacet
+        )+
+    MAP_END
+    ;
+
+annotatedObjectInstance:
+    MAP_START
+        (
+            'value' objectInstance
+            | annotationFacet
+        )+
+    MAP_END
     ;
 
 stringInstance:
@@ -544,7 +605,7 @@ objectInstance:
     ;
 
 instanceProperty:
-    name=id value=instance
+    name=id value=baseInstance
     ;
 
 id:

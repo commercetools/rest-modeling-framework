@@ -6,6 +6,7 @@
 package io.vrap.rmf.raml.model.values
 
 import com.google.common.net.MediaType
+import io.vrap.rmf.raml.model.types.AnnotationsFacet
 
 type RegExp wraps io.vrap.rmf.raml.model.values.RegExp
 create {
@@ -27,7 +28,7 @@ create {
 	MediaType.parse(it)	
 }
 
-interface Instance {
+interface Instance extends AnnotationsFacet {
 	op Object getValue()
 }
 

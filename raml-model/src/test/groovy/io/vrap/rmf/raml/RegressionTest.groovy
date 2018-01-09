@@ -6,8 +6,12 @@ import io.vrap.rmf.raml.model.RamlModelResult
 import io.vrap.rmf.raml.model.modules.Api
 import io.vrap.rmf.raml.model.resources.HttpMethod
 import io.vrap.rmf.raml.model.resources.Method
+import io.vrap.rmf.raml.model.responses.Body
 import io.vrap.rmf.raml.model.types.Annotation
+import io.vrap.rmf.raml.model.types.Example
 import io.vrap.rmf.raml.model.util.StringCaseFormat
+import io.vrap.rmf.raml.model.values.ArrayInstance
+import io.vrap.rmf.raml.model.values.ObjectInstance
 import io.vrap.rmf.raml.persistence.ResourceFixtures
 import org.eclipse.emf.common.util.URI
 import spock.lang.Ignore
@@ -109,6 +113,82 @@ class RegressionTest extends Specification implements ResourceFixtures {
         ''')
         then:
         ramlModelResult.validationResults.size() == 0
+    }
+
+    def "example" () {
+        when:
+        RamlModelResult<Api> ramlModelResult = constructApi(
+                '''\
+                #%RAML 1.0
+                title: Annotating Examples
+                
+                annotationTypes:
+                    condition : string
+                
+                /request:
+                    get:
+                        body:
+                            application/json:
+                                examples:
+                                    example1:
+                                        (condition): test
+                                        value: |
+                                            {a:1}
+                                    example2:
+                                        value: |
+                                            {a:2}
+                                    example3:
+                                        value: |
+                                            a:3
+                                    example4: "{a:4}"
+                                    example5:
+                                        name: foo
+                                    example6:
+                                        (condition): test
+                                        value:
+                                            name: foo
+                                            value: bar
+                                    example7:
+                                        (condition): test
+                                        value:
+                                            - foo
+                                            - bar
+                                    example8:
+                                        - foo
+                                        - bar
+                                    example9:
+                                        value:
+                                            - foo
+                                            - bar
+                ''')
+        then:
+        ramlModelResult.validationResults.size() == 0
+        List<Example> examples = ramlModelResult.rootObject.resources[0].getMethod(HttpMethod.GET).getBody('application/json').type.examples;
+
+        examples[0].value.value.trim() == "{a:1}".trim()
+        examples[1].value.value.trim() == "{a:2}".trim()
+        examples[2].value.value.trim() == "a:3".trim()
+        examples[3].value.value.trim() == "{a:4}".trim()
+
+        ((ObjectInstance)examples[4].value).value[0].name == "name";
+        ((ObjectInstance)examples[4].value).value[0].value.value == "foo";
+
+        ((ObjectInstance)examples[5].value).value[0].name == "name";
+        ((ObjectInstance)examples[5].value).value[0].value.value == "foo";
+
+        ((ObjectInstance)examples[5].value).value[1].name == "value";
+        ((ObjectInstance)examples[5].value).value[1].value.value == "bar";
+
+        ((ArrayInstance)examples[6].value).value[0].value.trim() == "foo";
+        ((ArrayInstance)examples[6].value).value[1].value.trim() == "bar";
+        ((ArrayInstance)examples[7].value).value[0].value.trim() == "foo";
+        ((ArrayInstance)examples[7].value).value[1].value.trim() == "bar";
+        ((ArrayInstance)examples[8].value).value[0].value.trim() == "foo";
+        ((ArrayInstance)examples[8].value).value[1].value.trim() == "bar";
+
+        examples[0].value.getAnnotation('condition').value.value == 'test'
+        examples[5].value.getAnnotation('condition').value.value == 'test'
+        examples[6].value.getAnnotation('condition').value.value == 'test'
     }
 
     def "expand-traits-with-resource-type" () {
