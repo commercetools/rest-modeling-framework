@@ -222,6 +222,7 @@ class RegressionTest extends Specification implements ResourceFixtures {
                                         value:
                                             - foo
                                             - bar
+                                    example11: /test/12345
                 ''')
         then:
         ramlModelResult.validationResults.size() == 0
@@ -231,6 +232,7 @@ class RegressionTest extends Specification implements ResourceFixtures {
         examples[2].instanceValue.trim() == "{a:2}".trim()
         examples[3].instanceValue.trim() == "a:3".trim()
         examples[4].instanceValue.trim() == "{a:4}".trim()
+        examples[11].instanceValue.trim() == "/test/12345".trim()
 
         ((ObjectInstance)examples[5].value).value[0].name == "name";
         ((ObjectInstance)examples[5].value).value[0].value.value == "foo";
@@ -459,6 +461,10 @@ class RegressionTest extends Specification implements ResourceFixtures {
         constructApi(fileName, null, input)
     }
 
+    RamlModelResult<Api> constructApi(List<String> usesFiles, String input) {
+        constructApi('api.raml', usesFiles, input)
+    }
+
     RamlModelResult<Api> constructApi(String fileName, List<String> usesFiles, String input) {
         URI i = writeFile(fileName, usesFiles, input)
         return new RamlModelBuilder().buildApi(i)
@@ -483,7 +489,9 @@ class RegressionTest extends Specification implements ResourceFixtures {
     }
 
     String getTmpFileName(String fileName) {
-        String testFileName = StringCaseFormat.LOWER_HYPHEN_CASE.apply(specificationContext.currentFeature.getName()).replace(".raml", "");
-        return "tmp-${fileName.replace(".raml", "")}-${testFileName}.raml";
+        String fileExtension = fileName.contains(".") ? fileName.split("[.]").last() : "raml";
+        String file = fileName.replace("." + fileExtension, "");
+        String testFileName = StringCaseFormat.LOWER_HYPHEN_CASE.apply(specificationContext.currentFeature.getName()).replace("." + fileExtension, "");
+        return "tmp-${file}-${testFileName}." + fileExtension;
     }
 }

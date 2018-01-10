@@ -67,6 +67,16 @@ public class InstanceConstructor extends AbstractScopedVisitor<Instance> {
     }
 
     @Override
+    public Instance visitAnnotatedRelativeUriInstance(RAMLParser.AnnotatedRelativeUriInstanceContext ctx) {
+        final StringInstance stringInstance = create(STRING_INSTANCE, ctx);
+        stringInstance.setValue(ctx.RELATIVE_URI(0).getText());
+        return withinScope(scope.with(stringInstance), stringInstanceScope -> {
+            ctx.annotationFacet().forEach(this::visitAnnotationFacet);
+            return stringInstance;
+        });
+    }
+
+    @Override
     public Instance visitAnnotatedStringInstance(RAMLParser.AnnotatedStringInstanceContext ctx) {
         final StringInstance stringInstance = create(STRING_INSTANCE, ctx);
         stringInstance.setValue(ctx.id(0).getText());
@@ -105,6 +115,13 @@ public class InstanceConstructor extends AbstractScopedVisitor<Instance> {
             ctx.annotationFacet().forEach(this::visitAnnotationFacet);
             return numberInstance;
         });
+    }
+
+    @Override
+    public Instance visitRelativeUriInstance(RAMLParser.RelativeUriInstanceContext ctx) {
+        final StringInstance stringInstance = create(STRING_INSTANCE, ctx);
+        stringInstance.setValue(ctx.getText());
+        return stringInstance;
     }
 
     @Override

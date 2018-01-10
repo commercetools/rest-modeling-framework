@@ -535,11 +535,21 @@ baseInstance:
     ;
 
 simpleInstance:
-    stringInstance | booleanInstance | integerInstance | numberInstance
+    relativeUriInstance | stringInstance | booleanInstance | integerInstance | numberInstance
     ;
 
 annotatedSimpleInstance:
     annotatedStringInstance | annotatedBooleanInstance | annotatedIntegerInstance | annotatedNumberInstance
+    ;
+
+annotatedRelativeUriInstance:
+    value=RELATIVE_URI |
+    MAP_START
+        (
+            ('value' value=RELATIVE_URI)
+            | annotationFacet
+        )+
+    MAP_END
     ;
 
 annotatedStringInstance:
@@ -598,6 +608,10 @@ annotatedObjectInstance:
             | annotationFacet
         )+
     MAP_END
+    ;
+
+relativeUriInstance:
+    value=RELATIVE_URI
     ;
 
 stringInstance:
