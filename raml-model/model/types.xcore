@@ -266,22 +266,31 @@ class TypeTemplate extends AnyType {
 
 }
 
-class Example extends AnnotationsFacet {
+interface ValueInstanceFacet {
+    contains Instance value
+
+    op Object getInstanceValue() {
+        return value?.getValue()
+    }
+}
+
+interface DescriptionFacet {
+    contains StringInstance description
+}
+
+interface DisplayNameFacet {
+    contains StringInstance displayName
+}
+
+interface StrictFacet {
+    contains BooleanInstance strict
+}
+
+class Example extends AnnotationsFacet, DescriptionFacet, DisplayNameFacet, StrictFacet, ValueInstanceFacet {
     /*
      * The optional name of an example.
      */
     String name
-
-    contains StringInstance displayName
-
-    contains StringInstance description
-
-    contains BooleanInstance strict
-
-    /*
-     * The value of the example.
-     */
-    contains Instance value
 }
 
 interface InlineTypeContainer {

@@ -30,7 +30,6 @@ import static io.vrap.rmf.raml.model.security.SecurityPackage.Literals.*;
 import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.*;
 import static io.vrap.rmf.raml.model.values.ValuesPackage.Literals.BOOLEAN_INSTANCE;
 import static io.vrap.rmf.raml.model.values.ValuesPackage.Literals.MEDIA_TYPE;
-import static io.vrap.rmf.raml.model.values.ValuesPackage.Literals.STRING_INSTANCE;
 
 public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
     private final InstanceConstructor instanceConstructor = new InstanceConstructor();
@@ -76,71 +75,59 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
 
     @Override
     public Object visitExampleFacet(RAMLParser.ExampleFacetContext exampleFacet) {
-        final Example example = (Example)visitExampleInstance(exampleFacet.exampleInstance());
+        final Example example = (Example)visitExample(exampleFacet.example());
         example.setName("");
         return withinScope(scope.with(ANY_TYPE__EXAMPLES), exampleScope -> {
-            scope.setValue(example, exampleFacet.getStart());
+            exampleScope.setValue(example, exampleFacet.getStart());
             return example;
         });
     }
 
     @Override
-    public Object visitExampleInstance(RAMLParser.ExampleInstanceContext ctx) {
-        if (ctx.annotatedExampleInstance() != null) {
-            return visitAnnotatedExampleInstance(ctx.annotatedExampleInstance());
-        }
-
+    public Object visitExample(RAMLParser.ExampleContext ctx) {
         final Example example = create(EXAMPLE, ctx);
-        example.setValue(instanceConstructor.withinScope(scope.with(example, EXAMPLE__VALUE), exampleValueScope ->
-                instanceConstructor.visitExampleInstance(ctx)
-        ));
-        StringInstance displayName = ((StringInstance)create(STRING_INSTANCE, ctx));
-        displayName.setValue("");
-        StringInstance description = ((StringInstance)create(STRING_INSTANCE, ctx));
-        description.setValue("");
-        BooleanInstance strict = ((BooleanInstance)create(BOOLEAN_INSTANCE, ctx));
-        strict.setValue(true);
-        example.setDisplayName(displayName);
-        example.setDescription(description);
-        example.setStrict(strict);
-        return withinScope(scope.with(example), exampleScope -> example);
+
+        return withinScope(scope.with(example), exampleScope -> {
+            ctx.displayNameFacet().forEach(this::visitDisplayNameFacet);
+            ctx.descriptionFacet().forEach(this::visitDescriptionFacet);
+            ctx.strictFacet().forEach(this::visitStrictFacet);
+            ctx.annotationFacet().forEach(this::visitAnnotationFacet);
+
+            if (ctx.strictFacet().isEmpty()) {
+                BooleanInstance strict = create(BOOLEAN_INSTANCE, ctx);
+                strict.setValue(true);
+                example.setStrict(strict);
+            }
+
+            instanceConstructor.withinScope(scope.with(example, VALUE_INSTANCE_FACET__VALUE), exampleValueScope ->
+                    instanceConstructor.visitBaseInstance(ctx.value)
+            );
+
+            return example;
+        });
     }
 
     @Override
-    public Object visitAnnotatedExampleInstance(RAMLParser.AnnotatedExampleInstanceContext ctx) {
-        final Example example = create(EXAMPLE, ctx);
+    public Object visitStrictFacet(RAMLParser.StrictFacetContext ctx) {
+        return instanceConstructor.withinScope(scope.with(STRICT_FACET__STRICT), strictScope -> {
+            final Instance strict = instanceConstructor.visitAnnotatedBooleanInstance(ctx.annotatedBooleanInstance());
+            return strictScope.setValue(strict, ctx.getStart());
+        });
+    }
 
-        example.setValue(instanceConstructor.withinScope(scope.with(example, EXAMPLE__VALUE), exampleValueScope ->
-                instanceConstructor.visitBaseInstance(ctx.baseInstance(0))
-        ));
+    @Override
+    public Object visitDescriptionFacet(RAMLParser.DescriptionFacetContext ctx) {
+        return instanceConstructor.withinScope(scope.with(DESCRIPTION_FACET__DESCRIPTION), descriptionScope -> {
+            final Instance description = instanceConstructor.visitAnnotatedStringInstance(ctx.annotatedStringInstance());
+            return descriptionScope.setValue(description, ctx.getStart());
+        });
+    }
 
-        return withinScope(scope.with(example), exampleScope -> {
-            ctx.annotationFacet().forEach(this::visitAnnotationFacet);
-            final StringInstance displayName;
-            final StringInstance description;
-            final BooleanInstance strict;
-            if (ctx.displayName != null)
-                displayName = (StringInstance)instanceConstructor.visitAnnotatedStringInstance(ctx.displayName);
-            else {
-                displayName = create(STRING_INSTANCE, ctx);
-                displayName.setValue("");
-            }
-            if (ctx.description != null)
-                description = (StringInstance)instanceConstructor.visitAnnotatedStringInstance(ctx.description);
-            else {
-                description = create(STRING_INSTANCE, ctx);
-                description.setValue("");
-            }
-            if (ctx.strict != null)
-                strict = (BooleanInstance)instanceConstructor.visitAnnotatedBooleanInstance(ctx.strict);
-            else {
-                strict = create(BOOLEAN_INSTANCE, ctx);
-                strict.setValue(true);
-            }
-            example.setDisplayName(displayName);
-            example.setDescription(description);
-            example.setStrict(strict);
-            return example;
+    @Override
+    public Object visitDisplayNameFacet(RAMLParser.DisplayNameFacetContext ctx) {
+        return instanceConstructor.withinScope(scope.with(DISPLAY_NAME_FACET__DISPLAY_NAME), displayNameScope -> {
+            final Instance displayName = instanceConstructor.visitAnnotatedStringInstance(ctx.annotatedStringInstance());
+            return displayNameScope.setValue(displayName, ctx.getStart());
         });
     }
 
@@ -155,7 +142,7 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
 
     @Override
     public Object visitNamedExample(RAMLParser.NamedExampleContext namedExample) {
-        final Example example = (Example)visitExampleInstance(namedExample.exampleInstance());
+        final Example example = (Example)visitExample(namedExample.example());
         example.setName(namedExample.name.getText());
         scope.setValue(example, namedExample.getStart());
         return example;

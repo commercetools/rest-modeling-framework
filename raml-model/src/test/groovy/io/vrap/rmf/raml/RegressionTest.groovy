@@ -227,10 +227,10 @@ class RegressionTest extends Specification implements ResourceFixtures {
         ramlModelResult.validationResults.size() == 0
         List<Example> examples = ramlModelResult.rootObject.resources[0].getMethod(HttpMethod.GET).getBody('application/json').type.examples;
 
-        examples[1].value.value.trim() == "{a:1}".trim()
-        examples[2].value.value.trim() == "{a:2}".trim()
-        examples[3].value.value.trim() == "a:3".trim()
-        examples[4].value.value.trim() == "{a:4}".trim()
+        examples[1].instanceValue.trim() == "{a:1}".trim()
+        examples[2].instanceValue.trim() == "{a:2}".trim()
+        examples[3].instanceValue.trim() == "a:3".trim()
+        examples[4].instanceValue.trim() == "{a:4}".trim()
 
         ((ObjectInstance)examples[5].value).value[0].name == "name";
         ((ObjectInstance)examples[5].value).value[0].value.value == "foo";

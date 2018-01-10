@@ -308,6 +308,18 @@ describedByFacet:
         )
     ;
 
+displayNameFacet:
+    'displayName' annotatedStringInstance
+    ;
+
+descriptionFacet:
+    'description' annotatedStringInstance
+    ;
+
+strictFacet:
+    'strict' annotatedBooleanInstance
+    ;
+
 securitySchemeTypeFacet:
     'type' type=SCALAR
     ;
@@ -450,23 +462,20 @@ defaultFacet:
     ;
 
 exampleFacet:
-    'example' exampleInstance
+    'example' example
     ;
 
-annotatedExampleInstance:
+example:
     MAP_START
         (
-            'value' baseInstance
-            | 'strict' strict=annotatedBooleanInstance
-            | 'displayName' displayName=annotatedStringInstance
-            | 'description' description=annotatedStringInstance
+            'value' value=baseInstance
+            | strictFacet
+            | displayNameFacet
+            | descriptionFacet
             | annotationFacet
         )+
-    MAP_END
-    ;
-
-exampleInstance:
-    simpleInstance | arrayInstance | annotatedExampleInstance | objectInstance
+    MAP_END |
+    value=baseInstance
     ;
 
 examplesFacet:
@@ -482,7 +491,7 @@ examplesFacet:
     ;
 
 namedExample:
-    name=id exampleInstance
+    name=id example
     ;
 
 propertiesFacet:
