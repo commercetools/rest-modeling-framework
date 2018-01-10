@@ -315,8 +315,7 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
             scope.setValue(body, bodyContentType.getStart());
         }
         if (bodyContentType.contentType != null) {
-            final MediaType contentType = (MediaType) ValuesFactory.eINSTANCE.createFromString(MEDIA_TYPE, bodyContentType.contentType.getText());
-            body.getContentTypes().add(contentType);
+            body.getContentTypes().add(bodyContentType.contentType.getText());
         }
         return body;
     }

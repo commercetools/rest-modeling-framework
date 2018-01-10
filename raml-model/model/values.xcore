@@ -6,6 +6,7 @@
 package io.vrap.rmf.raml.model.values
 
 import com.google.common.net.MediaType
+import org.eclipse.emf.common.util.EList
 import io.vrap.rmf.raml.model.types.AnnotationsFacet
 
 type RegExp wraps io.vrap.rmf.raml.model.values.RegExp
@@ -27,6 +28,8 @@ type MediaType wraps MediaType
 create {
 	MediaType.parse(it)	
 }
+
+type MediaTypes wraps EList<MediaType>
 
 interface Instance extends AnnotationsFacet {
 	op Object getValue()

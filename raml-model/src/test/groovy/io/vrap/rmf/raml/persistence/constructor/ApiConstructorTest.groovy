@@ -317,7 +317,7 @@ class ApiConstructorTest extends Specification {
         api.traits[0].responses[0].statusCode == '409'
         api.traits[0].responses[0].description == 'Conflict'
         api.traits[0].responses[0].bodies.size() == 1
-        api.traits[0].responses[0].bodies[0].contentTypes == [ MediaType.parse('application/json') ]
+        api.traits[0].responses[0].bodies[0].contentMediaTypes == [ MediaType.parse('application/json') ]
 
         api.resources.size() == 1
         api.resources[0].methods.size() == 1
@@ -371,7 +371,7 @@ class ApiConstructorTest extends Specification {
         then:
         api.title == 'Simple API'
         api.protocols == [ 'http', 'https' ]
-        api.mediaType == [ MediaType.parse('application/json') ]
+        api.mediaTypes == [ MediaType.parse('application/json') ]
     }
 
     def "base uri and base uri parameters"() {
@@ -532,13 +532,13 @@ class ApiConstructorTest extends Specification {
 
         api.resources[0].methods[0].responses[0].statusCode == '200'
         api.resources[0].methods[0].responses[0].bodies.size() == 1
-        api.resources[0].methods[0].responses[0].bodies[0].contentTypes == [MediaType.parse('application/json') ]
+        api.resources[0].methods[0].responses[0].bodies[0].contentMediaTypes == [MediaType.parse('application/json') ]
         api.resources[0].methods[0].responses[0].bodies[0].type instanceof ObjectType
         api.resources[0].methods[0].responses[0].bodies[0].type.name == 'object'
 
         api.resources[0].methods[0].responses[1].statusCode == '401'
         api.resources[0].methods[0].responses[1].bodies.size() == 1
-        api.resources[0].methods[0].responses[1].bodies[0].contentTypes == [MediaType.parse('application/json') ]
+        api.resources[0].methods[0].responses[1].bodies[0].contentMediaTypes == [MediaType.parse('application/json') ]
         api.resources[0].methods[0].responses[1].bodies[0].type instanceof StringType
         api.resources[0].methods[0].responses[1].bodies[0].type.name == 'string'
     }
@@ -634,10 +634,10 @@ class ApiConstructorTest extends Specification {
         api.resources.size() == 1
         api.resources[0].methods.size() == 2
         api.resources[0].methods[0].bodies.size() == 1
-        api.resources[0].methods[0].bodies[0].contentTypes == [MediaType.parse('application/json') ]
+        api.resources[0].methods[0].bodies[0].contentMediaTypes == [MediaType.parse('application/json') ]
         api.resources[0].methods[0].bodies[0].type instanceof StringType
         api.resources[0].methods[1].bodies.size() == 1
-        api.resources[0].methods[1].bodies[0].contentTypes == [ MediaType.parse('application/xml') ]
+        api.resources[0].methods[1].bodies[0].contentMediaTypes == [ MediaType.parse('application/xml') ]
         api.resources[0].methods[1].bodies[0].name == null
         api.resources[0].methods[1].bodies[0].type instanceof IntegerType
         IntegerType integerType = api.resources[0].methods[1].bodies[0].type
@@ -661,9 +661,9 @@ class ApiConstructorTest extends Specification {
         api.resources.size() == 1
         api.resources[0].methods.size() == 1
         api.resources[0].methods[0].bodies.size() == 2
-        api.resources[0].methods[0].bodies[0].contentTypes == [ MediaType.parse('application/json') ]
+        api.resources[0].methods[0].bodies[0].contentMediaTypes == [ MediaType.parse('application/json') ]
         api.resources[0].methods[0].bodies[0].type instanceof StringType
-        api.resources[0].methods[0].bodies[1].contentTypes == [ MediaType.parse('application/xml') ]
+        api.resources[0].methods[0].bodies[1].contentMediaTypes == [ MediaType.parse('application/xml') ]
         api.resources[0].methods[0].bodies[1].name == null
         api.resources[0].methods[0].bodies[1].type instanceof IntegerType
         IntegerType integerType = api.resources[0].methods[0].bodies[1].type
@@ -741,7 +741,7 @@ class ApiConstructorTest extends Specification {
         api.resources[0].methods.size() == 1
         api.resources[0].methods[0].bodies.size() == 1
         Body body = api.resources[0].methods[0].bodies[0]
-        body.contentTypes == [ MediaType.parse('application/json') ]
+        body.contentMediaTypes == [ MediaType.parse('application/json') ]
         body.type instanceof ObjectType
         ObjectType objectType = body.type
         objectType.properties.size() == 1

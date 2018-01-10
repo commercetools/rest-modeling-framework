@@ -439,9 +439,9 @@ public class RamlModelBuilder {
      * content type defined.
      */
     private static class BodyContentTypeResolver extends ResponsesSwitch<EObject> {
-        private final List<MediaType> defaultMediaTypes;
+        private final List<String> defaultMediaTypes;
 
-        public BodyContentTypeResolver(final List<MediaType> defaultMediaTypes) {
+        public BodyContentTypeResolver(final List<String> defaultMediaTypes) {
             this.defaultMediaTypes = defaultMediaTypes;
         }
 

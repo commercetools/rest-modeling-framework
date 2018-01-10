@@ -84,7 +84,7 @@ public class ModelHelper {
     public static Body getBody(final BodyContainer container, final String contentType) {
         final MediaType parsedContentType = MediaType.parse(contentType);
         return container.getBodies().stream()
-                .filter(body -> body.getContentTypes().stream().filter(mediaType -> parsedContentType.is(mediaType)).findFirst().isPresent())
+                .filter(body -> body.getContentMediaTypes().stream().filter(mediaType -> parsedContentType.is(mediaType)).findFirst().isPresent())
                 .findFirst()
                 .orElse(null);
     }
@@ -103,6 +103,11 @@ public class ModelHelper {
         } else {
             return getPropertiesAsMapInternal(objectTypeFacet, withoutPattern);
         }
+    }
+
+    public static EList<MediaType> getMediaTypes(final List<String> mediaTypes) {
+        final List<MediaType> types = mediaTypes.stream().map(MediaType::parse).collect(Collectors.toList());
+        return ECollections.toEList(types);
     }
 
     /**

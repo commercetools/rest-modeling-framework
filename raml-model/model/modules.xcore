@@ -6,7 +6,7 @@
 package io.vrap.rmf.raml.model.modules
 
 import io.vrap.rmf.raml.model.values.ProtocolsFacet
-import io.vrap.rmf.raml.model.values.MediaType
+import io.vrap.rmf.raml.model.values.MediaTypes
 import io.vrap.rmf.raml.model.types.AnnotationsFacet
 import io.vrap.rmf.raml.model.types.AnyAnnotationType
 import io.vrap.rmf.raml.model.types.AnyType
@@ -20,6 +20,7 @@ import io.vrap.rmf.raml.model.resources.UriParameter
 
 import io.vrap.rmf.raml.model.security.SecuritySchemeContainer
 import io.vrap.rmf.raml.model.security.SecuredByFacet
+import io.vrap.rmf.raml.model.util.ModelHelper
 
 /*
  * Common interface for api, extension and overlay. 
@@ -52,12 +53,16 @@ interface ApiBase extends AnnotationsFacet, TypeContainer, ResourceContainer, Pr
 	 * The default media types to use for request and response bodies (payloads),
 	 * for example "application/json".
 	 */
-	MediaType[] mediaType
+	String[] mediaType
 	
 	/*
 	 * Additional overall documentation for the API.
 	 */
 	contains Document[] documentation
+
+	op MediaTypes getMediaTypes() {
+	    ModelHelper.getMediaTypes(mediaType)
+	}
 }
 
 class Api extends ApiBase {

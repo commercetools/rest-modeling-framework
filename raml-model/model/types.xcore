@@ -8,7 +8,7 @@ import io.vrap.rmf.raml.model.elements.NamedElement
 import io.vrap.rmf.raml.model.values.Instance
 import io.vrap.rmf.raml.model.values.StringInstance
 import io.vrap.rmf.raml.model.values.BooleanInstance
-import io.vrap.rmf.raml.model.values.MediaType
+import io.vrap.rmf.raml.model.values.MediaTypes
 import io.vrap.rmf.raml.model.values.UnsignedInteger
 import io.vrap.rmf.raml.model.values.PositiveInteger
 import io.vrap.rmf.raml.model.values.RegExp
@@ -199,7 +199,7 @@ interface FileTypeFacet  extends AnyTypeFacet {
 	/*
      * A list of valid content-type strings for the file.
      */
-    MediaType[] fileTypes
+    String[] fileTypes
 
     /*
      * Specifies the minimum number of bytes for a parameter value. The value MUST be equal to or greater than 0.
@@ -210,6 +210,10 @@ interface FileTypeFacet  extends AnyTypeFacet {
      * Specifies the maximum number of bytes for a parameter value. The value MUST be equal to or greater than 0.
      */
     UnsignedInteger maxLength = "2147483647"
+
+    op MediaTypes getFileMediaTypes() {
+        ModelHelper.getMediaTypes(fileTypes)
+    }
 }
  
 /*

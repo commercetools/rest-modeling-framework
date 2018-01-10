@@ -85,7 +85,6 @@ public class UriFragmentBuilder {
             final List<String> segments = uriFragmentsBuilderSwitch.apply(body.eContainer());
             segments.add(body.eContainmentFeature().getName());
             segments.add(body.getContentTypes().stream()
-                    .map(MediaType::toString)
                     .collect(Collectors.joining(",")));
             return segments;
         }
