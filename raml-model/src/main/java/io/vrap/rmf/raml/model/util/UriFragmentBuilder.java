@@ -106,6 +106,11 @@ public class UriFragmentBuilder {
     }
 
     private List<String> stringInstance(final StringInstance stringInstance) {
-        return uriFragmentsBuilderSwitch.apply(stringInstance.eContainer());
+        if (stringInstance.eContainer() != null) {
+            final List<String> segments = uriFragmentsBuilderSwitch.apply(stringInstance.eContainer());
+            segments.add(stringInstance.eContainmentFeature().getName());
+            return segments;
+        }
+        return new ArrayList<>();
     }
 }
