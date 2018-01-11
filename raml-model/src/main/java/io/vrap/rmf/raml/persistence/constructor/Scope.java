@@ -215,7 +215,8 @@ public class Scope {
      * @return the value
      */
     public <T> T setValue(final EStructuralFeature feature, final T value, final Token token) {
-        final boolean isValidValue = eObject.eClass().getEAllStructuralFeatures().contains(feature) && value != null;
+        final EList<EStructuralFeature> objectClass = eObject.eClass().getEAllStructuralFeatures();
+        final boolean isValidValue = objectClass.contains(feature) && value != null;
         final boolean isCollectionValue = value instanceof Collection;
         final EClassifier eType = feature.getEType();
 

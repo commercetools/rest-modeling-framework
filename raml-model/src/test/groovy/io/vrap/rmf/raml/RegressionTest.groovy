@@ -448,9 +448,9 @@ class RegressionTest extends Specification implements ResourceFixtures {
                 ''')
         then:
         ramlModelResult.validationResults.size() == 0
-        ramlModelResult.rootObject.resources[0].getMethod(HttpMethod.GET).description == "Some API"
-        ramlModelResult.rootObject.resources[0].getMethod(HttpMethod.POST).description == "Extended API"
-        ramlModelResult.rootObject.resources[0].getMethod(HttpMethod.DELETE).description == "Final API"
+        ramlModelResult.rootObject.resources[0].getMethod(HttpMethod.GET).description.value == "Some API"
+        ramlModelResult.rootObject.resources[0].getMethod(HttpMethod.POST).description.value == "Extended API"
+        ramlModelResult.rootObject.resources[0].getMethod(HttpMethod.DELETE).description.value == "Final API"
     }
 
     RamlModelResult<Api> constructApi(String input) {

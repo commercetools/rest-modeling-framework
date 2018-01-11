@@ -116,6 +116,8 @@ public class ApiConstructor extends BaseConstructor {
             resource.setRelativeUri(relativeUri);
             return withinScope(resourcesScope.with(resource), resourceScope -> {
                 resourceFacet.attributeFacet().forEach(this::visitAttributeFacet);
+                resourceFacet.descriptionFacet().forEach(this::visitDescriptionFacet);
+                resourceFacet.displayNameFacet().forEach(this::visitDisplayNameFacet);
                 resourceFacet.annotationFacet().forEach(this::visitAnnotationFacet);
                 resourceFacet.securedByFacet().forEach(this::visitSecuredByFacet);
 

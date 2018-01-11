@@ -36,7 +36,7 @@ class TypeDeclarationFragmentConstructorTest extends Specification {
         displayName: Simple
         ''')
         then:
-        anyType.displayName == 'Simple'
+        anyType.displayName.value == 'Simple'
     }
 
     def "type with example"() {
@@ -50,7 +50,7 @@ class TypeDeclarationFragmentConstructorTest extends Specification {
         type.name == null
         StringType stringType = BuiltinType.STRING.getType(resourceSet)
         type != stringType
-        type.displayName == 'Simple'
+        type.displayName.value == 'Simple'
         type.examples.size() == 1
         type.examples[0].value instanceof StringInstance
     }

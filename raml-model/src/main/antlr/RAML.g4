@@ -64,11 +64,16 @@ traitFacet:
             |   (
                     MAP_START
                     (
-                        bodyFacet | attributeFacet
-                        | headersFacet | queryParametersFacet
+                        bodyFacet
+                        | descriptionFacet
+                        | displayNameFacet
+                        | attributeFacet
+                        | headersFacet
+                        | queryParametersFacet
                         | isFacet
                         | annotationFacet
-                        | responsesFacet | securedByFacet
+                        | responsesFacet
+                        | securedByFacet
                     )*
                     MAP_END
                 )
@@ -82,8 +87,16 @@ resourceFacet:
             |   (
                     MAP_START
                     (
-                        resourceFacet | methodFacet | attributeFacet | uriParametersFacet | annotationFacet
-                        | securedByFacet | resourceTypeFacet | isFacet
+                        resourceFacet
+                        | descriptionFacet
+                        | displayNameFacet
+                        | methodFacet
+                        | attributeFacet
+                        | uriParametersFacet
+                        | annotationFacet
+                        | securedByFacet
+                        | resourceTypeFacet
+                        | isFacet
                     )*
                     MAP_END
                 )
@@ -119,8 +132,15 @@ resourceTypeDeclarationFacet:
             |   (
                     MAP_START
                     (
-                        methodFacet | attributeFacet | uriParametersFacet | annotationFacet
-                        | securedByFacet | resourceTypeFacet | isFacet
+                        methodFacet
+                        | attributeFacet
+                        | descriptionFacet
+                        | displayNameFacet
+                        | uriParametersFacet
+                        | annotationFacet
+                        | securedByFacet
+                        | resourceTypeFacet
+                        | isFacet
                     )*
                     MAP_END
                 )
@@ -134,11 +154,16 @@ methodFacet:
             |   (
                     MAP_START
                     (
-                        bodyFacet | attributeFacet
-                        | headersFacet | queryParametersFacet
+                        bodyFacet
+                        | displayNameFacet
+                        | descriptionFacet
+                        | attributeFacet
+                        | headersFacet
+                        | queryParametersFacet
                         | isFacet
                         | annotationFacet
-                        | responsesFacet | securedByFacet
+                        | responsesFacet
+                        | securedByFacet
                     )*
                     MAP_END
                 )
@@ -196,7 +221,18 @@ bodyContentTypeFacet:
     ;
 
 bodyFacets:
-    ( attributeFacet | enumFacet | propertiesFacet | typeFacet | itemsFacet | defaultFacet | exampleFacet | examplesFacet | annotationFacet )*
+    (
+        attributeFacet
+        | descriptionFacet
+        | enumFacet
+        | propertiesFacet
+        | typeFacet
+        | itemsFacet
+        | defaultFacet
+        | exampleFacet
+        | examplesFacet
+        | annotationFacet
+    )*
     ;
 
 responsesFacet:
@@ -217,7 +253,12 @@ responseFacet:
                 SCALAR
                 |   (
                         MAP_START
-                        ( headersFacet | bodyFacet | attributeFacet )*
+                        (
+                            headersFacet
+                            | bodyFacet
+                            | descriptionFacet
+                            | attributeFacet
+                        )*
                         MAP_END
                     )
             )
@@ -291,7 +332,14 @@ securitySchemeFacet:
     name=id
     (
         MAP_START
-            ( securitySchemeTypeFacet | securitySchemeSettingsFacet | attributeFacet | describedByFacet )*
+            (
+                securitySchemeTypeFacet
+                | securitySchemeSettingsFacet
+                | descriptionFacet
+                | displayNameFacet
+                | attributeFacet
+                | describedByFacet
+            )*
         MAP_END
     )?
     ;
@@ -360,7 +408,7 @@ resourceTypesFacet:
     ;
 
 attributeFacet:
-    facet=('description' | 'displayName' | SCALAR ) value=facetValue
+    facet=SCALAR value=facetValue
     ;
 
 facetValue:
@@ -381,6 +429,8 @@ library:
 typeContainerFacets:
       usesFacet
     | attributeFacet
+    | descriptionFacet
+    | displayNameFacet
     | annotationTypesFacet
     | typesFacet
     | traitsFacet
@@ -424,7 +474,19 @@ typeDeclarationTuple:
 typeDeclarationMap:
     name=SCALAR
         MAP_START
-        ( attributeFacet | enumFacet | propertiesFacet | typeFacet | itemsFacet | defaultFacet | exampleFacet | examplesFacet | annotationFacet )*
+        (
+            attributeFacet
+            | descriptionFacet
+            | displayNameFacet
+            | enumFacet
+            | propertiesFacet
+            | typeFacet
+            | itemsFacet
+            | defaultFacet
+            | exampleFacet
+            | examplesFacet
+            | annotationFacet
+        )*
         MAP_END
     ;
 
@@ -437,7 +499,19 @@ enumFacet:
 
 typeDeclarationFragment:
     MAP_START
-    ( attributeFacet | enumFacet | propertiesFacet | typeFacet | itemsFacet| defaultFacet | exampleFacet | examplesFacet | annotationFacet )*
+    (
+        attributeFacet
+        | enumFacet
+        | descriptionFacet
+        | displayNameFacet
+        | propertiesFacet
+        | typeFacet
+        | itemsFacet
+        | defaultFacet
+        | exampleFacet
+        | examplesFacet
+        | annotationFacet
+    )*
     MAP_END
     ;
 
@@ -451,7 +525,19 @@ itemsFacet:
         typeExpression=SCALAR |
         (
             MAP_START
-            ( attributeFacet | enumFacet | propertiesFacet | typeFacet | itemsFacet | defaultFacet | exampleFacet | examplesFacet | annotationFacet )*
+            (
+                attributeFacet
+                | enumFacet
+                | descriptionFacet
+                | displayNameFacet
+                | propertiesFacet
+                | typeFacet
+                | itemsFacet
+                | defaultFacet
+                | exampleFacet
+                | examplesFacet
+                | annotationFacet
+            )*
             MAP_END
         )
     )
@@ -520,7 +606,20 @@ typedElementMap:
             SCALAR
             |   (
                     MAP_START
-                    ( attributeFacet | enumFacet | propertiesFacet | requiredFacet | typeFacet | itemsFacet | annotationFacet | exampleFacet | examplesFacet | defaultFacet )*
+                    (
+                        attributeFacet
+                        | descriptionFacet
+                        | displayNameFacet
+                        | enumFacet
+                        | propertiesFacet
+                        | requiredFacet
+                        | typeFacet
+                        | itemsFacet
+                        | annotationFacet
+                        | exampleFacet
+                        | examplesFacet
+                        | defaultFacet
+                    )*
                     MAP_END
                  )
         )

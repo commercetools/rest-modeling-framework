@@ -5,6 +5,10 @@
 )
 package io.vrap.rmf.raml.model.elements
 
+import io.vrap.rmf.raml.model.values.StringInstance
+import io.vrap.rmf.raml.model.types.DescriptionFacet
+import io.vrap.rmf.raml.model.types.DisplayNameFacet
+
 interface NamedElement {
 	/*
 	 * The optional name of this element.
@@ -15,14 +19,5 @@ interface NamedElement {
 /*
  * This describes the properties of an element that can be documented.
  */
-interface DocumentableElement {
-	/*
-	 * A substantial, human-friendly description of the type. Its value is a string and MAY be formatted using markdown.
-	 */
-	String description
-
-	/*
-	 * An alternate, human-friendly name for the type.
-	 */
-	String displayName
+interface DocumentableElement extends DescriptionFacet, DisplayNameFacet {
 }

@@ -11,6 +11,7 @@ import io.vrap.rmf.raml.model.types.AnnotationsFacet
 import io.vrap.rmf.raml.model.types.AnyAnnotationType
 import io.vrap.rmf.raml.model.types.AnyType
 import io.vrap.rmf.raml.model.types.InlineTypeContainer
+import io.vrap.rmf.raml.model.types.DescriptionFacet
 
 import io.vrap.rmf.raml.model.resources.ResourceContainer
 import io.vrap.rmf.raml.model.resources.ResourceType
@@ -26,13 +27,7 @@ import io.vrap.rmf.raml.model.util.ModelHelper
  * Common interface for api, extension and overlay. 
  */
 interface ApiBase extends AnnotationsFacet, TypeContainer, ResourceContainer, ProtocolsFacet, 
-		SecuritySchemeContainer, SecuredByFacet {
-	/*
-	 * A substantial, human-friendly description of the API.
-	 * Its value is a string and MAY be formatted using markdown.
-	 */
-	String description
-
+		SecuritySchemeContainer, SecuredByFacet, DescriptionFacet {
 	/*
 	 * The version of the API, for example "v1".
 	 */

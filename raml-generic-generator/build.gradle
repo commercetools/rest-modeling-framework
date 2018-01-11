@@ -63,7 +63,7 @@ task downloadAndUnzipCtpApiFile(dependsOn: downloadCtpApiZipFile, type: Copy) {
     into "$buildDir/resources/main/raml"
 }
 
-test.dependsOn(':raml-model:build')
+test.dependsOn(':raml-model:test')
 build.dependsOn(downloadAndUnzipCtpApiFile)
 downloadCtpApiZipFile.onlyIf { project.hasProperty(apiProperty) }
 downloadAndUnzipCtpApiFile.onlyIf { project.hasProperty(apiProperty) }

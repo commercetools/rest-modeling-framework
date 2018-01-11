@@ -1,7 +1,6 @@
 package io.vrap.rmf.raml.persistence.constructor;
 
 import com.google.common.base.Strings;
-import com.google.common.net.MediaType;
 import io.vrap.rmf.raml.model.resources.*;
 import io.vrap.rmf.raml.model.responses.Body;
 import io.vrap.rmf.raml.model.responses.Response;
@@ -29,7 +28,6 @@ import static io.vrap.rmf.raml.model.responses.ResponsesPackage.Literals.*;
 import static io.vrap.rmf.raml.model.security.SecurityPackage.Literals.*;
 import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.*;
 import static io.vrap.rmf.raml.model.values.ValuesPackage.Literals.BOOLEAN_INSTANCE;
-import static io.vrap.rmf.raml.model.values.ValuesPackage.Literals.MEDIA_TYPE;
 
 public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
     private final InstanceConstructor instanceConstructor = new InstanceConstructor();
@@ -164,6 +162,8 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
         final Trait trait = (Trait) scope.getEObjectByName(traitFacet.name.getText());
         return withinScope(scope.with(trait), traitScope -> {
             traitFacet.attributeFacet().forEach(this::visitAttributeFacet);
+            traitFacet.descriptionFacet().forEach(this::visitDescriptionFacet);
+            traitFacet.displayNameFacet().forEach(this::visitDisplayNameFacet);
             traitFacet.annotationFacet().forEach(this::visitAnnotationFacet);
             traitFacet.securedByFacet().forEach(this::visitSecuredByFacet);
             traitFacet.headersFacet().forEach(this::visitHeadersFacet);
@@ -224,6 +224,8 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
             securityScheme.setName(name);
             withinScope(scope.with(securityScheme), securitySchemeScope -> {
                 securitySchemeFacet.attributeFacet().forEach(this::visitAttributeFacet);
+                securitySchemeFacet.descriptionFacet().forEach(this::visitDescriptionFacet);
+                securitySchemeFacet.displayNameFacet().forEach(this::visitDisplayNameFacet);
                 securitySchemeFacet.describedByFacet().forEach(this::visitDescribedByFacet);
 
                 withinScope(securitySchemeScope.with(SECURITY_SCHEME__TYPE), s ->
@@ -289,6 +291,7 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
         response.setStatusCode(responseFacet.statusCode.getText());
         return withinScope(scope.with(response), responseScope -> {
             responseFacet.attributeFacet().forEach(this::visitAttributeFacet);
+            responseFacet.descriptionFacet().forEach(this::visitDescriptionFacet);
             responseFacet.headersFacet().forEach(this::visitHeadersFacet);
 
             responseFacet.bodyFacet().forEach(this::visitBodyFacet);
@@ -344,12 +347,14 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
                     bodyFacet.attributeFacet().size() > 0 || bodyFacet.propertiesFacet().size() > 0 ||
                             bodyFacet.exampleFacet().size() > 0 || bodyFacet.examplesFacet().size() > 0 ||
                             bodyFacet.defaultFacet().size() > 0 || bodyFacet.enumFacet().size() > 0 ||
+                            bodyFacet.descriptionFacet().size() > 0 ||
                             bodyFacet.itemsFacet().size() > 0;
             if (isInlineTypeDeclaration) {
                 type = inlineTypeDeclaration(type, bodyScope, bodyFacet);
                 withinScope(scope.with(type),
                         inlineTypeDeclarationScope -> {
                             bodyFacet.attributeFacet().forEach(this::visitAttributeFacet);
+                            bodyFacet.descriptionFacet().forEach(this::visitDescriptionFacet);
                             bodyFacet.propertiesFacet().forEach(this::visitPropertiesFacet);
                             bodyFacet.exampleFacet().forEach(this::visitExampleFacet);
                             bodyFacet.examplesFacet().forEach(this::visitExamplesFacet);
@@ -526,6 +531,7 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
                         itemsFacet.attributeFacet().size() > 0 || itemsFacet.propertiesFacet().size() > 0 ||
                                 itemsFacet.exampleFacet().size() > 0 || itemsFacet.examplesFacet().size() > 0 ||
                                 itemsFacet.defaultFacet().size() > 0 || itemsFacet.enumFacet().size() > 0 ||
+                                itemsFacet.descriptionFacet().size() > 0 || itemsFacet.displayNameFacet().size() > 0 ||
                                 itemsFacet.itemsFacet().size() > 0;
                 if (isInlineTypeDeclaration) {
                     typedElementType = EcoreUtil.create(typedElementType.eClass());
@@ -533,6 +539,8 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
                     withinScope(scope.with(typedElementType),
                             inlineTypeDeclarationScope -> {
                                 itemsFacet.attributeFacet().forEach(this::visitAttributeFacet);
+                                itemsFacet.descriptionFacet().forEach(this::visitDescriptionFacet);
+                                itemsFacet.displayNameFacet().forEach(this::visitDisplayNameFacet);
                                 itemsFacet.propertiesFacet().forEach(this::visitPropertiesFacet);
                                 itemsFacet.defaultFacet().forEach(this::visitDefaultFacet);
                                 itemsFacet.exampleFacet().forEach(this::visitExampleFacet);
@@ -569,6 +577,8 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
         return withinScope(scope.with(declaredType), typeScope -> {
             typeDeclarationMap.annotationFacet().forEach(this::visitAnnotationFacet);
             typeDeclarationMap.attributeFacet().forEach(this::visitAttributeFacet);
+            typeDeclarationMap.descriptionFacet().forEach(this::visitDescriptionFacet);
+            typeDeclarationMap.displayNameFacet().forEach(this::visitDisplayNameFacet);
             typeDeclarationMap.propertiesFacet().forEach(this::visitPropertiesFacet);
             typeDeclarationMap.defaultFacet().forEach(this::visitDefaultFacet);
             typeDeclarationMap.exampleFacet().forEach(this::visitExampleFacet);
@@ -669,6 +679,7 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
                 typedElementMap.attributeFacet().size() > 0 || typedElementMap.propertiesFacet().size() > 0 ||
                         typedElementMap.exampleFacet().size() > 0 || typedElementMap.examplesFacet().size() > 0 ||
                         typedElementMap.defaultFacet().size() > 0 || typedElementMap.enumFacet().size() > 0 ||
+                        typedElementMap.displayNameFacet().size() > 0 || typedElementMap.descriptionFacet().size() > 0 ||
                         typedElementMap.itemsFacet().size() > 0;
         if (isInlineTypeDeclaration) {
             typedElementType = inlineTypeDeclaration(typedElementType, scope, typedElementMap);
@@ -676,6 +687,8 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
             withinScope(scope.with(typedElementType),
                     inlineTypeDeclarationScope -> {
                         typedElementMap.attributeFacet().forEach(this::visitAttributeFacet);
+                        typedElementMap.descriptionFacet().forEach(this::visitDescriptionFacet);
+                        typedElementMap.displayNameFacet().forEach(this::visitDisplayNameFacet);
                         typedElementMap.propertiesFacet().forEach(this::visitPropertiesFacet);
                         typedElementMap.defaultFacet().forEach(this::visitDefaultFacet);
                         typedElementMap.exampleFacet().forEach(this::visitExampleFacet);
@@ -729,6 +742,8 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
         final EObject resourceType = scope.getEObjectByName(type);
         return withinScope(scope.with(resourceType), resourceTypeScope -> {
             resourceTypeDeclarationFacet.attributeFacet().forEach(this::visitAttributeFacet);
+            resourceTypeDeclarationFacet.descriptionFacet().forEach(this::visitDescriptionFacet);
+            resourceTypeDeclarationFacet.displayNameFacet().forEach(this::visitDisplayNameFacet);
             resourceTypeDeclarationFacet.annotationFacet().forEach(this::visitAnnotationFacet);
             resourceTypeDeclarationFacet.securedByFacet().forEach(this::visitSecuredByFacet);
             resourceTypeDeclarationFacet.isFacet().forEach(this::visitIsFacet);
@@ -757,6 +772,8 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
 
             withinScope(methodsScope.with(method), methodScope -> {
                 methodFacet.attributeFacet().forEach(this::visitAttributeFacet);
+                methodFacet.descriptionFacet().forEach(this::visitDescriptionFacet);
+                methodFacet.displayNameFacet().forEach(this::visitDisplayNameFacet);
                 methodFacet.annotationFacet().forEach(this::visitAnnotationFacet);
                 methodFacet.securedByFacet().forEach(this::visitSecuredByFacet);
                 methodFacet.headersFacet().forEach(this::visitHeadersFacet);

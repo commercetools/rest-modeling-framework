@@ -248,7 +248,7 @@ class ApiConstructorTest extends Specification {
         then:
         api.securitySchemes.size() == 1
         api.securitySchemes[0].name == 'oauth_2_0'
-        api.securitySchemes[0].description == 'OAuth 2.0 security scheme'
+        api.securitySchemes[0].description.value == 'OAuth 2.0 security scheme'
         api.securitySchemes[0].type.literal == 'OAuth 2.0'
 
         api.securitySchemes[0].describedBy != null
@@ -257,7 +257,7 @@ class ApiConstructorTest extends Specification {
         api.securitySchemes[0].describedBy.headers[0].type instanceof StringType
         api.securitySchemes[0].describedBy.responses.size() == 1
         api.securitySchemes[0].describedBy.responses[0].statusCode == '401'
-        api.securitySchemes[0].describedBy.responses[0].description == 'Unauthorized'
+        api.securitySchemes[0].describedBy.responses[0].description.value == 'Unauthorized'
 
         api.securitySchemes[0].settings instanceof OAuth20Settings
         OAuth20Settings oauth20Settings = api.securitySchemes[0].settings
@@ -307,15 +307,15 @@ class ApiConstructorTest extends Specification {
         api.traits.size() == 1
         api.traits[0].name == 'secured'
         api.traits[0].usage == 'Apply this to any method that needs to be secured'
-        api.traits[0].description == 'Some requests require authentication.'
-        api.traits[0].displayName == 'Secured Method'
+        api.traits[0].description.value == 'Some requests require authentication.'
+        api.traits[0].displayName.value == 'Secured Method'
         api.traits[0].headers.size() == 1
         api.traits[0].headers[0].name == 'access_token'
         api.traits[0].queryParameters.size() == 1
         api.traits[0].queryParameters[0].name == 'clientId'
         api.traits[0].responses.size() == 1
         api.traits[0].responses[0].statusCode == '409'
-        api.traits[0].responses[0].description == 'Conflict'
+        api.traits[0].responses[0].description.value == 'Conflict'
         api.traits[0].responses[0].bodies.size() == 1
         api.traits[0].responses[0].bodies[0].contentMediaTypes == [ MediaType.parse('application/json') ]
 
@@ -425,8 +425,8 @@ class ApiConstructorTest extends Specification {
         Resource resource = api.resources[0]
         resource.relativeUri.components.size() == 1
         resource.relativeUri.components[0] instanceof Literal
-        resource.description == 'User endpoint'
-        resource.displayName == 'Users'
+        resource.description.value == 'User endpoint'
+        resource.displayName.value == 'Users'
         resource.securedBy.size() == 1
         resource.securedBy[0].scheme == api.securitySchemes[0]
     }
@@ -498,7 +498,7 @@ class ApiConstructorTest extends Specification {
         api.resources.size() == 1
         api.resources[0].methods.size() == 2
         api.resources[0].methods[0].method == HttpMethod.GET
-        api.resources[0].methods[0].description == 'get something'
+        api.resources[0].methods[0].description.value == 'get something'
         api.resources[0].methods[1].method == HttpMethod.POST
         api.resources[0].resources.size() == 1
         api.resources[0].resources[0].relativeUri.components.size() == 1
@@ -564,8 +564,8 @@ class ApiConstructorTest extends Specification {
         Resource resource = api.resources[0]
         resource.methods.size() == 1
         resource.methods[0].method == HttpMethod.GET
-        resource.methods[0].displayName == 'Get users'
-        resource.methods[0].description == 'This method retrieves all users.'
+        resource.methods[0].displayName.value == 'Get users'
+        resource.methods[0].description.value == 'This method retrieves all users.'
         resource.methods[0].protocols == [ 'https' ]
         resource.methods[0].securedBy.size() == 1
         resource.methods[0].securedBy[0].scheme == api.securitySchemes[0]

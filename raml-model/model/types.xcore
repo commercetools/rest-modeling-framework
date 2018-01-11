@@ -279,18 +279,24 @@ interface ValueInstanceFacet {
 }
 
 interface DescriptionFacet {
-    contains StringInstance description
+	/*
+	 * A substantial, human-friendly description of the type. Its value is a string and MAY be formatted using markdown.
+	 */
+    contains StringInstance ^description
 }
 
 interface DisplayNameFacet {
-    contains StringInstance displayName
+	/*
+	 * An alternate, human-friendly name for the type.
+	 */
+    contains StringInstance ^displayName
 }
 
 interface StrictFacet {
     contains BooleanInstance strict
 }
 
-class Example extends AnnotationsFacet, DescriptionFacet, DisplayNameFacet, StrictFacet, ValueInstanceFacet {
+class Example extends AnnotationsFacet, DocumentableElement, StrictFacet, ValueInstanceFacet {
     /*
      * The optional name of an example.
      */

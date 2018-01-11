@@ -88,7 +88,7 @@ public class ActionGenModel extends ItemGenModel{
 
     @Override
     public String getDescription() {
-        return StringEscapeUtils.escapeJson(type.getDescription());
+        return StringEscapeUtils.escapeJson(type.getDescription().getValue());
     }
 
     private class InstanceSerializer extends StdSerializer<Instance> {

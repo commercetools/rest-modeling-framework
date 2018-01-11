@@ -30,7 +30,7 @@ public class IncludeTest implements ResourceFixtures {
         final ObjectType personType = (ObjectType) types.get(0);
 
         assertThat(personType.getName()).isEqualTo("Person");
-        assertThat(personType.getDisplayName()).isEqualTo("Person");
+        assertThat(personType.getDisplayName().getValue()).isEqualTo("Person");
         assertThat(personType.getProperties()).hasSize(1);
 
         final Property ageProperty = personType.getProperties().get(0);

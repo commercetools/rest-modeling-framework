@@ -22,11 +22,11 @@ public class ResourceGenModel {
 
     public String getName()
     {
-        return StringCaseFormat.UPPER_CAMEL_CASE.apply(Optional.ofNullable(resource.getDisplayName()).orElse(resource.getResourcePathName()));
+        return StringCaseFormat.UPPER_CAMEL_CASE.apply(Optional.ofNullable(resource.getDisplayName().getValue()).orElse(resource.getResourcePathName()));
     }
 
     public String getDescription() throws JsonProcessingException {
-        return StringEscapeUtils.escapeJson(resource.getDescription());
+        return StringEscapeUtils.escapeJson(resource.getDescription().getValue());
     }
 
     public Resource getResource() {

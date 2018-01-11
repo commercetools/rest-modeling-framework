@@ -23,11 +23,11 @@ public class ItemGenModel {
 
     public String getName()
     {
-        return StringCaseFormat.UPPER_CAMEL_CASE.apply(Optional.ofNullable(resource.getDisplayName()).orElse(resource.getResourcePathName()));
+        return StringCaseFormat.UPPER_CAMEL_CASE.apply(Optional.ofNullable(resource.getDisplayName().getValue()).orElse(resource.getResourcePathName()));
     }
 
     public String getDescription() {
-        return StringEscapeUtils.escapeJson(method.getDescription());
+        return StringEscapeUtils.escapeJson(method.getDescription().getValue());
     }
 
     public Resource getResource() {
@@ -38,7 +38,7 @@ public class ItemGenModel {
         final String resourcePathName = resource.getResourcePathName();
 
         if (resourcePathName.isEmpty()) {
-            return resource.getDisplayName().toLowerCase();
+            return resource.getDisplayName().getValue().toLowerCase();
         }
         return resourcePathName;
     }
