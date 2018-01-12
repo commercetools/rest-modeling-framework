@@ -3,16 +3,12 @@
     complianceLevel="8.0")
 package io.vrap.rmf.raml.model.types
 
-import io.vrap.rmf.raml.model.elements.DocumentableElement
 import io.vrap.rmf.raml.model.elements.NamedElement
-import io.vrap.rmf.raml.model.values.Instance
-import io.vrap.rmf.raml.model.values.StringInstance
-import io.vrap.rmf.raml.model.values.BooleanInstance
-import io.vrap.rmf.raml.model.values.MediaTypes
-import io.vrap.rmf.raml.model.values.UnsignedInteger
-import io.vrap.rmf.raml.model.values.PositiveInteger
-import io.vrap.rmf.raml.model.values.RegExp
 import io.vrap.rmf.raml.model.util.ModelHelper
+import io.vrap.rmf.raml.model.values.UnsignedInteger
+import io.vrap.rmf.raml.model.values.RegExp
+import io.vrap.rmf.raml.model.values.PositiveInteger
+import io.vrap.rmf.raml.model.values.MediaTypes
 
 interface AnyTypeFacet extends AnnotationsFacet, DocumentableElement, NamedElement, InlineTypeContainer {
 	op AnyType getType()
@@ -270,32 +266,6 @@ class TypeTemplate extends AnyType {
 
 }
 
-interface ValueInstanceFacet {
-    contains Instance value
-
-    op Object getInstanceValue() {
-        return value?.getValue()
-    }
-}
-
-interface DescriptionFacet {
-	/*
-	 * A substantial, human-friendly description of the type. Its value is a string and MAY be formatted using markdown.
-	 */
-    contains StringInstance ^description
-}
-
-interface DisplayNameFacet {
-	/*
-	 * An alternate, human-friendly name for the type.
-	 */
-    contains StringInstance ^displayName
-}
-
-interface StrictFacet {
-    contains BooleanInstance strict
-}
-
 class Example extends AnnotationsFacet, DocumentableElement, StrictFacet, ValueInstanceFacet {
     /*
      * The optional name of an example.
@@ -329,6 +299,12 @@ interface TypedElement extends NamedElement, InlineTypeContainer, AnnotationsFac
     op boolean matches(String name) {
         if (pattern !== null) ModelHelper.testPattern(this, name) else this.name === name
     }
+}
+
+/*
+ * This describes the properties of an element that can be documented.
+ */
+interface DocumentableElement extends DescriptionFacet, DisplayNameFacet {
 }
 
 class Property extends AnnotationsFacet, TypedElement {
@@ -689,5 +665,77 @@ interface QueryParametersFacet {
     op QueryParameter getQueryParameter(String name) {
         queryParameters.findFirst[it.name == name]
     }
+}
+
+interface Instance extends AnnotationsFacet {
+	op Object getValue()
+}
+
+class StringInstance extends Instance {
+	String value
+}
+
+class BooleanInstance extends Instance {
+	Boolean value
+}
+
+class NumberInstance extends Instance {
+	BigDecimal value
+}
+
+class IntegerInstance extends Instance {
+	Integer value
+}
+
+class ArrayInstance extends Instance {
+	contains Instance[] value
+}
+
+class ObjectInstance extends Instance {
+	contains PropertyValue[] value
+	
+	op Instance getValue(String name) {
+		value.findFirst[it.name == name]?.value
+	}
+}
+
+class PropertyValue {
+	String name
+	contains Instance value
+}
+
+interface ProtocolsFacet {
+
+	/*
+	 * The protocols supported by this element.
+	 */
+	String[] protocols	
+}
+
+
+interface ValueInstanceFacet {
+    contains Instance value
+
+    op Object getInstanceValue() {
+        return value?.getValue()
+    }
+}
+
+interface DescriptionFacet {
+	/*
+	 * A substantial, human-friendly description of the type. Its value is a string and MAY be formatted using markdown.
+	 */
+    contains StringInstance ^description
+}
+
+interface DisplayNameFacet {
+	/*
+	 * An alternate, human-friendly name for the type.
+	 */
+    contains StringInstance ^displayName
+}
+
+interface StrictFacet {
+    contains BooleanInstance strict
 }
 

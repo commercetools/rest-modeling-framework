@@ -1,7 +1,6 @@
 package io.vrap.rmf.raml.persistence.constructor
 
 import io.vrap.rmf.raml.model.types.*
-import io.vrap.rmf.raml.model.values.StringInstance
 import io.vrap.rmf.raml.persistence.RamlResourceSet
 import io.vrap.rmf.raml.persistence.antlr.RAMLCustomLexer
 import io.vrap.rmf.raml.persistence.antlr.RAMLParser

@@ -1,6 +1,5 @@
 package io.vrap.rmf.raml.model;
 
-import com.google.common.net.MediaType;
 import io.vrap.rmf.raml.model.modules.Api;
 import io.vrap.rmf.raml.model.modules.ApiBase;
 import io.vrap.rmf.raml.model.modules.ApiExtension;
@@ -12,7 +11,6 @@ import io.vrap.rmf.raml.model.responses.util.ResponsesSwitch;
 import io.vrap.rmf.raml.model.types.*;
 import io.vrap.rmf.raml.model.types.util.TypesSwitch;
 import io.vrap.rmf.raml.model.util.UriFragmentBuilder;
-import io.vrap.rmf.raml.model.values.StringInstance;
 import io.vrap.rmf.raml.model.values.StringTemplate;
 import io.vrap.rmf.raml.persistence.RamlResourceSet;
 import io.vrap.rmf.raml.persistence.constructor.Scope;

@@ -6,7 +6,7 @@ import io.vrap.rmf.raml.model.responses.Body;
 import io.vrap.rmf.raml.model.responses.Response;
 import io.vrap.rmf.raml.model.security.*;
 import io.vrap.rmf.raml.model.types.*;
-import io.vrap.rmf.raml.model.values.*;
+import io.vrap.rmf.raml.model.values.RegExp;
 import io.vrap.rmf.raml.persistence.antlr.RAMLParser;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
@@ -27,7 +27,6 @@ import static io.vrap.rmf.raml.model.resources.ResourcesPackage.Literals.*;
 import static io.vrap.rmf.raml.model.responses.ResponsesPackage.Literals.*;
 import static io.vrap.rmf.raml.model.security.SecurityPackage.Literals.*;
 import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.*;
-import static io.vrap.rmf.raml.model.values.ValuesPackage.Literals.BOOLEAN_INSTANCE;
 
 public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
     private final InstanceConstructor instanceConstructor = new InstanceConstructor();

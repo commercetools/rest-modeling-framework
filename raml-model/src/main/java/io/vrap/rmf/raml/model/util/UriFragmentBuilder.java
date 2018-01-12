@@ -1,16 +1,13 @@
 package io.vrap.rmf.raml.model.util;
 
-import com.google.common.net.MediaType;
 import io.vrap.functional.utils.TypeSwitch;
 import io.vrap.rmf.raml.model.elements.NamedElement;
 import io.vrap.rmf.raml.model.resources.Method;
 import io.vrap.rmf.raml.model.resources.Resource;
-import io.vrap.rmf.raml.model.resources.Trait;
 import io.vrap.rmf.raml.model.responses.Body;
 import io.vrap.rmf.raml.model.responses.Response;
 import io.vrap.rmf.raml.model.types.Annotation;
-import io.vrap.rmf.raml.model.types.AnyAnnotationType;
-import io.vrap.rmf.raml.model.values.StringInstance;
+import io.vrap.rmf.raml.model.types.StringInstance;
 import org.eclipse.emf.ecore.EObject;
 
 import java.util.ArrayList;

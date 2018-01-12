@@ -5,13 +5,13 @@
 )
 package io.vrap.rmf.raml.model.modules
 
-import io.vrap.rmf.raml.model.values.ProtocolsFacet
+import io.vrap.rmf.raml.model.types.ProtocolsFacet
 import io.vrap.rmf.raml.model.values.MediaTypes
+import io.vrap.rmf.raml.model.types.DescriptionFacet
 import io.vrap.rmf.raml.model.types.AnnotationsFacet
 import io.vrap.rmf.raml.model.types.AnyAnnotationType
 import io.vrap.rmf.raml.model.types.AnyType
 import io.vrap.rmf.raml.model.types.InlineTypeContainer
-import io.vrap.rmf.raml.model.types.DescriptionFacet
 
 import io.vrap.rmf.raml.model.resources.ResourceContainer
 import io.vrap.rmf.raml.model.resources.ResourceType

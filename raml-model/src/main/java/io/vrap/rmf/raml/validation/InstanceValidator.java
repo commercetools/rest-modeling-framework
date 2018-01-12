@@ -2,10 +2,9 @@ package io.vrap.rmf.raml.validation;
 
 import com.google.common.base.Strings;
 import io.vrap.rmf.raml.model.types.*;
+import io.vrap.rmf.raml.model.types.util.TypesSwitch;
 import io.vrap.rmf.raml.model.util.InstanceHelper;
 import io.vrap.rmf.raml.model.util.ModelHelper;
-import io.vrap.rmf.raml.model.values.*;
-import io.vrap.rmf.raml.model.values.util.ValuesSwitch;
 import org.eclipse.emf.common.util.BasicDiagnostic;
 import org.eclipse.emf.common.util.Diagnostic;
 import org.eclipse.emf.common.util.EList;
@@ -16,9 +15,7 @@ import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.ANY_TYPE;
-import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.ARRAY_TYPE;
-import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.OBJECT_TYPE;
+import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.*;
 
 public class InstanceValidator {
 
@@ -55,7 +52,7 @@ public class InstanceValidator {
         return new BasicDiagnostic(Diagnostic.ERROR, null, -1, message, new Object[]{eObject});
     }
 
-    private class InstanceValidatingVisitor extends ValuesSwitch<List<Diagnostic>> {
+    private class InstanceValidatingVisitor extends TypesSwitch<List<Diagnostic>> {
         private final Stack<EObject> types = new Stack<>();
 
         public InstanceValidatingVisitor(final EObject type) {

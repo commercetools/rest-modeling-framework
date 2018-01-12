@@ -3,9 +3,9 @@ package io.vrap.rmf.raml.regression
 import io.vrap.rmf.raml.model.RamlModelResult
 import io.vrap.rmf.raml.model.modules.Api
 import io.vrap.rmf.raml.model.resources.HttpMethod
+import io.vrap.rmf.raml.model.types.ArrayInstance
 import io.vrap.rmf.raml.model.types.Example
-import io.vrap.rmf.raml.model.values.ArrayInstance
-import io.vrap.rmf.raml.model.values.ObjectInstance
+import io.vrap.rmf.raml.model.types.ObjectInstance
 
 class ExampleTest extends RegressionTest {
     def "example" () {

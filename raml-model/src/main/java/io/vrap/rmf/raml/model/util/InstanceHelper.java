@@ -3,7 +3,7 @@ package io.vrap.rmf.raml.model.util;
 import io.vrap.rmf.raml.model.RamlDiagnostic;
 import io.vrap.rmf.raml.model.RamlModelResult;
 import io.vrap.rmf.raml.model.types.AnyType;
-import io.vrap.rmf.raml.model.values.Instance;
+import io.vrap.rmf.raml.model.types.Instance;
 import io.vrap.rmf.raml.persistence.RamlResourceSet;
 import io.vrap.rmf.raml.persistence.antlr.RAMLCustomLexer;
 import io.vrap.rmf.raml.persistence.antlr.RAMLParser;

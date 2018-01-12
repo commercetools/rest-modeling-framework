@@ -1,12 +1,7 @@
 package io.vrap.rmf.raml.model.util
 
 import io.vrap.rmf.raml.model.RamlModelResult
-import io.vrap.rmf.raml.model.types.ObjectType
-import io.vrap.rmf.raml.model.types.Property
-import io.vrap.rmf.raml.model.types.StringType
-import io.vrap.rmf.raml.model.types.TypesFactory
-import io.vrap.rmf.raml.model.values.Instance
-import io.vrap.rmf.raml.model.values.ObjectInstance
+import io.vrap.rmf.raml.model.types.*
 import spock.lang.Specification
 
 /**

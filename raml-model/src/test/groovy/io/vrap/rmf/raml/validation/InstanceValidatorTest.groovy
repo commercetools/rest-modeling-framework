@@ -1,7 +1,7 @@
 package io.vrap.rmf.raml.validation
 
 import io.vrap.rmf.raml.model.types.*
-import io.vrap.rmf.raml.model.values.*
+import io.vrap.rmf.raml.model.values.RegExp
 import org.eclipse.emf.common.util.Diagnostic
 import spock.lang.Shared
 import spock.lang.Specification
@@ -38,7 +38,7 @@ class InstanceValidatorTest extends Specification implements InstanceFixtures {
 
     def "validateStringInstance"() {
         when:
-        StringInstance stringInstance = ValuesFactory.eINSTANCE.createStringInstance();
+        StringInstance stringInstance = TypesFactory.eINSTANCE.createStringInstance();
         stringInstance.value = value
 
         StringType stringType = TypesFactory.eINSTANCE.createStringType()
@@ -59,7 +59,7 @@ class InstanceValidatorTest extends Specification implements InstanceFixtures {
 
     def "validateNumberInstance"() {
         when:
-        NumberInstance numberInstance = ValuesFactory.eINSTANCE.createNumberInstance()
+        NumberInstance numberInstance = TypesFactory.eINSTANCE.createNumberInstance()
         numberInstance.value = BigDecimal.valueOf(value)
 
         NumberType numberType = TypesFactory.eINSTANCE.createNumberType()
@@ -80,7 +80,7 @@ class InstanceValidatorTest extends Specification implements InstanceFixtures {
 
     def "validateIntegerInstance"() {
         when:
-        IntegerInstance numberInstance = ValuesFactory.eINSTANCE.createIntegerInstance()
+        IntegerInstance numberInstance = TypesFactory.eINSTANCE.createIntegerInstance()
         numberInstance.value = value
 
         IntegerType integerType = TypesFactory.eINSTANCE.createIntegerType()
@@ -101,7 +101,7 @@ class InstanceValidatorTest extends Specification implements InstanceFixtures {
 
     def "validateIntegerInstanceEnum"() {
         when:
-        IntegerInstance numberInstance = ValuesFactory.eINSTANCE.createIntegerInstance()
+        IntegerInstance numberInstance = TypesFactory.eINSTANCE.createIntegerInstance()
         numberInstance.value = value
 
         IntegerType integerType = TypesFactory.eINSTANCE.createIntegerType()
@@ -120,7 +120,7 @@ class InstanceValidatorTest extends Specification implements InstanceFixtures {
 
     def "validateArrayInstance"() {
         when:
-        ArrayInstance arrayInstance = ValuesFactory.eINSTANCE.createArrayInstance()
+        ArrayInstance arrayInstance = TypesFactory.eINSTANCE.createArrayInstance()
         value.each {
             arrayInstance.value.add(createInstance(it))
         }

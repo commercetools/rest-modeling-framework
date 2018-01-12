@@ -5,14 +5,14 @@
 )
 package io.vrap.rmf.raml.model.security
 
-import io.vrap.rmf.raml.model.elements.DocumentableElement
+import io.vrap.rmf.raml.model.types.DocumentableElement
 import io.vrap.rmf.raml.model.elements.NamedElement
 
 import io.vrap.rmf.raml.model.types.HeadersFacet
 import io.vrap.rmf.raml.model.types.QueryParametersFacet
 
 import io.vrap.rmf.raml.model.responses.ResponsesFacet
-import io.vrap.rmf.raml.model.values.ObjectInstance
+import io.vrap.rmf.raml.model.types.ObjectInstance
 
 interface SecuredByFacet {
 		

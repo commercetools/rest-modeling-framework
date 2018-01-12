@@ -9,9 +9,6 @@ import io.vrap.rmf.raml.model.resources.Resource
 import io.vrap.rmf.raml.model.responses.Body
 import io.vrap.rmf.raml.model.security.OAuth20Settings
 import io.vrap.rmf.raml.model.types.*
-import io.vrap.rmf.raml.model.values.ArrayInstance
-import io.vrap.rmf.raml.model.values.ObjectInstance
-import io.vrap.rmf.raml.model.values.StringInstance
 import io.vrap.rmf.raml.persistence.RamlResourceSet
 import io.vrap.rmf.raml.persistence.antlr.RAMLCustomLexer
 import io.vrap.rmf.raml.persistence.antlr.RAMLParser

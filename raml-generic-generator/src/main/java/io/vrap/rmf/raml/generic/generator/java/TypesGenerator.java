@@ -8,7 +8,6 @@ import com.squareup.javapoet.*;
 import io.vrap.rmf.raml.model.modules.TypeContainer;
 import io.vrap.rmf.raml.model.types.*;
 import io.vrap.rmf.raml.model.types.util.TypesSwitch;
-import io.vrap.rmf.raml.model.values.StringInstance;
 
 import javax.lang.model.element.Modifier;
 import java.io.File;

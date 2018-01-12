@@ -9,9 +9,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import io.vrap.rmf.raml.model.resources.Method;
 import io.vrap.rmf.raml.model.resources.Resource;
-import io.vrap.rmf.raml.model.types.Annotation;
-import io.vrap.rmf.raml.model.types.ObjectType;
-import io.vrap.rmf.raml.model.values.*;
+import io.vrap.rmf.raml.model.types.*;
 import org.apache.commons.lang3.StringEscapeUtils;
 
 import java.io.IOException;

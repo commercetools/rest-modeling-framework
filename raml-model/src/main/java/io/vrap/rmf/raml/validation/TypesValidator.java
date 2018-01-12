@@ -3,7 +3,6 @@ package io.vrap.rmf.raml.validation;
 import com.google.common.base.Strings;
 import io.vrap.rmf.raml.model.types.*;
 import io.vrap.rmf.raml.model.types.util.TypesSwitch;
-import io.vrap.rmf.raml.model.values.Instance;
 import org.eclipse.emf.common.util.Diagnostic;
 import org.eclipse.emf.common.util.DiagnosticChain;
 import org.eclipse.emf.ecore.EClass;

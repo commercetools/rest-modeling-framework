@@ -2,7 +2,8 @@ package io.vrap.rmf.raml.generic.generator;
 
 import com.google.common.collect.Lists;
 import io.vrap.rmf.raml.model.types.Annotation;
-import io.vrap.rmf.raml.model.values.StringInstance;
+import io.vrap.rmf.raml.model.types.StringInstance;
+
 import java.util.List;
 
 public class PackageGenModel {

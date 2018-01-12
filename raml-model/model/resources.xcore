@@ -3,10 +3,10 @@
     complianceLevel="8.0")
 package io.vrap.rmf.raml.model.resources
 
-import io.vrap.rmf.raml.model.values.Instance
-import io.vrap.rmf.raml.model.values.ProtocolsFacet
+import io.vrap.rmf.raml.model.types.Instance
+import io.vrap.rmf.raml.model.types.ProtocolsFacet
 
-import io.vrap.rmf.raml.model.elements.DocumentableElement
+import io.vrap.rmf.raml.model.types.DocumentableElement
 
 import io.vrap.rmf.raml.model.types.AnnotationsFacet
 import io.vrap.rmf.raml.model.types.HeadersFacet

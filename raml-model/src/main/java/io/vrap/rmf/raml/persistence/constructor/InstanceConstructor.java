@@ -1,14 +1,11 @@
 package io.vrap.rmf.raml.persistence.constructor;
 
-import io.vrap.rmf.raml.model.types.Annotation;
-import io.vrap.rmf.raml.model.types.AnyAnnotationType;
-import io.vrap.rmf.raml.model.values.*;
+import io.vrap.rmf.raml.model.types.*;
 import io.vrap.rmf.raml.persistence.antlr.RAMLParser;
 
 import java.math.BigDecimal;
 
 import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.*;
-import static io.vrap.rmf.raml.model.values.ValuesPackage.Literals.*;
 
 /**
  * Constructs {@link Instance}s.

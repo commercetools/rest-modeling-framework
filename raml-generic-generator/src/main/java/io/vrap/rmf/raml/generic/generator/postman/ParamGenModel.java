@@ -4,7 +4,7 @@ import com.hypertino.inflector.English;
 import io.vrap.rmf.raml.model.resources.Resource;
 import io.vrap.rmf.raml.model.types.Annotation;
 import io.vrap.rmf.raml.model.types.QueryParameter;
-import io.vrap.rmf.raml.model.values.StringInstance;
+import io.vrap.rmf.raml.model.types.StringInstance;
 
 public class ParamGenModel {
     private final Resource resource;

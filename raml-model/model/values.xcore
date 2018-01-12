@@ -7,7 +7,6 @@ package io.vrap.rmf.raml.model.values
 
 import com.google.common.net.MediaType
 import org.eclipse.emf.common.util.EList
-import io.vrap.rmf.raml.model.types.AnnotationsFacet
 
 type RegExp wraps io.vrap.rmf.raml.model.values.RegExp
 create {
@@ -30,48 +29,3 @@ create {
 }
 
 type MediaTypes wraps EList<MediaType>
-
-interface Instance extends AnnotationsFacet {
-	op Object getValue()
-}
-
-class StringInstance extends Instance {
-	String value
-}
-
-class BooleanInstance extends Instance {
-	Boolean value
-}
-
-class NumberInstance extends Instance {
-	BigDecimal value
-}
-
-class IntegerInstance extends Instance {
-	Integer value
-}
-
-class ArrayInstance extends Instance {
-	contains Instance[] value
-}
-
-class ObjectInstance extends Instance {
-	contains PropertyValue[] value
-	
-	op Instance getValue(String name) {
-		value.findFirst[it.name == name]?.value
-	}
-}
-
-class PropertyValue {
-	String name
-	contains Instance value
-}
-
-interface ProtocolsFacet {
-
-	/*
-	 * The protocols supported by this element.
-	 */
-	String[] protocols	
-}
