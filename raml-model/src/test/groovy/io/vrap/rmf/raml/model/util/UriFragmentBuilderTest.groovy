@@ -61,6 +61,15 @@ class UriFragmentBuilderTest extends Specification {
         uriFragmentBuilder.getURIFragment(subResource.methods[0]) == '/resources/root/resources/users/methods/post'
     }
 
+    def "stringInstance"() {
+        when:
+        Resource resource = createResource("root", HttpMethod.GET)
+        api.resources.add(resource)
+        resource.description = TypesFactory.eINSTANCE.createStringInstance()
+        then:
+        uriFragmentBuilder.getURIFragment(resource.description) == '/resources/root/description'
+    }
+
     Resource createResource(String relativeUri, HttpMethod httpMethod) {
         Resource resource = ResourcesFactory.eINSTANCE.createResource()
 

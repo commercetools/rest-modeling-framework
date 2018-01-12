@@ -7,7 +7,6 @@ import io.vrap.rmf.raml.model.resources.Resource;
 import io.vrap.rmf.raml.model.responses.Body;
 import io.vrap.rmf.raml.model.responses.Response;
 import io.vrap.rmf.raml.model.types.Annotation;
-import io.vrap.rmf.raml.model.types.StringInstance;
 import org.eclipse.emf.ecore.EObject;
 
 import java.util.ArrayList;
@@ -26,8 +25,7 @@ public class UriFragmentBuilder {
             .on(Method.class, this::method)
             .on(Resource.class, this::resource)
             .on(Response.class, this::response)
-            .on(StringInstance.class, this::stringInstance)
-            .fallthrough(eObject -> new ArrayList<>());
+            .fallthrough(this::defaultCase);
 
     public String getURIFragment(final EObject eObject) {
         return uriFragmentsBuilderSwitch.apply(eObject).stream().collect(SEGMENT_JOINER);
@@ -102,10 +100,10 @@ public class UriFragmentBuilder {
         }
     }
 
-    private List<String> stringInstance(final StringInstance stringInstance) {
-        if (stringInstance.eContainer() != null) {
-            final List<String> segments = uriFragmentsBuilderSwitch.apply(stringInstance.eContainer());
-            segments.add(stringInstance.eContainmentFeature().getName());
+    private List<String> defaultCase(final EObject eObject) {
+        if (eObject.eContainer() != null) {
+            final List<String> segments = uriFragmentsBuilderSwitch.apply(eObject.eContainer());
+            segments.add(eObject.eContainmentFeature().getName());
             return segments;
         }
         return new ArrayList<>();

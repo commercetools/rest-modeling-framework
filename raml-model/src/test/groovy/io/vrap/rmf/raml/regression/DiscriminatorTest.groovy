@@ -2,8 +2,10 @@ package io.vrap.rmf.raml.regression
 
 import io.vrap.rmf.raml.model.RamlModelResult
 import io.vrap.rmf.raml.model.modules.Api
+import spock.lang.Ignore
 
 class DiscriminatorTest extends RegressionTest {
+    @Ignore
     def "nested-discriminator-example-validation"() {
         when:
         RamlModelResult<Api> ramlModelResult = constructApi(
