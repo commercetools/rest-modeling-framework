@@ -590,7 +590,7 @@ authorization(oauth) ::=<<
 
 {
     "name": "Authorization",
-    "description": "",
+    "description": "Authorization",
     "item": [
         {
             "name": "Obtain access token",

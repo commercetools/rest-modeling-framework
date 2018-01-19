@@ -36,7 +36,8 @@ public class ItemGenModel {
     }
 
     public String getDescription() {
-        return StringEscapeUtils.escapeJson(method.getDescription().getValue());
+        String description = Optional.ofNullable(method.getDescription()).map(StringInstance::getValue).orElse(method.getMethod().getName() + " " + getName());
+        return StringEscapeUtils.escapeJson(description);
     }
 
     public Resource getResource() {

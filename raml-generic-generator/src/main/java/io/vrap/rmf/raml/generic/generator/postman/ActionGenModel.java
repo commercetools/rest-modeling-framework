@@ -13,6 +13,7 @@ import org.apache.commons.lang3.StringEscapeUtils;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class ActionGenModel extends ItemGenModel{
@@ -67,6 +68,7 @@ public class ActionGenModel extends ItemGenModel{
 
     @Override
     public String getDescription() {
-        return StringEscapeUtils.escapeJson(type.getDescription().getValue());
+        String description = Optional.ofNullable(type.getDescription()).map(StringInstance::getValue).orElse(type.getName());
+        return StringEscapeUtils.escapeJson(description);
     }
 }
