@@ -1,12 +1,10 @@
 package io.vrap.rmf.raml.generic.generator.postman;
 
-import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.ser.std.StdSerializer;
+import io.vrap.rmf.raml.generic.generator.Helper;
 import io.vrap.rmf.raml.model.resources.Method;
 import io.vrap.rmf.raml.model.resources.Resource;
 import io.vrap.rmf.raml.model.types.*;
@@ -26,29 +24,12 @@ public class ActionGenModel extends ItemGenModel{
         super(resource, template, method);
         this.type = type;
         String example = null;
-        final ObjectMapper mapper = new ObjectMapper();
-
-        SimpleModule module = new SimpleModule();
-        module.addSerializer(ObjectInstance.class, new ObjectInstanceSerializer());
-        module.addSerializer(ArrayInstance.class, new InstanceSerializer());
-        module.addSerializer(IntegerInstance.class, new InstanceSerializer());
-        module.addSerializer(BooleanInstance.class, new InstanceSerializer());
-        module.addSerializer(StringInstance.class, new InstanceSerializer());
-        module.addSerializer(NumberInstance.class, new InstanceSerializer());
-        mapper.registerModule(module);
 
         if (type.getExamples().size() > 0) {
             final Instance instance = type.getExamples().get(0).getValue();
-            if (instance instanceof StringInstance) {
-                example = ((StringInstance)instance).getValue();
-            }
-            if (instance instanceof ObjectInstance) {
-                try {
-                    example = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(instance);
-                } catch (JsonProcessingException e) {}
-            }
-
+            example = Helper.toJson(instance);
             try {
+                ObjectMapper mapper = new ObjectMapper();
                 ObjectNode nodes = (ObjectNode)mapper.readTree(example);
                 nodes.put("action", type.getDiscriminatorValue());
 
@@ -87,40 +68,5 @@ public class ActionGenModel extends ItemGenModel{
     @Override
     public String getDescription() {
         return StringEscapeUtils.escapeJson(type.getDescription().getValue());
-    }
-
-    private class InstanceSerializer extends StdSerializer<Instance> {
-        public InstanceSerializer() {
-            this(null);
-        }
-
-        public InstanceSerializer(Class<Instance> t) {
-            super(t);
-        }
-
-        @Override
-        public void serialize(Instance value, JsonGenerator gen, SerializerProvider provider) throws IOException {
-            gen.writeObject(value.getValue());
-        }
-    }
-
-    private class ObjectInstanceSerializer extends StdSerializer<ObjectInstance> {
-        public ObjectInstanceSerializer() {
-            this(null);
-        }
-
-        public ObjectInstanceSerializer(Class<ObjectInstance> t) {
-            super(t);
-        }
-
-        @Override
-        public void serialize(ObjectInstance value, JsonGenerator gen, SerializerProvider provider) throws IOException {
-            List<PropertyValue> properties = value.getValue();
-            gen.writeStartObject();
-            for(PropertyValue v : properties) {
-                gen.writeObjectField(v.getName(), v.getValue());
-            }
-            gen.writeEndObject();
-        }
     }
 }

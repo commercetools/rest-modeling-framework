@@ -7,7 +7,9 @@ import io.vrap.rmf.raml.model.resources.Method;
 import io.vrap.rmf.raml.model.resources.Resource;
 import io.vrap.rmf.raml.model.responses.Body;
 import io.vrap.rmf.raml.model.types.*;
+import io.vrap.rmf.raml.model.util.InstanceHelper;
 import io.vrap.rmf.raml.model.util.StringCaseFormat;
+import io.vrap.rmf.raml.persistence.constructor.InstanceConstructor;
 import org.apache.commons.lang3.StringEscapeUtils;
 
 import java.util.Comparator;
@@ -22,7 +24,7 @@ public class ResourceGenModel {
 
     public String getName()
     {
-        return StringCaseFormat.UPPER_CAMEL_CASE.apply(Optional.ofNullable(resource.getDisplayName().getValue()).orElse(resource.getResourcePathName()));
+        return StringCaseFormat.UPPER_CAMEL_CASE.apply(Optional.ofNullable(resource.getDisplayName()).map(StringInstance::getValue).orElse(resource.getResourcePathName()));
     }
 
     public String getDescription() throws JsonProcessingException {
