@@ -1,7 +1,15 @@
+buildscript {
+    dependencies {
+        classpath "com.github.jengelman.gradle.plugins:shadow:1.2.3"
+    }
+}
+
 plugins {
     id "org.xtext.builder" version "1.0.18"
     id "antlr"
 }
+
+apply plugin: "com.github.johnrengelman.shadow"
 
 ext {
     xtextVersion = '2.10.0'
@@ -83,4 +91,8 @@ dependencies {
     xtextLanguages 'org.eclipse.emf:org.eclipse.emf.ecore.xcore.lib:1.1.100'
     xtextLanguages 'org.eclipse.emf:org.eclipse.emf.codegen:2.11+'
     xtextLanguages 'org.eclipse.emf:org.eclipse.emf.codegen.ecore:2.11+'
+}
+
+shadowJar {
+    append 'plugin.properties'
 }
