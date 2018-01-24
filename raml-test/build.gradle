@@ -30,21 +30,21 @@ dependencies {
 
 task downloadTck1ZipFile(type: Download) {
     src 'https://github.com/raml-org/raml-tck/archive/v' + ramlTckVersion + '.zip'
-    dest new File(buildDir, 'raml-tck-' + ramlTckVersion + '.zip')
+    dest new File("$projectDir/cache", 'raml-tck-' + ramlTckVersion + '.zip')
     onlyIfNewer(true)
     overwrite(false)
 }
 
 task downloadTck2ZipFile(type: Download) {
     src 'https://github.com/raml-org/raml-tck/archive/wip/2.0.0.zip'
-    dest new File(buildDir, 'raml-tck-2.0.zip')
+    dest new File("$projectDir/cache", 'raml-tck-2.0.zip')
     onlyIfNewer(true)
     overwrite(false)
 }
 
 task downloadCtpApiZipFile(type: Download) {
     src 'https://github.com/commercetools/commercetools-api-reference/archive/master.zip'
-    dest new File(buildDir, 'commercetools-api-reference.zip')
+    dest new File("$projectDir/cache", 'commercetools-api-reference.zip')
     onlyIfNewer(true)
     overwrite(false)
 }

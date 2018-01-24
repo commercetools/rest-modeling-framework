@@ -53,7 +53,7 @@ mainClassName = "io.vrap.rmf.raml.generic.generator.CodeGenerator"
 
 task downloadCtpApiZipFile(type: Download) {
     src 'https://github.com/commercetools/commercetools-api-reference/archive/master.zip'
-    dest new File(buildDir, 'commercetools-api-reference.zip')
+    dest new File("$projectDir/cache", 'commercetools-api-reference.zip')
     onlyIfNewer(true)
     overwrite(false)
 }
