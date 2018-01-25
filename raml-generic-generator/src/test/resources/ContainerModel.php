@@ -1,4 +1,5 @@
 <?php
+declare(strict_types = 1);
 /**
  * This file has been auto generated
  * Do not change it
@@ -14,7 +15,7 @@ class ContainerModel extends JsonObjectModel implements Container {
      * @param string $key
      * @return mixed
      */
-    public function get($key)
+    public function get(string $key)
     {
         if(!isset($this->patternData[$key])) {
             switch (true) {
@@ -34,7 +35,7 @@ class ContainerModel extends JsonObjectModel implements Container {
      * @param mixed $value
      * @return $this
      */
-    public function set($key, $value)
+    public function set(string $key, $value)
     {
         if (!$this->validKey($key)) {
             throw new \InvalidArgumentException();
@@ -44,7 +45,7 @@ class ContainerModel extends JsonObjectModel implements Container {
     }
 
 
-    private function validKey($key)
+    private function validKey(string $key): bool
     {
         switch (true) {
             case preg_match('//', $key):
@@ -57,7 +58,7 @@ class ContainerModel extends JsonObjectModel implements Container {
     /**
      * @inheritdoc
      */
-    protected function toArray()
+    protected function toArray(): array
     {
         $data = parent::toArray();
         $data = array_merge($data, $this->patternData);

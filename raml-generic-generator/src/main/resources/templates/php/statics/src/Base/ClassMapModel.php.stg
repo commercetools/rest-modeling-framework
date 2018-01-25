@@ -10,7 +10,11 @@ abstract class ClassMapModel implements ClassMap
 {
     protected static $types = [];
 
-    public function getMappedClass($class)
+    /**
+     * @param string $class
+     * @return string
+     */
+    public function getMappedClass(string $class): string
     {
         if (isset(static::$types[$class])) {
             return static::$types[$class];

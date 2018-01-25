@@ -1,4 +1,5 @@
 <?php
+declare(strict_types = 1);
 /**
  * This file has been auto generated
  * Do not change it
@@ -8,7 +9,7 @@ namespace Test\Base;
 
 use Test\Types\ModelClassMap;
 
-class ActionBuilder implements MapperAware
+abstract class BaseBuilder implements MapperAware
 {
     private $resultMapper;
 
@@ -23,7 +24,7 @@ class ActionBuilder implements MapperAware
     /**
      * @returns Mapper
      */
-    public function getMapper()
+    public function getMapper(): Mapper
     {
         if (is_null($this->resultMapper)) {
             $this->resultMapper = new ResultMapper(new ModelClassMap());
@@ -31,7 +32,12 @@ class ActionBuilder implements MapperAware
         return $this->resultMapper;
     }
 
-    protected function mapData($class, $data)
+    /**
+     * @param string $class
+     * @param mixed $data
+     * @return mixed
+     */
+    protected function mapData(string $class, $data)
     {
         return $this->getMapper()->mapData($class, $data);
     }

@@ -141,7 +141,7 @@ public class PhpGeneratorHelper extends GeneratorHelper {
 
         String scalarMapper(final String scalarType)
         {
-            return null;
+            return scalarType;
         }
 
         @Override

@@ -16,7 +16,7 @@ interface MapperAware
     /**
      * @returns Mapper
      */
-    public function getMapper();
+    public function getMapper(): Mapper;
 }
 
 >>

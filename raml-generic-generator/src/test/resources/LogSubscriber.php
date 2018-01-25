@@ -1,4 +1,5 @@
 <?php
+declare(strict_types = 1);
 /**
  * This file has been auto generated
  * Do not change it
@@ -47,7 +48,7 @@ class LogSubscriber implements SubscriberInterface
     /** @var LoggerInterface */
     private $logger;
 
-    /** @var stg Formatter used to format log messages */
+    /** @var Formatter used to format log messages */
     private $formatter;
 
     /**
@@ -62,7 +63,7 @@ class LogSubscriber implements SubscriberInterface
      *     data. Pass a resource returned from ``fopen()`` to log to an open
      *     resource. Pass null or leave empty to write log messages using
      *     ``echo()``.
-     * @param string|stg $formatter Formatter used to format log
+     * @param string|Formatter $formatter Formatter used to format log
      *     messages or a string representing a message formatter template.
      */
     public function __construct($logger = null, $formatter = null, $logLevel = LogLevel::INFO)
@@ -72,12 +73,12 @@ class LogSubscriber implements SubscriberInterface
             ? $logger
             : new SimpleLogger($logger);
 
-        $this->formatter = $formatter instanceof stg
+        $this->formatter = $formatter instanceof Formatter
             ? $formatter
             : new stg($formatter);
     }
 
-    public function getEvents()
+    public function getEvents(): array
     {
         return [
             // Fire after responses are verified (which trigger error events).

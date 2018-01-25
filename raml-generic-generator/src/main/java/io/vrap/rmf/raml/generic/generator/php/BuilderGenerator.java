@@ -62,9 +62,13 @@ public class BuilderGenerator extends AbstractTemplateGenerator {
         final List<File> f = Lists.newArrayList();
         for (final BuilderGenModel builder : builders) {
 
-            final File builderFile = new File(outputPath, builder.getResourceType().getName().concat("ActionBuilder.php"));
+            final File builderFile = new File(outputPath, builder.getUpdateType().getName().concat("Builder.php"));
 
             f.add(generateFile(generateBuilder(builder), builderFile));
+//            for(final TypeGenModel updateAction : builder.getUpdates()) {
+//                final File actionBuilderFile = new File(outputPath, updateAction.getName().concat("Builder.php"));
+//                f.add(generateFile(generateActionBuilder(updateAction), actionBuilderFile));
+//            }
         }
         return f;
     }
@@ -72,9 +76,18 @@ public class BuilderGenerator extends AbstractTemplateGenerator {
     @VisibleForTesting
     String generateBuilder(BuilderGenModel builder) {
         final STGroupFile stGroup = createSTGroup(Resources.getResource(resourcesPath + TYPE_BUILDER + ".stg"));
-        final ST st = stGroup.getInstanceOf("builder");
+        final ST st = stGroup.getInstanceOf("updateBuilder");
         st.add("vendorName", vendorName);
         st.add("builder", builder);
         return st.render();
     }
+
+//    @VisibleForTesting
+//    String generateActionBuilder(TypeGenModel updateAction) {
+//        final STGroupFile stGroup = createSTGroup(Resources.getResource(resourcesPath + TYPE_BUILDER + ".stg"));
+//        final ST st = stGroup.getInstanceOf("actionBuilder");
+//        st.add("vendorName", vendorName);
+//        st.add("type", updateAction);
+//        return st.render();
+//    }
 }

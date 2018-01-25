@@ -1,4 +1,5 @@
 <?php
+declare(strict_types = 1);
 /**
  * This file has been auto generated
  * Do not change it
@@ -8,7 +9,19 @@ namespace Test\Base;
 
 interface Mapper
 {
-    public function mapData($class, $data);
+    /**
+     * @param string $class
+     * @param mixed $data
+     * @return mixed
+     */
+    public function mapData(string $class, $data);
 
-    public function resolveDiscriminator($class, $discriminator, array $subTypes, array $data);
+    /**
+     * @param string $class
+     * @param $discriminator
+     * @param array $subTypes
+     * @param array $data
+     * @return mixed
+     */
+    public function resolveDiscriminator(string $class, $discriminator, array $subTypes, array $data): string;
 }

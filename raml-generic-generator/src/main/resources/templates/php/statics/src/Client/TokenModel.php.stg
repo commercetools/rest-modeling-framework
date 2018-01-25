@@ -1,0 +1,48 @@
+import "../../../generic.stg"
+
+main(vendorName) ::=<<
+\<?php
+<generatorInfo()>
+
+namespace <vendorName>\Client;
+
+class TokenModel implements Token
+{
+    /**
+     * @return string
+     */
+    private $value;
+
+    /**
+     * @return int
+     */
+    private $expiresIn;
+
+    /**
+     * @param string $value
+     * @param int $expiresIn
+     */
+    public function __construct(string $value, int $expiresIn)
+    {
+        $this->value = $value;
+        $this->expiresIn = $expiresIn;
+    }
+
+    /**
+     * @return string
+     */
+    public function getValue(): string
+    {
+        return $this->value;
+    }
+
+    /**
+     * @return int
+     */
+    public function getExpiresIn(): int
+    {
+        return $this->expiresIn;
+    }
+}
+
+>>

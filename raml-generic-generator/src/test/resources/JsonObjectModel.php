@@ -1,4 +1,5 @@
 <?php
+declare(strict_types = 1);
 /**
  * This file has been auto generated
  * Do not change it
@@ -13,6 +14,9 @@ class JsonObjectModel implements JsonObject, MapperAware
     private $rawData;
     private $resultMapper;
 
+    /**
+     * @param array $data
+     */
     public function __construct(array $data = null)
     {
         $this->rawData = $data;
@@ -29,7 +33,7 @@ class JsonObjectModel implements JsonObject, MapperAware
     /**
      * @returns Mapper
      */
-    public function getMapper()
+    public function getMapper(): Mapper
     {
         if (is_null($this->resultMapper)) {
             $this->resultMapper = new ResultMapper(new ModelClassMap());
@@ -37,11 +41,21 @@ class JsonObjectModel implements JsonObject, MapperAware
         return $this->resultMapper;
     }
 
-    protected function resolveDiscriminator($class, $data)
+    /**
+     * @param string $class
+     * @param mixed $data
+     * @return string
+     */
+    protected function resolveDiscriminator(string $class, $data)
     {
         return $this->getMapper()->resolveDiscriminator($class, $class::DISCRIMINATOR, $class::SUB_TYPES, $data);
     }
 
+    /**
+     * @param string $class
+     * @param mixed $data
+     * @return mixed
+     */
     protected function mapData($class, $data)
     {
         return $this->getMapper()->mapData($class, $data);
@@ -56,7 +70,7 @@ class JsonObjectModel implements JsonObject, MapperAware
     }
 
 
-    public function isPresent()
+    public function isPresent(): bool
     {
         return !is_null($this->rawData);
     }
@@ -77,7 +91,7 @@ class JsonObjectModel implements JsonObject, MapperAware
     /**
      * @inheritdoc
      */
-    protected function toArray()
+    protected function toArray(): array
     {
         $rawData = is_array($this->rawData) ? $this->rawData : [];
         $data = array_filter(

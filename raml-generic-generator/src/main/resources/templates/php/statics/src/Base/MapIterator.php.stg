@@ -13,6 +13,10 @@ class MapIterator extends \ArrayIterator
      */
     private $callback;
 
+    /**
+     * @param mixed $value
+     * @param callable $callback
+     */
     public function __construct($value, callable $callback)
     {
         parent::__construct($value);

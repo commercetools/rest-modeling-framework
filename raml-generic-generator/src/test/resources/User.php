@@ -1,4 +1,5 @@
 <?php
+declare(strict_types = 1);
 /**
  * This file has been auto generated
  * Do not change it
@@ -18,6 +19,6 @@ interface User extends Person {
      * @param string $role
      * @return $this
      */
-    public function setRole($role);
+    public function setRole(string $role);
 
 }

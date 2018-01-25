@@ -19,6 +19,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class PhpGenerator implements Generator {
+    private static final String SRC_DIR = "src";
     private final String vendorName;
 
     public PhpGenerator(final String vendorName) {
@@ -33,16 +34,16 @@ public class PhpGenerator implements Generator {
 
         AnyAnnotationType placeholderParamAnnotation = api.getAnnotationType("placeholderParam");
         TypesGenerator generator = new TypesGenerator(vendorName);
-        List<File> f = generator.generate(api.getTypes(), new File(outputPath, "src/" + TypeGenModel.TYPES));
+        List<File> f = generator.generate(api.getTypes(), new File(outputPath, SRC_DIR + "/" + TypeGenModel.TYPES));
 
         StaticGenerator staticGenerator = new StaticGenerator(vendorName);
         f.addAll(staticGenerator.generate(outputPath, api));
 
         RequestGenerator requestGenerator = new RequestGenerator(vendorName, placeholderParamAnnotation);
-        f.addAll(requestGenerator.generate(api.getResources(), new File(outputPath, "src/Request")));
+        f.addAll(requestGenerator.generate(api.getResources(), new File(outputPath, SRC_DIR + "/Request")));
 
         BuilderGenerator builderGenerator = new BuilderGenerator(vendorName);
-        f.addAll(builderGenerator.generate(api, new File(outputPath, "src/" + BuilderGenerator.BUILDER)));
+        f.addAll(builderGenerator.generate(api, new File(outputPath, SRC_DIR + "/" + BuilderGenerator.BUILDER)));
         Helper.deleteObsoleteFiles(outputPath, f);
         Collection<File> files = FileUtils.listFiles(
                 outputPath,

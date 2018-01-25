@@ -1,4 +1,5 @@
 <?php
+declare(strict_types = 1);
 /**
  * This file has been auto generated
  * Do not change it
@@ -29,9 +30,10 @@ class ByProjectGet extends ApiRequest
 
     /**
      * @param ResponseInterface $response
+     * @param ResultMapper $mapper
      * @return JsonObject
      */
-    public function map(ResponseInterface $response, ResultMapper $mapper)
+    public function map(ResponseInterface $response, ResultMapper $mapper):  JsonObject
     {
         return parent::map($response, $mapper);
     }

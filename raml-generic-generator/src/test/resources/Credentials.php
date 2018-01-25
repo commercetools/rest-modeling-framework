@@ -1,4 +1,5 @@
 <?php
+declare(strict_types = 1);
 /**
  * This file has been auto generated
  * Do not change it
@@ -24,6 +25,9 @@ class Credentials
 
     private $scope;
 
+    /**
+     * @param array credentials
+     */
     public function __construct(array $credentials = [])
     {
         $this->clientId = isset($credentials[self::CLIENT_ID]) ? $credentials[self::CLIENT_ID] : null;
@@ -34,7 +38,7 @@ class Credentials
     /**
      * @return string
      */
-    public function getClientId()
+    public function getClientId(): string
     {
         return $this->clientId;
     }
@@ -43,7 +47,7 @@ class Credentials
      * @param string $clientId
      * @return Credentials
      */
-    public function setClientId($clientId)
+    public function setClientId(string $clientId): Credentials
     {
         $this->clientId = $clientId;
         return $this;
@@ -52,7 +56,7 @@ class Credentials
     /**
      * @return string
      */
-    public function getClientSecret()
+    public function getClientSecret(): string
     {
         return $this->clientSecret;
     }
@@ -61,13 +65,13 @@ class Credentials
      * @param string $clientSecret
      * @return Credentials
      */
-    public function setClientSecret($clientSecret)
+    public function setClientSecret($clientSecret): Credentials
     {
         $this->clientSecret = $clientSecret;
         return $this;
     }
 
-    public function toArray()
+    public function toArray(): array
     {
         $options = [
             self::CLIENT_ID => $this->clientId,

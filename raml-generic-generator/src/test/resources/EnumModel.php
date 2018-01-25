@@ -1,4 +1,5 @@
 <?php
+declare(strict_types = 1);
 /**
  * This file has been auto generated
  * Do not change it
@@ -47,7 +48,7 @@ class EnumModel extends JsonObjectModel implements Enum {
      * @param string $key
      * @return $this
      */
-    public function setKey($key)
+    public function setKey(string $key)
     {
         $this->key = (string)$key;
 
@@ -57,7 +58,7 @@ class EnumModel extends JsonObjectModel implements Enum {
      * @param string $label
      * @return $this
      */
-    public function setLabel($label)
+    public function setLabel(string $label)
     {
         $this->label = (string)$label;
 

@@ -5,7 +5,10 @@ declare(strict_types = 1);
  * Do not change it
  */
 
-namespace Test\Types;
+namespace Test\Test\Client;
 
-interface Cat extends Animal {
+use PHPUnit\Framework\TestCase;
+
+class TokenModelTest extends TestCase
+{
 }

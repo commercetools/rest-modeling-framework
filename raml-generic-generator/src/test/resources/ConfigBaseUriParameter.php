@@ -1,4 +1,5 @@
 <?php
+declare(strict_types = 1);
 /**
  * This file has been auto generated
  * Do not change it
@@ -45,6 +46,9 @@ class Config
      */
     private $clientOptions;
 
+    /**
+     * @param array $config
+     */
     public function __construct(array $config = [])
     {
         $apiUrl = isset($config[self::OPT_BASE_URI]) ? $config[self::OPT_BASE_URI] : static::API_URI;
@@ -66,9 +70,9 @@ class Config
     }
 
     /**
-     * @return mixed
+     * @return string
      */
-    public function getApiUrl()
+    public function getApiUrl(): string
     {
         return $this->apiUrl;
     }
@@ -77,7 +81,7 @@ class Config
      * @param string $apiUrl
      * @return Config
      */
-    public function setApiUrl($apiUrl)
+    public function setApiUrl(string $apiUrl): Config
     {
         $this->apiUrl = $apiUrl;
         return $this;
@@ -86,7 +90,7 @@ class Config
     /**
      * @return string
      */
-    public function getAuthUrl()
+    public function getAuthUrl(): string
     {
         return $this->authUrl;
     }
@@ -95,7 +99,7 @@ class Config
      * @param string $authUrl
      * @return Config
      */
-    public function setAuthUrl($authUrl)
+    public function setAuthUrl($authUrl): Config
     {
         $this->authUrl = $authUrl;
         return $this;
@@ -104,7 +108,7 @@ class Config
     /**
      * @return Credentials
      */
-    public function getCredentials()
+    public function getCredentials(): Credentials
     {
         return $this->credentials;
     }
@@ -113,7 +117,7 @@ class Config
      * @param Credentials $credentials
      * @return Config
      */
-    public function setCredentials(Credentials $credentials)
+    public function setCredentials(Credentials $credentials): Config
     {
         $this->credentials = $credentials;
         return $this;
@@ -122,7 +126,7 @@ class Config
     /**
      * @return array
      */
-    public function getClientOptions()
+    public function getClientOptions(): array
     {
         return $this->clientOptions;
     }
@@ -131,7 +135,7 @@ class Config
      * @param $options
      * @return Config
      */
-    public function setClientOptions(array $options)
+    public function setClientOptions(array $options): Config
     {
         $this->clientOptions = $options;
         return $this;
@@ -140,7 +144,7 @@ class Config
     /**
      * @return string
      */
-    public function getCacheDir()
+    public function getCacheDir(): string
     {
         return $this->cacheDir;
     }
@@ -149,13 +153,13 @@ class Config
      * @param string $cacheDir
      * @return Config
      */
-    public function setCacheDir($cacheDir)
+    public function setCacheDir($cacheDir): Config
     {
         $this->cacheDir = $cacheDir;
         return $this;
     }
 
-    public function getOptions()
+    public function getOptions(): array
     {
         return array_merge(
             [self::OPT_BASE_URI => $this->getApiUrl()],

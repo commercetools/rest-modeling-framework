@@ -1,4 +1,5 @@
 <?php
+declare(strict_types = 1);
 /**
  * This file has been auto generated
  * Do not change it
@@ -80,7 +81,7 @@ class Formatter
     /**
      * @param string $template Log message template
      */
-    public function __construct($template = self::CLF)
+    public function __construct(string $template = self::CLF)
     {
         $this->template = $template ?: self::CLF;
     }
@@ -100,12 +101,12 @@ class Formatter
         ResponseInterface $response = null,
         \Exception $error = null,
         array $customData = []
-    ) {
+    ): string {
         $cache = $customData;
 
         return preg_replace_callback(
             '/{\s*([A-Za-z_\-\.0-9]+)\s*}/',
-            function (array $matches) use ($request, $response, $error, &$cache) {
+            function (array $matches) use ($request, $response, $error, &$cache): string {
 
                 if (isset($cache[$matches[1]])) {
                     return $cache[$matches[1]];
@@ -198,7 +199,7 @@ class Formatter
         );
     }
 
-    private function headers(MessageInterface $message)
+    private function headers(MessageInterface $message): string
     {
         $result = '';
         foreach ($message->getHeaders() as $name => $values) {

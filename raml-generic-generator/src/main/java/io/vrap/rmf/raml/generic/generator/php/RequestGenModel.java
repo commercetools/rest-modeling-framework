@@ -46,7 +46,7 @@ public class RequestGenModel {
         Response response = method.getResponses().stream().filter(response1 -> response1.getStatusCode().matches("^2[0-9]{2}$")).findFirst().orElse(null);
         if (response != null) {
             Body bodyType = response.getBodies().stream()
-                    .filter(bodyType1 -> bodyType1.getContentTypes().size() == 0 || bodyType1.getContentTypes().contains(MediaType.parse("application/json")))
+                    .filter(bodyType1 -> bodyType1.getContentTypes().size() == 0 || bodyType1.getContentMediaTypes().contains(MediaType.parse("application/json")))
                     .findFirst().orElse(null);
             if (bodyType != null && !BuiltinType.of(bodyType.getName()).isPresent()) {
                 return new TypeGenModel(bodyType.getType());

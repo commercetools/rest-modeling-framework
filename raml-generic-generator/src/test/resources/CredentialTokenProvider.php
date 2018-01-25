@@ -1,4 +1,5 @@
 <?php
+declare(strict_types = 1);
 /**
  * This file has been auto generated
  * Do not change it
@@ -18,18 +19,37 @@ class CredentialTokenProvider implements TokenProvider
     const ACCESS_TOKEN = 'access_token';
     const EXPIRES_IN = 'expires_in';
 
+    /**
+     * @var Client
+     */
     private $client;
+
+    /**
+     * @var array
+     */
     private $credentials;
+
+    /**
+     * @var string
+     */
     private $accessTokenUrl;
 
-    public function __construct(Client $client, $accessTokenUrl, $credentials)
+    /**
+     * @param Client $client
+     * @param string $accessTokenUrl
+     * @param array $credentials
+     */
+    public function __construct(Client $client, string $accessTokenUrl, array $credentials)
     {
         $this->accessTokenUrl = $accessTokenUrl;
         $this->client = $client;
         $this->credentials = $credentials;
     }
 
-    public function getToken()
+    /**
+     * @return Token
+     */
+    public function getToken(): Token
     {
         $data = [
             self::GRANT_TYPE => self::GRANT_TYPE_CLIENT_CREDENTIALS
@@ -44,7 +64,7 @@ class CredentialTokenProvider implements TokenProvider
 
         $result = $this->client->post($this->accessTokenUrl, $options);
 
-        $body = json_decode($result->getBody(), true);
-        return [$body[self::EXPIRES_IN], $body[self::ACCESS_TOKEN]];
+        $body = json_decode((string)$result->getBody(), true);
+        return new TokenModel((string)$body[self::ACCESS_TOKEN], (int)$body[self::EXPIRES_IN]);
     }
 }

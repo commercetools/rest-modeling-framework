@@ -1,4 +1,5 @@
 <?php
+declare(strict_types = 1);
 /**
  * This file has been auto generated
  * Do not change it
@@ -13,6 +14,10 @@ class MapIterator extends \ArrayIterator
      */
     private $callback;
 
+    /**
+     * @param mixed $value
+     * @param callable $callback
+     */
     public function __construct($value, callable $callback)
     {
         parent::__construct($value);

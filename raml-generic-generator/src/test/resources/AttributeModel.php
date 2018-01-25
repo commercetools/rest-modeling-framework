@@ -1,4 +1,5 @@
 <?php
+declare(strict_types = 1);
 /**
  * This file has been auto generated
  * Do not change it
@@ -46,7 +47,7 @@ class AttributeModel extends JsonObjectModel implements Attribute {
      * @param string $name
      * @return $this
      */
-    public function setName($name)
+    public function setName(string $name)
     {
         $this->name = (string)$name;
 

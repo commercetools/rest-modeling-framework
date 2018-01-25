@@ -3,16 +3,16 @@ import "generic.stg"
 /*
  * implementation template functions
  */
-builder(vendorName, builder)::=<<
+updateBuilder(vendorName, builder)::=<<
 \<?php
 <generatorInfo()>
 
 namespace <vendorName>\\Builder;
 
-use Commercetools\Base\ActionBuilder;
+use Commercetools\Base\BaseBuilder;
 <builder.typeImports: {ti |<useTypeImport(vendorName, ti)>}>
 
-class <builder.resourceType.name>ActionBuilder extends ActionBuilder {
+class <builder.resourceType.name>UpdateBuilder extends BaseBuilder {
     /**
      * @var <builder.resourceType.typeName>
      */
@@ -50,7 +50,7 @@ class <builder.resourceType.name>ActionBuilder extends ActionBuilder {
      * Build <builder.updateType.typeName> and delete internal state
      * @return <builder.updateType.typeName>
      */
-    public function build()
+    public function build(): <builder.updateType.typeName>
     {
         $data = [
             'actions' => $this->actions,
@@ -86,5 +86,18 @@ public function <action.discriminatorValue>(callable $callback = null)
     $action = $this->mapData(<action.typeName>::class, null);
     $this->callback($action, $callback);
     return $this;
+}
+>>
+
+actionBuilder(vendorName, type)::=<<
+\<?php
+<generatorInfo()>
+
+namespace <vendorName>\\Builder;
+
+use Commercetools\Base\BaseBuilder;
+<type.typeImports: {ti |<useTypeImport(vendorName, ti)>}>
+
+class <type.name>Builder extends BaseBuilder {
 }
 >>

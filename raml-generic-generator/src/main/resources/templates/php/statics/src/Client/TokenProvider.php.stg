@@ -8,7 +8,10 @@ namespace <vendorName>\Client;
 
 interface TokenProvider
 {
-    public function getToken();
+    /**
+     * @return Token
+     */
+    public function getToken(): Token;
 }
 
 >>

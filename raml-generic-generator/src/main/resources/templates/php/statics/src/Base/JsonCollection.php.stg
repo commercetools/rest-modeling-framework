@@ -16,6 +16,9 @@ class JsonCollection implements Collection, MapperAware, \\JsonSerializable
     private $iterator;
     private $resultMapper;
 
+    /**
+     * @param array $data
+     */
     public function __construct(array $data = null)
     {
         if (is_array($data)) {
@@ -37,7 +40,7 @@ class JsonCollection implements Collection, MapperAware, \\JsonSerializable
     /**
      * @returns Mapper
      */
-    public function getMapper()
+    public function getMapper(): Mapper
     {
         if (is_null($this->resultMapper)) {
             $this->resultMapper = new ResultMapper(new ModelClassMap());
@@ -45,12 +48,22 @@ class JsonCollection implements Collection, MapperAware, \\JsonSerializable
         return $this->resultMapper;
     }
 
-    protected function resolveDiscriminator($class, $data)
+    /**
+     * @param string $class
+     * @param mixed $data
+     * @return string
+     */
+    protected function resolveDiscriminator(string $class, $data): string
     {
         return $this->getMapper()->resolveDiscriminator($class, $class::DISCRIMINATOR, $class::SUB_TYPES, $data);
     }
 
-    protected function mapData($class, $data)
+    /**
+     * @param string $class
+     * @param mixed $data
+     * @return mixed
+     */
+    protected function mapData(string $class, $data)
     {
         return $this->getMapper()->mapData($class, $data);
     }
@@ -60,7 +73,7 @@ class JsonCollection implements Collection, MapperAware, \\JsonSerializable
         return $this->rawData;
     }
 
-    public function isPresent()
+    public function isPresent(): bool
     {
         return !is_null($this->rawData);
     }
@@ -128,7 +141,7 @@ class JsonCollection implements Collection, MapperAware, \\JsonSerializable
     /**
      * @return MapIterator
      */
-    public function getIterator()
+    public function getIterator(): MapIterator
     {
         $data = !is_null($this->rawData) ? $this->rawData : [];
         return new MapIterator($data, [$this, 'map']);

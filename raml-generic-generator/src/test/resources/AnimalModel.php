@@ -1,4 +1,5 @@
 <?php
+declare(strict_types = 1);
 /**
  * This file has been auto generated
  * Do not change it
@@ -11,6 +12,9 @@ use Test\Base\JsonObjectModel;
 class AnimalModel extends JsonObjectModel implements Animal {
     const DISCRIMINATOR_VALUE = '';
 
+    /**
+     * @param array $data
+     */
     public function __construct(array $data = []) {
         parent::__construct($data);
         $this->setKind(static::DISCRIMINATOR_VALUE);
@@ -38,7 +42,7 @@ class AnimalModel extends JsonObjectModel implements Animal {
      * @param string $kind
      * @return $this
      */
-    public function setKind($kind)
+    public function setKind(string $kind)
     {
         $this->kind = (string)$kind;
 

@@ -25,8 +25,8 @@ interface <type.name> extends <if(!type.hasBuiltinParent)><type.parent.name><els
     <type.nonPatternProperties: {p |<propertyInterfaceSet(p)>}>
     <type.unionProperties: {p |<propertyInterfaceGetAs(p)>}>
     <if(type.hasPatternProperties)>
-    public function get($key);
-    public function set($key, $value);
+    public function get(string $key);
+    public function set(string $key, $value);
     <endif>
 }
 

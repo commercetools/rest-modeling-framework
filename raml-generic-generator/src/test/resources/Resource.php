@@ -1,4 +1,5 @@
 <?php
+declare(strict_types = 1);
 /**
  * This file has been auto generated
  * Do not change it
@@ -11,10 +12,20 @@ use Psr\Http\Message\RequestInterface;
 
 class Resource
 {
+    /**
+     * @var string
+     */
     private $uri;
+    /**
+     * @var array
+     */
     private $args = [];
 
-    public function __construct($uri, array $args = [])
+    /**
+     * @param string $uri
+     * @param array $args
+     */
+    public function __construct(string $uri, array $args = [])
     {
         $this->uri = $uri;
         $this->args = $args;
@@ -23,7 +34,7 @@ class Resource
     /**
      * @return string
      */
-    final protected function getUri()
+    final protected function getUri(): string
     {
         return $this->uri;
     }
@@ -31,21 +42,26 @@ class Resource
     /**
      * @return array
      */
-    final protected function getArgs()
+    final protected function getArgs(): array
     {
         return $this->args;
     }
 
     /**
-     * @param $method
-     * @param $uri
+     * @param string $method
+     * @param string $uri
      * @param mixed $body
      * @param array $options
      * @param string $requestClass
      * @return ApiRequest
      */
-    final protected function buildRequest($method, $uri, $body = null, array $options = [], $requestClass = ApiRequest::class)
-    {
+    final protected function buildRequest(
+        string $method,
+        string $uri,
+        $body = null,
+        array $options = [],
+        string $requestClass = ApiRequest::class
+    ): ApiRequest {
         $headers = isset($options['headers']) ? $options['headers'] : [];
         /**
          * @var ApiRequest $request
