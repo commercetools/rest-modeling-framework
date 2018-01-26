@@ -44,6 +44,42 @@ class ObjectInstanceValidationTest extends BaseValidatorTest implements TypeFixt
         'boolean' | 'aValue' || false
     }
 
+    def "object type with pattern property"() {
+        when:
+        ObjectType objectTypeWithExample = constructType(
+                """\
+            additionalProperties: false
+            properties:
+                /n.*/: string
+            example:
+                ${name}: test
+        """)
+        then:
+        validate(objectTypeWithExample) == valid
+        where:
+        name      || valid
+        'test'    || false
+        'natural' || true
+    }
+
+    def "object type with match all property"() {
+        when:
+        ObjectType objectTypeWithExample = constructType(
+                """\
+            additionalProperties: false
+            properties:
+                //: string
+            example:
+                ${name}: test
+        """)
+        then:
+        validate(objectTypeWithExample) == valid
+        where:
+        name      || valid
+        'test'    || true
+        'natural' || true
+    }
+
     def "object type with string enum property"() {
         when:
         Library library = constructLibrary(

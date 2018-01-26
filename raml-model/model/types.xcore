@@ -300,7 +300,7 @@ interface TypedElement extends NamedElement, InlineTypeContainer, AnnotationsFac
      * @return true iff. this property pattern matches the given name
      */
     op boolean matches(String name) {
-        if (pattern !== null) ModelHelper.testPattern(this, name) else this.name === name
+        if (pattern !== null) ModelHelper.testPattern(this, name) else this.name == name
     }
 }
 
@@ -311,12 +311,6 @@ interface DocumentableElement extends DescriptionFacet, DisplayNameFacet {
 }
 
 class Property extends AnnotationsFacet, TypedElement {
-    /*
-     * @return true iff. this property name equals the given name
-     */
-    op boolean matches(String name) {
-        this.name == name
-    }
 }
 
 class ObjectType extends AnyType, ObjectTypeFacet {
@@ -344,6 +338,11 @@ class ObjectType extends AnyType, ObjectTypeFacet {
      */
     refers derived Property[] allProperties get {
         ModelHelper.getAllProperties(this)
+    }
+    
+    op Property getProperty(String name) {
+        val Property p = properties.findFirst[it.matches(name)]
+        if (p === null && ^type instanceof ObjectType) (^type as ObjectType).getProperty(name) else p
     }
     
     /*

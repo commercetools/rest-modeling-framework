@@ -1,5 +1,6 @@
 package io.vrap.rmf.raml.model.types
 
+import io.vrap.rmf.raml.model.values.RegExp
 import spock.lang.Specification
 
 /**
@@ -47,5 +48,21 @@ class ObjectTypeTest extends Specification {
         true                     | null                    || true
         false                    | null                    || false
         false                    | true                    || false
+    }
+
+    def "getProperty with pattern"() {
+        when:
+        Property property = TypesFactory.eINSTANCE.createProperty()
+        property.pattern = pattern == null ? null : RegExp.of(pattern)
+        ObjectType objectType = TypesFactory.eINSTANCE.createObjectType()
+        objectType.properties.add(property)
+        then:
+        (objectType.getProperty(name) != null) == propertyFound
+        where:
+        pattern | name   || propertyFound
+        '.*'    | 'test' || true
+        'na.*'  | 'name' || true
+        'na.*'  | 'test' || false
+        null    | 'test' || false
     }
 }

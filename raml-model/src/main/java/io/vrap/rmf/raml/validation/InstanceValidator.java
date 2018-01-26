@@ -237,11 +237,9 @@ public class InstanceValidator {
                     }
                 }
 
-                final Map<String, Property> allProperties = ModelHelper.getAllPropertiesAsMap(actualObjectTypeFacet);
-
                 for (final PropertyValue propertyValue : objectInstance.getValue()) {
                     final String name = propertyValue.getName();
-                    final Property property = allProperties.get(name);
+                    final Property property = actualObjectTypeFacet.getProperty(name);
 
                     if (property != null) {
                         try {
@@ -256,6 +254,7 @@ public class InstanceValidator {
                     }
                 }
 
+                final Map<String, Property> allProperties = ModelHelper.getAllPropertiesAsMap(actualObjectTypeFacet);
                 final List<Diagnostic> missingRequiredPropertyErrors = allProperties.values().stream()
                         .filter(property -> property.getRequired() != null && property.getRequired())
                         .filter(property -> objectInstance.getValue(property.getName()) == null)
