@@ -22,81 +22,106 @@ class TypesValidator extends AbstractRamlValidator {
 
     @Override
     public boolean validate(final EClass eClass, final EObject eObject, final DiagnosticChain diagnostics, final Map<Object, Object> context) {
-        final Diagnostic diagnostic = typeAndAnnoationTypeValidator.doSwitch(eObject);
-        if (diagnostic != null) {
-            diagnostics.add(diagnostic);
-            return false;
-        } else {
-            final List<Diagnostic> validationResults = validators.stream()
-                    .flatMap(validator -> validator.doSwitch(eObject).stream())
-                    .collect(Collectors.toList());
-            validationResults.forEach(diagnostics::add);
+        final List<Diagnostic> validationResults = validators.stream()
+                .flatMap(validator -> validator.doSwitch(eObject).stream())
+                .collect(Collectors.toList());
+        validationResults.addAll(typeAndAnnoationTypeValidator.doSwitch(eObject));
 
-            return validationResults.isEmpty();
-        }
+        validationResults.forEach(diagnostics::add);
+
+        return validationResults.isEmpty();
     }
 
-    private class TypeAndAnnoationTypeValidator extends TypesSwitch<Diagnostic> {
+    private class TypeAndAnnoationTypeValidator extends TypesSwitch<List<Diagnostic>> {
 
         @Override
-        public Diagnostic defaultCase(EObject object) {
-            return null;
+        public List<Diagnostic> defaultCase(final EObject object) {
+            return Collections.emptyList();
         }
 
         @Override
-        public Diagnostic caseArrayTypeFacet(final ArrayTypeFacet arrayType) {
-            boolean rangeIsValid = arrayType.getMinItems() == null
+        public List<Diagnostic> caseArrayTypeFacet(final ArrayTypeFacet arrayType) {
+            final List<Diagnostic> validationResults = new ArrayList<>();
+            final boolean rangeIsValid = arrayType.getMinItems() == null
                     || arrayType.getMaxItems() == null
                     || arrayType.getMinItems() <= arrayType.getMaxItems();
-
-            return rangeIsValid ? null : error("Facet 'minItems' must be <= 'maxItems'", arrayType);
+            if (!rangeIsValid) {
+                validationResults.add(error("Facet 'minItems' must be <= 'maxItems'", arrayType));
+            }
+            return validationResults;
         }
 
         @Override
-        public Diagnostic caseStringTypeFacet(final StringTypeFacet stringType) {
-            boolean rangeIsValid = stringType.getMinLength() == null
+        public List<Diagnostic> caseStringTypeFacet(final StringTypeFacet stringType) {
+            final List<Diagnostic> validationResults = new ArrayList<>();
+            final boolean rangeIsValid = stringType.getMinLength() == null
                     || stringType.getMaxLength() == null
                     || stringType.getMinLength() <= stringType.getMaxLength();
-
-            return rangeIsValid ? null : error("Facet 'minLength' must be <= 'maxLength'", stringType);
+            if (!rangeIsValid) {
+                validationResults.add(error("Facet 'minLength' must be <= 'maxLength'", stringType));
+            }
+            return validationResults;
         }
 
         @Override
-        public Diagnostic caseNumberTypeFacet(final NumberTypeFacet numberType) {
-            boolean rangeIsValid = numberType.getMinimum() == null
+        public List<Diagnostic> caseNumberTypeFacet(final NumberTypeFacet numberType) {
+            final List<Diagnostic> validationResults = new ArrayList<>();
+            final boolean rangeIsValid = numberType.getMinimum() == null
                     || numberType.getMaximum() == null
                     || numberType.getMinimum().compareTo(numberType.getMaximum()) <= 0;
-
-            return rangeIsValid ? null : error("Facet 'minimum' must be <= 'maximum'", numberType);
+            if (!rangeIsValid) {
+                validationResults.add(error("Facet 'minimum' must be <= 'maximum'", numberType));
+            }
+            return validationResults;
         }
 
         @Override
-        public Diagnostic caseIntegerTypeFacet(final IntegerTypeFacet integerType) {
-            boolean rangeIsValid = integerType.getMinimum() == null
+        public List<Diagnostic> caseIntegerTypeFacet(final IntegerTypeFacet integerType) {
+            final List<Diagnostic> validationResults = new ArrayList<>();
+            final boolean rangeIsValid = integerType.getMinimum() == null
                     || integerType.getMaximum() == null
                     || integerType.getMinimum().compareTo(integerType.getMaximum()) <= 0;
-
-            return rangeIsValid ? null : error("Facet 'minimum' must be <= 'maximum'", integerType);
+            if (!rangeIsValid) {
+                validationResults.add(error("Facet 'minimum' must be <= 'maximum'", integerType));
+            }
+            return validationResults;
         }
 
         @Override
-        public Diagnostic caseFileTypeFacet(final FileTypeFacet fileType) {
-            boolean rangeIsValid = fileType.getMinLength() == null
+        public List<Diagnostic> caseFileTypeFacet(final FileTypeFacet fileType) {
+            final List<Diagnostic> validationResults = new ArrayList<>();
+            final boolean rangeIsValid = fileType.getMinLength() == null
                     || fileType.getMaxLength() == null
                     || fileType.getMinLength() <= fileType.getMaxLength();
-
-            return rangeIsValid ? null : error("Facet 'minLength' must be <= 'maxLength'", fileType);
+            if (!rangeIsValid) {
+                validationResults.add(error("Facet 'minLength' must be <= 'maxLength'", fileType));
+            }
+            return validationResults;
         }
 
         @Override
-        public Diagnostic caseProperty(final Property property) {
-            Diagnostic validationResult = null;
+        public List<Diagnostic> caseProperty(final Property property) {
+            final List<Diagnostic> validationResults = new ArrayList<>();
             if (Strings.isNullOrEmpty(property.getName())) {
-                validationResult = error("Property must have a name", property);
+                validationResults.add(error("Property must have a name", property));
             } else if (property.getType() == null) {
-                validationResult = error("Property must have a type", property);
+                validationResults.add(error("Property must have a type", property));
             }
-            return validationResult;
+            return validationResults;
+        }
+
+        @Override
+        public List<Diagnostic> caseObjectType(final ObjectType objectType) {
+            final List<Diagnostic> validationResults = new ArrayList<>();
+            if (objectType.isInlineType()) {
+                if (objectType.getDiscriminator() != null) {
+                    validationResults.add(error("Facet 'discriminator' can't be defined for an inline type", objectType));
+                }
+                if (objectType.getDiscriminatorValue() != null) {
+                    validationResults.add(error("Facet 'discriminator' can't be defined for an inline type", objectType));
+                }
+            }
+            return validationResults;
         }
     }
 
@@ -129,7 +154,7 @@ class TypesValidator extends AbstractRamlValidator {
         }
     }
 
-    private class EnumFacetValidator extends ValidatingTypesSwitch  {
+    private class EnumFacetValidator extends ValidatingTypesSwitch {
         private InstanceValidator instanceValidator = new InstanceValidator();
 
         @Override
@@ -172,8 +197,8 @@ class TypesValidator extends AbstractRamlValidator {
             return validationResults;
         }
     }
-    
-    private class DefaultFacetValidator extends ValidatingTypesSwitch  {
+
+    private class DefaultFacetValidator extends ValidatingTypesSwitch {
         private InstanceValidator instanceValidator = new InstanceValidator();
 
         @Override

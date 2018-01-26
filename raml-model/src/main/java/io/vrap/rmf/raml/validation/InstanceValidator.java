@@ -17,18 +17,41 @@ import java.util.stream.Collectors;
 
 import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.*;
 
+/**
+ * A validator for {@link Instance}s.
+ */
 public class InstanceValidator {
 
-    public List<Diagnostic> validate(final Instance instance, final AnyType anyType) {
-        return validateInternal(instance, anyType);
+    /**
+     * Validates the given instance against the given type.
+     *
+     * @param instance the instance to validate
+     * @param type     the type to validate the instance against
+     * @return the validation diagnostics
+     */
+    public List<Diagnostic> validate(final Instance instance, final AnyType type) {
+        return validateInternal(instance, type);
     }
 
+    /**
+     * Validates the given instance against the given annotation type.
+     *
+     * @param instance       the instance to validate
+     * @param annotationType the annotation type to validate the instance against
+     * @return the validation diagnostics
+     */
+    public List<Diagnostic> validate(final Instance instance, final AnyAnnotationType annotationType) {
+        return validateInternal(instance, annotationType);
+    }
+
+    /**
+     * Validates the given annotation.
+     *
+     * @param annotation the annotation to validate
+     * @return the validation diagnostics
+     */
     public List<Diagnostic> validate(final Annotation annotation) {
         return validateInternal(annotation.getValue(), annotation.getType());
-    }
-
-    public List<Diagnostic> validate(final Instance instance, final AnyAnnotationType anyAnnotationType) {
-        return validateInternal(instance, anyAnnotationType);
     }
 
     private List<Diagnostic> validateInternal(final Instance instance, final EObject type) {
