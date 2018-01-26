@@ -1,31 +1,16 @@
 package io.vrap.rmf.raml.persistence.constructor
 
+import io.vrap.rmf.raml.model.LibraryFixtures
 import io.vrap.rmf.raml.model.modules.Library
 import io.vrap.rmf.raml.model.resources.Trait
 import io.vrap.rmf.raml.model.security.OAuth20Settings
 import io.vrap.rmf.raml.model.types.*
-import io.vrap.rmf.raml.persistence.RamlResourceSet
-import io.vrap.rmf.raml.persistence.antlr.RAMLCustomLexer
-import io.vrap.rmf.raml.persistence.antlr.RAMLParser
-import org.antlr.v4.runtime.CommonTokenStream
-import org.antlr.v4.runtime.TokenStream
-import org.eclipse.emf.common.util.URI
-import org.eclipse.emf.ecore.resource.ResourceSet
-import org.eclipse.emf.ecore.resource.URIConverter
-import spock.lang.Shared
 import spock.lang.Specification
 
 /**
  * Unit tests for {@link ApiConstructor}
  */
-class LibraryConstructorTest extends Specification {
-    ResourceSet resourceSet
-    @Shared
-    URI uri = URI.createURI("test.raml");
-
-    def setup() {
-        resourceSet = new RamlResourceSet()
-    }
+class LibraryConstructorTest extends Specification implements LibraryFixtures {
 
     def "library"() {
         when:
@@ -243,20 +228,5 @@ class LibraryConstructorTest extends Specification {
         ObjectType objectType = type
         Property property = objectType.getProperty('anyOrName')
         property.type instanceof UnionType
-    }
-
-    Library constructLibrary(String input) {
-        RAMLParser parser = parser(input)
-        def libraryConstructor = new LibraryConstructor()
-        Scope scope = Scope.of(resourceSet.createResource(uri))
-        return libraryConstructor.construct(parser, scope)
-    }
-
-    RAMLParser parser(String input) {
-        final URIConverter uriConverter = resourceSet.getURIConverter();
-        def strippedInput = input.stripIndent()
-        final RAMLCustomLexer lexer = new RAMLCustomLexer(strippedInput, uri, uriConverter);
-        final TokenStream tokenStream = new CommonTokenStream(lexer);
-        new RAMLParser(tokenStream)
     }
 }
