@@ -30,11 +30,6 @@ class ObjectTypeValidationTest extends BaseValidatorTest implements TypeFixtures
         null            | null                 | true       || true
         'discriminator' | null                 | true       || false
         null            | 'discriminatorValue' | true       || false
-        'discriminator' | 'discriminatorValue' | true       || false
-        null            | null                 | false      || true
-        'discriminator' | null                 | false      || true
-        null            | 'discriminatorValue' | false      || true
-        'discriminator' | 'discriminatorValue' | false      || true
     }
 
     def "strict example validation"() {
@@ -55,5 +50,25 @@ class ObjectTypeValidationTest extends BaseValidatorTest implements TypeFixtures
         null   || false
         true   || false
         false  || true
+    }
+
+    def "validate discriminator"() {
+        when:
+        ObjectType objectTypeWithDiscriminator = constructType(
+                """\
+            discriminator: type
+            properties:
+                type: ${type}
+        """)
+        if (!withDescriminatorProperty) {
+            objectTypeWithDiscriminator.properties.clear()
+        }
+        then:
+        validate(objectTypeWithDiscriminator) == valid
+        where:
+        withDescriminatorProperty | type      || valid
+        true                      | 'string'  || true
+        true                      | 'boolean' || false
+        false                     | 'string'  || false
     }
 }

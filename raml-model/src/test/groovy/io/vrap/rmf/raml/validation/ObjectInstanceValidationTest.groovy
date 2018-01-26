@@ -90,8 +90,8 @@ class ObjectInstanceValidationTest extends BaseValidatorTest implements TypeFixt
         validate(library) == valid
         where:
         enumValue || valid
-        1  || true
-        2  || true
-        3  || false
+        1         || true
+        2         || true
+        3         || false
     }
 }
