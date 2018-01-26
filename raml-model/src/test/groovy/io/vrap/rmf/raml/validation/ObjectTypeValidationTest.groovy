@@ -1,13 +1,15 @@
 package io.vrap.rmf.raml.validation
 
 import io.vrap.rmf.raml.model.InstanceFixtures
+import io.vrap.rmf.raml.model.LibraryFixtures
 import io.vrap.rmf.raml.model.TypeFixtures
 import io.vrap.rmf.raml.model.modules.Api
+import io.vrap.rmf.raml.model.modules.Library
 import io.vrap.rmf.raml.model.modules.ModulesFactory
 import io.vrap.rmf.raml.model.types.ObjectType
 import io.vrap.rmf.raml.model.types.TypesFactory
 
-class ObjectTypeValidationTest extends BaseValidatorTest implements TypeFixtures, InstanceFixtures {
+class ObjectTypeValidationTest extends BaseValidatorTest implements TypeFixtures, InstanceFixtures, LibraryFixtures {
     ObjectType objectType
     Api api
 
@@ -70,5 +72,30 @@ class ObjectTypeValidationTest extends BaseValidatorTest implements TypeFixtures
         true                      | 'string'  || true
         true                      | 'boolean' || false
         false                     | 'string'  || false
+    }
+
+    def "validate discriminator values"() {
+        when:
+        Library library = constructLibrary(
+                """\
+            usage: A type hierarchy
+            types:
+                Base:
+                    discriminator: type
+                    properties:
+                        type: string
+                WithDefaultDiscriminatorValue:
+                    type: Base
+                WithDiscriminatorValue:
+                    type: Base
+                    discriminatorValue: ${discriminatorValue}   
+        """)
+        then:
+        validate(library) == valid
+        where:
+        discriminatorValue              || valid
+        'Test'                          || true
+        'WithDefaultDiscriminatorValue' || false
+        'Base'                          || false
     }
 }

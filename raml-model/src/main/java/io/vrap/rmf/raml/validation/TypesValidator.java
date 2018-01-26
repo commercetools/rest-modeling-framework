@@ -127,9 +127,30 @@ class TypesValidator extends AbstractRamlValidator {
                     validationResults.add(error("Type with discriminator '" + discriminator + "' needs to define a property for it", objectType));
                 } else if (!(discriminatorProperty.getType() instanceof StringType)) {
                     validationResults.add(error("Discriminator property '" + discriminator + "' must be of type 'string'", objectType));
+                } else {
+                    final Set<String> discriminatorValues = new HashSet<>();
+                    discriminatorValues.add(objectType.discriminatorValueOrDefault());
+                    validateDiscriminatorValueUniqueness(objectType, discriminatorValues, validationResults);
                 }
             }
             return validationResults;
+        }
+
+        private void validateDiscriminatorValueUniqueness(final ObjectType objectType, final Set<String> discriminatorValues, final List<Diagnostic> validationResults) {
+            final List<ObjectType> properSubTypes = objectType.getSubTypes().stream()
+                    .filter(ObjectType.class::isInstance)
+                    .map(ObjectType.class::cast)
+                    .collect(Collectors.toList());
+            for (final ObjectType subType : properSubTypes) {
+                final String discriminatorValue = subType.discriminatorValueOrDefault();
+                if (discriminatorValues.contains(discriminatorValue)) {
+                    validationResults.add(error("Duplicate discriminator value '" + discriminatorValue + "' found", subType));
+                } else {
+                    discriminatorValues.add(discriminatorValue);
+                }
+                // TODO make sure that inheritance doesn't contain cycles
+                validateDiscriminatorValueUniqueness(subType, discriminatorValues, validationResults);
+            }
         }
     }
 
