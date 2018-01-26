@@ -1,32 +1,14 @@
 package io.vrap.rmf.raml.persistence.constructor
 
+import io.vrap.rmf.raml.model.TypeFixtures
 import io.vrap.rmf.raml.model.types.*
-import io.vrap.rmf.raml.persistence.RamlResourceSet
-import io.vrap.rmf.raml.persistence.antlr.RAMLCustomLexer
-import io.vrap.rmf.raml.persistence.antlr.RAMLParser
-import org.antlr.v4.runtime.CommonTokenStream
-import org.antlr.v4.runtime.TokenStream
-import org.eclipse.emf.common.util.URI
-import org.eclipse.emf.ecore.resource.ResourceSet
-import org.eclipse.emf.ecore.resource.URIConverter
-import spock.lang.Shared
 import spock.lang.Specification
 
-import static io.vrap.rmf.raml.model.modules.ModulesPackage.Literals.TYPE_CONTAINER__TYPES
 
 /**
  * Unit tests for {@link TypeDeclarationFragmentConstructor}.
  */
-class TypeDeclarationFragmentConstructorTest extends Specification {
-    ResourceSet resourceSet
-    @Shared
-    URI uri = URI.createURI("test.raml");
-
-    def setup() {
-        resourceSet = new RamlResourceSet()
-                .getResource(BuiltinType.RESOURCE_URI, true)
-                .getResourceSet()
-    }
+class TypeDeclarationFragmentConstructorTest extends Specification implements TypeFixtures {
 
     def "simple attributes"() {
         when:
@@ -47,8 +29,6 @@ class TypeDeclarationFragmentConstructorTest extends Specification {
         ''')
         then:
         type.name == null
-        StringType stringType = BuiltinType.STRING.getType(resourceSet)
-        type != stringType
         type.displayName.value == 'Simple'
         type.examples.size() == 1
         type.examples[0].value instanceof StringInstance
@@ -71,8 +51,6 @@ class TypeDeclarationFragmentConstructorTest extends Specification {
         objectType.properties[0].type instanceof StringType
         StringType namePropertyType = objectType.properties[0].type
 
-        StringType stringType = BuiltinType.STRING.getType(resourceSet)
-        namePropertyType != stringType
         namePropertyType.examples.size() == 1
         namePropertyType.examples[0].value instanceof StringInstance
     }
@@ -94,8 +72,6 @@ class TypeDeclarationFragmentConstructorTest extends Specification {
         objectType.properties[0].type instanceof StringType
         StringType namePropertyType = objectType.properties[0].type
 
-        StringType stringType = BuiltinType.STRING.getType(resourceSet)
-        namePropertyType != stringType
         namePropertyType.default instanceof StringInstance
     }
 
@@ -212,20 +188,5 @@ class TypeDeclarationFragmentConstructorTest extends Specification {
         StringType itemsType = arrayType.items
         itemsType.name == null
         itemsType.minLength == 12
-    }
-
-    AnyType constructType(String input) {
-        RAMLParser parser = parser(input)
-        def constructor = new TypeDeclarationFragmentConstructor(TYPE_CONTAINER__TYPES)
-        Scope scope = Scope.of(resourceSet.createResource(uri))
-        return constructor.construct(parser, scope)
-    }
-
-    RAMLParser parser(String input) {
-        final URIConverter uriConverter = resourceSet.getURIConverter();
-        def strippedInput = input.stripIndent()
-        final RAMLCustomLexer lexer = new RAMLCustomLexer(strippedInput, uri, uriConverter);
-        final TokenStream tokenStream = new CommonTokenStream(lexer);
-        new RAMLParser(tokenStream)
     }
 }

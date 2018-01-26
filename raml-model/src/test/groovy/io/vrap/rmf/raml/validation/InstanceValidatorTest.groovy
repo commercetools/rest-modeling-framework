@@ -1,5 +1,6 @@
 package io.vrap.rmf.raml.validation
 
+import io.vrap.rmf.raml.model.InstanceFixtures
 import io.vrap.rmf.raml.model.types.*
 import io.vrap.rmf.raml.model.values.RegExp
 import org.eclipse.emf.common.util.Diagnostic

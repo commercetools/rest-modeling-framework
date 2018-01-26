@@ -1,11 +1,13 @@
 package io.vrap.rmf.raml.validation
 
+import io.vrap.rmf.raml.model.InstanceFixtures
+import io.vrap.rmf.raml.model.TypeFixtures
 import io.vrap.rmf.raml.model.modules.Api
 import io.vrap.rmf.raml.model.modules.ModulesFactory
 import io.vrap.rmf.raml.model.types.ObjectType
 import io.vrap.rmf.raml.model.types.TypesFactory
 
-class ObjectTypeValidationTest extends BaseValidatorTest {
+class ObjectTypeValidationTest extends BaseValidatorTest implements TypeFixtures, InstanceFixtures {
     ObjectType objectType
     Api api
 
@@ -33,5 +35,25 @@ class ObjectTypeValidationTest extends BaseValidatorTest {
         'discriminator' | null                 | false      || true
         null            | 'discriminatorValue' | false      || true
         'discriminator' | 'discriminatorValue' | false      || true
+    }
+
+    def "strict example validation"() {
+        when:
+        ObjectType objectTypeWithExample = constructType(
+                '''\
+            properties:
+                name: string
+                phoneNo: number
+            example:
+                name: Hans
+        ''')
+        objectTypeWithExample.examples[0].strict = strict == null ? null : createInstance(strict)
+        then:
+        validate(objectTypeWithExample) == valid
+        where:
+        strict || valid
+        null   || false
+        true   || false
+        false  || true
     }
 }

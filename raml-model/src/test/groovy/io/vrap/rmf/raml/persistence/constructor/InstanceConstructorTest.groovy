@@ -1,28 +1,13 @@
 package io.vrap.rmf.raml.persistence.constructor
 
+import io.vrap.rmf.raml.model.InstanceFixtures
 import io.vrap.rmf.raml.model.types.*
-import io.vrap.rmf.raml.persistence.RamlResourceSet
-import io.vrap.rmf.raml.persistence.antlr.RAMLCustomLexer
-import io.vrap.rmf.raml.persistence.antlr.RAMLParser
-import org.antlr.v4.runtime.CommonTokenStream
-import org.antlr.v4.runtime.TokenStream
-import org.eclipse.emf.common.util.URI
-import org.eclipse.emf.ecore.resource.ResourceSet
-import org.eclipse.emf.ecore.resource.URIConverter
-import spock.lang.Shared
 import spock.lang.Specification
 
 /**
  * Unit tests for {@link InstanceConstructor}.
  */
-class InstanceConstructorTest extends Specification {
-    ResourceSet resourceSet
-    @Shared
-    URI uri = URI.createURI("test.raml");
-
-    def setup() {
-        resourceSet = new RamlResourceSet()
-    }
+class InstanceConstructorTest extends Specification implements InstanceFixtures {
 
     def "primitive type instances parsed correctly"() {
         when:
@@ -113,20 +98,5 @@ class InstanceConstructorTest extends Specification {
         value1.value == 1
         IntegerInstance value2 = arrayInstance.value[1]
         value2.value == 2
-    }
-
-    Instance constructInstance(String input) {
-        RAMLParser parser = parser(input)
-        def constructor = new InstanceConstructor()
-        Scope scope = Scope.of(resourceSet.createResource(uri))
-        return constructor.construct(parser, scope)
-    }
-
-    RAMLParser parser(String input) {
-        final URIConverter uriConverter = resourceSet.getURIConverter();
-        def strippedInput = input.stripIndent()
-        final RAMLCustomLexer lexer = new RAMLCustomLexer(strippedInput, uri, uriConverter);
-        final TokenStream tokenStream = new CommonTokenStream(lexer);
-        new RAMLParser(tokenStream)
     }
 }

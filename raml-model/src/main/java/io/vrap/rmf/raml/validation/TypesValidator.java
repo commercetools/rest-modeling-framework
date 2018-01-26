@@ -148,6 +148,7 @@ class TypesValidator extends AbstractRamlValidator {
         @Override
         public List<Diagnostic> caseAnyType(final AnyType anyType) {
             final List<Diagnostic> validationResults = anyType.getExamples().stream()
+                    .filter(example -> example.getStrict() == null || example.getStrict().getValue() == null || example.getStrict().getValue())
                     .flatMap(example -> instanceValidator.validate(example.getValue(), anyType).stream())
                     .collect(Collectors.toList());
             return validationResults;

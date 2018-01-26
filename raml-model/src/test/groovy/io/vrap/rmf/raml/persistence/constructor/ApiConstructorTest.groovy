@@ -3,34 +3,19 @@ package io.vrap.rmf.raml.persistence.constructor
 import com.damnhandy.uri.template.Expression
 import com.damnhandy.uri.template.Literal
 import com.google.common.net.MediaType
+import io.vrap.rmf.raml.model.ApiFixtures
 import io.vrap.rmf.raml.model.modules.Api
 import io.vrap.rmf.raml.model.resources.HttpMethod
 import io.vrap.rmf.raml.model.resources.Resource
 import io.vrap.rmf.raml.model.responses.Body
 import io.vrap.rmf.raml.model.security.OAuth20Settings
 import io.vrap.rmf.raml.model.types.*
-import io.vrap.rmf.raml.persistence.RamlResourceSet
-import io.vrap.rmf.raml.persistence.antlr.RAMLCustomLexer
-import io.vrap.rmf.raml.persistence.antlr.RAMLParser
-import org.antlr.v4.runtime.CommonTokenStream
-import org.antlr.v4.runtime.TokenStream
-import org.eclipse.emf.common.util.URI
-import org.eclipse.emf.ecore.resource.ResourceSet
-import org.eclipse.emf.ecore.resource.URIConverter
-import spock.lang.Shared
 import spock.lang.Specification
 
 /**
  * Unit tests for {@link ApiConstructor}
  */
-class ApiConstructorTest extends Specification {
-    ResourceSet resourceSet
-    @Shared
-    URI uri = URI.createURI("test.raml");
-
-    def setup() {
-        resourceSet = new RamlResourceSet()
-    }
+class ApiConstructorTest extends Specification implements ApiFixtures {
 
     def "resource type with type template and transformations"() {
         when:
@@ -867,20 +852,5 @@ class ApiConstructorTest extends Specification {
         UnionAnnotationType rolesAnnotationType = api.annotationTypes[0]
         rolesAnnotationType.oneOf.size() == 2
         rolesAnnotationType.oneOf == api.types
-    }
-
-    Api constructApi(String input) {
-        RAMLParser parser = parser(input)
-        def apiConstructor = new ApiConstructor()
-        Scope scope = Scope.of(resourceSet.createResource(uri))
-        return apiConstructor.construct(parser, scope)
-    }
-
-    RAMLParser parser(String input) {
-        final URIConverter uriConverter = resourceSet.getURIConverter();
-        def strippedInput = input.stripIndent()
-        final RAMLCustomLexer lexer = new RAMLCustomLexer(strippedInput, uri, uriConverter);
-        final TokenStream tokenStream = new CommonTokenStream(lexer);
-        new RAMLParser(tokenStream)
     }
 }
