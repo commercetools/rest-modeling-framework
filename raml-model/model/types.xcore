@@ -266,11 +266,7 @@ class TypeTemplate extends AnyType {
 
 }
 
-class Example extends AnnotationsFacet, DocumentableElement, StrictFacet, ValueInstanceFacet {
-    /*
-     * The optional name of an example.
-     */
-    String name
+class Example extends AnnotationsFacet, DocumentableElement, NamedElement, StrictFacet, ValueInstanceFacet {
 }
 
 interface InlineTypeContainer {
