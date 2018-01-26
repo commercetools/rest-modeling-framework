@@ -48,7 +48,7 @@ class ResponsesValidator extends AbstractRamlValidator {
                 contentTypesDefined = body.getContentTypes().size() > 0;
             }
             if (!contentTypesDefined) {
-                validationErrors.add(error("Content type undefined", body));
+                validationErrors.add(error(body, "Content type undefined"));
             }
             return validationErrors;
         }

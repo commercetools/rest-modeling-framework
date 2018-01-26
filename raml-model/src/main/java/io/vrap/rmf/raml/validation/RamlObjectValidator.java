@@ -36,7 +36,7 @@ class RamlObjectValidator extends AbstractRamlValidator {
     private List<Diagnostic> requiredAttributesMustBeSet(final EClass eClass, final EObject eObject, final DiagnosticChain diagnostics) {
         final List<Diagnostic> missingRequiredAttributes = eClass.getEAllAttributes().stream()
                 .filter(eAttribute -> eAttribute.isRequired() && !eAttribute.isMany() && !eObject.eIsSet(eAttribute))
-                .map(eAttribute -> error("Facet '" + eAttribute.getName() + "' is required.", eObject)).collect(Collectors.toList());
+                .map(eAttribute -> error( eObject,"Facet {0} is required.", eAttribute.getName())).collect(Collectors.toList());
 
         return missingRequiredAttributes;
     }
@@ -46,7 +46,7 @@ class RamlObjectValidator extends AbstractRamlValidator {
                 .filter(eAttribute -> eAttribute.isRequired() && !eAttribute.isMany()
                         && eAttribute.getEAttributeType().getInstanceClass() == String.class
                         && eObject.eIsSet(eAttribute) && ((String) eObject.eGet(eAttribute)).isEmpty())
-                .map(eAttribute -> error("Facet '" + eAttribute.getName() + "' must be non-empty.", eObject)).collect(Collectors.toList());
+                .map(eAttribute -> error( eObject,"Facet {0} must be non-empty.", eAttribute.getName())).collect(Collectors.toList());
 
         return missingRequiredAttributes;
     }
@@ -56,7 +56,7 @@ class RamlObjectValidator extends AbstractRamlValidator {
                 .filter(eAttribute -> !eAttribute.isMany()
                         && eAttribute.getEAttributeType() == ValuesPackage.Literals.POSITIVE_INTEGER
                         && eObject.eIsSet(eAttribute) && ((Integer) eObject.eGet(eAttribute)) <= 0)
-                .map(eAttribute -> error("Facet '" + eAttribute.getName() + "' must > 0.", eObject)).collect(Collectors.toList());
+                .map(eAttribute -> error(eObject, "Facet {0} must > 0.", eAttribute.getName())).collect(Collectors.toList());
 
         return missingRequiredAttributes;
     }
@@ -66,7 +66,7 @@ class RamlObjectValidator extends AbstractRamlValidator {
                 .filter(eAttribute -> !eAttribute.isMany()
                         && eAttribute.getEAttributeType() == ValuesPackage.Literals.UNSIGNED_INTEGER
                         && eObject.eGet(eAttribute) != null && ((Integer) eObject.eGet(eAttribute)) < 0)
-                .map(eAttribute -> error("Facet '" + eAttribute.getName() + "' must >= 0.", eObject)).collect(Collectors.toList());
+                .map(eAttribute -> error(eObject, "Facet {0} must >= 0.", eAttribute.getName())).collect(Collectors.toList());
 
         return missingRequiredAttributes;
     }

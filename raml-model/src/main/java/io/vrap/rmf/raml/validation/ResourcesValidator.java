@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 
 class ResourcesValidator extends AbstractRamlValidator {
     private final ProtocolFacetsValidator protocolFacetsValidator =
-            new ProtocolFacetsValidator(this::error);
+            new ProtocolFacetsValidator();
     private final ResourcesValidatingVisitor visitor = new ResourcesValidatingVisitor();
 
     @Override
@@ -55,7 +55,7 @@ class ResourcesValidator extends AbstractRamlValidator {
                     .collect(Collectors.toList());
 
             return optionalMethods.stream()
-                    .map(method -> error("Optional method '" + method + "' not allowed", resource))
+                    .map(method -> error(resource, "Optional method {0} not allowed", method.getMethod()))
                     .collect(Collectors.toList());
         }
     }

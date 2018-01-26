@@ -46,7 +46,7 @@ class TypesValidator extends AbstractRamlValidator {
                     || arrayType.getMaxItems() == null
                     || arrayType.getMinItems() <= arrayType.getMaxItems();
             if (!rangeIsValid) {
-                validationResults.add(error("Facet 'minItems' must be <= 'maxItems'", arrayType));
+                validationResults.add(error(arrayType, "Facet 'minItems' must be <= 'maxItems'"));
             }
             return validationResults;
         }
@@ -58,7 +58,7 @@ class TypesValidator extends AbstractRamlValidator {
                     || stringType.getMaxLength() == null
                     || stringType.getMinLength() <= stringType.getMaxLength();
             if (!rangeIsValid) {
-                validationResults.add(error("Facet 'minLength' must be <= 'maxLength'", stringType));
+                validationResults.add(error(stringType,"Facet 'minLength' must be <= 'maxLength'"));
             }
             return validationResults;
         }
@@ -70,7 +70,7 @@ class TypesValidator extends AbstractRamlValidator {
                     || numberType.getMaximum() == null
                     || numberType.getMinimum().compareTo(numberType.getMaximum()) <= 0;
             if (!rangeIsValid) {
-                validationResults.add(error("Facet 'minimum' must be <= 'maximum'", numberType));
+                validationResults.add(error(numberType, "Facet 'minimum' must be <= 'maximum'"));
             }
             return validationResults;
         }
@@ -82,7 +82,7 @@ class TypesValidator extends AbstractRamlValidator {
                     || integerType.getMaximum() == null
                     || integerType.getMinimum().compareTo(integerType.getMaximum()) <= 0;
             if (!rangeIsValid) {
-                validationResults.add(error("Facet 'minimum' must be <= 'maximum'", integerType));
+                validationResults.add(error(integerType, "Facet 'minimum' must be <= 'maximum'"));
             }
             return validationResults;
         }
@@ -94,7 +94,7 @@ class TypesValidator extends AbstractRamlValidator {
                     || fileType.getMaxLength() == null
                     || fileType.getMinLength() <= fileType.getMaxLength();
             if (!rangeIsValid) {
-                validationResults.add(error("Facet 'minLength' must be <= 'maxLength'", fileType));
+                validationResults.add(error(fileType, "Facet 'minLength' must be <= 'maxLength'"));
             }
             return validationResults;
         }
@@ -103,9 +103,9 @@ class TypesValidator extends AbstractRamlValidator {
         public List<Diagnostic> caseProperty(final Property property) {
             final List<Diagnostic> validationResults = new ArrayList<>();
             if (Strings.isNullOrEmpty(property.getName())) {
-                validationResults.add(error("Property must have a name", property));
+                validationResults.add(error(property, "Property must have a name"));
             } else if (property.getType() == null) {
-                validationResults.add(error("Property must have a type", property));
+                validationResults.add(error(property, "Property must have a type"));
             }
             return validationResults;
         }
@@ -116,17 +116,17 @@ class TypesValidator extends AbstractRamlValidator {
             final String discriminator = objectType.getDiscriminator();
             if (objectType.isInlineType()) {
                 if (discriminator != null) {
-                    validationResults.add(error("Facet 'discriminator' can't be defined for an inline type", objectType));
+                    validationResults.add(error(objectType,"Facet 'discriminator' can't be defined for an inline type"));
                 }
                 if (objectType.getDiscriminatorValue() != null) {
-                    validationResults.add(error("Facet 'discriminator' can't be defined for an inline type", objectType));
+                    validationResults.add(error(objectType, "Facet 'discriminator' can't be defined for an inline type"));
                 }
             } else if (discriminator != null) {
                 final Property discriminatorProperty = objectType.getProperty(discriminator);
                 if (discriminatorProperty == null) {
-                    validationResults.add(error("Type with discriminator '" + discriminator + "' needs to define a property for it", objectType));
+                    validationResults.add(error(objectType,"Type with discriminator {0} has to define a property for it", discriminator));
                 } else if (!(discriminatorProperty.getType() instanceof StringType)) {
-                    validationResults.add(error("Discriminator property '" + discriminator + "' must be of type 'string'", objectType));
+                    validationResults.add(error(objectType, "Discriminator property {0} must be of type 'string'", discriminator));
                 } else {
                     final Set<String> discriminatorValues = new HashSet<>();
                     discriminatorValues.add(objectType.discriminatorValueOrDefault());
@@ -144,7 +144,7 @@ class TypesValidator extends AbstractRamlValidator {
             for (final ObjectType subType : properSubTypes) {
                 final String discriminatorValue = subType.discriminatorValueOrDefault();
                 if (discriminatorValues.contains(discriminatorValue)) {
-                    validationResults.add(error("Duplicate discriminator value '" + discriminatorValue + "' found", subType));
+                    validationResults.add(error(subType, "Duplicate discriminator value {0} found", discriminatorValue));
                 } else {
                     discriminatorValues.add(discriminatorValue);
                 }
@@ -201,7 +201,7 @@ class TypesValidator extends AbstractRamlValidator {
                         .filter(value -> !uniqueItems.add(value.getValue()))
                         .collect(Collectors.toSet());
                 if (duplicateValues.size() > 0) {
-                    validationResults.add(error("Enum facet contains duplicate values", anyType));
+                    validationResults.add(error(anyType,"Enum facet contains duplicate values"));
                 }
             }
             return validationResults;
@@ -221,7 +221,7 @@ class TypesValidator extends AbstractRamlValidator {
                         .filter(value -> !uniqueItems.add(value.getValue()))
                         .collect(Collectors.toSet());
                 if (duplicateValues.size() > 0) {
-                    validationResults.add(error("Enum facet contains duplicate values", anyAnnotationType));
+                    validationResults.add(error(anyAnnotationType, "Enum facet contains duplicate values"));
                 }
             }
             return validationResults;
