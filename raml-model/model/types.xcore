@@ -40,7 +40,14 @@ interface ObjectTypeFacet extends AnyTypeFacet {
 	/*
 	 * Boolean that indicates if an object instance has additional properties.
 	 */
-	Boolean additionalProperties = "true"
+	Boolean additionalProperties
+	
+	/**
+	 * Retrieves the explicitly or inherited set additional properties facet. 
+	 */
+	op Boolean additionalPropertiesInherited() {
+		additionalProperties
+	}
 
 	/*
 	 * Determines the concrete type of an individual object at runtime when, for example,
@@ -313,7 +320,15 @@ class Property extends AnnotationsFacet, TypedElement {
 }
 
 class ObjectType extends AnyType, ObjectTypeFacet {
-
+	op Boolean additionalPropertiesInherited() {
+		if (additionalProperties === null && ^type instanceof ObjectType) {
+			(^type as ObjectType).additionalPropertiesInherited()
+		} else if (additionalProperties === null) {
+			true			
+		} 
+		else additionalProperties
+	}
+	
 	op String discriminator() {
 		if (getDiscriminator === null && ^type instanceof ObjectType) 
 			(^type as ObjectType).discriminator() 

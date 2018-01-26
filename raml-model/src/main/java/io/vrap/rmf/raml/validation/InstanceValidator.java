@@ -251,7 +251,7 @@ public class InstanceValidator {
                         } finally {
                             types.pop();
                         }
-                    } else if (objectTypeFacet.getAdditionalProperties() == Boolean.FALSE) {
+                    } else if (objectTypeFacet.additionalPropertiesInherited() == Boolean.FALSE) {
                         validationResults.add(error("Property '" + name + "' not defined", objectInstance));
                     }
                 }

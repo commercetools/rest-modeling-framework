@@ -32,4 +32,20 @@ class ObjectTypeTest extends Specification {
         null               || 'Type'
         'discriminator'    || 'discriminator'
     }
+
+    def "additionalPropertiesInherited"() {
+        when:
+        ObjectType baseType = TypesFactory.eINSTANCE.createObjectType()
+        baseType.additionalProperties = baseAdditionalProperties
+        ObjectType subType = TypesFactory.eINSTANCE.createObjectType()
+        subType.setType(baseType)
+        then:
+        subType.additionalPropertiesInherited() == additionalPropertiesInherited
+        where:
+        baseAdditionalProperties | subAdditionalProperties || additionalPropertiesInherited
+        null                     | null                    || true
+        true                     | null                    || true
+        false                    | null                    || false
+        false                    | true                    || false
+    }
 }

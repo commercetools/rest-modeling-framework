@@ -94,4 +94,31 @@ class ObjectInstanceValidationTest extends BaseValidatorTest implements TypeFixt
         2         || true
         3         || false
     }
+
+    def "type hierarchy with discriminators"() {
+        when:
+        Library library = constructLibrary(
+                """\
+        usage: Just a test
+        types:
+            Base:
+                discriminator: type
+                additionalProperties: false
+                properties:
+                    type: string
+                example:
+                    type: ${discriminatorValue}
+                    name: Peter
+            SubType:
+                type: Base
+                properties:
+                    name: string
+        """)
+        then:
+        validate(library) == valid
+        where:
+        discriminatorValue || valid
+        'Base'             || false
+        'SubType'          || true
+    }
 }
