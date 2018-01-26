@@ -65,7 +65,7 @@ interface ObjectTypeFacet extends AnyTypeFacet {
      */
     contains Property[] properties
 
-	op ObjectType getSubType(String discriminatorValue) {
+	op ObjectType getType(String discriminator) {
 		null
 	}
 	
@@ -80,7 +80,7 @@ interface ObjectTypeFacet extends AnyTypeFacet {
 	op String discriminator() {
 		getDiscriminator	
 	}
-	
+
 	op String discriminatorValueOrDefault() {
 		if (discriminatorValue === null) name else discriminatorValue
 	}
@@ -337,16 +337,21 @@ class ObjectType extends AnyType, ObjectTypeFacet {
     
     /*
      * Returns the sub type of this type with the given discriminator value.
+     * This type can be returned if it has the given discrimintaor.
      * Traverses the whole inheritance tree.
      */
-    op ObjectType getSubType(String discriminatorValue) {
-    	val ObjectType subType = subTypes.filter(ObjectType).findFirst[it.discriminatorValue == discriminatorValue]
+    op ObjectType getType(String discriminatorValue) {
+    	if (discriminatorValueOrDefault() == discriminatorValue) {
+    		this
+    	} else {
+    		val ObjectType subType = subTypes.filter(ObjectType).findFirst[it.discriminatorValueOrDefault() == discriminatorValue]
     	
-    	if (subType === null) 
-    		subTypes.filter(ObjectType).map[it.getSubType(discriminatorValue)].findFirst[]
-    	else
-    		subType
-    }
+    		if (subType === null) 
+    			subTypes.filter(ObjectType).map[it.getType(discriminatorValue)].findFirst[]
+    		else
+    			subType
+    		}
+    	}
 }
 
 /*

@@ -204,9 +204,14 @@ public class InstanceValidator {
                 if (Strings.isNullOrEmpty(discriminator)) {
                     actualObjectTypeFacet = objectTypeFacet;
                 } else {
-                    final String discriminatorValue = objectTypeFacet.discriminatorValueOrDefault();
-                    final ObjectType subType = objectTypeFacet.getSubType(discriminatorValue);
-                    actualObjectTypeFacet = subType == null ? objectTypeFacet : subType;
+                    final Instance discriminatorValueInstance = objectInstance.getValue(discriminator);
+                    if (discriminatorValueInstance instanceof StringInstance) {
+                        final String discriminatorValue = ((StringInstance) discriminatorValueInstance).getValue();
+                        final ObjectType subType = objectTypeFacet.getType(discriminatorValue);
+                        actualObjectTypeFacet = subType == null ? objectTypeFacet : subType;
+                    } else {
+                        actualObjectTypeFacet = objectTypeFacet;
+                    }
                 }
 
                 final Map<String, Property> allProperties = ModelHelper.getAllPropertiesAsMap(actualObjectTypeFacet);
@@ -224,9 +229,16 @@ public class InstanceValidator {
                             types.pop();
                         }
                     } else if (objectTypeFacet.getAdditionalProperties() == Boolean.FALSE) {
-                        error("Property '" + name + "' not defined", objectInstance);
+                        validationResults.add(error("Property '" + name + "' not defined", objectInstance));
                     }
                 }
+
+                final List<Diagnostic> missingRequiredPropertyErrors = allProperties.values().stream()
+                        .filter(property -> property.getRequired() != null && property.getRequired())
+                        .filter(property -> objectInstance.getValue(property.getName()) == null)
+                        .map(property -> error("Required property '" + property.getName() + "' is missing", objectInstance))
+                        .collect(Collectors.toList());
+                validationResults.addAll(missingRequiredPropertyErrors);
             }
             return validationResults;
         }
