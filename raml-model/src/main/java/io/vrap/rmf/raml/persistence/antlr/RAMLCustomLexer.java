@@ -26,7 +26,16 @@ public class RAMLCustomLexer implements TokenSource {
     public RAMLCustomLexer(final String input, final URI uri, final URIConverter uriConverter) {
         this.uri.push(uri);
         this.uriConverter = uriConverter;
-        currentLexer.push(new YamlLexer(input, uri, uriConverter));
+        currentLexer.push(createInputLexer(input, uri));
+    }
+
+    private TokenSource createInputLexer(final String input, final URI uri) {
+        switch (uri.fileExtension()) {
+            case "json":
+                return new JsonLexer(input, uri);
+            default:
+                return new YamlLexer(input, uri, uriConverter);
+        }
     }
 
     private TokenSource createLexer(final URI uri) {

@@ -6,6 +6,7 @@ import io.vrap.rmf.raml.model.resources.HttpMethod
 import io.vrap.rmf.raml.model.types.ArrayInstance
 import io.vrap.rmf.raml.model.types.Example
 import io.vrap.rmf.raml.model.types.ObjectInstance
+import spock.lang.Ignore
 
 class ExampleTest extends RegressionTest {
     def "example" () {
@@ -106,5 +107,104 @@ class ExampleTest extends RegressionTest {
         examples[6].getAnnotation('condition').value.value == 'test'
         examples[7].getAnnotation('condition').value.value == 'test'
         examples[10].getAnnotation('condition').value.value == 'test'
+    }
+
+    def "number-example-string-valid"() {
+        when:
+        RamlModelResult<Api> ramlModelResult = constructApi(
+                '''\
+                #%RAML 1.0
+                title: Annotating Examples
+                
+                types:
+                    SomeObject:
+                        properties:
+                            sort: string
+                        examples:
+                            valid: |
+                                {
+                                    "sort": "0.2"
+                                }
+                ''')
+        then:
+        ramlModelResult.validationResults.size() == 0
+    }
+
+    def "number-example-string-invalid"() {
+        when:
+        RamlModelResult<Api> ramlModelResult = constructApi(
+                '''\
+                #%RAML 1.0
+                title: Annotating Examples
+                
+                types:
+                    SomeObject:
+                        properties:
+                            sort: string
+                        examples:
+                            invalid: |
+                                {
+                                    "sort": 0.2
+                                }
+                ''')
+        then:
+        ramlModelResult.validationResults.size() == 1
+    }
+
+    @Ignore
+    def "number-example-object-valid"() {
+        when:
+        RamlModelResult<Api> ramlModelResult = constructApi(
+                '''\
+                #%RAML 1.0
+                title: Annotating Examples
+                
+                types:
+                    SomeObject:
+                        properties:
+                            sort: string
+                        examples:
+                            valid: { "sort": "0.2" }
+                ''')
+        then:
+        ramlModelResult.validationResults.size() == 0
+    }
+
+    def "number-example-object-invalid"() {
+        when:
+        RamlModelResult<Api> ramlModelResult = constructApi(
+                '''\
+                #%RAML 1.0
+                title: Annotating Examples
+                
+                types:
+                    SomeObject:
+                        properties:
+                            sort: string
+                        examples:
+                            invalid: { "sort": 0.2 }
+                ''')
+        then:
+        ramlModelResult.validationResults.size() == 1
+    }
+
+    @Ignore
+    def "number-example-raml-object-valid"() {
+        when:
+        RamlModelResult<Api> ramlModelResult = constructApi(
+                '''\
+                #%RAML 1.0
+                title: Annotating Examples
+                
+                types:
+                    SomeObject:
+                        properties:
+                            sort: string
+                        examples:
+                            valid:
+                                sort: "0.2"
+                ''')
+        then:
+        ramlModelResult.validationResults.size() == 0
     }
 }

@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 
 public class RamlResourceSet extends ResourceSetImpl {
     private final static List<String> ACCEPTED_MIME_TYPES =
-            Arrays.asList("application/raml+yaml", "application/yaml");
+            Arrays.asList("application/raml+yaml", "application/yaml", "application/json");
     private final static String ACCEPT_HEADER_VALUE = ACCEPTED_MIME_TYPES.stream()
             .collect(Collectors.joining(", "));
 

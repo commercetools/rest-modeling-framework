@@ -8,7 +8,10 @@ import org.antlr.v4.runtime.misc.Pair;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.URIConverter;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 
 class JsonLexer implements TokenSource {
     private final URI uri;
@@ -21,12 +24,28 @@ class JsonLexer implements TokenSource {
     private final int listStart = RAMLParser.LIST_START;
     private final int listEnd = RAMLParser.LIST_END;
 
-    public JsonLexer(final URI uri, final URIConverter uriConverter) {
+    private JsonLexer(InputStream input, final URI uri) {
         this.uri = uri;
         factory = RamlTokenFactory.DEFAULT;
         jsonFactory = new JsonFactory();
         try {
-            parser = jsonFactory.createParser(uriConverter.createInputStream(uri));
+            parser = jsonFactory.createParser(input);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public JsonLexer(final String input, final URI uri) {
+        this(new ByteArrayInputStream(input.getBytes(StandardCharsets.UTF_8)), uri);
+    }
+
+    public JsonLexer(final URI uri, final URIConverter uriConverter) {
+        this(convertUriToStream(uri, uriConverter), uri);
+    }
+
+    private static InputStream convertUriToStream(final URI uri, final URIConverter uriConverter) {
+        try {
+            return uriConverter.createInputStream(uri);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

@@ -19,6 +19,7 @@ import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.URIConverter;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -47,11 +48,22 @@ public interface InstanceHelper {
     static Instance parse(final String text) {
         final ResourceSet resourceSet = new RamlResourceSet();
         final URIConverter uriConverter = resourceSet.getURIConverter();
-        final URI uri = URI.createURI("validate.raml");
+        final URI uri = URI.createURI(UUID.randomUUID() + ".raml");
         final RAMLCustomLexer lexer = new RAMLCustomLexer(text, uri, uriConverter);
         final TokenStream tokenStream = new CommonTokenStream(lexer);
         final RAMLParser parser = new RAMLParser(tokenStream);
         final Scope scope = Scope.of(resourceSet.createResource(uri));
+        return new InstanceConstructor().construct(parser, scope);
+    }
+
+    static Instance parseJson(final String text) {
+        final ResourceSet resourceSet = new RamlResourceSet();
+        final URIConverter uriConverter = resourceSet.getURIConverter();
+        final URI uri = URI.createURI(UUID.randomUUID() + ".json");
+        final RAMLCustomLexer lexer = new RAMLCustomLexer(text, uri, uriConverter);
+        final TokenStream tokenStream = new CommonTokenStream(lexer);
+        final RAMLParser parser = new RAMLParser(tokenStream);
+        final Scope scope = Scope.of(resourceSet.createResource(uri, "application/json"));
         return new InstanceConstructor().construct(parser, scope);
     }
 
