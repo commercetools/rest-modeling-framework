@@ -140,7 +140,7 @@ class YamlLexer implements TokenSource {
 
     private Token scalar(final ScalarEvent scalarEvent) {
         final String scalarValue = scalarEvent.getValue();
-        final Tag implicitTag = IMPLICIT_TAG_RESOLVER.resolve(NodeId.scalar, scalarValue, true);
+        final Tag implicitTag = IMPLICIT_TAG_RESOLVER.resolve(NodeId.scalar, scalarValue, scalarEvent.getImplicit().canOmitTagInPlainScalar());
         final Matcher matcher = ANNOTATION_TYPE_REF_PATTERN.matcher(scalarValue);
         final int type = literalTokenTypes.containsKey(scalarValue) ?
                 literalTokenTypes.get(scalarValue) :

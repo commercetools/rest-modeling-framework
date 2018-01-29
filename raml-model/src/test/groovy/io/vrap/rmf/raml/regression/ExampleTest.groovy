@@ -151,7 +151,6 @@ class ExampleTest extends RegressionTest {
         ramlModelResult.validationResults.size() == 1
     }
 
-    @Ignore
     def "number-example-object-valid"() {
         when:
         RamlModelResult<Api> ramlModelResult = constructApi(
@@ -188,7 +187,6 @@ class ExampleTest extends RegressionTest {
         ramlModelResult.validationResults.size() == 1
     }
 
-    @Ignore
     def "number-example-raml-object-valid"() {
         when:
         RamlModelResult<Api> ramlModelResult = constructApi(
