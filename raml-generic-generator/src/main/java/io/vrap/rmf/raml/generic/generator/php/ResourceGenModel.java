@@ -3,6 +3,8 @@ package io.vrap.rmf.raml.generic.generator.php;
 import com.damnhandy.uri.template.Expression;
 import com.damnhandy.uri.template.UriTemplate;
 import com.damnhandy.uri.template.impl.VarSpec;
+import io.vrap.rmf.raml.generic.generator.GeneratorHelper;
+import io.vrap.rmf.raml.generic.generator.PackageGenModel;
 import io.vrap.rmf.raml.model.resources.Resource;
 
 import javax.annotation.Nullable;

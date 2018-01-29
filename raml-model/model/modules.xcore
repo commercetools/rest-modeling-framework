@@ -5,8 +5,9 @@
 )
 package io.vrap.rmf.raml.model.modules
 
-import io.vrap.rmf.raml.model.facets.ProtocolsFacet
-import io.vrap.rmf.raml.model.facets.MediaType
+import io.vrap.rmf.raml.model.types.ProtocolsFacet
+import io.vrap.rmf.raml.model.values.MediaTypes
+import io.vrap.rmf.raml.model.types.DescriptionFacet
 import io.vrap.rmf.raml.model.types.AnnotationsFacet
 import io.vrap.rmf.raml.model.types.AnyAnnotationType
 import io.vrap.rmf.raml.model.types.AnyType
@@ -15,23 +16,18 @@ import io.vrap.rmf.raml.model.types.InlineTypeContainer
 import io.vrap.rmf.raml.model.resources.ResourceContainer
 import io.vrap.rmf.raml.model.resources.ResourceType
 import io.vrap.rmf.raml.model.resources.Trait
-import io.vrap.rmf.raml.model.resources.UriTemplate
+import io.vrap.rmf.raml.model.resources.AnnotatedUriTemplate
 import io.vrap.rmf.raml.model.resources.UriParameter
 
 import io.vrap.rmf.raml.model.security.SecuritySchemeContainer
 import io.vrap.rmf.raml.model.security.SecuredByFacet
+import io.vrap.rmf.raml.model.util.ModelHelper
 
 /*
  * Common interface for api, extension and overlay. 
  */
 interface ApiBase extends AnnotationsFacet, TypeContainer, ResourceContainer, ProtocolsFacet, 
-		SecuritySchemeContainer, SecuredByFacet {
-	/*
-	 * A substantial, human-friendly description of the API.
-	 * Its value is a string and MAY be formatted using markdown.
-	 */
-	String description
-
+		SecuritySchemeContainer, SecuredByFacet, DescriptionFacet {
 	/*
 	 * The version of the API, for example "v1".
 	 */
@@ -41,7 +37,7 @@ interface ApiBase extends AnnotationsFacet, TypeContainer, ResourceContainer, Pr
 	 * A URI that serves as the base for URIs of all resources. Often used as the base
 	 * of the URL of each resource containing the location of the API. Can be a template URI.
 	 */
-	UriTemplate baseUri
+	contains AnnotatedUriTemplate baseUri
 
 	/*
 	 * Specifies the uri parameters in the base URI.
@@ -52,12 +48,16 @@ interface ApiBase extends AnnotationsFacet, TypeContainer, ResourceContainer, Pr
 	 * The default media types to use for request and response bodies (payloads),
 	 * for example "application/json".
 	 */
-	MediaType[] mediaType
+	String[] mediaType
 	
 	/*
 	 * Additional overall documentation for the API.
 	 */
 	contains Document[] documentation
+
+	op MediaTypes getMediaTypes() {
+	    ModelHelper.getMediaTypes(mediaType)
+	}
 }
 
 class Api extends ApiBase {
@@ -71,7 +71,7 @@ interface ApiExtension {
 	/**
 	 * The api that this object extends.
 	 */
-	refers Api ^extends
+	refers ApiBase ^extends
 	
 	String[1] usage 
 }

@@ -1,4 +1,5 @@
 <?php
+declare(strict_types = 1);
 /**
  * This file has been auto generated
  * Do not change it
@@ -26,12 +27,12 @@ interface Money extends JsonObject {
      * @param string $centAmount
      * @return $this
      */
-    public function setCentAmount($centAmount);
+    public function setCentAmount(string $centAmount);
 
     /**
      * @param string $currencyCode
      * @return $this
      */
-    public function setCurrencyCode($currencyCode);
+    public function setCurrencyCode(string $currencyCode);
 
 }

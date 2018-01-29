@@ -7,26 +7,28 @@ import io.vrap.rmf.raml.model.resources.Method;
 import io.vrap.rmf.raml.model.resources.Resource;
 import io.vrap.rmf.raml.model.responses.Body;
 import io.vrap.rmf.raml.model.types.*;
+import io.vrap.rmf.raml.model.util.InstanceHelper;
 import io.vrap.rmf.raml.model.util.StringCaseFormat;
+import io.vrap.rmf.raml.persistence.constructor.InstanceConstructor;
 import org.apache.commons.lang3.StringEscapeUtils;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
 public class ResourceGenModel {
     private final Resource resource;
-
     public ResourceGenModel(final Resource resource) {
         this.resource = resource;
     }
 
     public String getName()
     {
-        return StringCaseFormat.UPPER_CAMEL_CASE.apply(Optional.ofNullable(resource.getDisplayName()).orElse(resource.getResourcePathName()));
+        return StringCaseFormat.UPPER_CAMEL_CASE.apply(Optional.ofNullable(resource.getDisplayName()).map(StringInstance::getValue).orElse(resource.getResourcePathName()));
     }
 
     public String getDescription() throws JsonProcessingException {
-        return StringEscapeUtils.escapeJson(resource.getDescription());
+        return StringEscapeUtils.escapeJson(resource.getDescription().getValue());
     }
 
     public Resource getResource() {
@@ -63,25 +65,38 @@ public class ResourceGenModel {
             items.add(new ItemGenModel(resource, "deleteByKey", byKey.getMethod(HttpMethod.DELETE)));
         }
         if (byId != null && byId.getMethod(HttpMethod.POST) != null) {
-            Method method = byId.getMethod(HttpMethod.POST);
-            Body body = method.getBody("application/json");
-            if (body != null && body.getType() instanceof ObjectType) {
-                Property actions = ((ObjectType)body.getType()).getProperty("actions");
-                if (actions != null) {
-                    ArrayType actionsType = (ArrayType)actions.getType();
-                    List<AnyType> updateActions;
-                    if (actionsType.getItems() instanceof UnionType) {
-                        updateActions = ((UnionType)actionsType.getItems()).getOneOf().get(0).subTypes();
-                    } else {
-                        updateActions = actionsType.getItems().subTypes();
-                    }
-                    for (AnyType action: updateActions) {
-                        items.add(new ActionGenModel((ObjectType)action, resource, "action", method));
-                    }
+            items.addAll(getActionItems(byId.getMethod(HttpMethod.POST)));
+        }
+        return items;
+    }
+
+    protected List<ActionGenModel> getActionItems(final Method method) {
+        return getActionItems(method, "action");
+    }
+
+    protected List<ActionGenModel> getActionItems(final Method method, final String template) {
+        final List<ActionGenModel> actionItems = Lists.newArrayList();
+
+        final Body body = method.getBody("application/json");
+        if (body != null && body.getType() instanceof ObjectType) {
+            final Property actions = ((ObjectType)body.getType()).getProperty("actions");
+            if (actions != null) {
+                final ArrayType actionsType = (ArrayType)actions.getType();
+                final List<AnyType> updateActions;
+                if (actionsType.getItems() instanceof UnionType) {
+                    updateActions = ((UnionType)actionsType.getItems()).getOneOf().get(0).getSubTypes();
+                } else {
+                    updateActions = actionsType.getItems().getSubTypes();
                 }
+                for (AnyType action: updateActions) {
+                    actionItems.add(new ActionGenModel((ObjectType)action, resource, template, method));
+                }
+                actionItems.sort(
+                        Comparator.comparing(a -> a.getType().getDiscriminatorValue())
+                );
             }
         }
 
-        return items;
+        return actionItems;
     }
 }

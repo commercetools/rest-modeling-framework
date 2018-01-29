@@ -1,6 +1,6 @@
 package io.vrap.rmf.raml.validation;
 
-import io.vrap.rmf.raml.model.facets.FacetsPackage;
+import io.vrap.rmf.raml.model.values.ValuesPackage;
 import org.eclipse.emf.common.util.Diagnostic;
 import org.eclipse.emf.common.util.DiagnosticChain;
 import org.eclipse.emf.ecore.EClass;
@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 /**
  * A generic validator that checks common constraints.
  */
-public class RamlObjectValidator extends AbstractRamlValidator {
+class RamlObjectValidator extends AbstractRamlValidator {
     private EObjectValidator eObjectValidator = new EObjectValidator();
     @Override
     public boolean validate(final EClass eClass, final EObject eObject, final DiagnosticChain diagnostics, final Map<Object, Object> context) {
@@ -36,7 +36,7 @@ public class RamlObjectValidator extends AbstractRamlValidator {
     private List<Diagnostic> requiredAttributesMustBeSet(final EClass eClass, final EObject eObject, final DiagnosticChain diagnostics) {
         final List<Diagnostic> missingRequiredAttributes = eClass.getEAllAttributes().stream()
                 .filter(eAttribute -> eAttribute.isRequired() && !eAttribute.isMany() && !eObject.eIsSet(eAttribute))
-                .map(eAttribute -> error("Facet '" + eAttribute.getName() + "' is required.", eObject)).collect(Collectors.toList());
+                .map(eAttribute -> error( eObject,"Facet {0} is required.", eAttribute.getName())).collect(Collectors.toList());
 
         return missingRequiredAttributes;
     }
@@ -46,7 +46,7 @@ public class RamlObjectValidator extends AbstractRamlValidator {
                 .filter(eAttribute -> eAttribute.isRequired() && !eAttribute.isMany()
                         && eAttribute.getEAttributeType().getInstanceClass() == String.class
                         && eObject.eIsSet(eAttribute) && ((String) eObject.eGet(eAttribute)).isEmpty())
-                .map(eAttribute -> error("Facet '" + eAttribute.getName() + "' must be non-empty.", eObject)).collect(Collectors.toList());
+                .map(eAttribute -> error( eObject,"Facet {0} must be non-empty.", eAttribute.getName())).collect(Collectors.toList());
 
         return missingRequiredAttributes;
     }
@@ -54,9 +54,9 @@ public class RamlObjectValidator extends AbstractRamlValidator {
     private List<Diagnostic> validatePositiveIntegerAttributes(final EClass eClass, final EObject eObject, final DiagnosticChain diagnostics) {
         final List<Diagnostic> missingRequiredAttributes = eClass.getEAllAttributes().stream()
                 .filter(eAttribute -> !eAttribute.isMany()
-                        && eAttribute.getEAttributeType() == FacetsPackage.Literals.POSITIVE_INTEGER
+                        && eAttribute.getEAttributeType() == ValuesPackage.Literals.POSITIVE_INTEGER
                         && eObject.eIsSet(eAttribute) && ((Integer) eObject.eGet(eAttribute)) <= 0)
-                .map(eAttribute -> error("Facet '" + eAttribute.getName() + "' must > 0.", eObject)).collect(Collectors.toList());
+                .map(eAttribute -> error(eObject, "Facet {0} must > 0.", eAttribute.getName())).collect(Collectors.toList());
 
         return missingRequiredAttributes;
     }
@@ -64,9 +64,9 @@ public class RamlObjectValidator extends AbstractRamlValidator {
     private List<Diagnostic> validateUnsignedIntegerAttributes(final EClass eClass, final EObject eObject, final DiagnosticChain diagnostics) {
         final List<Diagnostic> missingRequiredAttributes = eClass.getEAllAttributes().stream()
                 .filter(eAttribute -> !eAttribute.isMany()
-                        && eAttribute.getEAttributeType() == FacetsPackage.Literals.UNSIGNED_INTEGER
+                        && eAttribute.getEAttributeType() == ValuesPackage.Literals.UNSIGNED_INTEGER
                         && eObject.eGet(eAttribute) != null && ((Integer) eObject.eGet(eAttribute)) < 0)
-                .map(eAttribute -> error("Facet '" + eAttribute.getName() + "' must >= 0.", eObject)).collect(Collectors.toList());
+                .map(eAttribute -> error(eObject, "Facet {0} must >= 0.", eAttribute.getName())).collect(Collectors.toList());
 
         return missingRequiredAttributes;
     }

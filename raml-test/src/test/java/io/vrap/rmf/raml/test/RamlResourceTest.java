@@ -1,7 +1,7 @@
 package io.vrap.rmf.raml.test;
 
 import io.vrap.rmf.raml.model.modules.Api;
-import io.vrap.rmf.raml.model.types.*;
+import io.vrap.rmf.raml.model.types.AnyType;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
@@ -61,7 +61,7 @@ public class RamlResourceTest implements ResourceFixtures {
 
         assertThat(optionalDestinationType.isPresent());
         final AnyType destinationType = optionalDestinationType.get();
-        final List<AnyType> subTypes = destinationType.subTypes();
+        final List<AnyType> subTypes = destinationType.getSubTypes();
         assertThat(subTypes).hasSize(3);
     }
 

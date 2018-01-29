@@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
 import io.vrap.rmf.raml.generic.generator.AbstractTemplateGenerator;
 import io.vrap.rmf.raml.generic.generator.Helper;
+import io.vrap.rmf.raml.generic.generator.TypeGenModel;
 import io.vrap.rmf.raml.model.modules.Api;
 import io.vrap.rmf.raml.model.security.OAuth20Settings;
 import org.stringtemplate.v4.ST;
@@ -57,8 +58,7 @@ public class StaticGenerator extends AbstractTemplateGenerator {
                     .filter(securityScheme -> securityScheme.getSettings() instanceof OAuth20Settings)
                     .map(securityScheme -> ((OAuth20Settings)securityScheme.getSettings()).getAccessTokenUri())
                     .findFirst().orElse("");
-            st.add("apiUri", apiUri);
-            st.add("authUri", authUri);
+            st.add("api", new ApiGenModel(api));
         }
         return st.render();
     }

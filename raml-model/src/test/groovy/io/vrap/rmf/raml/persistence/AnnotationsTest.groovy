@@ -1,12 +1,7 @@
 package io.vrap.rmf.raml.persistence
 
-import io.vrap.rmf.raml.model.facets.ObjectInstance
-import io.vrap.rmf.raml.model.facets.StringInstance
 import io.vrap.rmf.raml.model.modules.Library
-import io.vrap.rmf.raml.model.types.Annotation
-import io.vrap.rmf.raml.model.types.AnyType
-import io.vrap.rmf.raml.model.types.ObjectAnnotationType
-import io.vrap.rmf.raml.model.types.StringAnnotationType
+import io.vrap.rmf.raml.model.types.*
 import org.eclipse.emf.ecore.resource.Resource
 import spock.lang.Specification
 
@@ -43,7 +38,7 @@ class AnnotationsTest extends Specification implements ResourceFixtures {
         Annotation typeMappingAnnotation = annotatedType.annotations[1]
         typeMappingAnnotation.value instanceof ObjectInstance
         ObjectInstance objectInstance = typeMappingAnnotation.value
-        objectInstance.propertyValues[0].name == typeMappingAnnotationType.properties[0].name
-        objectInstance.propertyValues[1].name == typeMappingAnnotationType.properties[1].name
+        objectInstance.value[0].name == typeMappingAnnotationType.properties[0].name
+        objectInstance.value[1].name == typeMappingAnnotationType.properties[1].name
     }
 }

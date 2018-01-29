@@ -36,7 +36,7 @@ class ResponsesValidatorTest extends BaseValidatorTest {
 
     def "should accept bodies with no content type when default media types are defined"() {
         when:
-        api.mediaType.add(MediaType.parse('application/json'))
+        api.mediaType.add('application/json')
         then:
         validate(api) == true
         diagnostic.severity == Diagnostic.OK
@@ -44,7 +44,7 @@ class ResponsesValidatorTest extends BaseValidatorTest {
 
     def "should accept bodies with content type"() {
         when:
-        body.contentTypes.add(MediaType.parse('application/json'))
+        body.contentTypes.add('application/json')
         then:
         validate(api) == true
         diagnostic.severity == Diagnostic.OK

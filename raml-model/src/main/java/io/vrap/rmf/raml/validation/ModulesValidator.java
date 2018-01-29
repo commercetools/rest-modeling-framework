@@ -12,9 +12,9 @@ import org.eclipse.emf.ecore.EObject;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class ModulesValidator extends AbstractRamlValidator {
+class ModulesValidator extends AbstractRamlValidator {
     private final ProtocolFacetsValidator protocolFacetsValidator =
-            new ProtocolFacetsValidator(this::error);
+            new ProtocolFacetsValidator();
     private final ModulesValidatingVisitor visitor = new ModulesValidatingVisitor();
 
     @Override
@@ -62,7 +62,7 @@ public class ModulesValidator extends AbstractRamlValidator {
                         final String resourcePath = r.getResourcePath();
                         return resourcePath.length() > 0 && !resourcePaths.add(resourcePath);
                     })
-                    .map(r -> error("Duplicate resource '" + r.getFullUri().getTemplate() + "'", r))
+                    .map(r -> error(r,"Duplicate resource {0}", r.getFullUri().getTemplate()))
                     .collect(Collectors.toList());
         }
     }

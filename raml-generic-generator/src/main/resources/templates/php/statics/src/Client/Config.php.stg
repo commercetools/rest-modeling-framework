@@ -1,6 +1,6 @@
 import "../../../generic.stg"
 
-main(vendorName, apiUri, authUri) ::=<<
+main(vendorName, api) ::=<<
 \<?php
 <generatorInfo()>
 
@@ -8,8 +8,8 @@ namespace <vendorName>\Client;
 
 class Config
 {
-    const API_URI = '<apiUri>';
-    const AUTH_URI = '<authUri>';
+    const API_URI = '<api.baseUri>';
+    const AUTH_URI = '<api.authUri>';
 
     const OPT_BASE_URI = 'base_uri';
     const OPT_AUTH_URI = 'auth_uri';
@@ -17,6 +17,7 @@ class Config
     const OPT_CREDENTIALS = 'credentials';
     const OPT_CLIENT_OPTIONS = 'options';
 
+    <api.baseUriVariables: {p |<uriVariable(p)>}>
     /**
      * @var string
      */
@@ -42,9 +43,18 @@ class Config
      */
     private $clientOptions;
 
+    /**
+     * @param array $config
+     */
     public function __construct(array $config = [])
     {
+        <if(api.hasBaseUriVariables)>
+        $apiUrl = isset($config[self::OPT_BASE_URI]) ? $config[self::OPT_BASE_URI] : static::API_URI;
+        <api.baseUriVariables: {p |<replaceVariable(p)>}>
+        $this->apiUrl = $apiUrl;
+        <else>
         $this->apiUrl = isset($config[self::OPT_BASE_URI]) ? $config[self::OPT_BASE_URI] : static::API_URI;
+        <endif>
         $this->authUrl = isset($config[self::OPT_AUTH_URI]) ? $config[self::OPT_AUTH_URI] : static::AUTH_URI;
         $this->cacheDir = isset($config[self::OPT_CACHE_DIR]) ? $config[self::OPT_CACHE_DIR] : getcwd();
         $this->credentials = new Credentials();
@@ -60,9 +70,9 @@ class Config
     }
 
     /**
-     * @return mixed
+     * @return string
      */
-    public function getApiUrl()
+    public function getApiUrl(): string
     {
         return $this->apiUrl;
     }
@@ -71,7 +81,7 @@ class Config
      * @param string $apiUrl
      * @return Config
      */
-    public function setApiUrl($apiUrl)
+    public function setApiUrl(string $apiUrl): Config
     {
         $this->apiUrl = $apiUrl;
         return $this;
@@ -80,7 +90,7 @@ class Config
     /**
      * @return string
      */
-    public function getAuthUrl()
+    public function getAuthUrl(): string
     {
         return $this->authUrl;
     }
@@ -89,7 +99,7 @@ class Config
      * @param string $authUrl
      * @return Config
      */
-    public function setAuthUrl($authUrl)
+    public function setAuthUrl($authUrl): Config
     {
         $this->authUrl = $authUrl;
         return $this;
@@ -98,7 +108,7 @@ class Config
     /**
      * @return Credentials
      */
-    public function getCredentials()
+    public function getCredentials(): Credentials
     {
         return $this->credentials;
     }
@@ -107,7 +117,7 @@ class Config
      * @param Credentials $credentials
      * @return Config
      */
-    public function setCredentials(Credentials $credentials)
+    public function setCredentials(Credentials $credentials): Config
     {
         $this->credentials = $credentials;
         return $this;
@@ -116,7 +126,7 @@ class Config
     /**
      * @return array
      */
-    public function getClientOptions()
+    public function getClientOptions(): array
     {
         return $this->clientOptions;
     }
@@ -125,7 +135,7 @@ class Config
      * @param $options
      * @return Config
      */
-    public function setClientOptions(array $options)
+    public function setClientOptions(array $options): Config
     {
         $this->clientOptions = $options;
         return $this;
@@ -134,7 +144,7 @@ class Config
     /**
      * @return string
      */
-    public function getCacheDir()
+    public function getCacheDir(): string
     {
         return $this->cacheDir;
     }
@@ -143,13 +153,13 @@ class Config
      * @param string $cacheDir
      * @return Config
      */
-    public function setCacheDir($cacheDir)
+    public function setCacheDir($cacheDir): Config
     {
         $this->cacheDir = $cacheDir;
         return $this;
     }
 
-    public function getOptions()
+    public function getOptions(): array
     {
         return array_merge(
             [self::OPT_BASE_URI => $this->getApiUrl()],
@@ -157,5 +167,15 @@ class Config
         );
     }
 }
+
+>>
+
+replaceVariable(name) ::=<<
+
+$apiUrl = str_replace('{<p>}', (isset($config[self::OPT_<p; format="upperUnderscore">]) ? $config[self::OPT_<p; format="upperUnderscore">] : '{<p>}'), $apiUrl);
+>>
+
+uriVariable(name) ::=<<
+const OPT_<p; format="upperUnderscore">='<p>';
 
 >>

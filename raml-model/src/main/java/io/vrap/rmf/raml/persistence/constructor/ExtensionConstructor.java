@@ -4,10 +4,10 @@ import io.vrap.rmf.raml.model.modules.Api;
 import io.vrap.rmf.raml.model.modules.ApiExtension;
 import io.vrap.rmf.raml.model.modules.Extension;
 import io.vrap.rmf.raml.model.modules.ModulesPackage;
-import io.vrap.rmf.raml.persistence.RamlResource;
 import io.vrap.rmf.raml.persistence.antlr.RAMLParser;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.resource.Resource;
 
 import java.util.function.Predicate;
 
@@ -33,18 +33,20 @@ public class ExtensionConstructor extends ApiConstructor {
             } else {
                 ctx.extendsFacet().forEach(this::visitExtendsFacet);
             }
-            final Predicate<RAMLParser.ApiFacetsContext> isSecuritySchemesFacet =
-                    apiFacetsContext -> apiFacetsContext.securitySchemesFacet() != null;
+            final Predicate<RAMLParser.TypeContainerFacetsContext> isSecuritySchemesFacet =
+                    typeContainerFacets -> typeContainerFacets.securitySchemesFacet() != null;
 
             // TODO move to first pass
             // order is relevant here: first create security schemes
-            ctx.apiFacets().stream()
+            ctx.typeContainerFacets().stream()
                     .filter(isSecuritySchemesFacet)
-                    .forEach(this::visitApiFacets);
+                    .forEach(this::visitTypeContainerFacets);
 
-            ctx.apiFacets().stream()
+            ctx.typeContainerFacets().stream()
                     .filter(isSecuritySchemesFacet.negate())
-                    .forEach(this::visitApiFacets);
+                    .forEach(this::visitTypeContainerFacets);
+
+            ctx.apiFacets().forEach(this::visitApiFacets);
 
             return rootObject;
         });
@@ -53,7 +55,7 @@ public class ExtensionConstructor extends ApiConstructor {
     @Override
     public Object visitExtendsFacet(final RAMLParser.ExtendsFacetContext extendsFacet) {
         final String extendsUri = extendsFacet.uri.getText();
-        final RamlResource extendsResource = (RamlResource) scope.getResource(extendsUri);
+        final Resource extendsResource = scope.getResource(extendsUri);
         final EList<org.eclipse.emf.ecore.resource.Resource.Diagnostic> errors = extendsResource.getErrors();
         if (errors.isEmpty()) {
             final EList<EObject> contents = extendsResource.getContents();
@@ -61,7 +63,7 @@ public class ExtensionConstructor extends ApiConstructor {
                 scope.addError("Extended api definition is invalid at {0}", extendsFacet);
             } else {
                 final EObject extendsEObject = contents.get(0);
-                if (extendsEObject instanceof Api && !(extendsEObject instanceof ApiExtension)) {
+                if (extendsEObject instanceof Api || extendsEObject instanceof ApiExtension) {
                     scope.setValue(ModulesPackage.Literals.API_EXTENSION__EXTENDS, extendsEObject, extendsFacet.uri);
                 } else {
                     scope.addError("Extended api definition has invalid type {0} at {1}",

@@ -4,11 +4,11 @@ import com.damnhandy.uri.template.MalformedUriTemplateException;
 import com.damnhandy.uri.template.UriTemplate;
 import io.vrap.rmf.raml.model.modules.Api;
 import io.vrap.rmf.raml.model.modules.Document;
+import io.vrap.rmf.raml.model.resources.AnnotatedUriTemplate;
 import io.vrap.rmf.raml.model.resources.Resource;
 import io.vrap.rmf.raml.model.resources.ResourcesFactory;
 import io.vrap.rmf.raml.model.resources.ResourcesPackage;
 import io.vrap.rmf.raml.persistence.antlr.RAMLParser;
-import org.antlr.v4.runtime.tree.ParseTree;
 import org.eclipse.emf.common.util.ECollections;
 import org.eclipse.emf.ecore.EObject;
 
@@ -37,39 +37,23 @@ public class ApiConstructor extends BaseConstructor {
         final EObject rootObject = scope.getResource().getContents().get(0);
 
         return withinScope(scope.with(rootObject), rootScope -> {
-            final Predicate<RAMLParser.ApiFacetsContext> isSecuritySchemesFacet =
-                    apiFacetsContext -> apiFacetsContext.securitySchemesFacet() != null;
+            final Predicate<RAMLParser.TypeContainerFacetsContext> isSecuritySchemesFacet =
+                    typeContainerFacets -> typeContainerFacets.securitySchemesFacet() != null;
 
             // TODO move to first pass
             // order is relevant here: first create security schemes
-            ctx.apiFacets().stream()
+            ctx.typeContainerFacets().stream()
                     .filter(isSecuritySchemesFacet)
-                    .forEach(this::visitApiFacets);
+                    .forEach(this::visitTypeContainerFacets);
 
-            ctx.apiFacets().stream()
+            ctx.typeContainerFacets().stream()
                     .filter(isSecuritySchemesFacet.negate())
-                    .forEach(this::visitApiFacets);
+                    .forEach(this::visitTypeContainerFacets);
+
+            ctx.apiFacets().forEach(this::visitApiFacets);
 
             return rootObject;
         });
-    }
-
-    @Override
-    public Object visitApiFacets(RAMLParser.ApiFacetsContext ctx) {
-        // TODO move creation of security schemes to 1 pass
-        final RAMLParser.SecuritySchemesFacetContext securitySchemesFacet = ctx.securitySchemesFacet();
-        if (securitySchemesFacet != null) {
-            visitSecuritySchemesFacet(securitySchemesFacet);
-        }
-
-        for (int i = 0; i < ctx.getChildCount(); i++) {
-            final ParseTree child = ctx.getChild(i);
-            if (child != securitySchemesFacet) {
-                child.accept(this);
-            }
-        }
-
-        return scope.eObject();
     }
 
     @Override
@@ -93,17 +77,21 @@ public class ApiConstructor extends BaseConstructor {
 
     @Override
     public Object visitBaseUriFacet(RAMLParser.BaseUriFacetContext ctx) {
-        final String baseUriText = ctx.baseUri.getText();
+        final String baseUriText = ctx.baseUri.id(0).getText();
+        final AnnotatedUriTemplate annotatedUriTemplate = create(ANNOTATED_URI_TEMPLATE, ctx);
         try {
             final UriTemplate uriTemplate = (UriTemplate) ResourcesFactory.eINSTANCE
                     .createFromString(ResourcesPackage.Literals.URI_TEMPLATE, baseUriText);
-            scope.with(API_BASE__BASE_URI).setValue(uriTemplate, ctx.getStart());
-
-            return uriTemplate;
+            annotatedUriTemplate.setValue(uriTemplate);
+            scope.with(API_BASE__BASE_URI).setValue(annotatedUriTemplate, ctx.getStart());
         } catch (final MalformedUriTemplateException uriTemplateException) {
             scope.addError(uriTemplateException.getMessage(), ctx);
             return null;
         }
+        return withinScope(scope.with(annotatedUriTemplate), annotatedUriTemplateScope -> {
+            ctx.baseUri.annotationFacet().forEach(this::visitAnnotationFacet);
+            return annotatedUriTemplate;
+        });
     }
 
 
@@ -128,6 +116,8 @@ public class ApiConstructor extends BaseConstructor {
             resource.setRelativeUri(relativeUri);
             return withinScope(resourcesScope.with(resource), resourceScope -> {
                 resourceFacet.attributeFacet().forEach(this::visitAttributeFacet);
+                resourceFacet.descriptionFacet().forEach(this::visitDescriptionFacet);
+                resourceFacet.displayNameFacet().forEach(this::visitDisplayNameFacet);
                 resourceFacet.annotationFacet().forEach(this::visitAnnotationFacet);
                 resourceFacet.securedByFacet().forEach(this::visitSecuredByFacet);
 

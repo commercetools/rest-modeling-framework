@@ -14,9 +14,20 @@ use Psr\Http\Message\RequestInterface;
 
 class OAuth2Handler {
 
+    /**
+     * @var TokenProvider
+     */
     private $provider;
+    /**
+     * @var CacheItemPoolInterface
+     */
     private $cache;
 
+    /**
+     * OAuth2Handler constructor.
+     * @param TokenProvider $provider
+     * @param CacheItemPoolInterface $cache
+     */
     public function __construct(TokenProvider $provider, CacheItemPoolInterface $cache = null) {
         $this->provider = $provider;
         if (is_null($cache)) {
@@ -27,37 +38,53 @@ class OAuth2Handler {
         $this->cache = $cache;
     }
 
-    public function __invoke(RequestInterface $request, array $options = []) {
+    /**
+     * @param RequestInterface $request
+     * @param array $options
+     * @return RequestInterface
+     */
+    public function __invoke(RequestInterface $request, array $options = []): RequestInterface {
         return $request->withHeader('Authorization', $this->getAuthorizationHeader());
     }
 
-    public function getAuthorizationHeader()
+    /**
+     * @return string
+     */
+    public function getAuthorizationHeader(): string
     {
         return 'Bearer ' . $this->getBearerToken();
     }
 
-    private function getBearerToken()
+    /**
+     * @return string
+     */
+    private function getBearerToken(): string
     {
         $item = null;
         if (!is_null($this->cache)) {
             $item = $this->cache->getItem(sha1('access_token'));
             if ($item->isHit()) {
-                return $item->get();
+                return (string)$item->get();
             }
         }
 
-        list($expires, $token) = $this->provider->getToken();
+        $token = $this->provider->getToken();
         // ensure token to be invalidated in cache before TTL
-        $ttl = max(1, floor($expires/2));
-        $this->saveToken($token, $item, $ttl);
+        $ttl = max(1, floor($token->getExpiresIn()/2));
+        $this->saveToken($token->getValue(), $item, (int)$ttl);
 
-        return $token;
+        return $token->getValue();
     }
 
-    private function saveToken($token, CacheItemInterface $item, $ttl)
+    /**
+     * @param string $token
+     * @param CacheItemInterface $item
+     * @param int $ttl
+     */
+    private function saveToken(string $token, CacheItemInterface $item, int $ttl)
     {
         if (!is_null($this->cache)) {
-            $item->set($token)->expiresAfter((int)$ttl);
+            $item->set($token)->expiresAfter($ttl);
             $this->cache->save($item);
         }
     }

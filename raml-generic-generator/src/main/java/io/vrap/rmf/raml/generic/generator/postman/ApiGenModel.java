@@ -1,5 +1,6 @@
 package io.vrap.rmf.raml.generic.generator.postman;
 
+import com.google.common.collect.Lists;
 import io.vrap.rmf.raml.model.modules.Api;
 import io.vrap.rmf.raml.model.security.OAuth20Settings;
 
@@ -33,6 +34,10 @@ public class ApiGenModel {
 
     public List<ResourceGenModel> getResources()
     {
-        return api.getResources().get(0).getResources().stream().map(ResourceGenModel::new).collect(Collectors.toList());
+        final List<ResourceGenModel> resources = Lists.newArrayList();
+        resources.add(new ProjectGenModel(api.getResources().get(0)));
+        resources.addAll(api.getResources().get(0).getResources().stream().map(ResourceGenModel::new).collect(Collectors.toList()));
+
+        return resources;
     }
 }

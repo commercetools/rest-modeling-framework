@@ -1,4 +1,5 @@
 <?php
+declare(strict_types = 1);
 /**
  * This file has been auto generated
  * Do not change it
@@ -26,12 +27,12 @@ interface Enum extends JsonObject {
      * @param string $key
      * @return $this
      */
-    public function setKey($key);
+    public function setKey(string $key);
 
     /**
      * @param string $label
      * @return $this
      */
-    public function setLabel($label);
+    public function setLabel(string $label);
 
 }

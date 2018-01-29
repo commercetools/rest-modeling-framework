@@ -22,14 +22,20 @@ class ApiRequest extends Request
     /**
      * @inheritDoc
      */
-    public function __construct($method, $uri, array $headers = [], $body = null, $version = '1.1')
+    public function __construct(string $method, string $uri, array $headers = [], $body = null, string $version = '1.1')
     {
         $headers = $this->ensureHeader($headers, 'Content-Type', 'application/json');
 
         parent::__construct($method, $uri, $headers, $body, $version);
     }
 
-    protected function ensureHeader(array $headers, $header, $defaultValue)
+    /**
+     * @param array $headers
+     * @param string $header
+     * @param mixed $defaultValue
+     * @return array
+     */
+    protected function ensureHeader(array $headers, string $header, $defaultValue): array
     {
         $normalizedHeader = strtolower($header);
         foreach ($headers as $header => $value) {
@@ -44,12 +50,21 @@ class ApiRequest extends Request
         return $headers;
     }
 
+    /**
+     * @param ResponseInterface $response
+     * @param ResultMapper $mapper
+     * @return mixed
+     */
     public function map(ResponseInterface $response, ResultMapper $mapper)
     {
         return $mapper->map($this, $response);
     }
 
-    public function withQueryParam($parameterName, $value)
+    /**
+     * @param string $parameterName
+     * @param mixed $value
+     */
+    public function withQueryParam(string $parameterName, $value): ApiRequest
     {
         $query = $this->getUri()->getQuery();
         if ($this->query !== $query) {

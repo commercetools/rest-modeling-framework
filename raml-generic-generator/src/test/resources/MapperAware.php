@@ -1,4 +1,5 @@
 <?php
+declare(strict_types = 1);
 /**
  * This file has been auto generated
  * Do not change it
@@ -16,5 +17,5 @@ interface MapperAware
     /**
      * @returns Mapper
      */
-    public function getMapper();
+    public function getMapper(): Mapper;
 }

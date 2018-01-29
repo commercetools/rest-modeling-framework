@@ -3,8 +3,10 @@ package io.vrap.rmf.raml.test;
 import com.tngtech.java.junit.dataprovider.DataProvider;
 import com.tngtech.java.junit.dataprovider.DataProviderRunner;
 import com.tngtech.java.junit.dataprovider.UseDataProvider;
+import io.vrap.rmf.raml.model.RamlModelBuilder;
+import io.vrap.rmf.raml.model.RamlModelResult;
 import org.eclipse.emf.common.util.URI;
-import org.eclipse.emf.ecore.resource.Resource;
+import org.eclipse.emf.ecore.EObject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -34,63 +36,27 @@ public class RamlTckTest implements ResourceFixtures {
 
     @Test
     @UseDataProvider("allTckRamlFiles")
-    public void tckFilesParse(final File f) throws IOException, TckParseException {
-        final Resource resource;
-        final URI fileURI = URI.createURI(f.toURI().toString());
-        try {
-            resource = fromUri(fileURI);
-        } catch (Exception e) {
-            throw new TckParseException(fileURI.toString(), e);
-        }
-        assertThat(resource).isInstanceOf(Resource.class)
-                .overridingErrorMessage("Failed to parse: " + f.toString());
+    public void tckFilesParse(final File f) throws TckParseException {
+        tckParse(f);
     }
 
     @Test
     @UseDataProvider("allTckInvalidRamlFiles")
-    public void tckInvalidRaml(final File f) throws IOException, TckParseException  {
-        final Resource resource;
-        final URI fileURI = URI.createURI(f.toURI().toString());
-        try {
-            resource = fromUri(fileURI);
-        } catch (Exception e) {
-            throw new TckParseException(fileURI.toString(), e);
-        }
-        assertThat(resource.getErrors())
-            .overridingErrorMessage("No errors found parsing invalid raml: " + f.toString())
-            .isNotEmpty();
+    public void tckInvalidRaml(final File f) throws TckParseException  {
+        tckParse(f, false);
     }
 
 
     @Test
     @UseDataProvider("allTckValidRamlFiles")
-    public void tckValidRaml(final File f) throws IOException, TckParseException  {
-        final Resource resource;
-        final URI fileURI = URI.createURI(f.toURI().toString());
-        try {
-            resource = fromUri(fileURI);
-        } catch (Exception e) {
-            throw new TckParseException(fileURI.toString(), e);
-        }
-        assertThat(resource.getErrors())
-            .overridingErrorMessage("Errors found parsing valid raml: " + f.toString())
-            .isEmpty();
+    public void tckValidRaml(final File f) throws TckParseException  {
+        tckParse(f, true);
     }
 
     @Test
     @UseDataProvider("allTckApiRamlFiles")
-    public void tckTest(final File f) throws IOException, TckParseException  {
-        final Resource resource;
-        final URI fileURI = URI.createURI(f.toURI().toString());
-        try {
-            resource = fromUri(fileURI);
-        } catch (Exception e) {
-            throw new TckParseException(fileURI.toString(), e);
-        }
-        if (!resource.getErrors().isEmpty()) {
-            String file = fileURI.toString();
-            System.out.println(file);
-        }
+    public void tckTest(final File f) throws TckParseException  {
+        tckParse(f);
     }
 
     @DataProvider
@@ -111,14 +77,14 @@ public class RamlTckTest implements ResourceFixtures {
     public static List<File> allTckInvalidRamlFiles() throws IOException {
         return Files.walk(Paths.get(tckURL.getPath()))
                 .filter(Files::isRegularFile)
-                .filter(path -> path.toString().endsWith("Invalid.raml")).map(Path::toFile).collect(Collectors.toList());
+                .filter(path -> path.toString().toLowerCase().endsWith("invalid.raml")).map(Path::toFile).collect(Collectors.toList());
     }
 
     @DataProvider
     public static List<File> allTckValidRamlFiles() throws IOException {
         return Files.walk(Paths.get(tckURL.getPath()))
                 .filter(Files::isRegularFile)
-                .filter(path -> path.toString().endsWith("Valid.raml")).map(Path::toFile).collect(Collectors.toList());
+                .filter(path -> !path.toString().toLowerCase().endsWith("invalid.raml") && path.toString().toLowerCase().endsWith("valid.raml")).map(Path::toFile).collect(Collectors.toList());
     }
 
     @DataProvider
@@ -126,5 +92,33 @@ public class RamlTckTest implements ResourceFixtures {
         return Files.walk(Paths.get(tckURL.getPath()))
                 .filter(Files::isRegularFile)
                 .filter(path -> path.toString().endsWith("api.raml")).map(Path::toFile).collect(Collectors.toList());
+    }
+
+    public void tckParse(final File f, final Boolean valid) throws TckParseException {
+        final URI fileURI = URI.createURI(f.toURI().toString());
+        try {
+            final RamlModelResult<EObject> result = new RamlModelBuilder().build(fileURI);
+            if (valid) {
+                assertThat(result.getValidationResults())
+                        .describedAs(fileURI.toFileString().replace(tckURL.getPath(), "") + "(" + f.getName() + ":0)")
+                        .isEmpty();
+            } else {
+                assertThat(result.getValidationResults())
+                        .describedAs(fileURI.toFileString().replace(tckURL.getPath(), "") + "(" + f.getName() + ":0)")
+                        .isNotEmpty();
+            }
+        } catch (Throwable e) {
+            throw new TckParseException(f.toString() + "(" + f.getName() + ":0)", e);
+        }
+    }
+
+    public void tckParse(final File f) throws TckParseException {
+        final URI fileURI = URI.createURI(f.toURI().toString());
+        try {
+            final RamlModelResult<EObject> result = new RamlModelBuilder().build(fileURI);
+            assertThat(result.getRootObject() != null);
+        } catch (Throwable e) {
+            throw new TckParseException(f.toString() + "(" + f.getName() + ":0)", e);
+        }
     }
 }

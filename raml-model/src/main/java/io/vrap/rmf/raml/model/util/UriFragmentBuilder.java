@@ -1,8 +1,7 @@
 package io.vrap.rmf.raml.model.util;
 
-import com.google.common.net.MediaType;
 import io.vrap.functional.utils.TypeSwitch;
-import io.vrap.rmf.raml.model.elements.IdentifiableElement;
+import io.vrap.rmf.raml.model.elements.NamedElement;
 import io.vrap.rmf.raml.model.resources.Method;
 import io.vrap.rmf.raml.model.resources.Resource;
 import io.vrap.rmf.raml.model.responses.Body;
@@ -21,19 +20,25 @@ public class UriFragmentBuilder {
 
     private final TypeSwitch<EObject, List<String>> uriFragmentsBuilderSwitch = new TypeSwitch<EObject, List<String>>()
             .on(Body.class, this::body)
-            .on(IdentifiableElement.class, this::identifiableElement)
+            .on(NamedElement.class, this::namedElement)
             .on(Annotation.class, this::annotation)
             .on(Method.class, this::method)
             .on(Resource.class, this::resource)
             .on(Response.class, this::response)
-            .fallthrough(eObject -> new ArrayList<>());
+            .fallthrough(this::defaultCase);
 
     public String getURIFragment(final EObject eObject) {
         return uriFragmentsBuilderSwitch.apply(eObject).stream().collect(SEGMENT_JOINER);
     }
 
-    private List<String> identifiableElement(final IdentifiableElement identifiableElement) {
-        final List<String> segments = new ArrayList<>();
+    private List<String> namedElement(final NamedElement identifiableElement) {
+        final List<String> segments;
+        if (identifiableElement.eContainer() != null) {
+            segments = uriFragmentsBuilderSwitch.apply(identifiableElement.eContainer());
+        } else {
+            segments = new ArrayList<>();
+        }
+
         segments.add(identifiableElement.eContainmentFeature().getName());
         segments.add(identifiableElement.getName());
 
@@ -45,6 +50,7 @@ public class UriFragmentBuilder {
             final List<String> segments = uriFragmentsBuilderSwitch.apply(annotation.eContainer());
             segments.add(annotation.eContainmentFeature().getName());
             segments.add(annotation.getType().getName());
+            return segments;
         }
         return new ArrayList<>();
     }
@@ -74,7 +80,6 @@ public class UriFragmentBuilder {
             final List<String> segments = uriFragmentsBuilderSwitch.apply(body.eContainer());
             segments.add(body.eContainmentFeature().getName());
             segments.add(body.getContentTypes().stream()
-                    .map(MediaType::toString)
                     .collect(Collectors.joining(",")));
             return segments;
         }
@@ -93,5 +98,14 @@ public class UriFragmentBuilder {
         } else {
             return segments;
         }
+    }
+
+    private List<String> defaultCase(final EObject eObject) {
+        if (eObject.eContainer() != null) {
+            final List<String> segments = uriFragmentsBuilderSwitch.apply(eObject.eContainer());
+            segments.add(eObject.eContainmentFeature().getName());
+            return segments;
+        }
+        return new ArrayList<>();
     }
 }

@@ -2,6 +2,7 @@
  * common template functions
  */
 generatorInfo() ::= <<
+declare(strict_types = 1);
 /**
  * This file has been auto generated
  * Do not change it
@@ -9,6 +10,6 @@ generatorInfo() ::= <<
 >>
 
 useTypeImport(vendorName, typeImport, suffix="") ::=<<
-use <if(typeImport.package.name)><vendorName>\\<typeImport.package.name><endif><if(typeImport.name)><if(typeImport.package.name)>\\<endif><typeImport.name><suffix><endif>;
+use <vendorName>\\<typeImport.parts; separator="\\"><suffix>;
 
 >>

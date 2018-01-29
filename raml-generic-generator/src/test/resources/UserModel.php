@@ -1,4 +1,5 @@
 <?php
+declare(strict_types = 1);
 /**
  * This file has been auto generated
  * Do not change it
@@ -12,7 +13,7 @@ class UserModel extends PersonModel implements User {
     /**
      * @var string
      */
-    private $role;
+    protected $role;
 
     /**
      * @return string
@@ -31,7 +32,7 @@ class UserModel extends PersonModel implements User {
      * @param string $role
      * @return $this
      */
-    public function setRole($role)
+    public function setRole(string $role)
     {
         $this->role = (string)$role;
 

@@ -1,7 +1,15 @@
+buildscript {
+    dependencies {
+        classpath "com.github.jengelman.gradle.plugins:shadow:1.2.3"
+    }
+}
+
 plugins {
     id "org.xtext.builder" version "1.0.18"
     id "antlr"
 }
+
+apply plugin: "com.github.johnrengelman.shadow"
 
 ext {
     xtextVersion = '2.10.0'
@@ -64,6 +72,7 @@ dependencies {
     compile 'org.eclipse.emf:org.eclipse.emf.ecore:2.11+'
     compile 'org.eclipse.emf:org.eclipse.emf.ecore.xcore.lib:1.1.100'
     compile "org.eclipse.xtext:org.eclipse.xtext.xbase.lib:$xtextVersion"
+    compile 'com.fasterxml.jackson.core:jackson-core:2.9.1'
     compile 'com.hypertino:inflector_2.12:1.0.7'
     compile 'com.damnhandy:handy-uri-templates:2.1.6'
     compile 'com.google.guava:guava:23.3-jre'
@@ -82,4 +91,8 @@ dependencies {
     xtextLanguages 'org.eclipse.emf:org.eclipse.emf.ecore.xcore.lib:1.1.100'
     xtextLanguages 'org.eclipse.emf:org.eclipse.emf.codegen:2.11+'
     xtextLanguages 'org.eclipse.emf:org.eclipse.emf.codegen.ecore:2.11+'
+}
+
+shadowJar {
+    append 'plugin.properties'
 }

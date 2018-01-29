@@ -1,16 +1,12 @@
 package io.vrap.rmf.raml.model.types;
 
-import io.vrap.rmf.raml.persistence.constructor.Scope;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EClass;
-import org.eclipse.emf.ecore.EObject;
-import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static io.vrap.functional.utils.Classes.as;
 import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.*;
 
 /**
@@ -47,8 +43,8 @@ public enum BuiltinType {
         this.name = name;
     }
 
-    public EObject getEObject(final ResourceSet resourceSet) {
-        return resourceSet.getResource(RESOURCE_URI, true)
+    public AnyType getType(final ResourceSet resourceSet) {
+        return (AnyType) resourceSet.getResource(RESOURCE_URI, true)
                 .getEObject("/types/" + name);
     }
 
@@ -58,37 +54,6 @@ public enum BuiltinType {
 
     public EClass getAnnotationTypeDeclarationType() {
         return annotationTypeDeclarationType;
-    }
-
-    /**
-     * Returns the type for the given type declaration type.
-     *
-     * If the type declaration type is a subtype of {@link AnyAnnotationType},
-     * the {@link #getAnnotationTypeDeclarationType()} will be returned.
-     *
-     * Otherwise {@link #getTypeDeclarationType()} will be returned
-     *
-     * @param typeDeclarationType the type declaration type
-     *
-     * @return the type for the given type declaration type
-     */
-    public EClass typeFor(final EClass typeDeclarationType) {
-        return ANY_ANNOTATION_TYPE.isSuperTypeOf(typeDeclarationType) ?
-                getAnnotationTypeDeclarationType() :
-                getTypeDeclarationType();
-    }
-
-    /**
-     * Returns the meta type of this type based on the given containment feature.
-     *
-     * @param scope the scope
-     * @return the meta type (either {@link #getTypeDeclarationType()} or {@link #getAnnotationTypeDeclarationType()}
-     */
-    public EClass getScopedMetaType(final Scope scope) {
-        final boolean isAnnotationType = as(EReference.class, scope.eFeature())
-                .map(EReference::getEReferenceType)
-                .map(ANY_ANNOTATION_TYPE::isSuperTypeOf).orElse(false);
-        return isAnnotationType ? annotationTypeDeclarationType : typeDeclarationType;
     }
 
     public String getName() {

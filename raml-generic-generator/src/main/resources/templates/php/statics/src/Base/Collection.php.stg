@@ -13,7 +13,7 @@ interface Collection extends Nullable, \\IteratorAggregate, \\ArrayAccess
     /**
      * @return MapIterator
      */
-    public function getIterator();
+    public function getIterator(): MapIterator;
 
     /**
      * @return mixed

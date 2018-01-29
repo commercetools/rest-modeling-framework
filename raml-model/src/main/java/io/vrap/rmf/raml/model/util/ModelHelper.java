@@ -5,12 +5,16 @@ import com.google.common.net.MediaType;
 import io.vrap.rmf.raml.model.resources.Resource;
 import io.vrap.rmf.raml.model.responses.Body;
 import io.vrap.rmf.raml.model.responses.BodyContainer;
-import io.vrap.rmf.raml.model.types.PatternProperty;
+import io.vrap.rmf.raml.model.types.ObjectType;
+import io.vrap.rmf.raml.model.types.ObjectTypeFacet;
+import io.vrap.rmf.raml.model.types.Property;
+import io.vrap.rmf.raml.model.types.TypedElement;
+import org.eclipse.emf.common.util.ECollections;
+import org.eclipse.emf.common.util.EList;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Stack;
+import java.util.*;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -24,8 +28,8 @@ public class ModelHelper {
     private ModelHelper() {
     }
 
-    public static boolean testPattern(final PatternProperty property, final String value) {
-        return property.getPattern().test(value);
+    public static boolean testPattern(final TypedElement typedElement, final String value) {
+        return typedElement.getPattern().test(value);
     }
 
     public static UriTemplate fullUri(final Resource resource) {
@@ -80,8 +84,78 @@ public class ModelHelper {
     public static Body getBody(final BodyContainer container, final String contentType) {
         final MediaType parsedContentType = MediaType.parse(contentType);
         return container.getBodies().stream()
-                .filter(body -> body.getContentTypes().stream().filter(mediaType -> parsedContentType.is(mediaType)).findFirst().isPresent())
+                .filter(body -> body.getContentMediaTypes().stream().filter(mediaType -> parsedContentType.is(mediaType)).findFirst().isPresent())
                 .findFirst()
                 .orElse(null);
+    }
+
+    /**
+     * Returns all non-pattern properties of the given object type as map.
+     *
+     * @param objectTypeFacet the object type
+     * @return map of none-pattern properties
+     */
+    public static Map<String, Property> getAllPropertiesAsMap(final ObjectTypeFacet objectTypeFacet) {
+        final Predicate<Property> withoutPattern = p -> p.getPattern() == null;
+        if (objectTypeFacet instanceof ObjectType) {
+            final ObjectType objectType = (ObjectType) objectTypeFacet;
+            return getAllPropertiesAsMapInternal(objectType, withoutPattern);
+        } else {
+            return getPropertiesAsMapInternal(objectTypeFacet, withoutPattern);
+        }
+    }
+
+    public static EList<MediaType> getMediaTypes(final List<String> mediaTypes) {
+        final List<MediaType> types = mediaTypes.stream().map(MediaType::parse).collect(Collectors.toList());
+        return ECollections.toEList(types);
+    }
+
+    /**
+     * Returns all properties (with inherited) of the given object type.
+
+     * If an object type specializes the type of an inherited property,
+     * the specialize property will be returned by this method.
+     *
+     * @param objectType the object type
+     * @return list of all properties ordered by inheritance
+     */
+    public static EList<Property> getAllProperties(final ObjectType objectType) {
+        final Collection<Property> values = getAllPropertiesAsMapInternal(objectType, p -> true).values();
+        return ECollections.toEList(values);
+    }
+
+    /**
+     * Returns all properties (with inherited) of the given object type.
+
+     * If an object type specializes the type of an inherited property,
+     * the specialize property will be returned by this method.
+     *
+     * @param objectType the object type
+     * @return list of all properties ordered by inheritance
+     */
+    public static EList<Property> getAllPatternProperties(final ObjectType objectType) {
+        final Collection<Property> values = getAllPropertiesAsMapInternal(objectType, p -> p.getPattern() != null).values();
+        return ECollections.toEList(values);
+    }
+
+    private static Map<String, Property> getAllPropertiesAsMapInternal(final ObjectType objectType, final Predicate<Property> filter) {
+        final Map<String, Property> allPropertiesAsMap = new LinkedHashMap<>();
+        if (objectType.getType() != null) {
+            final ObjectType parent = (ObjectType) objectType.getType();
+            allPropertiesAsMap.putAll(getAllPropertiesAsMapInternal(parent, filter));
+        }
+        allPropertiesAsMap.putAll(getPropertiesAsMapInternal(objectType, filter));
+        return allPropertiesAsMap;
+    }
+
+    private static Map<String, Property> getPropertiesAsMapInternal(final ObjectTypeFacet objectType, final Predicate<Property> filter) {
+        final Map<String, Property> allPropertiesAsMap = new LinkedHashMap<>();
+        if (objectType != null) {
+            final Map<String, Property> filteredProperties = objectType.getProperties().stream()
+                    .filter(filter)
+                    .collect(Collectors.toMap(Property::getName, Function.identity()));
+            allPropertiesAsMap.putAll(filteredProperties);
+        }
+        return allPropertiesAsMap;
     }
 }

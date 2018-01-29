@@ -8,7 +8,11 @@ namespace <vendorName>\\Base;
 
 interface ClassMap
 {
-    public function getMappedClass($class);
+    /**
+     * @param string $class
+     * @return string
+     */
+    public function getMappedClass(string $class): string;
 }
 
 >>

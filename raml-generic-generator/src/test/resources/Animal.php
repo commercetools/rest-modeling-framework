@@ -1,4 +1,5 @@
 <?php
+declare(strict_types = 1);
 /**
  * This file has been auto generated
  * Do not change it
@@ -26,6 +27,6 @@ interface Animal extends JsonObject {
      * @param string $kind
      * @return $this
      */
-    public function setKind($kind);
+    public function setKind(string $kind);
 
 }

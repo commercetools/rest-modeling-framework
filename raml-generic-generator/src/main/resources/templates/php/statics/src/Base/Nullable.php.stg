@@ -11,7 +11,7 @@ interface Nullable
     /*
      * @var bool
      */
-    public function isPresent();
+    public function isPresent(): bool;
 }
 
 >>

@@ -14,7 +14,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-public class ResponsesValidator extends AbstractRamlValidator {
+class ResponsesValidator extends AbstractRamlValidator {
     @Override
     public boolean validate(EClass eClass, EObject eObject, DiagnosticChain diagnostics, Map<Object, Object> context) {
         final  List<Diagnostic> validationErrors = new ResponsesValidatingVisitor().doSwitch(eObject);
@@ -48,7 +48,7 @@ public class ResponsesValidator extends AbstractRamlValidator {
                 contentTypesDefined = body.getContentTypes().size() > 0;
             }
             if (!contentTypesDefined) {
-                validationErrors.add(error("Content type undefined", body));
+                validationErrors.add(error(body, "Content type undefined"));
             }
             return validationErrors;
         }

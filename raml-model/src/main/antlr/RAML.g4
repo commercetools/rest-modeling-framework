@@ -8,27 +8,26 @@ package io.vrap.rmf.raml.persistence.antlr;
 
 tokens {
     MAP_START, MAP_END, LIST_START, LIST_END, SCALAR,
+    INT, FLOAT, BOOL,
     ANNOTATION_TYPE_REF, RELATIVE_URI, MEDIA_TYPE
 }
 
 api:
     MAP_START
-        apiFacets*
+        (apiFacets | typeContainerFacets)*
     MAP_END;
 
 apiFacets:
-    usesFacet | baseUriFacet | baseUriParametersFacet | documentationFacet
+      baseUriFacet
+    | baseUriParametersFacet
+    | documentationFacet
     | resourceFacet
-    | securitySchemesFacet | securedByFacet
-    | resourceTypesFacet | attributeFacet
-    | typesFacet | traitsFacet | annotationFacet
+    | securedByFacet
     ;
 
 extension:
     MAP_START
-    (
-        extendsFacet | apiFacets
-    )*
+        (extendsFacet | apiFacets | typeContainerFacets)*
     MAP_END;
 
 extendsFacet:
@@ -65,11 +64,16 @@ traitFacet:
             |   (
                     MAP_START
                     (
-                        bodyFacet | attributeFacet
-                        | headersFacet | queryParametersFacet
+                        bodyFacet
+                        | descriptionFacet
+                        | displayNameFacet
+                        | attributeFacet
+                        | headersFacet
+                        | queryParametersFacet
                         | isFacet
                         | annotationFacet
-                        | responsesFacet | securedByFacet
+                        | responsesFacet
+                        | securedByFacet
                     )*
                     MAP_END
                 )
@@ -83,8 +87,16 @@ resourceFacet:
             |   (
                     MAP_START
                     (
-                        resourceFacet | methodFacet | attributeFacet | uriParametersFacet | annotationFacet
-                        | securedByFacet | resourceTypeFacet | isFacet
+                        resourceFacet
+                        | descriptionFacet
+                        | displayNameFacet
+                        | methodFacet
+                        | attributeFacet
+                        | uriParametersFacet
+                        | annotationFacet
+                        | securedByFacet
+                        | resourceTypeFacet
+                        | isFacet
                     )*
                     MAP_END
                 )
@@ -120,8 +132,15 @@ resourceTypeDeclarationFacet:
             |   (
                     MAP_START
                     (
-                        methodFacet | attributeFacet | uriParametersFacet | annotationFacet
-                        | securedByFacet | resourceTypeFacet | isFacet
+                        methodFacet
+                        | attributeFacet
+                        | descriptionFacet
+                        | displayNameFacet
+                        | uriParametersFacet
+                        | annotationFacet
+                        | securedByFacet
+                        | resourceTypeFacet
+                        | isFacet
                     )*
                     MAP_END
                 )
@@ -135,11 +154,16 @@ methodFacet:
             |   (
                     MAP_START
                     (
-                        bodyFacet | attributeFacet
-                        | headersFacet | queryParametersFacet
+                        bodyFacet
+                        | displayNameFacet
+                        | descriptionFacet
+                        | attributeFacet
+                        | headersFacet
+                        | queryParametersFacet
                         | isFacet
                         | annotationFacet
-                        | responsesFacet | securedByFacet
+                        | responsesFacet
+                        | securedByFacet
                     )*
                     MAP_END
                 )
@@ -197,7 +221,18 @@ bodyContentTypeFacet:
     ;
 
 bodyFacets:
-    ( attributeFacet | enumFacet | propertiesFacet | typeFacet | itemsFacet | defaultFacet | exampleFacet | examplesFacet | annotationFacet )*
+    (
+        attributeFacet
+        | descriptionFacet
+        | enumFacet
+        | propertiesFacet
+        | typeFacet
+        | itemsFacet
+        | defaultFacet
+        | exampleFacet
+        | examplesFacet
+        | annotationFacet
+    )*
     ;
 
 responsesFacet:
@@ -213,12 +248,17 @@ responsesFacet:
     ;
 
 responseFacet:
-    statusCode=SCALAR
+    statusCode=INT
             (
                 SCALAR
                 |   (
                         MAP_START
-                        ( headersFacet | bodyFacet | attributeFacet )*
+                        (
+                            headersFacet
+                            | bodyFacet
+                            | descriptionFacet
+                            | attributeFacet
+                        )*
                         MAP_END
                     )
             )
@@ -266,7 +306,7 @@ uriParametersFacet:
     ;
 
 baseUriFacet:
-    'baseUri' baseUri=SCALAR
+    'baseUri' baseUri=annotatedStringInstance
     ;
 
 baseUriParametersFacet:
@@ -292,7 +332,14 @@ securitySchemeFacet:
     name=id
     (
         MAP_START
-            ( securitySchemeTypeFacet | securitySchemeSettingsFacet | attributeFacet | describedByFacet )*
+            (
+                securitySchemeTypeFacet
+                | securitySchemeSettingsFacet
+                | descriptionFacet
+                | displayNameFacet
+                | attributeFacet
+                | describedByFacet
+            )*
         MAP_END
     )?
     ;
@@ -307,6 +354,18 @@ describedByFacet:
                     MAP_END
                 )
         )
+    ;
+
+displayNameFacet:
+    'displayName' annotatedStringInstance
+    ;
+
+descriptionFacet:
+    'description' annotatedStringInstance
+    ;
+
+strictFacet:
+    'strict' annotatedBooleanInstance
     ;
 
 securitySchemeTypeFacet:
@@ -353,14 +412,31 @@ attributeFacet:
     ;
 
 facetValue:
-        value=id
-    |   (LIST_START values+=id* LIST_END)
+        value=anyValue
+    |   (LIST_START values+=anyValue* LIST_END)
+    ;
+
+anyValue:
+    id | BOOL | INT | FLOAT
     ;
 
 library:
     MAP_START
-    ( usesFacet | attributeFacet | typesFacet | traitsFacet | resourceTypesFacet | annotationFacet | securitySchemesFacet )*
+        typeContainerFacets*
     MAP_END
+    ;
+
+typeContainerFacets:
+      usesFacet
+    | attributeFacet
+    | descriptionFacet
+    | displayNameFacet
+    | annotationTypesFacet
+    | typesFacet
+    | traitsFacet
+    | resourceTypesFacet
+    | annotationFacet
+    | securitySchemesFacet
     ;
 
 usesFacet:
@@ -375,9 +451,16 @@ libraryUse:
     ;
 
 typesFacet:
-    facet=( 'types' | 'annotationTypes' )
+    'types'
         MAP_START
         ( types+=typeDeclarationFacet )*
+        MAP_END
+    ;
+
+annotationTypesFacet:
+    'annotationTypes'
+        MAP_START
+        ( annotationTypes+=typeDeclarationFacet )*
         MAP_END
     ;
 
@@ -391,7 +474,19 @@ typeDeclarationTuple:
 typeDeclarationMap:
     name=SCALAR
         MAP_START
-        ( attributeFacet | enumFacet | propertiesFacet | typeFacet | itemsFacet | defaultFacet | exampleFacet | examplesFacet | annotationFacet )*
+        (
+            attributeFacet
+            | descriptionFacet
+            | displayNameFacet
+            | enumFacet
+            | propertiesFacet
+            | typeFacet
+            | itemsFacet
+            | defaultFacet
+            | exampleFacet
+            | examplesFacet
+            | annotationFacet
+        )*
         MAP_END
     ;
 
@@ -404,7 +499,19 @@ enumFacet:
 
 typeDeclarationFragment:
     MAP_START
-    ( attributeFacet | enumFacet | propertiesFacet | typeFacet | itemsFacet| defaultFacet | exampleFacet | examplesFacet | annotationFacet )*
+    (
+        attributeFacet
+        | enumFacet
+        | descriptionFacet
+        | displayNameFacet
+        | propertiesFacet
+        | typeFacet
+        | itemsFacet
+        | defaultFacet
+        | exampleFacet
+        | examplesFacet
+        | annotationFacet
+    )*
     MAP_END
     ;
 
@@ -418,7 +525,19 @@ itemsFacet:
         typeExpression=SCALAR |
         (
             MAP_START
-            ( attributeFacet | enumFacet | propertiesFacet | typeFacet | itemsFacet | defaultFacet | exampleFacet | examplesFacet | annotationFacet )*
+            (
+                attributeFacet
+                | enumFacet
+                | descriptionFacet
+                | displayNameFacet
+                | propertiesFacet
+                | typeFacet
+                | itemsFacet
+                | defaultFacet
+                | exampleFacet
+                | examplesFacet
+                | annotationFacet
+            )*
             MAP_END
         )
     )
@@ -429,9 +548,21 @@ defaultFacet:
     ;
 
 exampleFacet:
-    'example' instance
+    'example' example
     ;
 
+example:
+    MAP_START
+        (
+            'value' value=baseInstance
+            | strictFacet
+            | displayNameFacet
+            | descriptionFacet
+            | annotationFacet
+        )+
+    MAP_END |
+    value=baseInstance
+    ;
 
 examplesFacet:
     'examples'
@@ -446,7 +577,7 @@ examplesFacet:
     ;
 
 namedExample:
-    name=id instance
+    name=id example
     ;
 
 propertiesFacet:
@@ -475,18 +606,127 @@ typedElementMap:
             SCALAR
             |   (
                     MAP_START
-                    ( attributeFacet | enumFacet | propertiesFacet | requiredFacet | typeFacet | itemsFacet | annotationFacet | exampleFacet | examplesFacet | defaultFacet )*
+                    (
+                        attributeFacet
+                        | descriptionFacet
+                        | displayNameFacet
+                        | enumFacet
+                        | propertiesFacet
+                        | requiredFacet
+                        | typeFacet
+                        | itemsFacet
+                        | annotationFacet
+                        | exampleFacet
+                        | examplesFacet
+                        | defaultFacet
+                    )*
                     MAP_END
                  )
         )
     ;
 
 instance:
+    annotatedSimpleInstance | annotatedArrayInstance | annotatedObjectInstance | arrayInstance | objectInstance
+    ;
+
+baseInstance:
     simpleInstance | arrayInstance | objectInstance
     ;
 
 simpleInstance:
+    relativeUriInstance | stringInstance | booleanInstance | integerInstance | numberInstance
+    ;
+
+annotatedSimpleInstance:
+    annotatedStringInstance | annotatedBooleanInstance | annotatedIntegerInstance | annotatedNumberInstance
+    ;
+
+annotatedRelativeUriInstance:
+    value=RELATIVE_URI |
+    MAP_START
+        (
+            ('value' value=RELATIVE_URI)
+            | annotationFacet
+        )+
+    MAP_END
+    ;
+
+annotatedStringInstance:
+    value=id |
+    MAP_START
+        (
+            ('value' value=id)
+            | annotationFacet
+        )+
+    MAP_END
+    ;
+
+annotatedBooleanInstance:
+    value=BOOL|
+    MAP_START
+        (
+            ('value' value=BOOL)
+            | annotationFacet
+        )+
+    MAP_END
+    ;
+
+annotatedIntegerInstance:
+    value=INT |
+    MAP_START
+        (
+            ('value' value=INT)
+            | annotationFacet
+        )+
+    MAP_END
+    ;
+
+annotatedNumberInstance:
+    value=FLOAT
+    MAP_START
+        (
+            ('value' value=FLOAT)
+            | annotationFacet
+        )+
+    MAP_END
+    ;
+
+annotatedArrayInstance:
+    MAP_START
+        (
+            'value' arrayInstance
+            | annotationFacet
+        )+
+    MAP_END
+    ;
+
+annotatedObjectInstance:
+    MAP_START
+        (
+            'value' objectInstance
+            | annotationFacet
+        )+
+    MAP_END
+    ;
+
+relativeUriInstance:
+    value=RELATIVE_URI
+    ;
+
+stringInstance:
     value=id
+    ;
+
+booleanInstance:
+    value=BOOL
+    ;
+
+integerInstance:
+    value=INT
+    ;
+
+numberInstance:
+    value=FLOAT
     ;
 
 arrayInstance:
@@ -502,7 +742,7 @@ objectInstance:
     ;
 
 instanceProperty:
-    name=id value=instance
+    name=id value=baseInstance
     ;
 
 id:
@@ -522,11 +762,13 @@ id:
     |   'responses'
     |   'securedBy' | 'securitySchemes' | 'settings'
     |   'traits'
+    |   'value'
+    |   'strict' | 'displayName' | 'description'
     |   SCALAR
     ;
 
 requiredFacet:
-    'required' required=SCALAR
+    'required' required=BOOL
     ;
 
 annotationFacet:

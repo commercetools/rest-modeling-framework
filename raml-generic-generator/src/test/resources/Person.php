@@ -1,4 +1,5 @@
 <?php
+declare(strict_types = 1);
 /**
  * This file has been auto generated
  * Do not change it
@@ -20,6 +21,6 @@ interface Person extends JsonObject {
      * @param string $name
      * @return $this
      */
-    public function setName($name);
+    public function setName(string $name);
 
 }

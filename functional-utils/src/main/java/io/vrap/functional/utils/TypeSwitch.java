@@ -74,7 +74,7 @@ public class TypeSwitch<T, R> {
         private final Predicate<T> predicate;
         private final Function<T, R> function;
 
-        public Switch(final Predicate<T> predicate, final Function<T, R> function) {
+        Switch(final Predicate<T> predicate, final Function<T, R> function) {
             this.predicate = predicate;
             this.function = function;
         }

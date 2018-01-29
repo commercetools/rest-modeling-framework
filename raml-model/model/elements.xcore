@@ -5,24 +5,11 @@
 )
 package io.vrap.rmf.raml.model.elements
 
-interface IdentifiableElement {
+interface NamedElement {
 	/*
 	 * The optional name of this element.
 	 */
 	String name
 }
 
-/*
- * This describes the properties of an element that can be documented.
- */
-interface DocumentableElement {
-	/*
-	 * A substantial, human-friendly description of the type. Its value is a string and MAY be formatted using markdown.
-	 */
-	String description
 
-	/*
-	 * An alternate, human-friendly name for the type.
-	 */
-	String displayName
-}

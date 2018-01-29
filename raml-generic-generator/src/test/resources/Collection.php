@@ -1,4 +1,5 @@
 <?php
+declare(strict_types = 1);
 /**
  * This file has been auto generated
  * Do not change it
@@ -13,7 +14,7 @@ interface Collection extends Nullable, \IteratorAggregate, \ArrayAccess
     /**
      * @return MapIterator
      */
-    public function getIterator();
+    public function getIterator(): MapIterator;
 
     /**
      * @return mixed

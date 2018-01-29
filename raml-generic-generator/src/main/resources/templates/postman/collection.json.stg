@@ -82,10 +82,10 @@ query(oauth, item) ::=<<
             "path": [
                 "{{projectKey}}",
                 "<item.resource.resourcePathName>"
-            <if (item.method.queryParameters)>
+            <if (item.queryParameters)>
             ],
             "query": [
-                <item.method.queryParameters: {param |<queryParam(param)>}; separator=",">
+                <item.queryParameters: {param |<queryParam(param)>}; separator=",">
             <endif>
             ]
         },
@@ -99,9 +99,9 @@ queryParam(param) ::=<<
 
 {
     "key": "<param.name>",
-    "value": "",
+    "value": "<param.default>",
     "equals": true,
-    "disabled": true
+    "disabled": <param.disabled>
 }
 >>
 
@@ -141,10 +141,10 @@ create(oauth, item) ::=<<
             "path": [
                 "{{projectKey}}",
                 "<item.resource.resourcePathName>"
-            <if (item.method.queryParameters)>
+            <if (item.queryParameters)>
             ],
             "query": [
-                <item.method.queryParameters: {param |<queryParam(param)>}; separator=",">
+                <item.queryParameters: {param |<queryParam(param)>}; separator=",">
             <endif>
             ]
         },
@@ -154,17 +154,22 @@ create(oauth, item) ::=<<
 }
 >>
 
+get(oauth, item) ::=<<
+<getByParam(oauth, item, false, false)>
+>>
+
+
 getByID(oauth, item) ::=<<
-<getByParam(oauth, item, false)>
+<getByParam(oauth, item, false, true)>
 >>
 
 getByKey(oauth, item) ::=<<
-<getByParam(oauth, item, "key")>
+<getByParam(oauth, item, "key", true)>
 >>
 
-getByParam(oauth, item, param) ::=<<
+getByParam(oauth, item, param, by) ::=<<
 {
-    "name": "Get <item.name; format="singularize"> by <if(param)><param><else>ID<endif>",
+    "name": "Get <item.name; format="singularize"><if(by)> by <if(param)><param><else>ID<endif><endif>",
     "event": [
         {
             "listen": "test",
@@ -207,10 +212,58 @@ getByParam(oauth, item, param) ::=<<
                 <else>
                 "{{<item.resource.resourcePathName; format="singularize">-id}}"
                 <endif>
-            <if (item.method.queryParameters)>
+            <if (item.queryParameters)>
             ],
             "query": [
-                <item.method.queryParameters: {param |<queryParam(param)>}; separator=",">
+                <item.queryParameters: {param |<queryParam(param)>}; separator=",">
+            <endif>
+            ]
+        },
+        "description": "<item.description>"
+    },
+    "response": []
+}
+>>
+
+getProject(oauth, item) ::=<<
+{
+    "name": "Get <item.name; format="singularize">",
+    "event": [
+        {
+            "listen": "test",
+            "script": {
+                "type": "text/javascript",
+                "exec": [
+                    <test(item, false)>
+                ]
+            }
+        }
+    ],
+    "request": {
+        "auth":
+            <auth(oauth)>,
+        "method": "<item.method.methodName; format="uppercase">",
+        "header": [
+            {
+                "key": "Content-Type",
+                "value": "application/json"
+            }
+        ],
+        "body": {
+            "mode": "raw",
+            "raw": ""
+        },
+        "url": {
+            "raw": "{{host}}/{{projectKey}}",
+            "host": [
+                "{{host}}"
+            ],
+            "path": [
+                "{{projectKey}}"
+            <if (item.queryParameters)>
+            ],
+            "query": [
+                <item.queryParameters: {param |<queryParam(param)>}; separator=",">
             <endif>
             ]
         },
@@ -226,6 +279,54 @@ updateByID(oauth, item) ::=<<
 
 updateByKey(oauth, item) ::=<<
 <updateByParam(oauth, item, "key")>
+>>
+
+updateProject(oauth, item) ::=<<
+{
+    "name": "Update <item.name; format="singularize">",
+    "event": [
+        {
+            "listen": "test",
+            "script": {
+                "type": "text/javascript",
+                "exec": [
+                    <test(item, false)>
+                ]
+            }
+        }
+    ],
+    "request": {
+        "auth":
+            <auth(oauth)>,
+        "method": "<item.method.methodName; format="uppercase">",
+        "header": [
+            {
+                "key": "Content-Type",
+                "value": "application/json"
+            }
+        ],
+        "body": {
+            "mode": "raw",
+            "raw": "<if (item.example)><item.example><else>{\n  \"version\": {{project-version}},\n  \"actions\": [\n  ]\n}<endif>"
+        },
+        "url": {
+            "raw": "{{host}}/{{projectKey}}",
+            "host": [
+                "{{host}}"
+            ],
+            "path": [
+                "{{projectKey}}"
+            <if (item.queryParameters)>
+            ],
+            "query": [
+                <item.queryParameters: {param |<queryParam(param)>}; separator=",">
+            <endif>
+            ]
+        },
+        "description": "<item.description>"
+    },
+    "response": []
+}
 >>
 
 updateByParam(oauth, item, param) ::=<<
@@ -254,7 +355,7 @@ updateByParam(oauth, item, param) ::=<<
         ],
         "body": {
             "mode": "raw",
-            "raw": ""
+            "raw": "<if (item.example)><item.example><else>{\n  \"version\": {{<item.resource.resourcePathName; format="singularize">-version}},\n  \"actions\": [\n  ]\n}<endif>"
         },
         "url": {
             <if (param)>
@@ -273,10 +374,10 @@ updateByParam(oauth, item, param) ::=<<
                 <else>
                 "{{<item.resource.resourcePathName; format="singularize">-id}}"
                 <endif>
-            <if (item.method.queryParameters)>
+            <if (item.queryParameters)>
             ],
             "query": [
-                <item.method.queryParameters: {param |<queryParam(param)>}; separator=",">
+                <item.queryParameters: {param |<queryParam(param)>}; separator=",">
             <endif>
             ]
         },
@@ -324,9 +425,9 @@ deleteByParam(oauth, item, param) ::=<<
         },
         "url": {
             <if (param)>
-            "raw": "{{host}}/{{projectKey}}<item.resource.relativeUri.template>/<param>={{<item.resource.resourcePathName; format="singularize">-<param>}}",
+            "raw": "{{host}}/{{projectKey}}<item.resource.relativeUri.template>/<param>={{<item.resource.resourcePathName; format="singularize">-<param>}}?version={{<item.resource.resourcePathName; format="singularize">-version}}",
             <else>
-            "raw": "{{host}}/{{projectKey}}<item.resource.relativeUri.template>/{{<item.resource.resourcePathName; format="singularize">-id}}",
+            "raw": "{{host}}/{{projectKey}}<item.resource.relativeUri.template>/{{<item.resource.resourcePathName; format="singularize">-id}}?version={{<item.resource.resourcePathName; format="singularize">-version}}",
             <endif>
             "host": [
                 "{{host}}"
@@ -339,10 +440,10 @@ deleteByParam(oauth, item, param) ::=<<
                 <else>
                 "{{<item.resource.resourcePathName; format="singularize">-id}}"
                 <endif>
-            <if (item.method.queryParameters)>
+            <if (item.queryParameters)>
             ],
             "query": [
-                <item.method.queryParameters: {param |<queryParam(param)>}; separator=",">
+                <item.queryParameters: {param |<queryParam(param)>}; separator=",">
             <endif>
             ]
         },
@@ -374,6 +475,12 @@ action(oauth, action) ::=<<
             "mode": "raw",
             "raw": "{\n  \"version\": {{<item.resource.resourcePathName; format="singularize">-version}},\n  \"actions\": [<if (item.example)><item.example><else>{\n    \"action\": \"<action.type.discriminatorValue>\"\n  }<endif>]\n}"
         },
+        "header": [
+            {
+                "key": "Content-Type",
+                "value": "application/json"
+            }
+        ],
         "url": {
             "raw": "{{host}}/{{projectKey}}/<item.resource.relativeUri.template>/{{<item.resource.resourcePathName; format="singularize">-id}}",
             "host": [
@@ -383,10 +490,58 @@ action(oauth, action) ::=<<
                 "{{projectKey}}",
                 "<item.resource.resourcePathName>",
                 "{{<item.resource.resourcePathName; format="singularize">-id}}"
-            <if (item.method.queryParameters)>
+            <if (item.queryParameters)>
             ],
             "query": [
-                <item.method.queryParameters: {param |<queryParam(param)>}; separator=",">
+                <item.queryParameters: {param |<queryParam(param)>}; separator=",">
+            <endif>
+            ]
+        },
+        "description": "<item.description>"
+    },
+    "response": []
+}
+>>
+
+projectAction(oauth, action) ::=<<
+{
+    "name": "<action.type.discriminatorValue; format="capitalize">",
+    "event": [
+        {
+            "listen": "test",
+            "script": {
+                "type": "text/javascript",
+                "exec": [
+                    <test(item, false)>
+                ]
+            }
+        }
+    ],
+    "request": {
+        "auth":
+            <auth(oauth)>,
+        "method": "<item.method.methodName; format="uppercase">",
+        "body": {
+            "mode": "raw",
+            "raw": "{\n  \"version\": {{project-version}},\n  \"actions\": [<if (item.example)><item.example><else>{\n    \"action\": \"<action.type.discriminatorValue>\"\n  }<endif>]\n}"
+        },
+        "header": [
+            {
+                "key": "Content-Type",
+                "value": "application/json"
+            }
+        ],
+        "url": {
+            "raw": "{{host}}/{{projectKey}}",
+            "host": [
+                "{{host}}"
+            ],
+            "path": [
+                "{{projectKey}}"
+            <if (item.queryParameters)>
+            ],
+            "query": [
+                <item.queryParameters: {param |<queryParam(param)>}; separator=",">
             <endif>
             ]
         },
@@ -399,19 +554,24 @@ action(oauth, action) ::=<<
 test(item, param) ::=<<
 "tests[\"Status code \" + responseCode.code] = responseCode.code === 200 || responseCode.code === 201;",
 "var data = JSON.parse(responseBody);",
-"if(data.id && data.version){",
-"    postman.setEnvironmentVariable(\"<item.resource.resourcePathName; format="singularize">-id\", data.id); ",
-"    postman.setEnvironmentVariable(\"<item.resource.resourcePathName; format="singularize">-version\", data.version);",
+"if(data.version){",
+"    postman.setEnvironmentVariable(\"<item.resourcePathName; format="singularize">-version\", data.version);",
+"}",
+"if(data.id){",
+"    postman.setEnvironmentVariable(\"<item.resourcePathName; format="singularize">-id\", data.id); ",
 "}",
 "if(data.key){",
-"    postman.setEnvironmentVariable(\"<item.resource.resourcePathName; format="singularize">-key\", data.key); ",
-<if (param)>
+"    postman.setEnvironmentVariable(\"<item.resourcePathName; format="singularize">-key\", data.key); ",
 "}",
+<if (param)>
 "if(data.<param>){",
-"    postman.setEnvironmentVariable(\"<item.resource.resourcePathName; format="singularize">-<param>\", data.<param>); ",
+"    postman.setEnvironmentVariable(\"<item.resourcePathName; format="singularize">-<param>\", data.<param>); ",
+"}",
 <endif>
-"}"
-
+<if (item.testScript)>
+<item.testScript: {t |"<t; format="jsonescape">"}; separator=",\n">,
+<endif>
+""
 >>
 
 auth(oauth) ::=<<
@@ -430,7 +590,7 @@ authorization(oauth) ::=<<
 
 {
     "name": "Authorization",
-    "description": "",
+    "description": "Authorization",
     "item": [
         {
             "name": "Obtain access token",
@@ -443,7 +603,7 @@ authorization(oauth) ::=<<
                             "tests[\"Status code is 200\"] = responseCode.code === 200;",
                             "var data = JSON.parse(responseBody);",
                             "if(data.access_token){",
-                            "    postman.setEnvironmentVariable(\"access_token\", data.access_token);",
+                            "    postman.setEnvironmentVariable(\"ctp_access_token\", data.access_token);",
                             "}",
                             "if (data.scope) {",
                             "    parts = data.scope.split(\" \");",

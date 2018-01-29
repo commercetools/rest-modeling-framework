@@ -25,6 +25,6 @@ class ModelClassMap extends ClassMapModel
 >>
 
 typeMapping(type) ::= <<
-<type.package.name>\\<type.name>::class => <type.package.name>\\<type.name>Model::class,
+<type.package.parts; separator="\\">\\<type.name>::class => <type.package.parts; separator="\\">\\<type.name>Model::class,
 
 >>

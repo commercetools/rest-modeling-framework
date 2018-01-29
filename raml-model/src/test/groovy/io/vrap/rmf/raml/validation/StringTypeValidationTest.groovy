@@ -25,4 +25,18 @@ class StringTypeValidationTest extends BaseValidatorTest {
         null      | -1        || false
         1         | 2         || true
     }
+
+    def "validateEnumFacet"() {
+        when:
+        enumValues.each {
+            stringType.enum.add(createInstance(it))
+        }
+        then:
+        validate(stringType) == valid
+        where:
+        enumValues   || valid
+        [ 0, '1']    || false
+        [ '0', '1']  || true
+        [ '1', '1']  || false
+    }
 }

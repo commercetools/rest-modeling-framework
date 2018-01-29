@@ -3,48 +3,234 @@
     complianceLevel="8.0")
 package io.vrap.rmf.raml.model.types
 
-import io.vrap.rmf.raml.model.elements.DocumentableElement
-import io.vrap.rmf.raml.model.elements.IdentifiableElement
-import io.vrap.rmf.raml.model.facets.ArrayTypeFacet
-import io.vrap.rmf.raml.model.facets.DateTimeTypeFacet
-import io.vrap.rmf.raml.model.facets.FileTypeFacet
-import io.vrap.rmf.raml.model.facets.Instance
-import io.vrap.rmf.raml.model.facets.IntegerTypeFacet
-import io.vrap.rmf.raml.model.facets.NumberTypeFacet
-import io.vrap.rmf.raml.model.facets.ObjectTypeFacet
-import io.vrap.rmf.raml.model.facets.RegExp
-import io.vrap.rmf.raml.model.facets.StringTypeFacet
-import io.vrap.rmf.raml.model.util.AllPropertiesCollector
+import io.vrap.rmf.raml.model.elements.NamedElement
 import io.vrap.rmf.raml.model.util.ModelHelper
-import io.vrap.rmf.raml.model.util.SuperTypeCrossReferencer
+import io.vrap.rmf.raml.model.values.UnsignedInteger
+import io.vrap.rmf.raml.model.values.RegExp
+import io.vrap.rmf.raml.model.values.PositiveInteger
+import io.vrap.rmf.raml.model.values.MediaTypes
 
+interface AnyTypeFacet extends AnnotationsFacet, DocumentableElement, NamedElement, InlineTypeContainer {
+	op AnyType getType()
+
+	/*
+     * An enumeration of all the possible values of instances of this type.
+     * The value is an array containing representations of these possible values.
+     * An instance of this type MUST be equal to one of these values.
+     */
+    contains Instance[] ^enum
+	
+	/*
+	 * A default value for this element.
+	 */
+	contains Instance ^default	
+}
+
+interface ObjectTypeFacet extends AnyTypeFacet {
+	/*
+	 * The minimum number of properties allowed for instances of this type.
+	 */
+	UnsignedInteger minProperties
+
+	/*
+	 * The maximum number of properties allowed for instances of this type.
+	 */
+	UnsignedInteger maxProperties
+
+	/*
+	 * Boolean that indicates if an object instance has additional properties.
+	 */
+	Boolean additionalProperties
+	
+	/**
+	 * Retrieves the explicitly or inherited set additional properties facet. 
+	 */
+	op Boolean additionalPropertiesInherited() {
+		additionalProperties
+	}
+
+	/*
+	 * Determines the concrete type of an individual object at runtime when, for example,
+	 * payloads contain ambiguous types due to unions or inheritance.
+	 *
+	 * The value must match the name of one of the declared properties of a type.
+	 * Unsupported practices are inline type declarations and using discriminator with non-scalar
+	 * properties.
+	 */
+	String discriminator
+	
+	/*
+	 * Identifies the declaring type. Requires including a discriminator facet in the type declaration.
+	 * A valid value is an actual value that might identify the type of an individual object and is
+	 * unique in the hierarchy of the type.
+	 * Inline type declarations are not supported.
+	 */
+	String discriminatorValue
+	
+	/*
+     * The properties that instances of this type can or must have.
+     */
+    contains Property[] properties
+
+	op ObjectType getType(String discriminator) {
+		null
+	}
+	
+    /*
+     * Returns the property which matches the given name or null if no property
+     * with the given name exists.
+     */
+    op Property getProperty(String name) {
+        properties.findFirst[it.matches(name)]
+    }
+    
+	op String discriminator() {
+		getDiscriminator	
+	}
+
+	op String discriminatorValueOrDefault() {
+		if (discriminatorValue === null) name else discriminatorValue
+	}
+}
+ 
+interface ArrayTypeFacet extends AnyTypeFacet {
+	/*
+	 * Boolean value that indicates if items in the array MUST be unique.
+	 */
+	Boolean uniqueItems
+
+	/*
+	 * Minimum amount of items in array. Value MUST be equal to or greater than 0.
+	 */
+	UnsignedInteger minItems = "0"
+
+	/*
+	 * aximum amount of items in array. Value MUST be equal to or greater than 0.
+	 */
+	UnsignedInteger maxItems = "2147483647"
+	
+    /*
+     * Indicates the type that all items in the array are inherited from.
+     * Can be a reference to an existing type or an inline type declaration.
+     */
+    refers AnyType items
+}
+
+interface StringTypeFacet extends AnyTypeFacet {
+	/*
+	 * Regular expression that this string SHOULD match.
+	 */
+	RegExp pattern
+
+	/*
+	 * Minimum length of the string. Value MUST be equal to or greater than 0.
+	 */
+	UnsignedInteger minLength = "0"
+
+	/*
+	 * Maximum length of the string. Value MUST be equal to or greater than 0.
+	 */
+	UnsignedInteger maxLength = "2147483647"
+}
+
+/*
+ * This enum defines the format of a number type.
+ */
+enum NumberFormat {
+	int16,
+	int8,
+	int32,
+	int64,
+
+	int,
+	long,
+
+	float,
+	double
+}
+
+interface CommonNumberTypeFacet extends AnyTypeFacet {
+	/*
+	 * The format of the value.
+	 */
+	NumberFormat format
+
+	/*
+	 * A numeric instance is valid against "multipleOf" if the result of dividing the instance
+	 * by this keyword's value is an integer.
+	 */
+	PositiveInteger multipleOf		
+}
+
+interface NumberTypeFacet extends CommonNumberTypeFacet {
+	/*
+	 * The minimum value of the parameter. Applicable only to parameters of type number or integer.
+	 */
+	BigDecimal minimum
+	/*
+	 * The maximum value of the parameter. Applicable only to parameters of type number or integer.
+	 */
+	BigDecimal maximum
+}
+
+interface IntegerTypeFacet extends CommonNumberTypeFacet {
+	/*
+	 * The minimum value of the parameter. Applicable only to parameters of type number or integer.
+	 */
+	Integer minimum
+	/*
+	 * The maximum value of the parameter. Applicable only to parameters of type number or integer.
+	 */
+	Integer maximum
+}
+
+enum DateTimeFormat {
+	rfc3339,
+	rfc2616
+}
+
+interface DateTimeTypeFacet extends AnyTypeFacet {
+		/*
+	 * A timestamp in one of the following formats: if the format is omitted or set to rfc3339,
+	 * uses the "date-time" notation of RFC3339; if format is set to rfc2616, uses the format
+	 * defined in RFC2616.
+	 */
+	DateTimeFormat format	
+}
+
+interface FileTypeFacet  extends AnyTypeFacet {
+	/*
+     * A list of valid content-type strings for the file.
+     */
+    String[] fileTypes
+
+    /*
+     * Specifies the minimum number of bytes for a parameter value. The value MUST be equal to or greater than 0.
+     */
+    UnsignedInteger minLength = "0"
+
+    /*
+     * Specifies the maximum number of bytes for a parameter value. The value MUST be equal to or greater than 0.
+     */
+    UnsignedInteger maxLength = "2147483647"
+
+    op MediaTypes getFileMediaTypes() {
+        ModelHelper.getMediaTypes(fileTypes)
+    }
+}
+ 
 /*
  * Every type, whether built-in or user-defined, has the any type at the root of its inheritance tree.
  * By definition, the any type is a type which imposes no restrictions, i.e. any instance of data is
  * valid against it.
  */
-class AnyType extends AnnotationsFacet, DocumentableElement, IdentifiableElement, EnumFacet, InlineTypeContainer {
-    /*
-     * The type which this type extends.
-     */
-    refers AnyType ^type
-    /*
-     * Returns the computed sub types of this type.
-     */
-    op AnyType[] subTypes() {
-        SuperTypeCrossReferencer.getSubTypes(this)
-    }
-
-    /*
-     * A default value for a type.
-     */
-    contains Instance ^default
-
-    /*
-     * An example of an instance of this type that can be used,
-     * for example, by documentation generators to generate sample values for an object of this type.
-     */
-    contains Example example
+class AnyType extends AnyTypeFacet {
+	/*
+	 * The type which this type extends.
+	 */
+	refers AnyType ^type opposite subTypes
+	
+	refers AnyType[] subTypes opposite ^type
 
     /*
      * Examples of instances of this type.
@@ -87,25 +273,7 @@ class TypeTemplate extends AnyType {
 
 }
 
-interface EnumFacet {
-    /*
-     * An enumeration of all the possible values of instances of this type.
-     * The value is an array containing representations of these possible values.
-     * An instance of this type MUST be equal to one of these values.
-     */
-    contains Instance[] ^enum
-}
-
-class Example {
-    /*
-     * The optional name of an example.
-     */
-    String name
-
-    /*
-     * The value of the example.
-     */
-    contains Instance value
+class Example extends AnnotationsFacet, DocumentableElement, NamedElement, StrictFacet, ValueInstanceFacet {
 }
 
 interface InlineTypeContainer {
@@ -115,7 +283,7 @@ interface InlineTypeContainer {
     contains AnyType[] inlineTypes
 }
 
-interface TypedElement extends IdentifiableElement, InlineTypeContainer, AnnotationsFacet {
+interface TypedElement extends NamedElement, InlineTypeContainer, AnnotationsFacet {
     /*
      * The type of this element.
      */
@@ -125,44 +293,42 @@ interface TypedElement extends IdentifiableElement, InlineTypeContainer, Annotat
      * Specifies if the element is required or not.
      */
     Boolean required = "true"
-}
-
-class Property extends AnnotationsFacet, TypedElement {
-    /*
-     * @return true iff. this property name equals the given name
-     */
-    op boolean matches(String name) {
-        this.name == name
-    }
-}
-
-class PatternProperty extends Property {
+    
     RegExp pattern
 
     /*
      * @return true iff. this property pattern matches the given name
      */
     op boolean matches(String name) {
-        ModelHelper.testPattern(this, name)
+        if (pattern !== null) ModelHelper.testPattern(this, name) else this.name == name
     }
 }
 
-interface PropertiesFacet {
-    /*
-     * The properties that instances of this type can or must have.
-     */
-    contains Property[] properties
-
-    /*
-     * Returns the property which matches the given name or null if no property
-     * with the given name exists.
-     */
-    op Property getProperty(String name) {
-        properties.findFirst[it.matches(name)]
-    }
+/*
+ * This describes the properties of an element that can be documented.
+ */
+interface DocumentableElement extends DescriptionFacet, DisplayNameFacet {
 }
 
-class ObjectType extends AnyType, ObjectTypeFacet, PropertiesFacet {
+class Property extends AnnotationsFacet, TypedElement {
+}
+
+class ObjectType extends AnyType, ObjectTypeFacet {
+	op Boolean additionalPropertiesInherited() {
+		if (additionalProperties === null && ^type instanceof ObjectType) {
+			(^type as ObjectType).additionalPropertiesInherited()
+		} else if (additionalProperties === null) {
+			true			
+		} 
+		else additionalProperties
+	}
+	
+	op String discriminator() {
+		if (getDiscriminator === null && ^type instanceof ObjectType) 
+			(^type as ObjectType).discriminator() 
+		else 
+			getDiscriminator	
+	}
 
     /*
      * Returns all properties (with inherited) of this object type.
@@ -171,22 +337,37 @@ class ObjectType extends AnyType, ObjectTypeFacet, PropertiesFacet {
      * the specialize property will be returned by this method.
      */
     refers derived Property[] allProperties get {
-        AllPropertiesCollector.getAllProperties(this)
+        ModelHelper.getAllProperties(this)
     }
-}
-
-interface ItemsFacet {
+    
+    op Property getProperty(String name) {
+        val Property p = properties.findFirst[it.matches(name)]
+        if (p === null && ^type instanceof ObjectType) (^type as ObjectType).getProperty(name) else p
+    }
+    
     /*
-     * Indicates the type that all items in the array are inherited from.
-     * Can be a reference to an existing type or an inline type declaration.
+     * Returns the sub type of this type with the given discriminator value.
+     * This type can be returned if it has the given discrimintaor.
+     * Traverses the whole inheritance tree.
      */
-    refers AnyType items
+    op ObjectType getType(String discriminatorValue) {
+    	if (discriminatorValueOrDefault() == discriminatorValue) {
+    		this
+    	} else {
+    		val ObjectType subType = subTypes.filter(ObjectType).findFirst[it.discriminatorValueOrDefault() == discriminatorValue]
+    	
+    		if (subType === null) 
+    			subTypes.filter(ObjectType).map[it.getType(discriminatorValue)].findFirst[]
+    		else
+    			subType
+    		}
+    	}
 }
 
 /*
  * A JSON array.
  */
-class ArrayType extends AnyType, ArrayTypeFacet, ItemsFacet {
+class ArrayType extends AnyType, ArrayTypeFacet {
 }
 
 /*
@@ -248,11 +429,14 @@ class FileType extends AnyType, FileTypeFacet {
 class NilType extends AnyType {
 }
 
+interface OneOfFacet {
+	refers AnyType[] oneOf
+}
+
 /*
  * A union type is a composition of one of its types.
  */
-class UnionType extends AnyType {
-    refers AnyType[] oneOf
+class UnionType extends AnyType, OneOfFacet {
 }
 
 /*
@@ -367,11 +551,12 @@ enum AnnotationTarget {
  * The allowedTargets node restricts the kinds of locations where the annotation can be applied. Annotation types, like data types,
  * can extend other data types, but annotation types themselves can neither be extended nor used anywhere data types can be used.
  */
-class AnyAnnotationType extends DocumentableElement, IdentifiableElement, AnnotationsFacet, InlineTypeContainer {
-    /*
-     * The type which this type extends.
-     */
-    refers AnyAnnotationType ^type
+class AnyAnnotationType extends AnyTypeFacet {
+	/*
+	 * The type which this type extends.
+	 */
+	refers AnyType ^type
+	
     /*
      * The locations to which annotations are restricted.
      * If this node is specified, annotations of this type may be applied only on a node corresponding to one of the locations.
@@ -409,11 +594,15 @@ class NilAnnotationType extends AnyAnnotationType {
 class FileAnnotationType extends FileTypeFacet, AnyAnnotationType {
 }
 
-class ObjectAnnotationType extends AnyAnnotationType, ObjectTypeFacet, PropertiesFacet  {
+class ObjectAnnotationType extends AnyAnnotationType, ObjectTypeFacet {
 }
 
-class ArrayAnnotationType extends AnyAnnotationType, ArrayTypeFacet, ItemsFacet {
+class ArrayAnnotationType extends AnyAnnotationType, ArrayTypeFacet {
 }
+
+class UnionAnnotationType extends AnyAnnotationType, OneOfFacet {
+}
+
 
 interface AnnotationsFacet {
     /*
@@ -491,5 +680,77 @@ interface QueryParametersFacet {
     op QueryParameter getQueryParameter(String name) {
         queryParameters.findFirst[it.name == name]
     }
+}
+
+interface Instance extends AnnotationsFacet {
+	op Object getValue()
+}
+
+class StringInstance extends Instance {
+	String value
+}
+
+class BooleanInstance extends Instance {
+	Boolean value
+}
+
+class NumberInstance extends Instance {
+	BigDecimal value
+}
+
+class IntegerInstance extends Instance {
+	Integer value
+}
+
+class ArrayInstance extends Instance {
+	contains Instance[] value
+}
+
+class ObjectInstance extends Instance {
+	contains PropertyValue[] value
+	
+	op Instance getValue(String name) {
+		value.findFirst[it.name == name]?.value
+	}
+}
+
+class PropertyValue {
+	String name
+	contains Instance value
+}
+
+interface ProtocolsFacet {
+
+	/*
+	 * The protocols supported by this element.
+	 */
+	String[] protocols	
+}
+
+
+interface ValueInstanceFacet {
+    contains Instance value
+
+    op Object getInstanceValue() {
+        return value?.getValue()
+    }
+}
+
+interface DescriptionFacet {
+	/*
+	 * A substantial, human-friendly description of the type. Its value is a string and MAY be formatted using markdown.
+	 */
+    contains StringInstance ^description
+}
+
+interface DisplayNameFacet {
+	/*
+	 * An alternate, human-friendly name for the type.
+	 */
+    contains StringInstance ^displayName
+}
+
+interface StrictFacet {
+    contains BooleanInstance strict
 }
 

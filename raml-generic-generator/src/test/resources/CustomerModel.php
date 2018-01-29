@@ -1,4 +1,5 @@
 <?php
+declare(strict_types = 1);
 /**
  * This file has been auto generated
  * Do not change it
@@ -12,7 +13,7 @@ class CustomerModel extends JsonObjectModel implements Customer {
     /**
      * @var Address
      */
-    private $address;
+    protected $address;
 
     /**
      * @return Address

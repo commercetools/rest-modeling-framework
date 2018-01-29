@@ -25,7 +25,7 @@ public class TypedFragmentTest implements ResourceFixtures {
                 .as("Name of a typed fragment")
                 .isNull();
 
-        assertThat(objectType.getDisplayName()).isEqualTo("Person");
+        assertThat(objectType.getDisplayName().getValue()).isEqualTo("Person");
 
         final EList<Property> properties = objectType.getProperties();
         assertThat(properties)
@@ -48,7 +48,7 @@ public class TypedFragmentTest implements ResourceFixtures {
                 .as("Name of a typed fragment")
                 .isNull();
 
-        assertThat(stringAnnotationType.getDisplayName())
+        assertThat(stringAnnotationType.getDisplayName().getValue())
                 .isEqualTo("NameAnnotation");
     }
 }

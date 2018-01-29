@@ -1,0 +1,22 @@
+import "../../../generic.stg"
+
+main(vendorName) ::=<<
+\<?php
+<generatorInfo()>
+
+namespace <vendorName>\Client;
+
+interface Token
+{
+    /**
+     * @return string
+     */
+    public function getValue(): string;
+
+    /**
+     * @return int
+     */
+    public function getExpiresIn(): int;
+}
+
+>>

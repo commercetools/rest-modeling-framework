@@ -4,6 +4,8 @@ import io.vrap.rmf.raml.model.modules.Library;
 import io.vrap.rmf.raml.persistence.antlr.RAMLParser;
 import org.eclipse.emf.ecore.EObject;
 
+import java.util.function.Predicate;
+
 /**
  * Constructs a library from a {@link RAMLParser.LibraryContext}.
  */
@@ -26,12 +28,18 @@ public class LibraryConstructor extends BaseConstructor {
         final EObject rootObject = scope.getResource().getContents().get(0);
 
         return withinScope(scope.with(rootObject), rootScope -> {
-            ctx.annotationFacet().forEach(this::visitAnnotationFacet);
-            ctx.attributeFacet().forEach(this::visitAttributeFacet);
-            ctx.typesFacet().forEach(this::visitTypesFacet);
-            ctx.securitySchemesFacet().forEach(this::visitSecuritySchemesFacet);
-            ctx.traitsFacet().forEach(this::visitTraitsFacet);
-            ctx.resourceTypesFacet().forEach(this::visitResourceTypesFacet);
+            final Predicate<RAMLParser.TypeContainerFacetsContext> isSecuritySchemesFacet =
+                    typeContainerFacets -> typeContainerFacets.securitySchemesFacet() != null;
+
+            // TODO move to first pass
+            // order is relevant here: first create security schemes
+            ctx.typeContainerFacets().stream()
+                    .filter(isSecuritySchemesFacet)
+                    .forEach(this::visitTypeContainerFacets);
+
+            ctx.typeContainerFacets().stream()
+                    .filter(isSecuritySchemesFacet.negate())
+                    .forEach(this::visitTypeContainerFacets);
 
             return rootObject;
         });

@@ -4,24 +4,7 @@
 <!--
 -->
 
-<plugin
-      name="%pluginName"
-      id="raml-model"
-      version="1.0.0"
-      provider-name="%providerName">
-
-   <requires>
-      <import plugin="org.eclipse.core.runtime"/>
-      <import plugin="org.eclipse.emf.ecore" export="true"/>
-      <import plugin="org.eclipse.xtext.xbase.lib" export="true"/>
-      <import plugin="org.eclipse.emf.ecore.xcore.lib" export="true"/>
-   </requires>
-
-   <runtime>
-      <library name=".">
-         <export name="*"/>
-      </library>
-   </runtime>
+<plugin>
 
    <extension point="org.eclipse.emf.ecore.generated_package">
       <!-- @generated elements -->
@@ -32,27 +15,11 @@
    </extension>
 
    <extension point="org.eclipse.emf.ecore.generated_package">
-      <!-- @generated facets -->
-      <package
-            uri="http://www.vrap.io/raml/facets"
-            class="io.vrap.rmf.raml.model.facets.FacetsPackage"
-            genModel="model/facets.xcore"/>
-   </extension>
-
-   <extension point="org.eclipse.emf.ecore.generated_package">
       <!-- @generated modules -->
       <package
             uri="http://www.vrap.io/raml/modules"
             class="io.vrap.rmf.raml.model.modules.ModulesPackage"
             genModel="model/modules.xcore"/>
-   </extension>
-
-   <extension point="org.eclipse.emf.ecore.generated_package">
-      <!-- @generated instances -->
-      <package
-            uri="http://www.vrap.io/raml/instances"
-            class="io.vrap.rmf.raml.model.instances.InstancesPackage"
-            genModel="model/instances.xcore"/>
    </extension>
 
    <extension point="org.eclipse.emf.ecore.generated_package">
@@ -72,14 +39,6 @@
    </extension>
 
    <extension point="org.eclipse.emf.ecore.generated_package">
-      <!-- @generated securityschemes -->
-      <package
-            uri="http://www.vrap.io/raml/securityschemes"
-            class="io.vrap.rmf.raml.model.securityschemes.SecurityschemesPackage"
-            genModel="model/security.xcore"/>
-   </extension>
-
-   <extension point="org.eclipse.emf.ecore.generated_package">
       <!-- @generated security -->
       <package
             uri="http://www.vrap.io/raml/security"
@@ -93,6 +52,14 @@
             uri="http://www.vrap.io/raml/responses"
             class="io.vrap.rmf.raml.model.responses.ResponsesPackage"
             genModel="model/responses.xcore"/>
+   </extension>
+
+   <extension point="org.eclipse.emf.ecore.generated_package">
+      <!-- @generated values -->
+      <package
+            uri="http://www.vrap.io/raml/values"
+            class="io.vrap.rmf.raml.model.values.ValuesPackage"
+            genModel="model/values.xcore"/>
    </extension>
 
 </plugin>

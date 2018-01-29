@@ -3,40 +3,19 @@ package io.vrap.rmf.raml.persistence.constructor
 import com.damnhandy.uri.template.Expression
 import com.damnhandy.uri.template.Literal
 import com.google.common.net.MediaType
-import io.vrap.rmf.raml.model.facets.ArrayInstance
-import io.vrap.rmf.raml.model.facets.ObjectInstance
-import io.vrap.rmf.raml.model.facets.StringInstance
+import io.vrap.rmf.raml.model.ApiFixtures
 import io.vrap.rmf.raml.model.modules.Api
 import io.vrap.rmf.raml.model.resources.HttpMethod
 import io.vrap.rmf.raml.model.resources.Resource
 import io.vrap.rmf.raml.model.responses.Body
 import io.vrap.rmf.raml.model.security.OAuth20Settings
-import io.vrap.rmf.raml.model.types.IntegerType
-import io.vrap.rmf.raml.model.types.ObjectType
-import io.vrap.rmf.raml.model.types.StringType
-import io.vrap.rmf.raml.model.types.TypeTemplate
-import io.vrap.rmf.raml.persistence.RamlResourceSet
-import io.vrap.rmf.raml.persistence.antlr.RAMLCustomLexer
-import io.vrap.rmf.raml.persistence.antlr.RAMLParser
-import org.antlr.v4.runtime.CommonTokenStream
-import org.antlr.v4.runtime.TokenStream
-import org.eclipse.emf.common.util.URI
-import org.eclipse.emf.ecore.resource.ResourceSet
-import org.eclipse.emf.ecore.resource.URIConverter
-import spock.lang.Shared
+import io.vrap.rmf.raml.model.types.*
 import spock.lang.Specification
 
 /**
  * Unit tests for {@link ApiConstructor}
  */
-class ApiConstructorTest extends Specification {
-    ResourceSet resourceSet
-    @Shared
-    URI uri = URI.createURI("test.raml");
-
-    def setup() {
-        resourceSet = new RamlResourceSet()
-    }
+class ApiConstructorTest extends Specification implements ApiFixtures {
 
     def "resource type with type template and transformations"() {
         when:
@@ -73,20 +52,20 @@ class ApiConstructorTest extends Specification {
         ''')
         then:
         api.types.size() == 2
-        api.types[0].example != null
-        api.types[0].example.name == null
-        api.types[0].example.value instanceof ObjectInstance
-        ObjectInstance example = api.types[0].example.value
-        example.propertyValues.size() == 1
-        example.propertyValues[0].name == 'name'
-        example.propertyValues[0].value instanceof StringInstance
-        StringInstance stringInstance = example.propertyValues[0].value
+        api.types[0].examples.size() == 1
+        api.types[0].examples[0].name == ''
+        api.types[0].examples[0].value instanceof ObjectInstance
+        ObjectInstance example = api.types[0].examples[0].value
+        example.value.size() == 1
+        example.value[0].name == 'name'
+        example.value[0].value instanceof StringInstance
+        StringInstance stringInstance = example.value[0].value
         stringInstance.value == 'Mr. X'
 
 
-        api.types[1].example != null
-        api.types[1].example.value instanceof StringInstance
-        StringInstance stringInstance1 = api.types[1].example.value
+        api.types[1].examples.size() == 1
+        api.types[1].examples[0].value instanceof StringInstance
+        StringInstance stringInstance1 = api.types[1].examples[0].value
         stringInstance1.value == 'John Doe'
     }
 
@@ -128,19 +107,19 @@ class ApiConstructorTest extends Specification {
         api.types[0].examples[0].name == 'Mr. X'
         api.types[0].examples[0].value instanceof ObjectInstance
         ObjectInstance exampleInstance1 = api.types[0].examples[0].value
-        exampleInstance1.propertyValues.size() == 1
-        exampleInstance1.propertyValues[0].name == 'name'
-        exampleInstance1.propertyValues[0].value instanceof StringInstance
-        StringInstance exampleValue1 = exampleInstance1.propertyValues[0].value
+        exampleInstance1.value.size() == 1
+        exampleInstance1.value[0].name == 'name'
+        exampleInstance1.value[0].value instanceof StringInstance
+        StringInstance exampleValue1 = exampleInstance1.value[0].value
         exampleValue1.value == 'Mr. X'
 
         api.types[0].examples[1].name == 'Mrs. Y'
         api.types[0].examples[1].value instanceof ObjectInstance
         ObjectInstance exampleInstance2 = api.types[0].examples[1].value
-        exampleInstance2.propertyValues.size() == 1
-        exampleInstance2.propertyValues[0].name == 'name'
-        exampleInstance2.propertyValues[0].value instanceof StringInstance
-        StringInstance exampleValue2 = exampleInstance2.propertyValues[0].value
+        exampleInstance2.value.size() == 1
+        exampleInstance2.value[0].name == 'name'
+        exampleInstance2.value[0].value instanceof StringInstance
+        StringInstance exampleValue2 = exampleInstance2.value[0].value
         exampleValue2.value == 'Mrs. Y'
     }
 
@@ -163,10 +142,10 @@ class ApiConstructorTest extends Specification {
 
         api.types[0].default instanceof ObjectInstance
         ObjectInstance default_ = api.types[0].default
-        default_.propertyValues.size() == 1
-        default_.propertyValues[0].name == 'name'
-        default_.propertyValues[0].value instanceof StringInstance
-        StringInstance stringInstance = default_.propertyValues[0].value
+        default_.value.size() == 1
+        default_.value[0].name == 'name'
+        default_.value[0].value instanceof StringInstance
+        StringInstance stringInstance = default_.value[0].value
         stringInstance.value == 'Mr. X'
 
         api.types[1].default instanceof StringInstance
@@ -251,7 +230,7 @@ class ApiConstructorTest extends Specification {
         then:
         api.securitySchemes.size() == 1
         api.securitySchemes[0].name == 'oauth_2_0'
-        api.securitySchemes[0].description == 'OAuth 2.0 security scheme'
+        api.securitySchemes[0].description.value == 'OAuth 2.0 security scheme'
         api.securitySchemes[0].type.literal == 'OAuth 2.0'
 
         api.securitySchemes[0].describedBy != null
@@ -260,7 +239,7 @@ class ApiConstructorTest extends Specification {
         api.securitySchemes[0].describedBy.headers[0].type instanceof StringType
         api.securitySchemes[0].describedBy.responses.size() == 1
         api.securitySchemes[0].describedBy.responses[0].statusCode == '401'
-        api.securitySchemes[0].describedBy.responses[0].description == 'Unauthorized'
+        api.securitySchemes[0].describedBy.responses[0].description.value == 'Unauthorized'
 
         api.securitySchemes[0].settings instanceof OAuth20Settings
         OAuth20Settings oauth20Settings = api.securitySchemes[0].settings
@@ -271,13 +250,13 @@ class ApiConstructorTest extends Specification {
 
         api.securedBy.size() == 1
         api.securedBy[0].scheme == api.securitySchemes[0]
-        api.securedBy[0].parameters.propertyValues.size() == 1
-        api.securedBy[0].parameters.propertyValues[0].name == 'scopes'
-        api.securedBy[0].parameters.propertyValues[0].value instanceof ArrayInstance
-        ArrayInstance scopes = api.securedBy[0].parameters.propertyValues[0].value
-        scopes.values.size() == 1
-        scopes.values[0] instanceof StringInstance
-        StringInstance scope = scopes.values[0]
+        api.securedBy[0].parameters.value.size() == 1
+        api.securedBy[0].parameters.value[0].name == 'scopes'
+        api.securedBy[0].parameters.value[0].value instanceof ArrayInstance
+        ArrayInstance scopes = api.securedBy[0].parameters.value[0].value
+        scopes.value.size() == 1
+        scopes.value[0] instanceof StringInstance
+        StringInstance scope = scopes.value[0]
         scope.value == 'manage'
     }
 
@@ -310,17 +289,17 @@ class ApiConstructorTest extends Specification {
         api.traits.size() == 1
         api.traits[0].name == 'secured'
         api.traits[0].usage == 'Apply this to any method that needs to be secured'
-        api.traits[0].description == 'Some requests require authentication.'
-        api.traits[0].displayName == 'Secured Method'
+        api.traits[0].description.value == 'Some requests require authentication.'
+        api.traits[0].displayName.value == 'Secured Method'
         api.traits[0].headers.size() == 1
         api.traits[0].headers[0].name == 'access_token'
         api.traits[0].queryParameters.size() == 1
         api.traits[0].queryParameters[0].name == 'clientId'
         api.traits[0].responses.size() == 1
         api.traits[0].responses[0].statusCode == '409'
-        api.traits[0].responses[0].description == 'Conflict'
+        api.traits[0].responses[0].description.value == 'Conflict'
         api.traits[0].responses[0].bodies.size() == 1
-        api.traits[0].responses[0].bodies[0].contentTypes == [ MediaType.parse('application/json') ]
+        api.traits[0].responses[0].bodies[0].contentMediaTypes == [ MediaType.parse('application/json') ]
 
         api.resources.size() == 1
         api.resources[0].methods.size() == 1
@@ -374,7 +353,7 @@ class ApiConstructorTest extends Specification {
         then:
         api.title == 'Simple API'
         api.protocols == [ 'http', 'https' ]
-        api.mediaType == [ MediaType.parse('application/json') ]
+        api.mediaTypes == [ MediaType.parse('application/json') ]
     }
 
     def "base uri and base uri parameters"() {
@@ -387,20 +366,20 @@ class ApiConstructorTest extends Specification {
         ''')
 
         then:
-        api.baseUri.components.size() == 4
-        api.baseUri.components[0] instanceof Literal
-        Literal literal = api.baseUri.components[0]
+        api.baseUri.value.components.size() == 4
+        api.baseUri.value.components[0] instanceof Literal
+        Literal literal = api.baseUri.value.components[0]
         literal.value == 'https://api.simple.com/'
 
-        api.baseUri.components[1] instanceof Expression
-        Expression versionTemplateExpression = api.baseUri.components[1]
+        api.baseUri.value.components[1] instanceof Expression
+        Expression versionTemplateExpression = api.baseUri.value.components[1]
         versionTemplateExpression.varSpecs.size() == 1
         versionTemplateExpression.varSpecs[0].variableName == 'version'
 
-        api.baseUri.components[2] instanceof Literal
+        api.baseUri.value.components[2] instanceof Literal
 
-        api.baseUri.components[3] instanceof Expression
-        Expression userIdTemplateExpression = api.baseUri.components[3]
+        api.baseUri.value.components[3] instanceof Expression
+        Expression userIdTemplateExpression = api.baseUri.value.components[3]
         userIdTemplateExpression.varSpecs.size() == 1
         userIdTemplateExpression.varSpecs[0].variableName == 'userId'
 
@@ -428,8 +407,8 @@ class ApiConstructorTest extends Specification {
         Resource resource = api.resources[0]
         resource.relativeUri.components.size() == 1
         resource.relativeUri.components[0] instanceof Literal
-        resource.description == 'User endpoint'
-        resource.displayName == 'Users'
+        resource.description.value == 'User endpoint'
+        resource.displayName.value == 'Users'
         resource.securedBy.size() == 1
         resource.securedBy[0].scheme == api.securitySchemes[0]
     }
@@ -501,7 +480,7 @@ class ApiConstructorTest extends Specification {
         api.resources.size() == 1
         api.resources[0].methods.size() == 2
         api.resources[0].methods[0].method == HttpMethod.GET
-        api.resources[0].methods[0].description == 'get something'
+        api.resources[0].methods[0].description.value == 'get something'
         api.resources[0].methods[1].method == HttpMethod.POST
         api.resources[0].resources.size() == 1
         api.resources[0].resources[0].relativeUri.components.size() == 1
@@ -535,13 +514,13 @@ class ApiConstructorTest extends Specification {
 
         api.resources[0].methods[0].responses[0].statusCode == '200'
         api.resources[0].methods[0].responses[0].bodies.size() == 1
-        api.resources[0].methods[0].responses[0].bodies[0].contentTypes == [MediaType.parse('application/json') ]
+        api.resources[0].methods[0].responses[0].bodies[0].contentMediaTypes == [MediaType.parse('application/json') ]
         api.resources[0].methods[0].responses[0].bodies[0].type instanceof ObjectType
         api.resources[0].methods[0].responses[0].bodies[0].type.name == 'object'
 
         api.resources[0].methods[0].responses[1].statusCode == '401'
         api.resources[0].methods[0].responses[1].bodies.size() == 1
-        api.resources[0].methods[0].responses[1].bodies[0].contentTypes == [MediaType.parse('application/json') ]
+        api.resources[0].methods[0].responses[1].bodies[0].contentMediaTypes == [MediaType.parse('application/json') ]
         api.resources[0].methods[0].responses[1].bodies[0].type instanceof StringType
         api.resources[0].methods[0].responses[1].bodies[0].type.name == 'string'
     }
@@ -567,8 +546,8 @@ class ApiConstructorTest extends Specification {
         Resource resource = api.resources[0]
         resource.methods.size() == 1
         resource.methods[0].method == HttpMethod.GET
-        resource.methods[0].displayName == 'Get users'
-        resource.methods[0].description == 'This method retrieves all users.'
+        resource.methods[0].displayName.value == 'Get users'
+        resource.methods[0].description.value == 'This method retrieves all users.'
         resource.methods[0].protocols == [ 'https' ]
         resource.methods[0].securedBy.size() == 1
         resource.methods[0].securedBy[0].scheme == api.securitySchemes[0]
@@ -637,10 +616,10 @@ class ApiConstructorTest extends Specification {
         api.resources.size() == 1
         api.resources[0].methods.size() == 2
         api.resources[0].methods[0].bodies.size() == 1
-        api.resources[0].methods[0].bodies[0].contentTypes == [MediaType.parse('application/json') ]
+        api.resources[0].methods[0].bodies[0].contentMediaTypes == [MediaType.parse('application/json') ]
         api.resources[0].methods[0].bodies[0].type instanceof StringType
         api.resources[0].methods[1].bodies.size() == 1
-        api.resources[0].methods[1].bodies[0].contentTypes == [ MediaType.parse('application/xml') ]
+        api.resources[0].methods[1].bodies[0].contentMediaTypes == [ MediaType.parse('application/xml') ]
         api.resources[0].methods[1].bodies[0].name == null
         api.resources[0].methods[1].bodies[0].type instanceof IntegerType
         IntegerType integerType = api.resources[0].methods[1].bodies[0].type
@@ -664,9 +643,9 @@ class ApiConstructorTest extends Specification {
         api.resources.size() == 1
         api.resources[0].methods.size() == 1
         api.resources[0].methods[0].bodies.size() == 2
-        api.resources[0].methods[0].bodies[0].contentTypes == [ MediaType.parse('application/json') ]
+        api.resources[0].methods[0].bodies[0].contentMediaTypes == [ MediaType.parse('application/json') ]
         api.resources[0].methods[0].bodies[0].type instanceof StringType
-        api.resources[0].methods[0].bodies[1].contentTypes == [ MediaType.parse('application/xml') ]
+        api.resources[0].methods[0].bodies[1].contentMediaTypes == [ MediaType.parse('application/xml') ]
         api.resources[0].methods[0].bodies[1].name == null
         api.resources[0].methods[0].bodies[1].type instanceof IntegerType
         IntegerType integerType = api.resources[0].methods[0].bodies[1].type
@@ -744,7 +723,7 @@ class ApiConstructorTest extends Specification {
         api.resources[0].methods.size() == 1
         api.resources[0].methods[0].bodies.size() == 1
         Body body = api.resources[0].methods[0].bodies[0]
-        body.contentTypes == [ MediaType.parse('application/json') ]
+        body.contentMediaTypes == [ MediaType.parse('application/json') ]
         body.type instanceof ObjectType
         ObjectType objectType = body.type
         objectType.properties.size() == 1
@@ -787,14 +766,11 @@ class ApiConstructorTest extends Specification {
         api.types.size() == 1
 
         api.types.get(0).name == "foo"
-        api.types.get(0).type instanceof ObjectType
-        ObjectType objectType = api.types.get(0).getType()
-        objectType.name == "object"
-        objectType.properties.size() == 0
-        objectType.type == null
+        api.types.get(0) instanceof ObjectType
 
-        api.types.get(0).properties.get(0).type instanceof ObjectType
-        api.types.get(0).properties.get(0).name == "bar"
+        ObjectType foo = api.types[0]
+        foo.properties.get(0).type instanceof ObjectType
+        foo.properties.get(0).name == "bar"
         ObjectType propertyType = api.types.get(0).properties.get(0).type
         propertyType.properties.size() == 0
         propertyType.name == "object"
@@ -834,18 +810,47 @@ class ApiConstructorTest extends Specification {
         api.types.size() == 1
     }
 
-    Api constructApi(String input) {
-        RAMLParser parser = parser(input)
-        def apiConstructor = new ApiConstructor()
-        Scope scope = Scope.of(resourceSet.createResource(uri))
-        return apiConstructor.construct(parser, scope)
+    def "annotation array type"() {
+        when:
+        Api api = constructApi(
+                '''\
+        #%RAML 1.0
+        title: Test
+        types:
+            Person:
+                type: object
+        annotationTypes:
+            Roles: Person[]
+        ''')
+        then:
+        api.types.size() == 1
+        api.annotationTypes.size() == 1
+        api.annotationTypes[0] instanceof ArrayAnnotationType
+        ArrayAnnotationType rolesAnnotationType = api.annotationTypes[0]
+        rolesAnnotationType.items instanceof ObjectType
+        rolesAnnotationType.items.name == 'Person'
     }
 
-    RAMLParser parser(String input) {
-        final URIConverter uriConverter = resourceSet.getURIConverter();
-        def strippedInput = input.stripIndent()
-        final RAMLCustomLexer lexer = new RAMLCustomLexer(strippedInput, uri, uriConverter);
-        final TokenStream tokenStream = new CommonTokenStream(lexer);
-        new RAMLParser(tokenStream)
+    def "annotation union type"() {
+        when:
+        Api api = constructApi(
+                '''\
+        #%RAML 1.0
+        title: Test
+        types:
+            Admin:
+                type: object
+            User:
+                type: object
+        annotationTypes:
+            Roles: Admin | User
+        ''')
+        then:
+        api.types.size() == 2
+        api.annotationTypes.size() == 1
+        api.annotationTypes[0] instanceof UnionAnnotationType
+        UnionAnnotationType rolesAnnotationType = api.annotationTypes[0]
+        rolesAnnotationType.oneOf.size() == 2
+        rolesAnnotationType.oneOf == api.types
     }
 }

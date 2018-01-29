@@ -31,9 +31,6 @@ public class BuiltinTypeTest implements ResourceFixtures {
 
             assertThat(anyAnnotationType).isNotNull();
             assertThat(anyAnnotationType).isInstanceOf(AnyAnnotationType.class);
-            final AnyAnnotationType annotationType = (AnyAnnotationType) anyAnnotationType;
-            final AnyAnnotationType superAnnotationType = annotationType.getType();
-            assertThat(superAnnotationType).isNull();
         }
     }
 }

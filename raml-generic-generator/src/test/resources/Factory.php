@@ -1,4 +1,5 @@
 <?php
+declare(strict_types = 1);
 /**
  * This file has been auto generated
  * Do not change it
@@ -53,8 +54,9 @@ class Factory
     /**
      * @param Config|array $config
      * @return Config
+     * @throws \InvalidArgumentException
      */
-    private function createConfig($config)
+    private function createConfig($config): Config
     {
         if ($config instanceof Config) {
             return $config;
@@ -99,16 +101,16 @@ class Factory
     }
 
     /**
-     * @param $options
+     * @param array $options
      * @param LoggerInterface|null $logger
      * @param OAuth2Handler $oauthHandler
      * @return HttpClient
      */
     private function createGuzzle6Client(
-        $options,
+        array $options,
         LoggerInterface $logger = null,
         OAuth2Handler $oauthHandler
-    ) {
+    ): HttpClient {
         if (isset($options['handler']) && $options['handler'] instanceof HandlerStack) {
             $handler = $options['handler'];
         } else {
@@ -142,16 +144,16 @@ class Factory
 
 
     /**
-     * @param $options
+     * @param array $options
      * @param LoggerInterface|null $logger
      * @param OAuth2Handler $oauthHandler
      * @return HttpClient
      */
     private function createGuzzle5Client(
-        $options,
+        array $options,
         LoggerInterface $logger = null,
         OAuth2Handler $oauthHandler
-    ) {
+    ): HttpClient {
         if (isset($options['base_uri'])) {
             $options['base_url'] = $options['base_uri'];
             unset($options['base_uri']);
@@ -203,7 +205,11 @@ class Factory
         return $client->createRequest($psrRequest->getMethod(), (string)$psrRequest->getUri(), $options);
     }
 
-    public static function createResponse($response)
+    /**
+     * @param GuzzleResponseInferface|ResponseInterface $response
+     * @return ResponseInterface
+     */
+    public static function createResponse($response): ResponseInterface
     {
         if ($response instanceof ResponseInterface) {
             return $response;
@@ -222,8 +228,19 @@ class Factory
         );
     }
 
-    private function getHandler($credentials, $accessTokenUrl, $cache = null, $provider = null)
-    {
+    /**
+     * @param array $credentials
+     * @param string $accessTokenUrl
+     * @param CacheItemPoolInterface $cache
+     * @param TokenProvider $provider
+     * @return OAuth2Handler
+     */
+    private function getHandler(
+        array $credentials,
+        string $accessTokenUrl,
+        CacheItemPoolInterface $cache = null,
+        TokenProvider $provider = null
+    ): OAuth2Handler {
         if (is_null($provider)) {
             $provider = new CredentialTokenProvider(
                 new HttpClient(),
@@ -234,7 +251,10 @@ class Factory
         return new OAuth2Handler($provider, $cache);
     }
 
-    private static function isGuzzle6() {
+    /**
+     * @return bool
+     */
+    private static function isGuzzle6(): bool {
         if (is_null(self::$isGuzzle6)) {
             if (version_compare(HttpClient::VERSION, '6.0.0', '>=')) {
                 self::$isGuzzle6 = true;

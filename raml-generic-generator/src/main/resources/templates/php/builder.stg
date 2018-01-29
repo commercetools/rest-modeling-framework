@@ -1,0 +1,103 @@
+import "generic.stg"
+
+/*
+ * implementation template functions
+ */
+updateBuilder(vendorName, builder)::=<<
+\<?php
+<generatorInfo()>
+
+namespace <vendorName>\\Builder;
+
+use Commercetools\Base\BaseBuilder;
+<builder.typeImports: {ti |<useTypeImport(vendorName, ti)>}>
+
+class <builder.resourceType.name>UpdateBuilder extends BaseBuilder {
+    /**
+     * @var <builder.resourceType.typeName>
+     */
+    private $resource = null;
+
+    /**
+     * @var array
+     */
+    private $actions = [];
+
+    <builder.updates: {u |<update(u)>}>
+
+    /*
+     * @param $action
+     * @param callable $callback
+     */
+    private function callback($action, callable $callback = null) {
+        if (!is_null($callback)) {
+            $action = $callback($action);
+        }
+        $this->actions[] = $action;
+    }
+
+    /**
+     * @param <builder.resourceType.typeName> $<builder.resourceType.typeName; format="lowercamel">
+     * @return $this
+     */
+    public function with(<builder.resourceType.typeName> $<builder.resourceType.typeName; format="lowercamel">)
+    {
+        $this->resource = $<builder.resourceType.typeName; format="lowercamel">;
+        return $this;
+    }
+
+    /**
+     * Build <builder.updateType.typeName> and delete internal state
+     * @return <builder.updateType.typeName>
+     */
+    public function build(): <builder.updateType.typeName>
+    {
+        $data = [
+            'actions' => $this->actions,
+        ];
+        $update = $this->mapData(<builder.updateType.typeName>::class, $data);
+        if ($update instanceof <builder.updateType.typeName> &&
+            $this->resource instanceof <builder.resourceType.typeName>
+        ) {
+            $update->setVersion($this->resource->getVersion());
+        }
+        $this->actions = [];
+        $this->resource = null;
+
+        return $update;
+    }
+}
+
+>>
+
+update(action)::=<<
+
+/**
+ * @param callable $callback builder function \<code\>
+ *   function (<action.typeName> $action) {
+ *     // modify action as needed
+ *     return $action;
+ *   }
+ *   \</code\>
+ * @return $this
+ */
+public function <action.discriminatorValue>(callable $callback = null)
+{
+    $action = $this->mapData(<action.typeName>::class, null);
+    $this->callback($action, $callback);
+    return $this;
+}
+>>
+
+actionBuilder(vendorName, type)::=<<
+\<?php
+<generatorInfo()>
+
+namespace <vendorName>\\Builder;
+
+use Commercetools\Base\BaseBuilder;
+<type.typeImports: {ti |<useTypeImport(vendorName, ti)>}>
+
+class <type.name>Builder extends BaseBuilder {
+}
+>>

@@ -1,7 +1,5 @@
 package io.vrap.rmf.raml.model;
 
-import com.google.common.net.MediaType;
-import io.vrap.rmf.raml.model.facets.StringInstance;
 import io.vrap.rmf.raml.model.modules.Api;
 import io.vrap.rmf.raml.model.modules.ApiBase;
 import io.vrap.rmf.raml.model.modules.ApiExtension;
@@ -12,11 +10,11 @@ import io.vrap.rmf.raml.model.responses.Body;
 import io.vrap.rmf.raml.model.responses.util.ResponsesSwitch;
 import io.vrap.rmf.raml.model.types.*;
 import io.vrap.rmf.raml.model.types.util.TypesSwitch;
-import io.vrap.rmf.raml.model.util.StringTemplate;
 import io.vrap.rmf.raml.model.util.UriFragmentBuilder;
+import io.vrap.rmf.raml.model.values.StringTemplate;
 import io.vrap.rmf.raml.persistence.RamlResourceSet;
 import io.vrap.rmf.raml.persistence.constructor.Scope;
-import io.vrap.rmf.raml.persistence.constructor.TypeExpressionConstructor;
+import io.vrap.rmf.raml.persistence.constructor.TypeExpressionResolver;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.common.util.URI;
@@ -28,9 +26,14 @@ import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+
+import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.TYPED_ELEMENT__TYPE;
 
 /**
  * This class is the main interface for accessing RAML models.
@@ -44,9 +47,7 @@ public class RamlModelBuilder {
      * @return a resolved api model result
      */
     public RamlModelResult<Api> buildApi(final URI uri) {
-        final EObject rootObject = load(uri);
-        final Api resolvedApi = resolveToApi(rootObject);
-        return RamlModelResult.of(resolvedApi);
+        return build(uri);
     }
 
     /**
@@ -55,18 +56,21 @@ public class RamlModelBuilder {
      * @param uri the uri to build the api from
      * @return a model result
      */
-    public RamlModelResult<EObject> build(final URI uri) {
-        final EObject rootObject = load(uri);
+    public <T extends EObject> RamlModelResult<T> build(final URI uri) {
+        final Resource resource = load(uri);
+        final EObject rootObject = resource.getContents().isEmpty() ?
+                null :
+                resource.getContents().get(0);
         final EObject resolved = rootObject instanceof ApiBase ?
                 resolveToApi(rootObject) :
                 rootObject;
-        return RamlModelResult.of(resolved);
+        return RamlModelResult.of(resource.getErrors(), resolved);
     }
 
-    private EObject load(final URI uri) {
+    private Resource load(final URI uri) {
         final RamlResourceSet resourceSet = new RamlResourceSet();
         final Resource resource = resourceSet.getResource(uri, true);
-        return resource.getContents().get(0);
+        return resource;
     }
 
     private Api resolveToApi(final EObject rootObject) {
@@ -107,7 +111,13 @@ public class RamlModelBuilder {
 
         @Override
         public Api caseApiExtension(final ApiExtension apiExtension) {
-            final Api resolvedApi = caseApi(apiExtension.getExtends());
+            final ApiBase extend = apiExtension.getExtends();
+            final Api resolvedApi;
+            if (extend instanceof ApiExtension) {
+                resolvedApi = caseApiExtension((ApiExtension)extend);
+            } else {
+                resolvedApi = caseApi((Api)extend);
+            }
             merge(apiExtension, resolvedApi);
             return resolvedApi;
         }
@@ -242,19 +252,6 @@ public class RamlModelBuilder {
             stringTemplateResolver = new StringTemplateResolver(this.parameters);
         }
 
-        private List<io.vrap.rmf.raml.model.resources.Resource> getResourcesToRoot() {
-            final LinkedList<io.vrap.rmf.raml.model.resources.Resource> resourcesToRoot = new LinkedList<>();
-
-            io.vrap.rmf.raml.model.resources.Resource currentResoure = resource;
-            while (currentResoure != null) {
-                resourcesToRoot.addFirst(currentResoure);
-                currentResoure = currentResoure.eContainer() instanceof io.vrap.rmf.raml.model.resources.Resource ?
-                        (io.vrap.rmf.raml.model.resources.Resource) currentResoure.eContainer() :
-                        null;
-            }
-            return resourcesToRoot;
-        }
-
         public io.vrap.rmf.raml.model.resources.Resource resolve(final ResourceType resourceType) {
             for (final UriParameter uriParameter : resourceType.getUriParameters()) {
                 final UriParameter resolvedUriParameter = EcoreUtil.copy(uriParameter);
@@ -376,13 +373,13 @@ public class RamlModelBuilder {
     private static class TypedElementResolver extends TypesSwitch<AnyType> {
         private final Resource resource;
         private final Map<String, String> parameters;
-        private final TypeExpressionConstructor typeExpressionConstructor;
+        private final TypeExpressionResolver typeExpressionResolver;
         private Scope scope;
 
         public TypedElementResolver(final Resource resource, final Map<String, String> parameters) {
             this.parameters = parameters;
             this.resource = resource;
-            this.typeExpressionConstructor = new TypeExpressionConstructor();
+            this.typeExpressionResolver = new TypeExpressionResolver();
         }
 
         public void resolveAll(final EObject eObject) {
@@ -390,7 +387,7 @@ public class RamlModelBuilder {
             while (allContents.hasNext()) {
                 final EObject next = allContents.next();
                 if (next instanceof TypedElement) {
-                    scope = Scope.of(resource).with(next, next.eContainmentFeature());
+                    scope = Scope.of(resource).with(next, TYPED_ELEMENT__TYPE);
                     resolve((TypedElement) next);
                 }
             }
@@ -412,7 +409,7 @@ public class RamlModelBuilder {
         public AnyType caseTypeTemplate(final TypeTemplate typeTemplate) {
             final String template = typeTemplate.getName();
             final String typeName = StringTemplate.of(template).render(parameters);
-            final AnyType resolvedType = (AnyType) typeExpressionConstructor.parse(typeName, scope);
+            final AnyType resolvedType = (AnyType) typeExpressionResolver.resolve(typeName, scope);
             EcoreUtil.remove(typeTemplate);
             return resolvedType;
         }
@@ -440,9 +437,9 @@ public class RamlModelBuilder {
      * content type defined.
      */
     private static class BodyContentTypeResolver extends ResponsesSwitch<EObject> {
-        private final List<MediaType> defaultMediaTypes;
+        private final List<String> defaultMediaTypes;
 
-        public BodyContentTypeResolver(final List<MediaType> defaultMediaTypes) {
+        public BodyContentTypeResolver(final List<String> defaultMediaTypes) {
             this.defaultMediaTypes = defaultMediaTypes;
         }
 

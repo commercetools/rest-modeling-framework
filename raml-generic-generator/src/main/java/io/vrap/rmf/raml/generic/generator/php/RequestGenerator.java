@@ -8,16 +8,12 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
 import io.vrap.rmf.raml.generic.generator.AbstractTemplateGenerator;
-import io.vrap.rmf.raml.model.facets.ObjectInstance;
-import io.vrap.rmf.raml.model.facets.StringInstance;
+import io.vrap.rmf.raml.generic.generator.GeneratorHelper;
 import io.vrap.rmf.raml.model.resources.HttpMethod;
 import io.vrap.rmf.raml.model.resources.Method;
 import io.vrap.rmf.raml.model.resources.Resource;
 import io.vrap.rmf.raml.model.responses.Body;
-import io.vrap.rmf.raml.model.types.Annotation;
-import io.vrap.rmf.raml.model.types.AnyAnnotationType;
-import io.vrap.rmf.raml.model.types.FileType;
-import io.vrap.rmf.raml.model.types.QueryParameter;
+import io.vrap.rmf.raml.model.types.*;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
 import org.stringtemplate.v4.STGroupFile;
@@ -122,30 +118,30 @@ public class RequestGenerator extends AbstractTemplateGenerator {
                         case "methodParam":
                             if (anno != null) {
                                 ObjectInstance o = (ObjectInstance)anno.getValue();
-                                StringInstance placeholder = (StringInstance)o.getPropertyValues().stream().filter(propertyValue -> propertyValue.getName().equals("placeholder")).findFirst().orElse(null).getValue();
-                                StringInstance paramName = (StringInstance)o.getPropertyValues().stream().filter(propertyValue -> propertyValue.getName().equals("paramName")).findFirst().orElse(null).getValue();
+                                StringInstance placeholder = (StringInstance)o.getValue().stream().filter(propertyValue -> propertyValue.getName().equals("placeholder")).findFirst().orElse(null).getValue();
+                                StringInstance paramName = (StringInstance)o.getValue().stream().filter(propertyValue -> propertyValue.getName().equals("paramName")).findFirst().orElse(null).getValue();
                                 return "$" + camelize(placeholder.getValue()) + ", $" + paramName.getValue();
                             }
                             return "$" + camelize(param.getName());
                         case "methodName":
                             if (anno != null) {
                                 ObjectInstance o = (ObjectInstance)anno.getValue();
-                                StringInstance paramName = (StringInstance)o.getPropertyValues().stream().filter(propertyValue -> propertyValue.getName().equals("paramName")).findFirst().orElse(null).getValue();
+                                StringInstance paramName = (StringInstance)o.getValue().stream().filter(propertyValue -> propertyValue.getName().equals("paramName")).findFirst().orElse(null).getValue();
                                 return "with" + capitalize(paramName.getValue());
                             }
                             return "with" + capitalize(camelize(param.getName()));
                         case "paramName":
                             if (anno != null) {
                                 ObjectInstance o = (ObjectInstance)anno.getValue();
-                                StringInstance paramName = (StringInstance)o.getPropertyValues().stream().filter(propertyValue -> propertyValue.getName().equals("paramName")).findFirst().orElse(null).getValue();
+                                StringInstance paramName = (StringInstance)o.getValue().stream().filter(propertyValue -> propertyValue.getName().equals("paramName")).findFirst().orElse(null).getValue();
                                 return "$" + paramName.getValue();
                             }
                             return "$" + camelize(param.getName());
                         case "template":
                             if (anno != null) {
                                 ObjectInstance o = (ObjectInstance) anno.getValue();
-                                StringInstance template = (StringInstance) o.getPropertyValues().stream().filter(propertyValue -> propertyValue.getName().equals("template")).findFirst().orElse(null).getValue();
-                                StringInstance placeholder = (StringInstance) o.getPropertyValues().stream().filter(propertyValue -> propertyValue.getName().equals("placeholder")).findFirst().orElse(null).getValue();
+                                StringInstance template = (StringInstance) o.getValue().stream().filter(propertyValue -> propertyValue.getName().equals("template")).findFirst().orElse(null).getValue();
+                                StringInstance placeholder = (StringInstance) o.getValue().stream().filter(propertyValue -> propertyValue.getName().equals("placeholder")).findFirst().orElse(null).getValue();
                                 return "sprintf('" + template.getValue().replace("<<" + placeholder.getValue() + ">>", "%s") + "', $" + placeholder.getValue() + ")";
                             }
                             return "'" + param.getName() + "'";

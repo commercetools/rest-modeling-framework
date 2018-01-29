@@ -1,7 +1,9 @@
 package io.vrap.rmf.raml.persistence;
 
 import io.vrap.rmf.raml.model.RamlDiagnostic;
-import io.vrap.rmf.raml.persistence.antlr.*;
+import io.vrap.rmf.raml.persistence.antlr.ParserErrorCollector;
+import io.vrap.rmf.raml.persistence.antlr.RAMLCustomLexer;
+import io.vrap.rmf.raml.persistence.antlr.RAMLParser;
 import io.vrap.rmf.raml.persistence.constructor.*;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.TokenStream;
@@ -12,7 +14,6 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.resource.impl.ResourceImpl;
 import org.eclipse.emf.ecore.util.Diagnostician;
-import org.eclipse.emf.ecore.util.EcoreUtil;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -23,8 +24,8 @@ import java.util.Optional;
 import java.util.Scanner;
 import java.util.stream.Collectors;
 
-import static io.vrap.rmf.raml.model.elements.ElementsPackage.Literals.IDENTIFIABLE_ELEMENT;
-import static io.vrap.rmf.raml.model.elements.ElementsPackage.Literals.IDENTIFIABLE_ELEMENT__NAME;
+import static io.vrap.rmf.raml.model.elements.ElementsPackage.Literals.NAMED_ELEMENT;
+import static io.vrap.rmf.raml.model.elements.ElementsPackage.Literals.NAMED_ELEMENT__NAME;
 import static io.vrap.rmf.raml.model.modules.ModulesPackage.Literals.TYPE_CONTAINER__ANNOTATION_TYPES;
 import static io.vrap.rmf.raml.model.modules.ModulesPackage.Literals.TYPE_CONTAINER__TYPES;
 
@@ -39,10 +40,10 @@ public class RamlResource extends ResourceImpl {
     @Override
     protected void doLoad(final InputStream inputStream, final Map<?, ?> options) throws IOException {
         final BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
-        final Optional<AbstractConstructor> optionalRootConstructor = getRootConstructor(bufferedInputStream);
+        final Optional<BaseConstructor> optionalRootConstructor = getRootConstructor(bufferedInputStream);
 
         if (optionalRootConstructor.isPresent()) {
-            final AbstractConstructor rootConstructor = optionalRootConstructor.get();
+            final BaseConstructor rootConstructor = optionalRootConstructor.get();
             final RAMLCustomLexer lexer = new RAMLCustomLexer(uri, getURIConverter());
             final TokenStream tokenStream = new CommonTokenStream(lexer);
             final RAMLParser parser = new RAMLParser(tokenStream);
@@ -65,24 +66,9 @@ public class RamlResource extends ResourceImpl {
         for (final EObject eObject : getContents()) {
             org.eclipse.emf.common.util.Diagnostic diagnostic = Diagnostician.INSTANCE.validate(eObject);
             if (diagnostic.getSeverity() != org.eclipse.emf.common.util.Diagnostic.OK) {
-                diagnostic.getChildren().forEach(this::addValidationError);
+                diagnostic.getChildren().stream().map(RamlDiagnostic::of).forEach(getErrors()::add);
             }
         }
-    }
-
-    private void addValidationError(final org.eclipse.emf.common.util.Diagnostic diagnostic) {
-        int line = -1;
-        int column = -1;
-        String source = diagnostic.getSource();
-        if (diagnostic.getData().size() > 0 && diagnostic.getData().get(0) instanceof EObject) {
-            final EObject eObject = (EObject) diagnostic.getData().get(0);
-            final RamlTokenProvider ramlTokenProvider = (RamlTokenProvider) EcoreUtil.getExistingAdapter(eObject, RamlTokenProvider.class);
-            final RamlToken ramlToken = ramlTokenProvider.get();
-            line = ramlToken.getLine();
-            column = ramlToken.getCharPositionInLine();
-            source = ramlToken.getLocation();
-        }
-        getErrors().add(RamlDiagnostic.of(diagnostic.getMessage(), source, line, column));
     }
 
     @Override
@@ -96,11 +82,11 @@ public class RamlResource extends ResourceImpl {
             final EReference feature = (EReference) rootObject.eClass().getEStructuralFeature(featureName);
             final EClass eReferenceType = feature.getEReferenceType();
 
-            if (IDENTIFIABLE_ELEMENT.isSuperTypeOf(eReferenceType)) {
+            if (NAMED_ELEMENT.isSuperTypeOf(eReferenceType)) {
                 @SuppressWarnings("unchecked") final EList<EObject> children = (EList<EObject>) rootObject.eGet(feature);
                 final String name = uriFragmentPath.get(1);
                 return children.stream()
-                        .filter(eObject -> name.equals(eObject.eGet(IDENTIFIABLE_ELEMENT__NAME)))
+                        .filter(eObject -> name.equals(eObject.eGet(NAMED_ELEMENT__NAME)))
                         .findFirst()
                         .orElse(null);
             }
@@ -108,7 +94,7 @@ public class RamlResource extends ResourceImpl {
         return null;
     }
 
-    private Optional<AbstractConstructor> getRootConstructor(final InputStream inputStream) throws IOException {
+    private Optional<BaseConstructor> getRootConstructor(final InputStream inputStream) throws IOException {
         inputStream.mark(1024);
         @SuppressWarnings("resource")        final String header = new Scanner(inputStream).useDelimiter("\\n").next();
         inputStream.reset();

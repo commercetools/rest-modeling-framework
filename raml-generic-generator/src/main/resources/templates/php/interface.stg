@@ -4,7 +4,7 @@ interface(vendorName, type) ::= <<
 \<?php
 <generatorInfo()>
 
-namespace <vendorName>\\<type.package.name>;
+namespace <vendorName>\\<type.package.parts; separator="\\">;
 
 <if(type.hasBuiltinParent)>
 use <vendorName>\\Base\\JsonObject;
@@ -25,15 +25,15 @@ interface <type.name> extends <if(!type.hasBuiltinParent)><type.parent.name><els
     <type.nonPatternProperties: {p |<propertyInterfaceSet(p)>}>
     <type.unionProperties: {p |<propertyInterfaceGetAs(p)>}>
     <if(type.hasPatternProperties)>
-    public function get($key);
-    public function set($key, $value);
+    public function get(string $key);
+    public function set(string $key, $value);
     <endif>
 }
 
 >>
 
 discriminatorMapping(type) ::= <<
-'<type.discriminatorValue>' => <if(type.package.hasPackage)><type.package.name>\\<endif><type.name>::class,
+'<type.discriminatorValue>' => <if(type.package.hasPackage)><type.package.parts; separator="\\">\\<endif><type.name>::class,
 
 >>
 

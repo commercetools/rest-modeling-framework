@@ -1,4 +1,5 @@
 <?php
+declare(strict_types = 1);
 /**
  * This file has been auto generated
  * Do not change it
@@ -20,6 +21,6 @@ interface Address extends JsonObject {
      * @param string $street
      * @return $this
      */
-    public function setStreet($street);
+    public function setStreet(string $street);
 
 }

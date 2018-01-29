@@ -4,7 +4,8 @@
 package io.vrap.rmf.raml.model.responses
 
 import io.vrap.rmf.raml.model.util.ModelHelper
-import io.vrap.rmf.raml.model.facets.MediaType
+import io.vrap.rmf.raml.model.values.MediaTypes
+import io.vrap.rmf.raml.model.types.DescriptionFacet
 import io.vrap.rmf.raml.model.types.AnnotationsFacet
 import io.vrap.rmf.raml.model.types.HeadersFacet
 import io.vrap.rmf.raml.model.types.TypedElement
@@ -16,23 +17,22 @@ interface ResponsesFacet {
 	contains Response[] responses	
 }
 
-class Response extends AnnotationsFacet, HeadersFacet, BodyContainer {
+class Response extends AnnotationsFacet, HeadersFacet, BodyContainer, DescriptionFacet {
 	/*
 	 * A possible HTTP status codes for that method on that resource.
 	 */
 	String statusCode
-	
-	/*
-	 * A substantial, human-friendly description of the type. Its value is a string and MAY be formatted using markdown.
-	 */
-	String description
 }
 
 class Body extends AnnotationsFacet, TypedElement {
 	/*
 	 * The content types that this body supports.
 	 */
-	MediaType[] contentTypes
+	String[] contentTypes
+
+    op MediaTypes getContentMediaTypes() {
+        ModelHelper.getMediaTypes(contentTypes)
+    }
 }
 
 interface BodyContainer {
