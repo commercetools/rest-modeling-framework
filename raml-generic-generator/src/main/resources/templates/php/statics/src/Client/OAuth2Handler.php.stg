@@ -84,7 +84,8 @@ class OAuth2Handler {
     private function saveToken(string $token, CacheItemInterface $item, int $ttl)
     {
         if (!is_null($this->cache)) {
-            $item->set($token)->expiresAfter($ttl);
+            $item->set($token);
+            $item->expiresAfter($ttl);
             $this->cache->save($item);
         }
     }
