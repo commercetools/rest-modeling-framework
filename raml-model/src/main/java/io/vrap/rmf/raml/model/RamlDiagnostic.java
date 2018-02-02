@@ -64,7 +64,7 @@ public class RamlDiagnostic implements Resource.Diagnostic {
             final EObject eObject = (EObject) diagnostic.getData().get(0);
             final RamlTokenProvider ramlTokenProvider = (RamlTokenProvider) EcoreUtil.getExistingAdapter(eObject, RamlTokenProvider.class);
             if (ramlTokenProvider != null) {
-                final RamlToken ramlToken = ramlTokenProvider.get();
+                final RamlToken ramlToken = ramlTokenProvider.getToken();
                 line = ramlToken.getLine();
                 column = ramlToken.getCharPositionInLine();
                 source = ramlToken.getLocation();
