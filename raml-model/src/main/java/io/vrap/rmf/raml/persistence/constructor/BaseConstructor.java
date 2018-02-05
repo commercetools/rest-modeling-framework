@@ -160,19 +160,7 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
     public Object visitTraitFacet(RAMLParser.TraitFacetContext traitFacet) {
         final Trait trait = (Trait) scope.getEObjectByName(traitFacet.name.getText());
         return withinScope(scope.with(trait), traitScope -> {
-            traitFacet.attributeFacet().forEach(this::visitAttributeFacet);
-            traitFacet.descriptionFacet().forEach(this::visitDescriptionFacet);
-            traitFacet.displayNameFacet().forEach(this::visitDisplayNameFacet);
-            traitFacet.annotationFacet().forEach(this::visitAnnotationFacet);
-            traitFacet.securedByFacet().forEach(this::visitSecuredByFacet);
-            traitFacet.headersFacet().forEach(this::visitHeadersFacet);
-            traitFacet.queryParametersFacet().forEach(this::visitQueryParametersFacet);
-
-            traitFacet.bodyFacet().forEach(this::visitBodyFacet);
-            traitFacet.responsesFacet().forEach(this::visitResponsesFacet);
-
-            traitFacet.isFacet().forEach(this::visitIsFacet);
-
+            traitFacet.methodBaseFacet().forEach(this::visitMethodBaseFacet);
             return trait;
         });
     }
@@ -740,16 +728,7 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
         final String type = resourceTypeDeclarationFacet.name.getText();
         final EObject resourceType = scope.getEObjectByName(type);
         return withinScope(scope.with(resourceType), resourceTypeScope -> {
-            resourceTypeDeclarationFacet.attributeFacet().forEach(this::visitAttributeFacet);
-            resourceTypeDeclarationFacet.descriptionFacet().forEach(this::visitDescriptionFacet);
-            resourceTypeDeclarationFacet.displayNameFacet().forEach(this::visitDisplayNameFacet);
-            resourceTypeDeclarationFacet.annotationFacet().forEach(this::visitAnnotationFacet);
-            resourceTypeDeclarationFacet.securedByFacet().forEach(this::visitSecuredByFacet);
-            resourceTypeDeclarationFacet.isFacet().forEach(this::visitIsFacet);
-            resourceTypeDeclarationFacet.methodFacet().forEach(this::visitMethodFacet);
-            resourceTypeDeclarationFacet.uriParametersFacet().forEach(this::visitUriParametersFacet);
-
-            resourceTypeDeclarationFacet.resourceTypeFacet().forEach(this::visitResourceTypeFacet);
+            resourceTypeDeclarationFacet.resourceBaseFacet().forEach(this::visitResourceBaseFacet);
 
             return resourceType;
         });
@@ -770,20 +749,8 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
             methodsScope.setValue(method, methodFacet.getStart());
 
             withinScope(methodsScope.with(method), methodScope -> {
-                methodFacet.attributeFacet().forEach(this::visitAttributeFacet);
-                methodFacet.descriptionFacet().forEach(this::visitDescriptionFacet);
-                methodFacet.displayNameFacet().forEach(this::visitDisplayNameFacet);
-                methodFacet.annotationFacet().forEach(this::visitAnnotationFacet);
-                methodFacet.securedByFacet().forEach(this::visitSecuredByFacet);
-                methodFacet.headersFacet().forEach(this::visitHeadersFacet);
-                methodFacet.queryParametersFacet().forEach(this::visitQueryParametersFacet);
-
-                methodFacet.bodyFacet().forEach(this::visitBodyFacet);
-
-                methodFacet.responsesFacet().forEach(this::visitResponsesFacet);
-                methodFacet.isFacet().forEach(this::visitIsFacet);
-
-                return methodScope.getEObject();
+                methodFacet.methodBaseFacet().forEach(this::visitMethodBaseFacet);
+                return method;
             });
 
             return method;

@@ -115,18 +115,8 @@ public class ApiConstructor extends BaseConstructor {
             final UriTemplate relativeUri = (UriTemplate) ResourcesFactory.eINSTANCE.createFromString(ResourcesPackage.Literals.URI_TEMPLATE, resourceFacet.relativeUri.getText());
             resource.setRelativeUri(relativeUri);
             return withinScope(resourcesScope.with(resource), resourceScope -> {
-                resourceFacet.attributeFacet().forEach(this::visitAttributeFacet);
-                resourceFacet.descriptionFacet().forEach(this::visitDescriptionFacet);
-                resourceFacet.displayNameFacet().forEach(this::visitDisplayNameFacet);
-                resourceFacet.annotationFacet().forEach(this::visitAnnotationFacet);
-                resourceFacet.securedByFacet().forEach(this::visitSecuredByFacet);
-
-                resourceFacet.methodFacet().forEach(this::visitMethodFacet);
-                resourceFacet.uriParametersFacet().forEach(this::visitUriParametersFacet);
+                resourceFacet.resourceBaseFacet().forEach(this::visitResourceBaseFacet);
                 resourceFacet.resourceFacet().forEach(this::visitResourceFacet);
-
-                resourceFacet.isFacet().forEach(this::visitIsFacet);
-                resourceFacet.resourceTypeFacet().forEach(this::visitResourceTypeFacet);
 
                 return resource;
             });

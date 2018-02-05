@@ -57,52 +57,6 @@ traitsFacet:
         )
     ;
 
-traitFacet:
-    name=SCALAR
-        (
-            SCALAR
-            |   (
-                    MAP_START
-                    (
-                        bodyFacet
-                        | descriptionFacet
-                        | displayNameFacet
-                        | attributeFacet
-                        | headersFacet
-                        | queryParametersFacet
-                        | isFacet
-                        | annotationFacet
-                        | responsesFacet
-                        | securedByFacet
-                    )*
-                    MAP_END
-                )
-        )
-    ;
-
-resourceFacet:
-    relativeUri=RELATIVE_URI
-        (
-            SCALAR
-            |   (
-                    MAP_START
-                    (
-                        resourceFacet
-                        | descriptionFacet
-                        | displayNameFacet
-                        | methodFacet
-                        | attributeFacet
-                        | uriParametersFacet
-                        | annotationFacet
-                        | securedByFacet
-                        | resourceTypeFacet
-                        | isFacet
-                    )*
-                    MAP_END
-                )
-        )
-    ;
-
 resourceTypeFacet:
     'type' resourceTypeApplication
     ;
@@ -125,49 +79,75 @@ resourceTypeApplication:
     )
     ;
 
+resourceFacet:
+    relativeUri=RELATIVE_URI
+    (
+        SCALAR |
+        (
+            MAP_START
+                ( resourceBaseFacet | resourceFacet)*
+            MAP_END
+        )
+    )
+    ;
+
 resourceTypeDeclarationFacet:
     name=id
+    (
+        SCALAR |
         (
-            SCALAR
-            |   (
-                    MAP_START
-                    (
-                        methodFacet
-                        | attributeFacet
-                        | descriptionFacet
-                        | displayNameFacet
-                        | uriParametersFacet
-                        | annotationFacet
-                        | securedByFacet
-                        | resourceTypeFacet
-                        | isFacet
-                    )*
-                    MAP_END
-                )
+            MAP_START
+                resourceBaseFacet*
+            MAP_END
         )
+    )
+    ;
+
+resourceBaseFacet:
+    methodFacet
+    | attributeFacet
+    | descriptionFacet
+    | displayNameFacet
+    | uriParametersFacet
+    | annotationFacet
+    | securedByFacet
+    | resourceTypeFacet
+    | isFacet
     ;
 
 methodFacet:
     httpMethod
+    (
+        SCALAR |
         (
-            SCALAR
-            |   (
-                    MAP_START
-                    (
-                        bodyFacet
-                        | displayNameFacet
-                        | descriptionFacet
-                        | attributeFacet
-                        | headersFacet
-                        | queryParametersFacet
-                        | isFacet
-                        | annotationFacet
-                        | responsesFacet
-                        | securedByFacet
-                    )*
-                    MAP_END
-                )
+            MAP_START
+                methodBaseFacet*
+            MAP_END
         )
+    );
+
+traitFacet:
+    name=SCALAR
+    (
+        SCALAR |
+        (
+            MAP_START
+                methodBaseFacet*
+            MAP_END
+        )
+    );
+
+methodBaseFacet:
+    bodyFacet
+    | descriptionFacet
+    | displayNameFacet
+    | attributeFacet
+    | headersFacet
+    | queryParametersFacet
+    | isFacet
+    | annotationFacet
+    | responsesFacet
+    | securedByFacet
     ;
 
 isFacet:
