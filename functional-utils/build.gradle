@@ -1,3 +1,16 @@
+publishing {
+    publications {
+        Maven(MavenPublication) {
+            from components.java
+            artifactId 'functional-utils'
+
+            artifact sourceJar {
+                classifier 'sources'
+            }
+        }
+    }
+}
+
 dependencies {
     testCompile 'junit:junit:4.11'
 }
