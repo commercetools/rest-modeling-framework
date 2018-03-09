@@ -1,15 +1,28 @@
 buildscript {
     dependencies {
-        classpath "com.github.jengelman.gradle.plugins:shadow:1.2.3"
+        classpath 'com.github.jengelman.gradle.plugins:shadow:1.2.3'
     }
 }
 
 plugins {
-    id "org.xtext.builder" version "1.0.18"
-    id "antlr"
+    id 'org.xtext.builder' version '1.0.18'
+    id 'antlr'
 }
 
-apply plugin: "com.github.johnrengelman.shadow"
+apply plugin: 'com.github.johnrengelman.shadow'
+
+publishing {
+    publications {
+        Maven(MavenPublication) {
+            from components.java
+            artifactId 'raml-model'
+
+            artifact sourceJar {
+                classifier 'sources'
+            }
+        }
+    }
+}
 
 ext {
     xtextVersion = '2.10.0'
@@ -43,14 +56,14 @@ xtext {
 sourceSets {
     test {
         resources {
-            srcDirs += "$buildDir/resources/test/raml"
+            srcDirs += '$buildDir/resources/test/raml'
         }
     }
 }
 
 generateGrammarSource {
-    outputDirectory = file("src/main/java-gen/io/vrap/rmf/raml/persistence/antlr")
-    arguments += ["-visitor"]
+    outputDirectory = file('src/main/java-gen/io/vrap/rmf/raml/persistence/antlr')
+    arguments += ['-visitor']
 }
 
 clean {
@@ -77,7 +90,7 @@ dependencies {
     compile 'com.damnhandy:handy-uri-templates:2.1.6'
     compile 'com.google.guava:guava:23.3-jre'
 
-    antlr "org.antlr:antlr4:4.7"
+    antlr 'org.antlr:antlr4:4.7'
 
     xtextLanguages 'org.eclipse.jdt:org.eclipse.jdt.core:3.10.0'
     xtextLanguages 'org.eclipse.text:org.eclipse.text:3.5.101'

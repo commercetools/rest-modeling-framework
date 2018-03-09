@@ -1,28 +1,93 @@
 buildscript {
     repositories {
         mavenCentral()
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.0'
     }
 }
 
+apply plugin: 'com.jfrog.bintray'
 
 ext {
     versions = [
-            spock  : "1.1-groovy-2.4"
+            spock: "1.1-groovy-2.4"
     ]
 }
 
-subprojects {
+
+import java.text.SimpleDateFormat
+
+def globalVersion = new Version(currentVersion)
+
+class Version {
+    String originalVersion
+    String thisVersion
+    String status
+    Date buildTime
+
+    Version(String versionValue) {
+        buildTime = new Date()
+        originalVersion = versionValue
+        if (originalVersion.endsWith('-SNAPSHOT')) {
+            status = 'integration'
+            thisVersion = originalVersion.substring(0, originalVersion.length() - 'SNAPSHOT'.length()) + getTimestamp()
+        } else {
+            status = 'release'
+            thisVersion = versionValue
+        }
+    }
+
+    String getTimestamp() {
+        // Convert local file timestamp to UTC
+        def format = new SimpleDateFormat('yyyyMMddHHmmss')
+        format.setCalendar(Calendar.getInstance(TimeZone.getTimeZone('UTC')));
+        return format.format(buildTime)
+    }
+
+    String toString() {
+        thisVersion
+    }
+}
+
+allprojects {
     repositories {
         mavenCentral()
     }
 
-    group 'io.vrap.rmf'
-    version '1.0-SNAPSHOT'
+    group='io.vrap.rmf'
+    version=globalVersion
 
     apply plugin: 'java'
     apply plugin: 'idea'
     apply plugin: 'eclipse'
     apply plugin: 'groovy'
+    apply plugin: 'maven'
+    apply plugin: 'maven-publish'
+    apply plugin: 'java-library' // needed to make sure that transitive deps have 'compile' scope
+    apply plugin: 'com.jfrog.bintray'
+
+    task sourceJar(type: Jar) {
+        from sourceSets.main.allSource
+        classifier = 'sources'
+    }
+
+    bintray {
+        user = System.getenv('BINTRAY_USER')
+        key = System.getenv('BINTRAY_KEY')
+        publications = [ 'Maven' ]
+
+        publish = true
+
+        pkg {
+            repo = 'vrapio'
+            name = 'rmf'
+            userOrg = 'vrapio'
+            licenses = ['MIT']
+            vcsUrl = 'https://github.com/vrapio/rest-modeling-framework'
+        }
+    }
 
     sourceCompatibility = 1.8
 }
