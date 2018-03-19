@@ -1,0 +1,13 @@
+
+dependencies {
+    compile project(':functional-utils')
+
+    compile 'com.fasterxml.jackson.core:jackson-databind:2.9.1'
+    compile 'com.fasterxml.jackson.core:jackson-core:2.9.1'
+    compile 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.9.1'
+
+    compile 'org.yaml:snakeyaml:1.18'
+    compile 'com.google.guava:guava:23.3-jre'
+
+    testCompile "org.spockframework:spock-core:${versions.spock}"
+}
