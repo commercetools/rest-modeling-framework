@@ -56,12 +56,28 @@ class NodeMergerTest extends Specification {
         JsonNode target = node.at(JsonPointer.compile('/~1products'))
         JsonNode merged = merger.merge(source, target)
         then:
-        merged != null
+        JsonNode expected = parse('''\
+        type: collection
+        get:
+            description: override the description
+            responses:
+                200:
+                    body:
+                        application/json:
+            headers:
+                APIKey:
+        ''')
+        merged == expected
     }
 
     JsonNode parse(String input) {
         YAMLFactory factory = new YAMLFactory();
         String stripIndent = input.stripIndent()
         return new ObjectMapper().readTree(factory.createParser(stripIndent))
+    }
+
+    String serialize(JsonNode node) {
+        YAMLFactory factory = new YAMLFactory();
+        return new ObjectMapper(factory).writeValueAsString(node)
     }
 }

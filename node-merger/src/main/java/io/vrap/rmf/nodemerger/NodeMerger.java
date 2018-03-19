@@ -10,7 +10,6 @@ import java.util.Map;
 
 public class NodeMerger {
 
-    // pre condition: source != null &&
     public JsonNode merge(final JsonNode source, final JsonNode target) {
         if (source.getNodeType() != target.getNodeType()) {
             if (target.isNull()) {
