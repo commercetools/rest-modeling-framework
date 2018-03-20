@@ -46,6 +46,12 @@ class <builder.resourceType.name>UpdateBuilder extends BaseBuilder {
         return $this;
     }
 
+    public function reset()
+    {
+        $this->actions = [];
+        $this->resource = null;
+    }
+
     /**
      * Build <builder.updateType.typeName> and delete internal state
      * @return <builder.updateType.typeName>
@@ -61,8 +67,6 @@ class <builder.resourceType.name>UpdateBuilder extends BaseBuilder {
         ) {
             $update->setVersion($this->resource->getVersion());
         }
-        $this->actions = [];
-        $this->resource = null;
 
         return $update;
     }

@@ -40,7 +40,7 @@ class RequestBuilder extends Resource
         array $headers = [],
         $body = null,
         string $version = '1.1'
-    ) {
+    ): ApiRequest {
         return new ApiRequest($method, $uri, $headers, $body, $version);
     }
 
