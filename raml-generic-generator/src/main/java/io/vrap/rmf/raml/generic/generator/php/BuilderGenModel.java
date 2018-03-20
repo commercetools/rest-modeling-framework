@@ -21,6 +21,7 @@ public class BuilderGenModel {
     private final TypeGenModel resourceType;
     private final List<TypeGenModel> updates;
     private final TypeGenModel updateType;
+    private final TypeGenModel baseActionType;
     private final Method method;
 
     public BuilderGenModel(Method method) {
@@ -39,15 +40,19 @@ public class BuilderGenModel {
                 final List<AnyType> updateActions;
                 if (actionsType.getItems() instanceof UnionType) {
                     updateActions = ((UnionType)actionsType.getItems()).getOneOf().get(0).getSubTypes();
+                    baseActionType = new TypeGenModel(((UnionType)actionsType.getItems()).getOneOf().get(0));
                 } else {
                     updateActions = actionsType.getItems().getSubTypes();
+                    baseActionType = new TypeGenModel(actionsType.getItems());
                 }
                 updates.addAll(updateActions.stream().map(TypeGenModel::new).collect(Collectors.toList()));
             } else {
                 updateType = null;
+                baseActionType = null;
             }
         } else {
             updateType = null;
+            baseActionType = null;
         }
     }
 
@@ -63,6 +68,10 @@ public class BuilderGenModel {
 
     public TypeGenModel getUpdateType() {
         return updateType;
+    }
+
+    public TypeGenModel getBaseActionType() {
+        return baseActionType;
     }
 
     public List<TypeGenModel> getUpdates() {

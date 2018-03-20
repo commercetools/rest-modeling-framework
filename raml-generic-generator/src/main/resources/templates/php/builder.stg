@@ -10,6 +10,7 @@ updateBuilder(vendorName, builder)::=<<
 namespace <vendorName>\\Builder;
 
 use Commercetools\Base\BaseBuilder;
+<useTypeImport(vendorName, builder.baseActionType.import)>
 <builder.typeImports: {ti |<useTypeImport(vendorName, ti)>}>
 
 class <builder.resourceType.name>UpdateBuilder extends BaseBuilder {
@@ -24,6 +25,16 @@ class <builder.resourceType.name>UpdateBuilder extends BaseBuilder {
     private $actions = [];
 
     <builder.updates: {u |<update(u)>}>
+
+    /**
+     * @param <builder.baseActionType.name> $action
+     * @return $this;
+     */
+    public function addAction(<builder.baseActionType.name> $action)
+    {
+        $this->actions[] = $action;
+        return $this;
+    }
 
     /*
      * @param $action
