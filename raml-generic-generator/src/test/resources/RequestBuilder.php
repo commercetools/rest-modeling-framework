@@ -12,16 +12,16 @@ use Test\Client\ApiRequest;
 
 class RequestBuilder extends Resource
 {
-    public function __construct()
+    public function __construct(array $args = [])
     {
-        parent::__construct('');
+        parent::__construct('', $args);
     }
 
     /**
      * @return Resource0
      */
-    public function withProjectValue($project): Resource0 {
-        $args = array_merge($this->getArgs(), ['project' => $project]);
+    public function withProjectValue($project = null): Resource0 {
+        $args = array_merge($this->getArgs(), array_filter(['project' => $project], function($value) { return !is_null($value); }));
         return new Resource0($this->getUri() . '/{project}', $args);
     }
 

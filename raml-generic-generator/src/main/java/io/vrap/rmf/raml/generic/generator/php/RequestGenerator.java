@@ -195,8 +195,8 @@ public class RequestGenerator extends AbstractTemplateGenerator {
                         case "params":
                             if (parts.size() > 0) {
                                 return parts.stream().map(
-                                        uriTemplateExpression -> uriTemplateExpression.getVarSpecs().stream().map(VarSpec::getVariableName).collect(Collectors.joining(", $"))
-                                ).collect(Collectors.joining(", $"));
+                                        uriTemplateExpression -> uriTemplateExpression.getVarSpecs().stream().map(VarSpec::getVariableName).collect(Collectors.joining(" = null, $"))
+                                ).collect(Collectors.joining(" = null, $"));
                             }
                             return "";
                         case "paramArray":

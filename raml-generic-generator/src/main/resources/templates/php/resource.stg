@@ -11,9 +11,9 @@ use <vendorName>\\Client\\ApiRequest;
 
 class RequestBuilder extends Resource
 {
-    public function __construct()
+    public function __construct(array $args = [])
     {
-        parent::__construct('');
+        parent::__construct('', $args);
     }
 
     <resource.resources: {r |<resourceMethod(r)>}>
@@ -142,8 +142,8 @@ resourceMethod(resource) ::=<<
 /**
  * @return Resource<resource.index>
  */
-public function <resource.relativeUri; format="methodName">(<if(resource.hasParams)>$<resource.relativeUri; format="params"><endif>): Resource<resource.index> {
-    <if(resource.hasParams)>$args = array_merge($this->getArgs(), [<resource.relativeUri; format="paramArray">]);<endif>
+public function <resource.relativeUri; format="methodName">(<if(resource.hasParams)>$<resource.relativeUri; format="params"> = null<endif>): Resource<resource.index> {
+    <if(resource.hasParams)>$args = array_merge($this->getArgs(), array_filter([<resource.relativeUri; format="paramArray">], function($value) { return !is_null($value); }));<endif>
     return new Resource<resource.index>($this->getUri() . '<resource.relativeUri.template>', <if(resource.hasParams)>$args<else>$this->getArgs()<endif>);
 }
 
