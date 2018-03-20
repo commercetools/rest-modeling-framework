@@ -46,35 +46,4 @@ class Resource
     {
         return $this->args;
     }
-
-    /**
-     * @param string $method
-     * @param string $uri
-     * @param mixed $body
-     * @param array $options
-     * @param string $requestClass
-     * @return ApiRequest
-     */
-    final protected function buildRequest(
-        string $method,
-        string $uri,
-        $body = null,
-        array $options = [],
-        string $requestClass = ApiRequest::class
-    ): ApiRequest {
-        $headers = isset($options['headers']) ? $options['headers'] : [];
-        /**
-         * @var ApiRequest $request
-         */
-        $request = new $requestClass($method, $uri, $headers, $body);
-
-        if (isset($options['query'])) {
-            ksort($options['query']);
-            $uri = $request->getUri()->withQuery(Psr7\build_query($options['query']));
-            $request = $request->withUri($uri);
-        }
-
-
-        return $request;
-    }
 }
