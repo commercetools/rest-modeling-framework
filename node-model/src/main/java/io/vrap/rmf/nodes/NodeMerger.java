@@ -1,4 +1,4 @@
-package io.vrap.rmf.nodemerger;
+package io.vrap.rmf.nodes;
 
 
 import com.fasterxml.jackson.databind.JsonNode;
