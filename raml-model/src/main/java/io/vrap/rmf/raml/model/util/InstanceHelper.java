@@ -36,7 +36,7 @@ public interface InstanceHelper {
      * @return the parsed and validated instance
      */
     static RamlModelResult<Instance> parseAndValidate(final String text, final AnyType type) {
-        final Instance instance = parse(text, type.eResource().getURI().toFileString());
+        final Instance instance = parse(text, (type.eResource() != null && type.eResource().getURI() != null ? type.eResource().getURI().toFileString() : null));
 
         final List<Resource.Diagnostic> validationResults = validate(instance, type).stream()
                 .map(RamlDiagnostic::of)
