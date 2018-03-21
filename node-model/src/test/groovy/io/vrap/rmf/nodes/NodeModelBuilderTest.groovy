@@ -1,5 +1,7 @@
 package io.vrap.rmf.nodes
 
+import io.vrap.rmf.nodes.antlr.RamlTokenProvider
+import org.eclipse.emf.ecore.util.EcoreUtil
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -20,6 +22,8 @@ class NodeModelBuilderTest extends Specification {
         objectNode.properties.size() == 1
         objectNode.properties[0].key instanceof StringNode
         objectNode.properties[0].value instanceof StringNode
+
+        EcoreUtil.getExistingAdapter(objectNode, RamlTokenProvider.class) != null
     }
 
     def "parse json array"() {
@@ -33,6 +37,8 @@ class NodeModelBuilderTest extends Specification {
         arrayNode.elements.size() == 2
         arrayNode.elements[0] instanceof StringNode
         arrayNode.elements[1] instanceof StringNode
+
+        EcoreUtil.getExistingAdapter(arrayNode, RamlTokenProvider.class) != null
     }
 
     def "parse yaml object"() {
@@ -46,6 +52,8 @@ class NodeModelBuilderTest extends Specification {
         objectNode.properties.size() == 1
         objectNode.properties[0].key instanceof StringNode
         objectNode.properties[0].value instanceof StringNode
+
+        EcoreUtil.getExistingAdapter(objectNode, RamlTokenProvider.class) != null
     }
 
     def "parse yaml array"() {
@@ -60,5 +68,7 @@ class NodeModelBuilderTest extends Specification {
         arrayNode.elements.size() == 2
         arrayNode.elements[0] instanceof StringNode
         arrayNode.elements[1] instanceof StringNode
+
+        EcoreUtil.getExistingAdapter(arrayNode, RamlTokenProvider.class) != null
     }
 }
