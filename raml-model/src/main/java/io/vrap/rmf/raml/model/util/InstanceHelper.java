@@ -36,7 +36,7 @@ public interface InstanceHelper {
      * @return the parsed and validated instance
      */
     static RamlModelResult<Instance> parseAndValidate(final String text, final AnyType type) {
-        final Instance instance = parse(text);
+        final Instance instance = parse(text, type.eResource().getURI().toFileString());
 
         final List<Resource.Diagnostic> validationResults = validate(instance, type).stream()
                 .map(RamlDiagnostic::of)
@@ -46,9 +46,13 @@ public interface InstanceHelper {
     }
 
     static Instance parse(final String text) {
+        return parse(text, null);
+    }
+
+    static Instance parse(final String text, String resource) {
         final ResourceSet resourceSet = new RamlResourceSet();
         final URIConverter uriConverter = resourceSet.getURIConverter();
-        final URI uri = URI.createURI(UUID.randomUUID() + ".raml");
+        final URI uri = URI.createURI(resource == null ? UUID.randomUUID() + ".raml": resource);
         final RAMLCustomLexer lexer = new RAMLCustomLexer(text, uri, uriConverter);
         final TokenStream tokenStream = new CommonTokenStream(lexer);
         final RAMLParser parser = new RAMLParser(tokenStream);
@@ -57,9 +61,13 @@ public interface InstanceHelper {
     }
 
     static Instance parseJson(final String text) {
+        return parseJson(text, null);
+    }
+
+    static Instance parseJson(final String text, String resource) {
         final ResourceSet resourceSet = new RamlResourceSet();
         final URIConverter uriConverter = resourceSet.getURIConverter();
-        final URI uri = URI.createURI(UUID.randomUUID() + ".json");
+        final URI uri = URI.createURI(resource == null ? UUID.randomUUID() + ".json": resource);
         final RAMLCustomLexer lexer = new RAMLCustomLexer(text, uri, uriConverter);
         final TokenStream tokenStream = new CommonTokenStream(lexer);
         final RAMLParser parser = new RAMLParser(tokenStream);
