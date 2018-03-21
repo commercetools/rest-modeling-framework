@@ -40,9 +40,15 @@ public class Helper {
                 outputPath,
                 TrueFileFilter.INSTANCE,
                 FileFilterUtils.notFileFilter(
-                        FileFilterUtils.and(
-                                FileFilterUtils.directoryFileFilter(),
-                                FileFilterUtils.nameFileFilter("vendor")
+                        FileFilterUtils.or(
+                            FileFilterUtils.and(
+                                    FileFilterUtils.directoryFileFilter(),
+                                    FileFilterUtils.nameFileFilter("vendor")
+                            ),
+                            FileFilterUtils.and(
+                                    FileFilterUtils.directoryFileFilter(),
+                                    FileFilterUtils.nameFileFilter(".git")
+                            )
                         )
                 )
         ).stream().filter(file -> !generatedFiles.contains(file)).collect(Collectors.toSet());

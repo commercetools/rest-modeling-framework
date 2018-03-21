@@ -1,6 +1,7 @@
 package io.vrap.rmf.raml.generic.generator;
 
 import com.google.common.collect.Lists;
+import io.vrap.rmf.raml.generic.generator.php.BuilderGenerator;
 import io.vrap.rmf.raml.model.modules.Api;
 import io.vrap.rmf.raml.model.types.*;
 import io.vrap.rmf.raml.model.types.util.TypesSwitch;
@@ -188,6 +189,9 @@ public class TypeGenModel {
             if (getDiscriminator() != null && getPackage().getHasPackage()) {
                 uses.add(new ImportGenModel(new PackageGenModel(TYPES)));
             }
+            if (getUpdateType() != null) {
+                uses.add(new ImportGenModel(new PackageGenModel(BuilderGenerator.BUILDER), getUpdateType().getName() + BuilderGenerator.BUILDER));
+            }
             return uses;
         }
         return null;
@@ -227,6 +231,15 @@ public class TypeGenModel {
     public Api getApi()
     {
         return GeneratorHelper.getParent(type, Api.class);
+    }
+
+    @Nullable
+    public TypeGenModel getUpdateType() {
+        Annotation updateTypeAnnotation = type.getAnnotation("updateType");
+        if (updateTypeAnnotation != null) {
+            return new TypeGenModel(getApi().getType(((StringInstance)updateTypeAnnotation.getValue()).getValue()));
+        }
+        return null;
     }
 
     private class BuiltinParentVisitor extends TypesSwitch<Boolean> {

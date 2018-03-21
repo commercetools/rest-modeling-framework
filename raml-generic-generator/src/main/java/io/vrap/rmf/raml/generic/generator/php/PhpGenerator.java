@@ -45,21 +45,5 @@ public class PhpGenerator implements Generator {
         BuilderGenerator builderGenerator = new BuilderGenerator(vendorName);
         f.addAll(builderGenerator.generate(api, new File(outputPath, SRC_DIR + "/" + BuilderGenerator.BUILDER)));
         Helper.deleteObsoleteFiles(outputPath, f);
-        Collection<File> files = FileUtils.listFiles(
-                outputPath,
-                TrueFileFilter.INSTANCE,
-                FileFilterUtils.notFileFilter(
-                        FileFilterUtils.and(
-                                FileFilterUtils.directoryFileFilter(),
-                                FileFilterUtils.nameFileFilter("vendor")
-                        )
-                )
-        ).stream().filter(file -> !f.contains(file)).collect(Collectors.toSet());
-
-        for (File file : files) {
-            if (file.isFile()) {
-                Files.deleteIfExists(file.toPath());
-            }
-        }
     }
 }

@@ -49,6 +49,19 @@ class <type.name>Model extends <if(!type.hasBuiltinParent)><type.parent.name>Mod
         return $data;
     }
     <endif>
+    <if(type.updateType)>
+
+    /**
+     * @return <type.updateType.name>Builder
+     */
+    public function update()
+    {
+        $builder = new <type.updateType.name>Builder();
+        $builder->setMapper($this->getMapper());
+        $builder->with($this);
+        return $builder;
+    }
+    <endif>
     <if(type.patternProperties)>
 
     private function validKey(string $key): bool

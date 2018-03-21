@@ -28,6 +28,12 @@ interface <type.name> extends <if(!type.hasBuiltinParent)><type.parent.name><els
     public function get(string $key);
     public function set(string $key, $value);
     <endif>
+    <if(type.updateType)>
+    /**
+     * @return <type.updateType.name>Builder
+     */
+    public function update();
+    <endif>
 }
 
 >>
