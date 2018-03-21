@@ -7,6 +7,8 @@ import io.vrap.rmf.raml.model.types.Instance;
 import io.vrap.rmf.raml.persistence.RamlResourceSet;
 import io.vrap.rmf.raml.persistence.antlr.RAMLCustomLexer;
 import io.vrap.rmf.raml.persistence.antlr.RAMLParser;
+import io.vrap.rmf.raml.persistence.antlr.RamlToken;
+import io.vrap.rmf.raml.persistence.antlr.RamlTokenProvider;
 import io.vrap.rmf.raml.persistence.constructor.InstanceConstructor;
 import io.vrap.rmf.raml.persistence.constructor.Scope;
 import io.vrap.rmf.raml.validation.InstanceValidator;
@@ -14,9 +16,11 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.TokenStream;
 import org.eclipse.emf.common.util.Diagnostic;
 import org.eclipse.emf.common.util.URI;
+import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.URIConverter;
+import org.eclipse.emf.ecore.util.EcoreUtil;
 
 import java.util.List;
 import java.util.UUID;
@@ -36,7 +40,7 @@ public interface InstanceHelper {
      * @return the parsed and validated instance
      */
     static RamlModelResult<Instance> parseAndValidate(final String text, final AnyType type) {
-        final Instance instance = parse(text, (type.eResource() != null && type.eResource().getURI() != null ? type.eResource().getURI().toFileString() : null));
+        final Instance instance = parse(text, resourceFile(type));
 
         final List<Resource.Diagnostic> validationResults = validate(instance, type).stream()
                 .map(RamlDiagnostic::of)
@@ -77,5 +81,16 @@ public interface InstanceHelper {
 
     static List<Diagnostic> validate(final Instance instance, final AnyType type) {
         return new InstanceValidator().validate(instance, type);
+    }
+
+    static String resourceFile(EObject object) {
+        String source = null;
+        final RamlTokenProvider ramlTokenProvider = (RamlTokenProvider) EcoreUtil.getExistingAdapter(object, RamlTokenProvider.class);
+        if (ramlTokenProvider != null) {
+            final RamlToken ramlToken = ramlTokenProvider.get();
+            source = ramlToken.getLocation();
+        }
+
+        return source;
     }
 }
