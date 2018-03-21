@@ -22,36 +22,26 @@ public class BuilderGenModel {
     private final List<TypeGenModel> updates;
     private final TypeGenModel updateType;
     private final TypeGenModel baseActionType;
-    private final Method method;
 
-    public BuilderGenModel(Method method) {
-        this.method = method;
-        RequestGenModel model = new RequestGenModel(method);
+    public BuilderGenModel(AnyType resourceType) {
 
-        resourceType = model.getReturnType();
-        Body body = model.getFirstBodyType();
+        this.resourceType = new TypeGenModel(resourceType);
+        updateType = this.resourceType.getUpdateType();
 
         updates = Lists.newArrayList();
-        if (body != null && body.getType() instanceof ObjectType) {
-            final Property actions = ((ObjectType) body.getType()).getProperty("actions");
-            if (actions != null) {
-                updateType = new TypeGenModel(body.getType());
-                final ArrayType actionsType = (ArrayType)actions.getType();
-                final List<AnyType> updateActions;
-                if (actionsType.getItems() instanceof UnionType) {
-                    updateActions = ((UnionType)actionsType.getItems()).getOneOf().get(0).getSubTypes();
-                    baseActionType = new TypeGenModel(((UnionType)actionsType.getItems()).getOneOf().get(0));
-                } else {
-                    updateActions = actionsType.getItems().getSubTypes();
-                    baseActionType = new TypeGenModel(actionsType.getItems());
-                }
-                updates.addAll(updateActions.stream().map(TypeGenModel::new).collect(Collectors.toList()));
+        final Property actions = ((ObjectType)updateType.getType()).getProperty("actions");
+        if (actions != null) {
+            final ArrayType actionsType = (ArrayType)actions.getType();
+            final List<AnyType> updateActions;
+            if (actionsType.getItems() instanceof UnionType) {
+                updateActions = ((UnionType)actionsType.getItems()).getOneOf().get(0).getSubTypes();
+                baseActionType = new TypeGenModel(((UnionType)actionsType.getItems()).getOneOf().get(0));
             } else {
-                updateType = null;
-                baseActionType = null;
+                updateActions = actionsType.getItems().getSubTypes();
+                baseActionType = new TypeGenModel(actionsType.getItems());
             }
+            updates.addAll(updateActions.stream().map(TypeGenModel::new).collect(Collectors.toList()));
         } else {
-            updateType = null;
             baseActionType = null;
         }
     }
