@@ -120,11 +120,11 @@ resource(vendorName, resource) ::=<<
 namespace <vendorName>\\<resource.package.parts; separator="\\">;
 
 use <vendorName>\\Client\\Resource;
-<resource.methods: {m |<methodUse(m)>}>
 <if (resource.updateBuilder)>
 use Commercetools\Base\MapperAware;
 <resource.updateBuilder.builderImports: {bi |<useTypeImport(vendorName, bi)>}>
 <endif>
+<resource.methods: {m |<methodUse(m)>}>
 
 class Resource<resource.index> extends Resource
 {
@@ -133,8 +133,8 @@ class Resource<resource.index> extends Resource
     <endif>
 
     <resource.methods: {m |<(m.method.method)(m)>}>
-
     <if(resource.updateBuilder)>
+
     public function update(<resource.updateBuilder.resourceType.name> $resource)
     {
         $builder = new <resource.updateBuilder.updateType.name>Builder(function (<resource.updateBuilder.updateType.name>Builder $builder) { return $this<if(resource.updateBuilder.hasId)>->withIDValue($builder->getResource()->getId())<endif>->post($builder->build()); });
