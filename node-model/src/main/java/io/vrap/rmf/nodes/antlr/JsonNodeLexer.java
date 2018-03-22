@@ -79,7 +79,7 @@ class JsonNodeLexer implements TokenSource {
                     case VALUE_FALSE:
                         return createToken(NodeParser.BOOL, "false");
                     case VALUE_NULL:
-                        return createToken(NodeParser.STRING, "null");
+                        return createToken(NodeParser.NULL, "null");
                     case VALUE_STRING:
                         return createToken(NodeParser.STRING, parser.getText());
                     default:

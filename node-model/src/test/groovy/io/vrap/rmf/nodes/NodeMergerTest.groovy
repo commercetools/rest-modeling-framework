@@ -1,9 +1,6 @@
 package io.vrap.rmf.nodes
 
-import com.fasterxml.jackson.core.JsonPointer
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
+import org.eclipse.emf.ecore.util.EcoreUtil
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -13,51 +10,45 @@ class NodeMergerTest extends Specification {
 
     def "simple merge"() {
         when:
-        JsonNode source = parse('''\
+        Node source = parse('''\
         description: source
         type: string
         ''')
-        JsonNode target = parse('''\
+        Node target = parse('''\
         description:
         type:
             item: string
         ''')
-        JsonNode merged = merger.merge(source, target)
+        Node merged = merger.merge(source, target)
         then:
-        JsonNode description = merged.get('description')
-
-        description != null
-        description.asText() == 'source'
-
-        JsonNode type = merged.get('type')
-        type != null
+        Node expected = parse('''\
+        description: source
+        type:
+            item: string
+        ''')
+        EcoreUtil.equals(merged, expected) == true
     }
 
     def "merge resource types from RAML spec"() {
         when:
-        JsonNode node = parse('''\
-        resourceTypes:
-            collection:
-                get:
-                    description: a list
-                    headers:
-                        APIKey:
-        /products:
-            type: collection
-            get:
-                description: override the description
-                responses:
-                    200:
-                        body:
-                            application/json:
+        Node source = parse('''\
+        get:
+            description: a description
+            headers:
+                APIKey:
         ''')
-
-        JsonNode source = node.at(JsonPointer.compile('/resourceTypes/collection'))
-        JsonNode target = node.at(JsonPointer.compile('/~1products'))
-        JsonNode merged = merger.merge(source, target)
+        Node target = parse('''\
+        get:
+            description: override the description
+            responses:
+                200:
+                    body:
+                        application/json:
+        ''')
+        Node merged = merger.merge(source, target)
         then:
-        JsonNode expected = parse('''\
-        type: collection
+        then:
+        Node expected = parse('''\
         get:
             description: override the description
             responses:
@@ -67,17 +58,11 @@ class NodeMergerTest extends Specification {
             headers:
                 APIKey:
         ''')
-        merged == expected
+        EcoreUtil.equals(merged, expected) == true
     }
 
-    JsonNode parse(String input) {
-        YAMLFactory factory = new YAMLFactory();
+    Node parse(String input) {
         String stripIndent = input.stripIndent()
-        return new ObjectMapper().readTree(factory.createParser(stripIndent))
-    }
-
-    String serialize(JsonNode node) {
-        YAMLFactory factory = new YAMLFactory();
-        return new ObjectMapper(factory).writeValueAsString(node)
+        return new NodeModelBuilder().parseYaml(stripIndent)
     }
 }

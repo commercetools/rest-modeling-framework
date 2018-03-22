@@ -25,6 +25,14 @@ class ObjectNode extends ContainerNode {
      * The properties of this object.
      */
     contains Property[] properties
+
+    /*
+     * Returns the property with the given key value.
+     * @return property with the given key value or null
+     */
+    op Property getProperty(Object keyValue) {
+        properties.findFirst[it.key?.value == keyValue]
+    }
 }
 
 class Property {
@@ -55,8 +63,10 @@ class NumberNode extends ValueNode<BigDecimal> {
 
 }
 
-
 class BooleanNode extends ValueNode<Boolean> {
 
 }
 
+class NullNode extends ValueNode<Object> {
+
+}

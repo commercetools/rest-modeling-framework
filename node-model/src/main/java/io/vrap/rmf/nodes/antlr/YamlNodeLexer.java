@@ -87,6 +87,7 @@ class YamlNodeLexer implements TokenSource {
         scalarTagTokenTypes.put(Tag.FLOAT, NodeParser.FLOAT);
         scalarTagTokenTypes.put(Tag.INT, NodeParser.INT);
         scalarTagTokenTypes.put(Tag.BOOL, NodeParser.BOOL);
+        scalarTagTokenTypes.put(Tag.NULL, NodeParser.NULL);
     }
 
     private void loadEvents(final URI uri) {

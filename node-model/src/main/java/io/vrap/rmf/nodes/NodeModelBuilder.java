@@ -177,6 +177,14 @@ public class NodeModelBuilder {
 
                 node = integerNode;
             }
+            if (ctx.NULL() != null) {
+                final NullNode nullNode = NodesFactory.eINSTANCE.createNullNode();
+
+                token = (NodeToken) ctx.NULL().getSymbol();
+                nullNode.eAdapters().add(NodeParserAdapter.of(token));
+
+                node = nullNode;
+            }
             if (token != null) {
                 token.setNode(node);
             }
