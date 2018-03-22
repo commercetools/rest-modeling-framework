@@ -53,6 +53,7 @@ public class BuilderGenModel {
                 baseActionType = new TypeGenModel(actionsType.getItems());
             }
             updates.addAll(updateActions.stream().map(TypeGenModel::new).collect(Collectors.toList()));
+            updates.sort(Comparator.comparing(TypeGenModel::getName, Comparator.naturalOrder()));
         } else {
             baseActionType = null;
         }
