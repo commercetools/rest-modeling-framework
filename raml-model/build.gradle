@@ -72,6 +72,8 @@ clean {
 
 dependencies {
     compile project(':functional-utils')
+    compile project(':node-model')
+    
     compile 'org.yaml:snakeyaml:1.18'
 
     compile 'com.fasterxml.jackson.core:jackson-databind:2.9.1'

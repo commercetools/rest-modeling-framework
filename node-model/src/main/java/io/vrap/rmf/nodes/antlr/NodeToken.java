@@ -1,5 +1,6 @@
 package io.vrap.rmf.nodes.antlr;
 
+import io.vrap.rmf.nodes.Node;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CommonToken;
 import org.antlr.v4.runtime.Recognizer;
@@ -9,16 +10,17 @@ import org.antlr.v4.runtime.misc.Pair;
 /**
  * Common token with additional location info.
  */
-public class RamlToken extends CommonToken {
+public class NodeToken extends CommonToken {
     private String location;
     private String includeUri;
+    private Node node;
 
-    public RamlToken(final Pair<TokenSource, CharStream> source,
+    public NodeToken(final Pair<TokenSource, CharStream> source,
                      final int type, final int channel, final int start, final int stop) {
         super(source, type, channel, start, stop);
     }
 
-    public RamlToken(int type, String text) {
+    public NodeToken(int type, String text) {
         super(type, text);
     }
 
@@ -42,6 +44,14 @@ public class RamlToken extends CommonToken {
 
     void setIncludeUri(final String includeUri) {
         this.includeUri = includeUri;
+    }
+
+    public Node getNode() {
+        return node;
+    }
+
+    public void setNode(final Node node) {
+        this.node = node;
     }
 
     @Override

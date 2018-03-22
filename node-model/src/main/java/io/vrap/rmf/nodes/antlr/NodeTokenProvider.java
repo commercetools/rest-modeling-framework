@@ -1,16 +1,16 @@
 package io.vrap.rmf.nodes.antlr;
 
 /**
- * Provides an start and end token {@link RamlToken} for an object.
+ * Provides an start and end token {@link NodeToken} for an object.
  */
-public interface RamlTokenProvider {
+public interface NodeTokenProvider {
     /**
      * @return the start token associated with this object or null
      */
-    RamlToken getStart();
+    NodeToken getStart();
 
     /**
      * @return the stop token associated with this object or null
      */
-    RamlToken getStop();
+    NodeToken getStop();
 }

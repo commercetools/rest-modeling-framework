@@ -13,9 +13,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
-class JsonLexer implements TokenSource {
+/**
+ * A node lexer that can tokenize json.
+ */
+class JsonNodeLexer implements TokenSource {
     private final URI uri;
-    private RamlTokenFactory factory;
+    private NodeTokenFactory factory;
     private final JsonFactory jsonFactory;
     private final JsonParser parser;
 
@@ -24,9 +27,9 @@ class JsonLexer implements TokenSource {
     private final int listStart = NodeParser.LIST_START;
     private final int listEnd = NodeParser.LIST_END;
 
-    private JsonLexer(InputStream input, final URI uri) {
+    private JsonNodeLexer(InputStream input, final URI uri) {
         this.uri = uri;
-        factory = RamlTokenFactory.DEFAULT;
+        factory = NodeTokenFactory.DEFAULT;
         jsonFactory = new JsonFactory();
         try {
             parser = jsonFactory.createParser(input);
@@ -35,11 +38,11 @@ class JsonLexer implements TokenSource {
         }
     }
 
-    public JsonLexer(final String input, final URI uri) {
+    public JsonNodeLexer(final String input, final URI uri) {
         this(new ByteArrayInputStream(input.getBytes(StandardCharsets.UTF_8)), uri);
     }
 
-    public JsonLexer(final URI uri, final URIConverter uriConverter) {
+    public JsonNodeLexer(final URI uri, final URIConverter uriConverter) {
         this(convertUriToStream(uri, uriConverter), uri);
     }
 
@@ -113,7 +116,7 @@ class JsonLexer implements TokenSource {
 
     @Override
     public void setTokenFactory(final TokenFactory<?> factory) {
-        this.factory = (RamlTokenFactory) factory;
+        this.factory = (NodeTokenFactory) factory;
     }
 
     @Override
@@ -124,11 +127,11 @@ class JsonLexer implements TokenSource {
     private Token createToken(final int type, final String text) {
         final Pair<TokenSource, CharStream> source = new Pair<>(this, null);
 
-        final RamlToken ramlToken = factory.create(source, type, text, Token.DEFAULT_CHANNEL,
+        final NodeToken nodeToken = factory.create(source, type, text, Token.DEFAULT_CHANNEL,
                 0, 0,
                 getLine(), getCharPositionInLine());
-        ramlToken.setLocation(uri.toString());
+        nodeToken.setLocation(uri.toString());
 
-        return ramlToken;
+        return nodeToken;
     }
 }

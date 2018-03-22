@@ -3,27 +3,26 @@ package io.vrap.rmf.nodes.antlr;
 import org.antlr.v4.runtime.*;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.URIConverter;
-import org.yaml.snakeyaml.events.Event;
 
 import java.util.Stack;
 
 /**
- * An antlr lexer that uses snakeyaml events {@link Event} to
- * generate antlr tokens.
+ * An antlr lexer that delegates to {@link JsonNodeLexer} or {@link YamlNodeLexer}
+ * depending on the file/content type.
  */
-public class RAMLCustomLexer implements TokenSource {
+public class NodeLexer implements TokenSource {
     private final Stack<TokenSource> currentLexer = new Stack<>();
     private final Stack<URI> uri = new Stack<>();
     private final URIConverter uriConverter;
 
-    public RAMLCustomLexer(final URI uri, final URIConverter uriConverter) {
+    public NodeLexer(final URI uri, final URIConverter uriConverter) {
         this.uri.push(uri);
         this.uriConverter = uriConverter;
         currentLexer.push(createLexer(uri));
     }
 
 
-    public RAMLCustomLexer(final String input, final URI uri, final URIConverter uriConverter) {
+    public NodeLexer(final String input, final URI uri, final URIConverter uriConverter) {
         this.uri.push(uri);
         this.uriConverter = uriConverter;
         currentLexer.push(createInputLexer(input, uri));
@@ -32,18 +31,18 @@ public class RAMLCustomLexer implements TokenSource {
     private TokenSource createInputLexer(final String input, final URI uri) {
         switch (uri.fileExtension()) {
             case "json":
-                return new JsonLexer(input, uri);
+                return new JsonNodeLexer(input, uri);
             default:
-                return new YamlLexer(input, uri, uriConverter);
+                return new YamlNodeLexer(input, uri, uriConverter);
         }
     }
 
     private TokenSource createLexer(final URI uri) {
         switch (uri.fileExtension()) {
             case "json":
-                return new JsonLexer(uri, uriConverter);
+                return new JsonNodeLexer(uri, uriConverter);
             default:
-                return new YamlLexer(uri, uriConverter);
+                return new YamlNodeLexer(uri, uriConverter);
         }
     }
 
@@ -59,7 +58,7 @@ public class RAMLCustomLexer implements TokenSource {
 
     @Override
     public Token nextToken() {
-        final RamlToken token = (RamlToken) currentLexer.peek().nextToken();
+        final NodeToken token = (NodeToken) currentLexer.peek().nextToken();
         if (token.getIncludeUri() != null) {
             final URI resolvedIncludeUri = resolve(token.getIncludeUri());
             if (uri.contains(resolvedIncludeUri)) {

@@ -6,6 +6,7 @@ import org.antlr.v4.runtime.TokenStream;
 import org.eclipse.emf.common.notify.impl.AdapterImpl;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.URI;
+import org.eclipse.emf.ecore.resource.URIConverter;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 
 import java.math.BigDecimal;
@@ -14,12 +15,29 @@ import java.math.BigDecimal;
  * Provides methods to build a node {@link Node} model from a string
  */
 public class NodeModelBuilder {
+    private final URI uri;
+    private final URIConverter uriConverter;
 
-    public Node parse(final String input) {
-        final ResourceSetImpl resourceSet = new ResourceSetImpl();
-        final URI uri = URI.createFileURI("input.json");
+    public NodeModelBuilder() {
+        this(null, null);
+    }
 
-        final RAMLCustomLexer lexer = new RAMLCustomLexer(input, uri, resourceSet.getURIConverter());
+    /**
+     * @param uri          the uri to parse a node from
+     * @param uriConverter the uri converter
+     */
+    public NodeModelBuilder(final URI uri, final URIConverter uriConverter) {
+        this.uri = uri;
+        this.uriConverter = uriConverter;
+    }
+
+    /**
+     * Parses a node instance from the given uri using the given uri converter.
+     *
+     * @return the parsed node
+     */
+    public Node parse() {
+        final NodeLexer lexer = new NodeLexer(uri, uriConverter);
         final TokenStream tokenStream = new CommonTokenStream(lexer);
         final NodeParser nodeParser = new NodeParser(tokenStream);
 
@@ -40,7 +58,7 @@ public class NodeModelBuilder {
         final ResourceSetImpl resourceSet = new ResourceSetImpl();
         final URI uri = URI.createFileURI("input.json");
 
-        final RAMLCustomLexer lexer = new RAMLCustomLexer(input, uri, resourceSet.getURIConverter());
+        final NodeLexer lexer = new NodeLexer(input, uri, resourceSet.getURIConverter());
         final TokenStream tokenStream = new CommonTokenStream(lexer);
         final NodeParser nodeParser = new NodeParser(tokenStream);
 
@@ -61,7 +79,7 @@ public class NodeModelBuilder {
         final ResourceSetImpl resourceSet = new ResourceSetImpl();
         final URI uri = URI.createFileURI("input.yaml");
 
-        final RAMLCustomLexer lexer = new RAMLCustomLexer(input, uri, resourceSet.getURIConverter());
+        final NodeLexer lexer = new NodeLexer(input, uri, resourceSet.getURIConverter());
         final TokenStream tokenStream = new CommonTokenStream(lexer);
         final NodeParser nodeParser = new NodeParser(tokenStream);
 
@@ -77,8 +95,13 @@ public class NodeModelBuilder {
         @Override
         public Node visitArrayNode(final NodeParser.ArrayNodeContext ctx) {
             final ArrayNode arrayNode = NodesFactory.eINSTANCE.createArrayNode();
-            final RamlToken start = (RamlToken) ctx.LIST_START().getSymbol();
-            final RamlToken stop = (RamlToken) ctx.LIST_END().getSymbol();
+
+            final NodeToken start = (NodeToken) ctx.LIST_START().getSymbol();
+            start.setNode(arrayNode);
+
+            final NodeToken stop = (NodeToken) ctx.LIST_END().getSymbol();
+            stop.setNode(arrayNode);
+
             arrayNode.eAdapters().add(NodeParserAdapter.of(start, stop));
 
             ctx.node().stream()
@@ -91,8 +114,13 @@ public class NodeModelBuilder {
         @Override
         public Node visitObjectNode(final NodeParser.ObjectNodeContext ctx) {
             final ObjectNode objectNode = NodesFactory.eINSTANCE.createObjectNode();
-            final RamlToken start = (RamlToken) ctx.MAP_START().getSymbol();
-            final RamlToken stop = (RamlToken) ctx.MAP_END().getSymbol();
+
+            final NodeToken start = (NodeToken) ctx.MAP_START().getSymbol();
+            start.setNode(objectNode);
+
+            final NodeToken stop = (NodeToken) ctx.MAP_END().getSymbol();
+            stop.setNode(objectNode);
+
             objectNode.eAdapters().add(NodeParserAdapter.of(start, stop));
 
             final EList<Property> properties = objectNode.getProperties();
@@ -112,11 +140,12 @@ public class NodeModelBuilder {
         @Override
         public Node visitValueNode(final NodeParser.ValueNodeContext ctx) {
             Node node = null;
+            NodeToken token = null;
             if (ctx.BOOL() != null) {
                 final BooleanNode booleanNode = NodesFactory.eINSTANCE.createBooleanNode();
                 booleanNode.setValue(Boolean.valueOf(ctx.getText()));
 
-                final RamlToken token = (RamlToken) ctx.BOOL().getSymbol();
+                token = (NodeToken) ctx.BOOL().getSymbol();
                 booleanNode.eAdapters().add(NodeParserAdapter.of(token));
 
                 node = booleanNode;
@@ -125,7 +154,7 @@ public class NodeModelBuilder {
                 final StringNode stringNode = NodesFactory.eINSTANCE.createStringNode();
                 stringNode.setValue(ctx.getText());
 
-                final RamlToken token = (RamlToken) ctx.STRING().getSymbol();
+                token = (NodeToken) ctx.STRING().getSymbol();
                 stringNode.eAdapters().add(NodeParserAdapter.of(token));
 
                 node = stringNode;
@@ -134,7 +163,7 @@ public class NodeModelBuilder {
                 final NumberNode numberNode = NodesFactory.eINSTANCE.createNumberNode();
                 numberNode.setValue(new BigDecimal(ctx.getText()));
 
-                final RamlToken token = (RamlToken) ctx.FLOAT().getSymbol();
+                token = (NodeToken) ctx.FLOAT().getSymbol();
                 numberNode.eAdapters().add(NodeParserAdapter.of(token));
 
                 node = numberNode;
@@ -143,20 +172,23 @@ public class NodeModelBuilder {
                 final IntegerNode integerNode = NodesFactory.eINSTANCE.createIntegerNode();
                 integerNode.setValue(Integer.parseInt(ctx.getText()));
 
-                final RamlToken token = (RamlToken) ctx.INT().getSymbol();
+                token = (NodeToken) ctx.INT().getSymbol();
                 integerNode.eAdapters().add(NodeParserAdapter.of(token));
 
                 node = integerNode;
+            }
+            if (token != null) {
+                token.setNode(node);
             }
             return node;
         }
     }
 
-    private static class NodeParserAdapter extends AdapterImpl implements RamlTokenProvider {
-        private final RamlToken start;
-        private final RamlToken end;
+    private static class NodeParserAdapter extends AdapterImpl implements NodeTokenProvider {
+        private final NodeToken start;
+        private final NodeToken end;
 
-        private NodeParserAdapter(final RamlToken start, final RamlToken end) {
+        private NodeParserAdapter(final NodeToken start, final NodeToken end) {
             this.start = start;
             this.end = end;
         }
@@ -164,24 +196,24 @@ public class NodeModelBuilder {
 
         @Override
         public boolean isAdapterForType(final Object type) {
-            return type == RamlTokenProvider.class;
+            return type == NodeTokenProvider.class;
         }
 
         @Override
-        public RamlToken getStart() {
+        public NodeToken getStart() {
             return start;
         }
 
         @Override
-        public RamlToken getStop() {
+        public NodeToken getStop() {
             return end;
         }
 
-        public static NodeParserAdapter of(final RamlToken start, final RamlToken end) {
+        public static NodeParserAdapter of(final NodeToken start, final NodeToken end) {
             return new NodeParserAdapter(start, end);
         }
 
-        public static NodeParserAdapter of(final RamlToken token) {
+        public static NodeParserAdapter of(final NodeToken token) {
             return new NodeParserAdapter(token, token);
         }
     }
