@@ -5,7 +5,12 @@ import com.damnhandy.uri.template.UriTemplate;
 import com.damnhandy.uri.template.impl.VarSpec;
 import io.vrap.rmf.raml.generic.generator.GeneratorHelper;
 import io.vrap.rmf.raml.generic.generator.PackageGenModel;
+import io.vrap.rmf.raml.generic.generator.TypeGenModel;
+import io.vrap.rmf.raml.model.modules.Api;
 import io.vrap.rmf.raml.model.resources.Resource;
+import io.vrap.rmf.raml.model.types.Annotation;
+import io.vrap.rmf.raml.model.types.BooleanInstance;
+import io.vrap.rmf.raml.model.types.StringInstance;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -78,4 +83,19 @@ public class ResourceGenModel {
         }
         return null;
     }
+
+    @Nullable
+    public BuilderGenModel getUpdateBuilder() {
+        Annotation annotation = resource.getAnnotation("updateable");
+        if (annotation != null) {
+            return new BuilderGenModel(this);
+        }
+        return null;
+    }
+
+    public Api getApi()
+    {
+        return GeneratorHelper.getParent(resource, Api.class);
+    }
+
 }

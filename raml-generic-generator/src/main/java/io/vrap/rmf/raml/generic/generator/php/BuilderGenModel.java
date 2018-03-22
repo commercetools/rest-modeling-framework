@@ -18,15 +18,27 @@ import java.util.stream.Collectors;
 public class BuilderGenModel {
     static String BUILDER = "Builder";
 
+    private final RequestGenModel request;
     private final TypeGenModel resourceType;
     private final List<TypeGenModel> updates;
     private final TypeGenModel updateType;
     private final TypeGenModel baseActionType;
 
-    public BuilderGenModel(AnyType resourceType) {
+    public BuilderGenModel(ResourceGenModel resource) {
 
-        this.resourceType = new TypeGenModel(resourceType);
-        updateType = this.resourceType.getUpdateType();
+        Annotation annotation = resource.getResource().getAnnotation("updateable");
+        resourceType =  new TypeGenModel(resource.getApi().getType(((StringInstance)annotation.getValue()).getValue()));
+        updateType = resourceType.getUpdateType();
+
+        request = !getHasId() ?
+                resource.getMethods().stream().filter(requestGenModel -> requestGenModel.getMethod().getMethod() == HttpMethod.POST).findFirst().get() :
+                resource.getResources().stream()
+                    .map(ResourceGenModel::getResource)
+                    .filter(resource1 -> resource1.getUriParameter("ID") != null)
+                    .filter(resource1 -> resource1.getMethod(HttpMethod.POST) != null)
+                    .map(resource1 -> new RequestGenModel(resource1.getMethod(HttpMethod.POST)))
+                    .findFirst().get()
+        ;
 
         updates = Lists.newArrayList();
         final Property actions = ((ObjectType)updateType.getType()).getProperty("actions");
@@ -51,6 +63,9 @@ public class BuilderGenModel {
         return new PackageGenModel(BUILDER);
     }
 
+    public RequestGenModel getRequest() {
+        return request;
+    }
 
     public TypeGenModel getResourceType() {
         return resourceType;
@@ -72,6 +87,20 @@ public class BuilderGenModel {
         List<ImportGenModel> imports = updates.stream().map(TypeGenModel::getImport).collect(Collectors.toList());
         imports.add(resourceType.getImport());
         imports.add(updateType.getImport());
+        if (request != null) {
+            imports.add(request.getImport());
+        }
         return imports;
     };
+
+    public List<ImportGenModel> getBuilderImports() {
+        List<ImportGenModel> imports = Lists.newArrayList();
+        imports.add(resourceType.getImport());
+        imports.add(new ImportGenModel(getPackage(), updateType.getName() + BUILDER));
+        return imports;
+    }
+
+    public Boolean getHasId() {
+        return resourceType.getType() instanceof ObjectType && ((ObjectType)resourceType.getType()).getProperty("id") != null;
+    }
 }

@@ -4,16 +4,8 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
 import io.vrap.rmf.raml.generic.generator.AbstractTemplateGenerator;
-import io.vrap.rmf.raml.generic.generator.CollectionGenModel;
-import io.vrap.rmf.raml.generic.generator.TypeGenModel;
-import io.vrap.rmf.raml.generic.generator.postman.ProjectGenModel;
-import io.vrap.rmf.raml.generic.generator.postman.ResourceGenModel;
+import io.vrap.rmf.raml.generic.generator.GeneratorHelper;
 import io.vrap.rmf.raml.model.modules.Api;
-import io.vrap.rmf.raml.model.resources.HttpMethod;
-import io.vrap.rmf.raml.model.types.*;
-import io.vrap.rmf.raml.model.types.impl.TypesFactoryImpl;
-import io.vrap.rmf.raml.model.types.util.TypesSwitch;
-import org.eclipse.emf.ecore.EObject;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
@@ -41,9 +33,9 @@ public class BuilderGenerator extends AbstractTemplateGenerator {
         final List<BuilderGenModel> builders = Lists.newArrayList();
 
         builders.addAll(
-                api.getTypes().stream()
-                        .filter(type -> type.getAnnotation("updateType") != null)
-                        .map(BuilderGenModel::new)
+                GeneratorHelper.flattenResources(api.getResources()).stream()
+                        .filter(resourceGenModel -> resourceGenModel.getUpdateBuilder() != null)
+                        .map(ResourceGenModel::getUpdateBuilder)
                 .collect(Collectors.toList()));
 
         f.addAll(generateBuilders(outputPath, builders));

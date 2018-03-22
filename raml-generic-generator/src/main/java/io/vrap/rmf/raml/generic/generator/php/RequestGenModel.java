@@ -107,6 +107,10 @@ public class RequestGenModel {
         return null;
     }
 
+    public ImportGenModel getImport() {
+        return new ImportGenModel(getPackage(), getName());
+    }
+
     @Nullable
     public Set<Map.Entry<String, String>> getAllParams() {
         Map<String, String> params = getAbsoluteUri().getComponents().stream()
