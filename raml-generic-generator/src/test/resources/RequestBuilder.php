@@ -7,14 +7,15 @@ declare(strict_types = 1);
 
 namespace Test\Request;
 
+use Commercetools\Base\Mapper;
 use Test\Client\Resource;
 use Test\Client\ApiRequest;
 
 class RequestBuilder extends Resource
 {
-    public function __construct(array $args = [])
+    public function __construct(array $args = [], Mapper $mapper = null)
     {
-        parent::__construct('', $args);
+        parent::__construct('', $args, $mapper);
     }
 
     /**
@@ -22,7 +23,7 @@ class RequestBuilder extends Resource
      */
     public function withProjectValue($project = null): Resource0 {
         $args = array_merge($this->getArgs(), array_filter(['project' => $project], function($value) { return !is_null($value); }));
-        return new Resource0($this->getUri() . '/{project}', $args);
+        return new Resource0($this->getUri() . '/{project}', $args, $this->getMapper());
     }
 
 

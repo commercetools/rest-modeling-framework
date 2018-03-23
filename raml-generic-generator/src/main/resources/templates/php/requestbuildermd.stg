@@ -37,6 +37,8 @@ $response = $client->send($request);
 
 ## Update <resource.updateBuilder.resourceType.name>
 
+All <resource.updateBuilder.resourceType.name> update methods can be found [here](<resource.updateBuilder.updateType.name>Builder.md)
+
 ### Example
 ```php
 $builder =  new RequestBuilder();

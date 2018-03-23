@@ -26,7 +26,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
 
-class Factory
+class ClientFactory
 {
     /**
      * @var bool

@@ -16,7 +16,8 @@ import java.util.stream.Collectors;
 
 public class ReadmeGenerator extends AbstractTemplateGenerator {
     private static final String resourcesPath = "./templates/php/";
-    static final String TYPE_README = "readme";
+    static final String TYPE_REQUESTBUILDER = "requestbuilder";
+    static final String TYPE_UPDATEBUILDER = "updatebuilder";
     private final String vendorName;
 
     ReadmeGenerator(final String vendorName)
@@ -28,25 +29,55 @@ public class ReadmeGenerator extends AbstractTemplateGenerator {
 
         final List<File> f = Lists.newArrayList();
 
-        f.addAll(generate(outputPath, new ReadmeGenModel(new ApiGenModel(api))));
+        f.addAll(generateRequest(outputPath, new ReadmeGenModel(new ApiGenModel(api))));
+
+        final List<BuilderGenModel> builders = Lists.newArrayList();
+
+        builders.addAll(
+                GeneratorHelper.flattenResources(api.getResources()).stream()
+                        .filter(resourceGenModel -> resourceGenModel.getUpdateBuilder() != null)
+                        .map(ResourceGenModel::getUpdateBuilder)
+                        .collect(Collectors.toList()));
+        f.addAll(generateUpdates(outputPath, builders));
 
         return f;
     }
 
 
-    private List<File> generate(final File outputPath, final ReadmeGenModel readme) throws IOException {
+    private List<File> generateRequest(final File outputPath, final ReadmeGenModel readme) throws IOException {
         final List<File> f = Lists.newArrayList();
 
-        f.add(generateFile(generateReadme(readme), new File(outputPath, "docs/requestbuilder.md")));
+        f.add(generateFile(generateRequestBuilder(readme), new File(outputPath, "docs/RequestBuilder.md")));
+
         return f;
     }
 
     @VisibleForTesting
-    String generateReadme(ReadmeGenModel readme) {
-        final STGroupFile stGroup = createSTGroup(Resources.getResource(resourcesPath + TYPE_README + ".stg"));
+    String generateRequestBuilder(ReadmeGenModel readme) {
+        final STGroupFile stGroup = createSTGroup(Resources.getResource(resourcesPath + TYPE_REQUESTBUILDER + "md.stg"));
         final ST st = stGroup.getInstanceOf("main");
         st.add("vendorName", vendorName);
         st.add("readme", readme);
+        return st.render();
+    }
+
+    private List<File> generateUpdates(final File outputPath, List<BuilderGenModel> builders) throws IOException {
+        final List<File> f = Lists.newArrayList();
+        for (final BuilderGenModel builder : builders) {
+
+            final File builderFile = new File(outputPath, "docs/" + builder.getUpdateType().getName().concat("Builder.md"));
+
+            f.add(generateFile(generateUpdateBuilder(builder), builderFile));
+        }
+        return f;
+    }
+
+    @VisibleForTesting
+    String generateUpdateBuilder(BuilderGenModel builder) {
+        final STGroupFile stGroup = createSTGroup(Resources.getResource(resourcesPath + TYPE_UPDATEBUILDER + "md.stg"));
+        final ST st = stGroup.getInstanceOf("main");
+        st.add("vendorName", vendorName);
+        st.add("builder", builder);
         return st.render();
     }
 }

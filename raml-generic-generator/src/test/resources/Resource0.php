@@ -15,7 +15,7 @@ class Resource0 extends Resource
      * @return Resource1
      */
     public function categories(): Resource1 {
-        return new Resource1($this->getUri() . '/categories', $this->getArgs());
+        return new Resource1($this->getUri() . '/categories', $this->getArgs(), $this->getMapper());
     }
 
 

@@ -1,0 +1,31 @@
+main(vendorName, builder) ::= <<
+
+# <builder.updateType.name>Builder
+
+```php
+use <vendorName>\\Builder\\<builder.updateType.name>Builder;
+
+$builder = new <builder.updateType.name>Builder();
+```
+
+<builder.updates: {u |<update(u)>}>
+
+>>
+
+update(action)::=<<
+
+## <action.discriminatorValue>
+
+```php
+use <vendorName>\\Builder\\<builder.updateType.name>Builder;
+
+$builder = new <builder.updateType.name>Builder();
+$<builder.updateType.name; format="lowercamel"> = $builder-><action.discriminatorValue>(new <action.typeName>())->build()
+//or
+$<builder.updateType.name; format="lowercamel"> = $builder-><action.discriminatorValue>(
+    function (<action.typeName> $action): <action.typeName> {
+        // modify action as needed
+        return $action;
+    })->build();
+```
+>>
