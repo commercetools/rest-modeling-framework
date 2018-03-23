@@ -83,6 +83,13 @@ public abstract class AbstractTemplateGenerator {
 
                             final String uri = ((UriTemplate) arg).getTemplate();
                             return CaseFormat.LOWER_HYPHEN.to(CaseFormat.LOWER_CAMEL, uri.replaceFirst("/", ""));
+                        case "paramVars":
+                            if (parts.size() > 0) {
+                                return parts.stream().map(
+                                        uriTemplateExpression -> uriTemplateExpression.getVarSpecs().stream().map(VarSpec::getVariableName).collect(Collectors.joining(" = null, $"))
+                                ).collect(Collectors.joining(", $"));
+                            }
+                            return "";
                         case "params":
                             if (parts.size() > 0) {
                                 return parts.stream().map(
