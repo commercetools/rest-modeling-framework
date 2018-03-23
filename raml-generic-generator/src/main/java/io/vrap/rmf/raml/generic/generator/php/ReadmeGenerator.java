@@ -37,7 +37,7 @@ public class ReadmeGenerator extends AbstractTemplateGenerator {
     private List<File> generate(final File outputPath, final ReadmeGenModel readme) throws IOException {
         final List<File> f = Lists.newArrayList();
 
-        f.add(generateFile(generateReadme(readme), new File(outputPath, "README.md")));
+        f.add(generateFile(generateReadme(readme), new File(outputPath, "docs/requestbuilder.md")));
         return f;
     }
 

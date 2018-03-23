@@ -53,6 +53,9 @@ public class StaticGenerator extends AbstractTemplateGenerator {
         if (fileName.equals("ResourceClassMap.php.stg")) {
             st.add("package", TypeGenModel.TYPES);
         }
+        if (fileName.equals("README.md.stg")) {
+            st.add("baseUri", new ApiGenModel(api).getBaseUri());
+        }
         if (fileName.equals("LICENSE.stg")) {
             st.add("year", DateTime.now().year().getAsString());
         }
