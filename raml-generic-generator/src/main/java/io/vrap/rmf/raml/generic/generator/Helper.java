@@ -39,18 +39,7 @@ public class Helper {
         Collection<File> files = FileUtils.listFiles(
                 outputPath,
                 TrueFileFilter.INSTANCE,
-                FileFilterUtils.notFileFilter(
-                        FileFilterUtils.or(
-                            FileFilterUtils.and(
-                                    FileFilterUtils.directoryFileFilter(),
-                                    FileFilterUtils.nameFileFilter("vendor")
-                            ),
-                            FileFilterUtils.and(
-                                    FileFilterUtils.directoryFileFilter(),
-                                    FileFilterUtils.nameFileFilter(".git")
-                            )
-                        )
-                )
+                TrueFileFilter.INSTANCE
         ).stream().filter(file -> !generatedFiles.contains(file)).collect(Collectors.toSet());
 
         for (File file : files) {

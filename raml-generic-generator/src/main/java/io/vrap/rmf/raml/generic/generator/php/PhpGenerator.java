@@ -6,17 +6,11 @@ import io.vrap.rmf.raml.generic.generator.TypeGenModel;
 import io.vrap.rmf.raml.model.modules.Api;
 import io.vrap.rmf.raml.model.types.AnyAnnotationType;
 import io.vrap.rmf.raml.model.util.StringCaseFormat;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.filefilter.FileFilterUtils;
-import org.apache.commons.io.filefilter.TrueFileFilter;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 public class PhpGenerator implements Generator {
     private static final String SRC_DIR = "src";
@@ -44,6 +38,10 @@ public class PhpGenerator implements Generator {
 
         BuilderGenerator builderGenerator = new BuilderGenerator(vendorName);
         f.addAll(builderGenerator.generate(api, new File(outputPath, SRC_DIR + "/" + BuilderGenerator.BUILDER)));
+
+        ReadmeGenerator readmeGenerator = new ReadmeGenerator(vendorName);
+        f.addAll(readmeGenerator.generate(api, outputPath));
+
         Helper.deleteObsoleteFiles(outputPath, f);
     }
 }

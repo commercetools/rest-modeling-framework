@@ -52,7 +52,7 @@ class <builder.resourceType.name>UpdateBuilder extends BaseBuilder {
         if (!is_null($callback)) {
             $action = $callback($action);
         }
-        $this->actions[] = $action;
+        return $action;
     }
 
     /**
@@ -111,18 +111,27 @@ class <builder.resourceType.name>UpdateBuilder extends BaseBuilder {
 update(action)::=<<
 
 /**
- * @param callable $callback builder function \<code\>
- *   function (<action.typeName> $action) {
+ * @param <action.typeName>|callable $action builder function \<code\>
+ *   function (<action.typeName> $action): <action.typeName> {
  *     // modify action as needed
  *     return $action;
  *   }
  *   \</code\>
  * @return $this
  */
-public function <action.discriminatorValue>(callable $callback = null)
+public function <action.discriminatorValue>($action = null)
 {
-    $action = $this->mapData(<action.typeName>::class, null);
-    $this->callback($action, $callback);
+    if (is_null($action) || is_callable($action)) {
+        $callback = $action;
+        $emptyAction = $this->mapData(<action.typeName>::class, null);
+        $action = $this->callback($emptyAction, $callback);
+    }
+    if (!$action instanceof <action.typeName>) {
+        throw new \InvalidArgumentException();
+    }
+    if (!is_null($action)) {
+        $this->actions[] = $action;
+    }
     return $this;
 }
 >>

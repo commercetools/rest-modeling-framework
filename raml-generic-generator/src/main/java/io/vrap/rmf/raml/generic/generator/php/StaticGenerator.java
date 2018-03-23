@@ -8,6 +8,7 @@ import io.vrap.rmf.raml.generic.generator.Helper;
 import io.vrap.rmf.raml.generic.generator.TypeGenModel;
 import io.vrap.rmf.raml.model.modules.Api;
 import io.vrap.rmf.raml.model.security.OAuth20Settings;
+import org.joda.time.DateTime;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
@@ -51,6 +52,9 @@ public class StaticGenerator extends AbstractTemplateGenerator {
         st.add("vendorName", vendorName);
         if (fileName.equals("ResourceClassMap.php.stg")) {
             st.add("package", TypeGenModel.TYPES);
+        }
+        if (fileName.equals("LICENSE.stg")) {
+            st.add("year", DateTime.now().year().getAsString());
         }
         if (fileName.equals("Config.php.stg")) {
             final String apiUri = api.getBaseUri().getTemplate();

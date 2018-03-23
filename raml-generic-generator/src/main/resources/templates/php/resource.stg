@@ -6,14 +6,15 @@ builder(vendorName, resource) ::=<<
 
 namespace <vendorName>\\<resource.package.parts; separator="\\">;
 
+use Commercetools\\Base\\Mapper;
 use <vendorName>\\Client\\Resource;
 use <vendorName>\\Client\\ApiRequest;
 
 class RequestBuilder extends Resource
 {
-    public function __construct(array $args = [])
+    public function __construct(array $args = [], Mapper $mapper = null)
     {
-        parent::__construct('', $args);
+        parent::__construct('', $args, $mapper);
     }
 
     <resource.resources: {r |<resourceMethod(r)>}>
@@ -135,14 +136,44 @@ class Resource<resource.index> extends Resource
     <resource.methods: {m |<(m.method.method)(m)>}>
     <if(resource.updateBuilder)>
 
-    public function update(<resource.updateBuilder.resourceType.name> $resource)
+    public function update(<resource.updateBuilder.resourceType.name> $<resource.updateBuilder.resourceType.name; format="lowercamel">)
     {
         $builder = new <resource.updateBuilder.updateType.name>Builder(function (<resource.updateBuilder.updateType.name>Builder $builder) { return $this<if(resource.updateBuilder.hasId)>->withIDValue($builder->getResource()->getId())<endif>->post($builder->build()); });
-        $builder->with($resource);
-        if ($resource instanceof MapperAware) {
-            $builder->setMapper($resource->getMapper());
+        $builder->with($<resource.updateBuilder.resourceType.name; format="lowercamel">);
+        if ($<resource.updateBuilder.resourceType.name; format="lowercamel"> instanceof MapperAware) {
+            $builder->setMapper($<resource.updateBuilder.resourceType.name; format="lowercamel">->getMapper());
         }
         return $builder;
+    }
+    <endif>
+    <if(resource.deleteType)>
+
+    public function delete(<resource.deleteType.name> $<resource.deleteType.name; format="lowercamel">)
+    {
+        return $this->withIDValue($<resource.deleteType.name; format="lowercamel">->getId())->delete()->withVersion($<resource.deleteType.name; format="lowercamel">->getVersion());
+    }
+    <endif>
+    <if(resource.createType)>
+
+    /**
+     * @param <resource.createType.name>|callable $<resource.createType.name; format="lowercamel">Draft builder function \<code\>
+     *   function (<resource.createType.name> $<resource.createType.name; format="lowercamel">): <resource.createType.name> {
+     *     // modify $draft as needed
+     *     return $<resource.createType.name; format="lowercamel">;
+     *   }
+     *   \</code\>
+     */
+    public function create($<resource.createType.name; format="lowercamel">)
+    {
+        if (is_callable($<resource.createType.name; format="lowercamel">)) {
+            $callback = $<resource.createType.name; format="lowercamel">;
+            $emptyDraft = $this->mapData(<resource.createType.name>::class, null);
+            $<resource.createType.name; format="lowercamel"> = $callback($emptyDraft);
+        }
+        if (!$<resource.createType.name; format="lowercamel"> instanceof <resource.createType.name>) {
+            throw new \InvalidArgumentException();
+        }
+        return $this->post($<resource.createType.name; format="lowercamel">);
     }
     <endif>
 }
@@ -160,7 +191,7 @@ resourceMethod(resource) ::=<<
  */
 public function <resource.relativeUri; format="methodName">(<if(resource.hasParams)>$<resource.relativeUri; format="params"> = null<endif>): Resource<resource.index> {
     <if(resource.hasParams)>$args = array_merge($this->getArgs(), array_filter([<resource.relativeUri; format="paramArray">], function($value) { return !is_null($value); }));<endif>
-    return new Resource<resource.index>($this->getUri() . '<resource.relativeUri.template>', <if(resource.hasParams)>$args<else>$this->getArgs()<endif>);
+    return new Resource<resource.index>($this->getUri() . '<resource.relativeUri.template>', <if(resource.hasParams)>$args<else>$this->getArgs()<endif>, $this->getMapper());
 }
 
 >>

@@ -3,6 +3,7 @@ package io.vrap.rmf.raml.generic.generator.php;
 import com.damnhandy.uri.template.Expression;
 import com.damnhandy.uri.template.UriTemplate;
 import com.damnhandy.uri.template.impl.VarSpec;
+import com.google.common.collect.Lists;
 import io.vrap.rmf.raml.generic.generator.GeneratorHelper;
 import io.vrap.rmf.raml.generic.generator.PackageGenModel;
 import io.vrap.rmf.raml.generic.generator.TypeGenModel;
@@ -11,6 +12,7 @@ import io.vrap.rmf.raml.model.resources.Resource;
 import io.vrap.rmf.raml.model.types.Annotation;
 import io.vrap.rmf.raml.model.types.BooleanInstance;
 import io.vrap.rmf.raml.model.types.StringInstance;
+import org.eclipse.emf.ecore.EObject;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -60,6 +62,17 @@ public class ResourceGenModel {
         return resource.getResources().stream().map(resource1 -> new ResourceGenModel(resource1, allResources)).collect(Collectors.toList());
     }
 
+    public List<ResourceGenModel> getResourcePath() {
+        List<ResourceGenModel> path = Lists.newArrayList();
+        path.add(this);
+        EObject t = resource.eContainer();
+        while(t instanceof Resource) {
+            path.add(new ResourceGenModel((Resource)t, allResources));
+            t = t.eContainer();
+        }
+        return Lists.reverse(path);
+    }
+
     public List<ResourceGenModel> getResourcesWithParams() {
         return getResources().stream().filter(resourceGenModel -> resourceGenModel.getResource().getRelativeUri().getComponents().size() > 1).collect(Collectors.toList());
     }
@@ -89,6 +102,24 @@ public class ResourceGenModel {
         Annotation annotation = resource.getAnnotation("updateable");
         if (annotation != null) {
             return new BuilderGenModel(this);
+        }
+        return null;
+    }
+
+    @Nullable
+    public TypeGenModel getDeleteType() {
+        Annotation annotation = resource.getAnnotation("deleteable");
+        if (annotation != null) {
+            return  new TypeGenModel(getApi().getType(((StringInstance)annotation.getValue()).getValue()));
+        }
+        return null;
+    }
+
+    @Nullable
+    public TypeGenModel getCreateType() {
+        Annotation annotation = resource.getAnnotation("createable");
+        if (annotation != null) {
+            return  new TypeGenModel(getApi().getType(((StringInstance)annotation.getValue()).getValue()));
         }
         return null;
     }
