@@ -44,6 +44,19 @@ class <builder.resourceType.name>UpdateBuilder extends BaseBuilder {
         return $this;
     }
 
+    private function resolveAction($class, $action = null) {
+        if (is_null($action) || is_callable($action)) {
+            $callback = $action;
+            $emptyAction = $this->mapData($class, null);
+            $action = $this->callback($emptyAction, $callback);
+        }
+        if (!$action instanceof $class) {
+            throw new \InvalidArgumentException();
+        }
+
+        return $action;
+    }
+
     /*
      * @param $action
      * @param callable $callback
@@ -121,14 +134,7 @@ update(action)::=<<
  */
 public function <action.discriminatorValue>($action = null)
 {
-    if (is_null($action) || is_callable($action)) {
-        $callback = $action;
-        $emptyAction = $this->mapData(<action.typeName>::class, null);
-        $action = $this->callback($emptyAction, $callback);
-    }
-    if (!$action instanceof <action.typeName>) {
-        throw new \InvalidArgumentException();
-    }
+    $action = $this->resolveAction(<action.typeName>::class, $action);
     if (!is_null($action)) {
         $this->actions[] = $action;
     }
@@ -142,9 +148,46 @@ actionBuilder(vendorName, type)::=<<
 
 namespace <vendorName>\\Builder;
 
-use Commercetools\Base\BaseBuilder;
+use  <vendorName>\Base\BaseBuilder;
 <type.typeImports: {ti |<useTypeImport(vendorName, ti)>}>
 
 class <type.name>Builder extends BaseBuilder {
 }
+>>
+
+builderTest(vendorName, builder) ::=<<
+\<?php
+<generatorInfo()>
+
+namespace <vendorName>\\Builder;
+
+use  <vendorName>\\Builder\\<builder.resourceType.name>UpdateBuilder;
+<builder.typeImports: {ti |<useTypeImport(vendorName, ti)>}>
+<builder.updateImports: {ti |<useTypeImport(vendorName, ti, "Model")>}>
+use PHPUnit\\Framework\\TestCase;
+
+class <builder.resourceType.name>BuilderTest extends TestCase {
+    <builder.updates: {action |<updateTest(builder, action)>}>
+}
+
+>>
+
+updateTest(builder, action) ::=<<
+
+public function test<action.discriminatorValue; format="uppercamel">Callback() {
+    $builder = new <builder.resourceType.name>UpdateBuilder();
+    $builder-><action.discriminatorValue>(function ($action) { static::assertInstanceOf(<action.typeName>::class, $action); return $action; });
+    $update = $builder->build();
+    static::assertInstanceOf(<builder.updateType.typeName>::class, $update);
+    static::assertInstanceOf(<action.typeName>::class, $update->getActions()->current());
+}
+
+public function test<action.discriminatorValue; format="uppercamel">Instance() {
+    $builder = new <builder.resourceType.name>UpdateBuilder();
+    $builder-><action.discriminatorValue>(new <action.typeName>Model());
+    $update = $builder->build();
+    static::assertInstanceOf(<builder.updateType.typeName>::class, $update);
+    static::assertInstanceOf(<action.typeName>::class, $update->getActions()->current());
+}
+
 >>

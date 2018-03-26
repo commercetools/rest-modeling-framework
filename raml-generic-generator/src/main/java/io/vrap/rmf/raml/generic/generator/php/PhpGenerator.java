@@ -37,7 +37,7 @@ public class PhpGenerator implements Generator {
         f.addAll(requestGenerator.generate(api.getResources(), outputPath));
 
         BuilderGenerator builderGenerator = new BuilderGenerator(vendorName);
-        f.addAll(builderGenerator.generate(api, new File(outputPath, SRC_DIR + "/" + BuilderGenerator.BUILDER)));
+        f.addAll(builderGenerator.generate(api, outputPath));
 
         ReadmeGenerator readmeGenerator = new ReadmeGenerator(vendorName);
         f.addAll(readmeGenerator.generate(api, outputPath));

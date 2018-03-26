@@ -84,8 +84,11 @@ public class BuilderGenModel {
         return updates;
     }
 
+    public List<ImportGenModel> getUpdateImports() {
+        return updates.stream().map(TypeGenModel::getImport).collect(Collectors.toList());
+    }
     public List<ImportGenModel> getTypeImports() {
-        List<ImportGenModel> imports = updates.stream().map(TypeGenModel::getImport).collect(Collectors.toList());
+        List<ImportGenModel> imports = getUpdateImports();
         imports.add(resourceType.getImport());
         imports.add(updateType.getImport());
         if (request != null) {

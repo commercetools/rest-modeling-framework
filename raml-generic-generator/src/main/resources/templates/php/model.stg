@@ -37,6 +37,7 @@ class <type.name>Model extends <if(!type.hasBuiltinParent)><type.parent.name>Mod
     <type.nonPatternProperties: {p |<property(p)>}>
     <type.nonPatternProperties: {p |<getter(type, p)>}>
     <type.nonPatternProperties: {p |<(p.setter.setter)(p)>}>
+    <type.unionProperties: {p |<propertyInterfaceGetAs(p)>}>
     <if(type.patternProperties)>
     <patternGetter(type, type.patternProperties)>
     <patternSetter(type, type.patternProperties)>
@@ -87,6 +88,23 @@ class <type.name>Model extends <if(!type.hasBuiltinParent)><type.parent.name>Mod
 }
 
 >>
+
+propertyInterfaceGetAs(property) ::= <<
+<property.type.oneOf: {st |<propertyInterfaceGetAsType(property, st)>}>
+>>
+
+propertyInterfaceGetAsType(property, type) ::= <<
+
+/**
+ * @return <type.typeName>
+ */
+public function get<property.name; format="capitalize">As<type.typeName; format="capitalize">()
+{
+    return null;
+}
+
+>>
+
 
 patternGetter(type, properties) ::= <<
 /**

@@ -38,7 +38,8 @@ public class BuilderGenerator extends AbstractTemplateGenerator {
                         .map(ResourceGenModel::getUpdateBuilder)
                 .collect(Collectors.toList()));
 
-        f.addAll(generateBuilders(outputPath, builders));
+        f.addAll(generateBuilders(new File(outputPath, PhpGenerator.SRC_DIR + "/" + BUILDER), builders));
+        f.addAll(generateBuilderTests(new File(outputPath, "test/unit/" + BUILDER), builders));
 
         return f;
     }
@@ -59,10 +60,30 @@ public class BuilderGenerator extends AbstractTemplateGenerator {
         return f;
     }
 
+    private List<File> generateBuilderTests(final File outputPath, List<BuilderGenModel> builders) throws IOException {
+        final List<File> f = Lists.newArrayList();
+        for (final BuilderGenModel builder : builders) {
+
+            final File builderFile = new File(outputPath, builder.getUpdateType().getName().concat("BuilderTest.php"));
+
+            f.add(generateFile(generateBuilderTest(builder), builderFile));
+        }
+        return f;
+    }
+
     @VisibleForTesting
     String generateBuilder(BuilderGenModel builder) {
         final STGroupFile stGroup = createSTGroup(Resources.getResource(resourcesPath + TYPE_BUILDER + ".stg"));
         final ST st = stGroup.getInstanceOf("updateBuilder");
+        st.add("vendorName", vendorName);
+        st.add("builder", builder);
+        return st.render();
+    }
+
+    @VisibleForTesting
+    String generateBuilderTest(BuilderGenModel builder) {
+        final STGroupFile stGroup = createSTGroup(Resources.getResource(resourcesPath + TYPE_BUILDER + ".stg"));
+        final ST st = stGroup.getInstanceOf("builderTest");
         st.add("vendorName", vendorName);
         st.add("builder", builder);
         return st.render();
