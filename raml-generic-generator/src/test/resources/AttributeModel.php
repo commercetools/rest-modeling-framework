@@ -64,4 +64,28 @@ class AttributeModel extends JsonObjectModel implements Attribute {
         return $this;
     }
 
+    /**
+     * @return string
+     */
+    public function getValueAsString()
+    {
+        return null;
+    }
+
+    /**
+     * @return Money
+     */
+    public function getValueAsMoney()
+    {
+        return null;
+    }
+
+    /**
+     * @return Enum
+     */
+    public function getValueAsEnum()
+    {
+        return null;
+    }
+
 }

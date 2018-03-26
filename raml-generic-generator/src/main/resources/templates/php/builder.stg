@@ -125,7 +125,7 @@ update(action)::=<<
 
 /**
  * @param <action.typeName>|callable $action builder function \<code\>
- *   function (<action.typeName> $action): <action.typeName> {
+ *   function(<action.typeName> $action): <action.typeName> {
  *     // modify action as needed
  *     return $action;
  *   }
@@ -176,7 +176,7 @@ updateTest(builder, action) ::=<<
 
 public function test<action.discriminatorValue; format="uppercamel">Callback() {
     $builder = new <builder.resourceType.name>UpdateBuilder();
-    $builder-><action.discriminatorValue>(function ($action) { static::assertInstanceOf(<action.typeName>::class, $action); return $action; });
+    $builder-><action.discriminatorValue>(function($action) { static::assertInstanceOf(<action.typeName>::class, $action); return $action; });
     $update = $builder->build();
     static::assertInstanceOf(<builder.updateType.typeName>::class, $update);
     static::assertInstanceOf(<action.typeName>::class, $update->getActions()->current());

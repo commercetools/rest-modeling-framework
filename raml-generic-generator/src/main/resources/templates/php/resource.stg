@@ -138,7 +138,7 @@ class Resource<resource.index> extends Resource
 
     public function update(<resource.updateBuilder.resourceType.name> $<resource.updateBuilder.resourceType.name; format="lowercamel">)
     {
-        $builder = new <resource.updateBuilder.updateType.name>Builder(function (<resource.updateBuilder.updateType.name>Builder $builder) { return $this<if(resource.updateBuilder.hasId)>->withIDValue($builder->getResource()->getId())<endif>->post($builder->build()); });
+        $builder = new <resource.updateBuilder.updateType.name>Builder(function(<resource.updateBuilder.updateType.name>Builder $builder) { return $this<if(resource.updateBuilder.hasId)>->withIDValue($builder->getResource()->getId())<endif>->post($builder->build()); });
         $builder->with($<resource.updateBuilder.resourceType.name; format="lowercamel">);
         if ($<resource.updateBuilder.resourceType.name; format="lowercamel"> instanceof MapperAware) {
             $builder->setMapper($<resource.updateBuilder.resourceType.name; format="lowercamel">->getMapper());
@@ -157,7 +157,7 @@ class Resource<resource.index> extends Resource
 
     /**
      * @param <resource.createType.name>|callable $<resource.createType.name; format="lowercamel">Draft builder function \<code\>
-     *   function (<resource.createType.name> $<resource.createType.name; format="lowercamel">): <resource.createType.name> {
+     *   function(<resource.createType.name> $<resource.createType.name; format="lowercamel">): <resource.createType.name> {
      *     // modify $draft as needed
      *     return $<resource.createType.name; format="lowercamel">;
      *   }
@@ -245,7 +245,7 @@ class RequestBuilderTest extends TestCase
     public function getRequests()
     {
         return [
-            <resources: {r |<resourceTest(r)>}; separator=",">
+            <resources: {r |<resourceTest(r)>}; separator=", ">
         ];
     }
 
@@ -264,7 +264,7 @@ class RequestBuilderTest extends TestCase
 >>
 
 resourceTest(resource) ::=<<
-<resource.methods: {request |<requestTest(resource, request)>}; separator=",">
+<resource.methods: {request |<requestTest(resource, request)>}; separator=", ">
 >>
 
 requestTest(resource, request) ::=<<
