@@ -10,6 +10,7 @@ import io.vrap.rmf.raml.generic.generator.ImportGenModel;
 import io.vrap.rmf.raml.generic.generator.PackageGenModel;
 import io.vrap.rmf.raml.generic.generator.TypeGenModel;
 import io.vrap.rmf.raml.model.modules.Api;
+import io.vrap.rmf.raml.model.resources.HttpMethod;
 import io.vrap.rmf.raml.model.resources.Method;
 import io.vrap.rmf.raml.model.resources.Resource;
 import io.vrap.rmf.raml.model.responses.Body;
@@ -122,6 +123,18 @@ public class RequestGenModel {
                 .collect(Collectors.toMap(VarSpec::getVariableName, o -> "%s"));
         if (params.size() > 0) {
             return params.entrySet();
+        }
+        return null;
+    }
+
+    @Nullable
+    public List<String> getAllParamNames() {
+        List<String> params = getAbsoluteUri().getComponents().stream()
+                .filter(uriTemplatePart -> uriTemplatePart instanceof Expression)
+                .flatMap(uriTemplatePart -> ((Expression)uriTemplatePart).getVarSpecs().stream().map(VarSpec::getVariableName))
+                .collect(Collectors.toList());
+        if (params.size() > 0) {
+            return params;
         }
         return null;
     }

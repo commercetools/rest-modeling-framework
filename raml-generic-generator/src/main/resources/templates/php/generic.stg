@@ -10,6 +10,6 @@ declare(strict_types = 1);
 >>
 
 useTypeImport(vendorName, typeImport, suffix="") ::=<<
-use <vendorName>\\<typeImport.parts; separator="\\"><suffix>;
+use <if(typeImport.hasVendor)><vendorName>\\<endif><typeImport.parts; separator="\\"><suffix>;
 
 >>

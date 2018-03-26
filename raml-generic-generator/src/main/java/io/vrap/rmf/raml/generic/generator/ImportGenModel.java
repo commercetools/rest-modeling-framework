@@ -7,12 +7,14 @@ import java.util.List;
 
 public class ImportGenModel {
     private final List<String> parts;
+    private final Boolean hasVendor;
 
     public ImportGenModel(final PackageGenModel packageGenModel) {
         this(packageGenModel, null);
     }
 
     public ImportGenModel(final PackageGenModel packageGenModel, final String name) {
+        hasVendor = packageGenModel != null;
         parts = Lists.newArrayList();
         if (packageGenModel != null) {
             parts.addAll(packageGenModel.getParts());
@@ -27,6 +29,10 @@ public class ImportGenModel {
     @Nullable
     public String getName() {
         return parts.get(parts.size() - 1);
+    }
+
+    public Boolean getHasVendor() {
+        return hasVendor;
     }
 
     @Override

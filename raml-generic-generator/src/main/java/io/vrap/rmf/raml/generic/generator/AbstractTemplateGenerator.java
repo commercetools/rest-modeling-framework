@@ -86,8 +86,15 @@ public abstract class AbstractTemplateGenerator {
                         case "paramVars":
                             if (parts.size() > 0) {
                                 return parts.stream().map(
-                                        uriTemplateExpression -> uriTemplateExpression.getVarSpecs().stream().map(VarSpec::getVariableName).collect(Collectors.joining(" = null, $"))
+                                        uriTemplateExpression -> uriTemplateExpression.getVarSpecs().stream().map(VarSpec::getVariableName).collect(Collectors.joining(", $"))
                                 ).collect(Collectors.joining(", $"));
+                            }
+                            return "";
+                        case "paramValues":
+                            if (parts.size() > 0) {
+                                return parts.stream().map(
+                                        uriTemplateExpression -> uriTemplateExpression.getVarSpecs().stream().map(VarSpec::getVariableName).collect(Collectors.joining("', '"))
+                                ).collect(Collectors.joining("', '"));
                             }
                             return "";
                         case "params":

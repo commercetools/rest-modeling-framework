@@ -71,9 +71,9 @@ class <request.name> extends ApiRequest
      * @param $body
      * @param array $headers
      */
-    public function __construct(<request.allParams: {p |$<p.key>, }><request.bodyType>$body<request.method; format="optionalBody">, array $headers = [])
+    public function __construct(<request.allParamNames: {name |$<name>, }><request.bodyType>$body<request.method; format="optionalBody">, array $headers = [])
     {
-        $uri = sprintf('<request.absoluteUri; format="sprintf">'<request.allParams: {p |, $<p.key>}>);
+        $uri = str_replace([<request.allParamNames: {name |'{<name>\}'}; separator=", ">], [<request.allParamNames: {name |$<name>}; separator=", ">], '<request.absoluteUri.template>');
         <request.method; format="ensureHeader">
         parent::__construct('<request.method.method>', $uri, $headers, <request.method; format="serialize">);
     }
@@ -202,7 +202,7 @@ get(request) ::=<<
  */
 public function <request.method.method>(): <request.name> {
     $args = $this->getArgs();
-    return new <request.name>(<trunc(request.allParams): {p|$args['<p.key>'], }><last(request.allParams): {p|$args['<p.key>']}>);
+    return new <request.name>(<request.allParamNames: {p|$args['<p>']}; separator=", ">);
 }
 
 >>
@@ -212,9 +212,9 @@ post(request) ::=<<
  * @param <request.bodyType>$body
  * @return <request.name>
  */
-public function <request.method.method>(<request.bodyType>$body): <request.name> {
+public function <request.method.method>(<request.bodyType>$body = null): <request.name> {
     $args = $this->getArgs();
-    return new <request.name>(<trunc(request.allParams): {p|$args['<p.key>'], }><last(request.allParams): {p|$args['<p.key>']}>, $body);
+    return new <request.name>(<request.allParamNames: {p|$args['<p>'], }>$body);
 }
 
 >>
@@ -225,7 +225,54 @@ delete(request) ::=<<
  */
 public function <request.method.method>(): <request.name> {
     $args = $this->getArgs();
-    return new <request.name>(<trunc(request.allParams): {p|$args['<p.key>'], }><last(request.allParams): {p|$args['<p.key>']}>);
+    return new <request.name>(<request.allParamNames: {p|$args['<p>']}; separator=", ">);
 }
 
+>>
+
+builderTest(vendorName, resources) ::=<<
+\<?php
+<generatorInfo()>
+
+namespace <vendorName>\\Request\\Test;
+
+use Commercetools\Request\RequestBuilder;
+use PHPUnit\Framework\TestCase;
+use Psr\Http\Message\RequestInterface;
+
+class RequestBuilderTest extends TestCase
+{
+    public function getRequests()
+    {
+        return [
+            <resources: {r |<resourceTest(r)>}; separator=",">
+        ];
+    }
+
+    /**
+     * @dataProvider getRequests()
+     */
+    public function testBuilder(callable $builderFunction, string $method, string $relativeUri)
+    {
+        $builder = new RequestBuilder();
+        $request = $builderFunction($builder);
+
+        $this->assertSame(strtolower($method), strtolower($request->getMethod()));
+        $this->assertContains(str_replace(['{', '}'], '', $relativeUri), (string)$request->getUri());
+    }
+}
+>>
+
+resourceTest(resource) ::=<<
+<resource.methods: {request |<requestTest(resource, request)>}; separator=",">
+>>
+
+requestTest(resource, request) ::=<<
+'<request.name>' => [
+    function(RequestBuilder $builder): RequestInterface {
+        return $builder-><resource.resourcePath: {p |<p.relativeUri; format="methodName">(<if(p.hasParams)>'<p.relativeUri; format="paramValues">'<endif>)->}><request.method.method>(<if(request.bodyType)>$body = null<endif>);
+    },
+    '<request.method.method>',
+    '<request.absoluteUri.template>',
+]
 >>

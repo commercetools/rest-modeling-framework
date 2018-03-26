@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Optional;
 
 public class PhpGenerator implements Generator {
-    private static final String SRC_DIR = "src";
+    static final String SRC_DIR = "src";
     private final String vendorName;
 
     public PhpGenerator(final String vendorName) {
@@ -34,7 +34,7 @@ public class PhpGenerator implements Generator {
         f.addAll(staticGenerator.generate(outputPath, api));
 
         RequestGenerator requestGenerator = new RequestGenerator(vendorName, placeholderParamAnnotation);
-        f.addAll(requestGenerator.generate(api.getResources(), new File(outputPath, SRC_DIR + "/Request")));
+        f.addAll(requestGenerator.generate(api.getResources(), outputPath));
 
         BuilderGenerator builderGenerator = new BuilderGenerator(vendorName);
         f.addAll(builderGenerator.generate(api, new File(outputPath, SRC_DIR + "/" + BuilderGenerator.BUILDER)));

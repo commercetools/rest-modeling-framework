@@ -42,10 +42,16 @@ public class RequestGenerator extends AbstractTemplateGenerator {
     public List<File> generate(final List<Resource> resources, final File outputPath) throws IOException {
 
         final List<File> f = Lists.newArrayList();
-        f.addAll(generateResources(outputPath, resources));
-        f.addAll(generateRequests(outputPath, resources));
+        f.addAll(generateResources(new File(outputPath, PhpGenerator.SRC_DIR + "/Request"), resources));
+        f.addAll(generateRequests(new File(outputPath, PhpGenerator.SRC_DIR + "/Request"), resources));
+        f.add(generateTest(outputPath, resources));
 
         return f;
+    }
+
+    private File generateTest(final File outputPath, final List<Resource> resources) throws IOException {
+        final File requestTestFile = new File(outputPath, "test/unit/Request/RequestBuilderTest.php");
+        return generateFile(generateRequestTest(resources), requestTestFile);
     }
 
     private List<File> generateResources(final File outputPath, final List<Resource> resources) throws IOException {
@@ -55,6 +61,7 @@ public class RequestGenerator extends AbstractTemplateGenerator {
         final File requestFile = new File(outputPath, "RequestBuilder.php");
         final RootResourceGenModel root = new RootResourceGenModel(flatResources.stream().filter(resourceGenModel -> resources.contains(resourceGenModel.getResource())).collect(Collectors.toList()));
         f.add(generateFile(generateBuilder(root), requestFile));
+
         for (final ResourceGenModel resource : flatResources) {
             final File resourceFile = new File(outputPath, "Resource" + resource.getIndex() + ".php");
 
@@ -73,7 +80,18 @@ public class RequestGenerator extends AbstractTemplateGenerator {
                 f.add(generateFile(generateRequest(request), resourceFile));
             }
         }
+
         return f;
+    }
+
+    String generateRequestTest(final List<Resource> resources) throws IOException {
+        final List<ResourceGenModel> flatResources = GeneratorHelper.flattenResources(resources);
+
+        final STGroupFile stGroup = createSTGroup(Resources.getResource(resourcesPath + TYPE_RESOURCE + ".stg"));
+        final ST st = stGroup.getInstanceOf("builderTest");
+        st.add("vendorName", vendorName);
+        st.add("resources", flatResources.stream().filter(resourceGenModel -> resourceGenModel.getMethods().size() > 0).collect(Collectors.toList()));
+        return st.render();
     }
 
     String generateBuilder(final RootResourceGenModel resource) {
@@ -156,20 +174,20 @@ public class RequestGenerator extends AbstractTemplateGenerator {
                     switch (Strings.nullToEmpty(formatString)) {
                         case "optionalBody":
                             if (method.getMethod().equals(HttpMethod.POST)) {
-                                return "";
+                                return " = null";
                             }
                             return " = null";
                         case "ensureHeader":
                             if (firstBodyType != null) {
                                 if (firstBodyType.getType() instanceof FileType) {
-                                    return "$headers = $this->ensureHeader($headers, 'Content-Type', $body->getClientMediaType());";
+                                    return "if (!is_null($body)) { $headers = $this->ensureHeader($headers, 'Content-Type', $body->getClientMediaType()); }";
                                 }
                             }
                             return "";
                         case "serialize":
                             if (firstBodyType != null) {
                                 if (firstBodyType.getType() instanceof FileType) {
-                                    return "$body->getStream()";
+                                    return "!is_null($body) ? $body->getStream() : null";
                                 }
                             }
                             return "!is_null($body) ? json_encode($body) : null";
