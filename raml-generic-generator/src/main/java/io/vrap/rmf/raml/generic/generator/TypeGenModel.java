@@ -167,6 +167,7 @@ public class TypeGenModel {
                         AnyType t = property.getType() instanceof ArrayType ? ((ArrayType) property.getType()).getItems() : property.getType();
                         return !new TypeGenModel(t).getPackage().equals(getPackage());
                     })
+                    .filter(property -> !new BuiltinVisitor().doSwitch(property.getType()))
                     .map(property -> {
                         AnyType t = property.getType() instanceof ArrayType ? ((ArrayType) property.getType()).getItems() : property.getType();
                         return new TypeGenModel(t).getImport();
@@ -180,6 +181,7 @@ public class TypeGenModel {
                                 AnyType t = property.getType() instanceof ArrayType ? ((ArrayType) property.getType()).getItems() : property.getType();
                                 return !new TypeGenModel(t).getPackage().equals(getPackage());
                             })
+                            .filter(property -> !new BuiltinVisitor().doSwitch(property.getType()))
                             .map(property -> new TypeGenModel(property.getType()).getImport())
                             .collect(Collectors.toSet())
             );
@@ -257,6 +259,24 @@ public class TypeGenModel {
         @Override
         public Boolean caseObjectType(final ObjectType objectType) {
             return objectType.getName() != null && (objectType.getType() == null || BuiltinType.of(objectType.getType().getName()).isPresent());
+        }
+    }
+
+    private class BuiltinVisitor extends TypesSwitch<Boolean> {
+        @Override
+        public Boolean defaultCase(EObject object) {
+            return true;
+        }
+
+        @Override
+        public Boolean caseArrayType(final ArrayType arrayType) {
+            final AnyType items = arrayType.getItems();
+            return items != null && items.getName() != null && BuiltinType.of(items.getName()).isPresent();
+        }
+
+        @Override
+        public Boolean caseObjectType(final ObjectType objectType) {
+            return objectType.getName() != null && BuiltinType.of(objectType.getName()).isPresent();
         }
     }
 

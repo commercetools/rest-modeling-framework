@@ -86,7 +86,12 @@ public class PhpGeneratorHelper extends GeneratorHelper {
 
         @Override
         public String caseArrayType(final ArrayType arrayType) {
-            if (arrayType.getItems() == null || arrayType.getItems().getName() == null || BuiltinType.of(arrayType.getItems().getName()).isPresent()) {
+            if (
+                    arrayType.getItems() == null ||
+                    arrayType.getItems().getName() == null ||
+                    BuiltinType.of(arrayType.getItems().getName()).isPresent() ||
+                    arrayType.getItems() instanceof StringType
+            ) {
                 return "array";
             } else {
                 return  arrayType.getItems().getName() + "Collection";
@@ -152,8 +157,8 @@ public class PhpGeneratorHelper extends GeneratorHelper {
                 if (BuiltinType.of(arrayType.getItems().getName()).isPresent()) {
                     return "array";
                 } else {
-                    final Property t = getBaseProperty(property);
-                    return new TypeNameVisitor().doSwitch(t.getType());
+//                    final Property t = getBaseProperty(property);
+                    return new TypeNameVisitor().doSwitch(arrayType);
                 }
             }
         }
@@ -163,8 +168,8 @@ public class PhpGeneratorHelper extends GeneratorHelper {
             if (BuiltinType.of(objectType.getName()).isPresent()) {
                 return null;
             } else {
-                final Property t = getBaseProperty(property);
-                return new TypeNameVisitor().doSwitch(t.getType());
+//                final Property t = getBaseProperty(property);
+                return new TypeNameVisitor().doSwitch(objectType);
             }
         }
 
@@ -246,14 +251,11 @@ public class PhpGeneratorHelper extends GeneratorHelper {
 
         @Override
         public GetterGenModel caseArrayType(final ArrayType arrayType) {
-            if (arrayType.getItems() == null || BuiltinType.of(arrayType.getItems().getName()).isPresent()) {
+            if (arrayType.getItems() == null) {
                 return null;
-            } else if (arrayType.getItems() instanceof UnionType) {
+            } else if (arrayType.getItems() instanceof UnionType || arrayType.getItems() instanceof StringType || BuiltinType.of(arrayType.getItems().getName()).isPresent()) {
                 return new GetterGenModel("scalarGetter", property, "array");
             } else {
-                if (BuiltinType.of(arrayType.getItems().getName()).isPresent()) {
-                    return new GetterGenModel("scalarGetter", property, "array");
-                }
                 return new GetterGenModel("arrayGetter", property, "array");
             }
         }
@@ -325,7 +327,7 @@ public class PhpGeneratorHelper extends GeneratorHelper {
 
         private SetterGenModel scalarMapper(final String scalarType)
         {
-            return new SetterGenModel("scalarSetter", property, scalarType);
+            return new SetterGenModel("scalarSetter", property, scalarType, scalarType);
         }
 
         @Override
@@ -333,7 +335,7 @@ public class PhpGeneratorHelper extends GeneratorHelper {
             if (arrayType.getItems() == null || BuiltinType.of(arrayType.getItems().getName()).isPresent()) {
                 return null;
             } else if (arrayType.getItems() instanceof UnionType) {
-                return new SetterGenModel("arraySetter", property, null);
+                return new SetterGenModel("arraySetter", property, "array", "array");
             } else {
                 if (BuiltinType.of(arrayType.getItems().getName()).isPresent()) {
                     return new SetterGenModel("arraySetter", property, "array", "array");

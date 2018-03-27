@@ -77,6 +77,6 @@ propertyInterfaceSet(property) ::= <<
  * @param <property.type.typeName> $<property.name>
  * @return $this
  */
-public function set<property.name; format="capitalize">(<if(property.paramType)><property.paramType> <endif>$<property.name>);
+public function set<property.name; format="capitalize">(<if(property.setter.paramType)><property.setter.paramType> <endif>$<property.name>);
 
 >>
