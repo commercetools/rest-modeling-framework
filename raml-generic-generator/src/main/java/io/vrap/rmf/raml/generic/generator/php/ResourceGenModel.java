@@ -76,6 +76,11 @@ public class ResourceGenModel {
         return resource.getRelativeUri();
     }
 
+    public UriTemplate getAbsoluteUri()
+    {
+        return resource.getFullUri();
+    }
+
     @Nullable
     public List<ResourceGenModel> getResources() {
         return resource.getResources().stream().map(resource1 -> new ResourceGenModel(resource1, allResources)).collect(Collectors.toList());

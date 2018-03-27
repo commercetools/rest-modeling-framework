@@ -230,7 +230,7 @@ public function <request.method.method>(): <request.name> {
 
 >>
 
-builderTest(vendorName, resources) ::=<<
+builderTest(vendorName, resources, createResources, deleteResources) ::=<<
 \<?php
 <generatorInfo()>
 
@@ -239,13 +239,17 @@ namespace <vendorName>\\Request\\Test;
 use Commercetools\Request\RequestBuilder;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\RequestInterface;
+<createResources: {r |<useTypeImport(vendorName, r.createType.import)>}>
+<deleteResources: {r |<useTypeImport(vendorName, r.deleteType.import, "Model")>}>
 
 class RequestBuilderTest extends TestCase
 {
     public function getRequests()
     {
         return [
-            <resources: {r |<resourceTest(r)>}; separator=", ">
+            <resources: {r |<resourceTest(r)>}; separator=", ">,
+            <createResources: {r |<resourceCreateTest(r)>}; separator=", ">,
+            <deleteResources: {r |<resourceDeleteTest(r)>}; separator=", ">
         ];
     }
 
@@ -274,5 +278,28 @@ requestTest(resource, request) ::=<<
     },
     '<request.method.method>',
     '<request.absoluteUri.template>',
+]
+>>
+
+resourceCreateTest(resource) ::=<<
+'create_<resource.createType.name>' => [
+    function(RequestBuilder $builder): RequestInterface {
+        return $builder->withProjectKeyValue('projectKey')-><resource.methodName>()->create(function ($draft){
+            static::assertInstanceOf(<resource.createType.name>::class, $draft);
+            return $draft;
+        });
+    },
+    'post',
+    '<resource.absoluteUri.template>',
+]
+>>
+
+resourceDeleteTest(resource) ::=<<
+'delete_<resource.deleteType.name>' => [
+    function(RequestBuilder $builder): RequestInterface {
+        return $builder->withProjectKeyValue('projectKey')-><resource.methodName>()->delete(new <resource.deleteType.name>Model(['id' => 'ID', 'version' => 1]));
+    },
+    'delete',
+    '<resource.absoluteUri.template>/{ID}?version=1',
 ]
 >>

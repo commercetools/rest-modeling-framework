@@ -168,9 +168,40 @@ use  <vendorName>\\Builder\\<builder.resourceType.name>UpdateBuilder;
 <builder.typeImports: {ti |<useTypeImport(vendorName, ti)>}>
 <builder.updateImports: {ti |<useTypeImport(vendorName, ti, "Model")>}>
 use PHPUnit\\Framework\\TestCase;
+<useTypeImport(vendorName, builder.resourceType.import, "Model")>
 
 class <builder.resourceType.name>BuilderTest extends TestCase {
     <builder.updates: {action |<updateTest(builder, action)>}>
+
+    public function testReset() {
+        $builder = new <builder.resourceType.name>UpdateBuilder();
+        $builder-><first(builder.updates).discriminatorValue>(new <first(builder.updates).typeName>Model());
+        $update = $builder->build();
+        static::assertInstanceOf(<builder.updateType.typeName>::class, $update);
+        static::assertInstanceOf(<first(builder.updates).typeName>::class, $update->getActions()->current());
+
+        $builder->reset();
+        $update = $builder->build();
+        static::assertInstanceOf(<builder.updateType.typeName>::class, $update);
+        static::assertCount(0, $update->getActions());
+    }
+
+    public function testWithResource() {
+        $builder = new <builder.resourceType.name>UpdateBuilder();
+        static::assertNull($builder->getResource());
+
+        $builder->with(new <builder.resourceType.typeName>Model());
+        static::assertInstanceOf(<builder.resourceType.typeName>::class, $builder->getResource());
+    }
+
+    public function testBuild() {
+        $builder = new <builder.resourceType.name>UpdateBuilder();
+        $builder->with(new <builder.resourceType.typeName>Model(['version' => 3]));
+
+        $update = $builder->build();
+        static::assertInstanceOf(<builder.updateType.typeName>::class, $update);
+        static::assertSame(3, $update->getVersion());
+    }
 }
 
 >>

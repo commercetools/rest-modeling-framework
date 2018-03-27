@@ -91,6 +91,8 @@ public class RequestGenerator extends AbstractTemplateGenerator {
         final ST st = stGroup.getInstanceOf("builderTest");
         st.add("vendorName", vendorName);
         st.add("resources", flatResources.stream().filter(resourceGenModel -> resourceGenModel.getMethods().size() > 0).collect(Collectors.toList()));
+        st.add("createResources", flatResources.stream().filter(resourceGenModel -> resourceGenModel.getCreateType() != null).collect(Collectors.toList()));
+        st.add("deleteResources", flatResources.stream().filter(resourceGenModel -> resourceGenModel.getDeleteType() != null).collect(Collectors.toList()));
         return st.render();
     }
 
