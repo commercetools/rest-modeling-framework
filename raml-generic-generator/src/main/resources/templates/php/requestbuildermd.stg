@@ -23,9 +23,9 @@ resourceConvenience(resource) ::=<<
 ### Example
 ```php
 $builder =  new RequestBuilder();
-$request = $builder-><resource.resourcePath: {p |<p.relativeUri; format="methodName">(<if(p.hasParams)>$<p.relativeUri; format="paramVars"><endif>)->}>create($<resource.createType.name; format="lowercamel">)->buildRequest();
+$request = $builder-><resource.resourcePath: {p |<p.methodName>(<if(p.hasParams)>$<p.relativeUri; format="paramVars"><endif>)->}>create($<resource.createType.name; format="lowercamel">)->buildRequest();
 // or
-$request = $builder-><resource.resourcePath: {p |<p.relativeUri; format="methodName">(<if(p.hasParams)>$<p.relativeUri; format="paramVars"><endif>)->}>create(
+$request = $builder-><resource.resourcePath: {p |<p.methodName>(<if(p.hasParams)>$<p.relativeUri; format="paramVars"><endif>)->}>create(
     function (<resource.createType.name> $<resource.createType.name; format="lowercamel">): <resource.createType.name> {
         // modify $draft as needed
         return $<resource.createType.name; format="lowercamel">;
@@ -42,7 +42,7 @@ All <resource.updateBuilder.resourceType.name> update methods can be found [here
 ### Example
 ```php
 $builder =  new RequestBuilder();
-$request = $builder-><resource.resourcePath: {p |<p.relativeUri; format="methodName">(<if(p.hasParams)>$<p.relativeUri; format="paramVars"><endif>)->}>update($<resource.updateBuilder.resourceType.name; format="lowercamel">)
+$request = $builder-><resource.resourcePath: {p |<p.methodName>(<if(p.hasParams)>$<p.relativeUri; format="paramVars"><endif>)->}>update($<resource.updateBuilder.resourceType.name; format="lowercamel">)
     <updateInfo(first(resource.updateBuilder.updates))>
     ->buildRequest();
 $response = $client->send($request);
@@ -55,7 +55,7 @@ $response = $client->send($request);
 ### Example
 ```php
 $builder =  new RequestBuilder();
-$request = $builder-><resource.resourcePath: {p |<p.relativeUri; format="methodName">(<if(p.hasParams)>$<p.relativeUri; format="paramVars"><endif>)->}>delete($<resource.deleteType.name; format="lowercamel">);
+$request = $builder-><resource.resourcePath: {p |<p.methodName>(<if(p.hasParams)>$<p.relativeUri; format="paramVars"><endif>)->}>delete($<resource.deleteType.name; format="lowercamel">);
 $response = $client->send($request);
 ```
 <endif>
@@ -76,7 +76,7 @@ resourceInfo(resource) ::=<<
 
 requestInfo(resource, request) ::=<<
 
-## `<resource.resourcePath: {p |<p.relativeUri; format="methodName">(<if(p.hasParams)>$<p.relativeUri; format="paramVars"><endif>)->}><request.method.method>()`
+## `<resource.resourcePath: {p |<p.methodName>(<if(p.hasParams)>$<p.relativeUri; format="paramVars"><endif>)->}><request.method.method>()`
 
 <request.method.description.value>
 
@@ -86,7 +86,7 @@ requestInfo(resource, request) ::=<<
 ### Example
 ```php
 $builder =  new RequestBuilder();
-$request = $builder-><resource.resourcePath: {p |<p.relativeUri; format="methodName">(<if(p.hasParams)>$<p.relativeUri; format="paramVars"><endif>)->}><request.method.method>();
+$request = $builder-><resource.resourcePath: {p |<p.methodName>(<if(p.hasParams)>$<p.relativeUri; format="paramVars"><endif>)->}><request.method.method>();
 $response = $client->send($request);
 ```
 >>

@@ -8,10 +8,7 @@ import io.vrap.rmf.raml.model.types.util.TypesSwitch;
 import org.eclipse.emf.ecore.EObject;
 
 import javax.annotation.Nullable;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class TypeGenModel {
@@ -32,6 +29,11 @@ public class TypeGenModel {
     public String getName()
     {
         return type.getName();
+    }
+
+    private String getNameString()
+    {
+        return Optional.ofNullable(type.getName()).orElse("");
     }
 
     public TypeGenModel getParent()
@@ -83,7 +85,7 @@ public class TypeGenModel {
     @Nullable
     public List<TypeGenModel> getSubTypes()
     {
-        return type.getSubTypes().stream().map(TypeGenModel::new).collect(Collectors.toList());
+        return type.getSubTypes().stream().map(TypeGenModel::new).sorted(Comparator.comparing(TypeGenModel::getNameString, Comparator.naturalOrder())).collect(Collectors.toList());
     }
 
     public List<PropertyGenModel> getTypeProperties()

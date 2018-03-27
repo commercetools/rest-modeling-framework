@@ -3,6 +3,7 @@ package io.vrap.rmf.raml.generic.generator.php;
 import com.damnhandy.uri.template.Expression;
 import com.damnhandy.uri.template.UriTemplate;
 import com.damnhandy.uri.template.impl.VarSpec;
+import com.google.common.base.CaseFormat;
 import com.google.common.collect.Lists;
 import io.vrap.rmf.raml.generic.generator.GeneratorHelper;
 import io.vrap.rmf.raml.generic.generator.PackageGenModel;
@@ -37,6 +38,22 @@ public class ResourceGenModel {
         this.resource = resource;
         this.index = allResources.indexOf(resource);
         this.allResources = allResources;
+    }
+
+    public String getMethodName() {
+        Annotation annotation = resource.getAnnotation("methodName");
+        if (annotation != null) {
+            return ((StringInstance)annotation.getValue()).getValue();
+        }
+        final List<Expression> parts = resource.getRelativeUri().getComponents().stream()
+                .filter(uriTemplatePart -> uriTemplatePart instanceof Expression)
+                .map(uriTemplatePart -> (Expression)uriTemplatePart)
+                .collect(Collectors.toList());
+        if (parts.size() > 0) {
+            return CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, GeneratorHelper.toParamName(resource.getRelativeUri(), "With", "Value"));
+        }
+        final String uri = resource.getRelativeUri().getTemplate();
+        return CaseFormat.LOWER_HYPHEN.to(CaseFormat.LOWER_CAMEL, uri.replaceFirst("/", ""));
     }
 
     @Nullable

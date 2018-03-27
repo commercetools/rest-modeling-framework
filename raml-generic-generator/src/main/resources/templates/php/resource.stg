@@ -189,7 +189,7 @@ resourceMethod(resource) ::=<<
 /**
  * @return Resource<resource.index>
  */
-public function <resource.relativeUri; format="methodName">(<if(resource.hasParams)>$<resource.relativeUri; format="params"> = null<endif>): Resource<resource.index> {
+public function <resource.methodName>(<if(resource.hasParams)>$<resource.relativeUri; format="params"> = null<endif>): Resource<resource.index> {
     <if(resource.hasParams)>$args = array_merge($this->getArgs(), array_filter([<resource.relativeUri; format="paramArray">], function($value) { return !is_null($value); }));<endif>
     return new Resource<resource.index>($this->getUri() . '<resource.relativeUri.template>', <if(resource.hasParams)>$args<else>$this->getArgs()<endif>, $this->getMapper());
 }
@@ -270,7 +270,7 @@ resourceTest(resource) ::=<<
 requestTest(resource, request) ::=<<
 '<request.name>' => [
     function(RequestBuilder $builder): RequestInterface {
-        return $builder-><resource.resourcePath: {p |<p.relativeUri; format="methodName">(<if(p.hasParams)>'<p.relativeUri; format="paramValues">'<endif>)->}><request.method.method>(<if(request.bodyType)>$body = null<endif>);
+        return $builder-><resource.resourcePath: {p |<p.methodName>(<if(p.hasParams)>'<p.relativeUri; format="paramValues">'<endif>)->}><request.method.method>(<if(request.bodyType)>$body = null<endif>);
     },
     '<request.method.method>',
     '<request.absoluteUri.template>',
