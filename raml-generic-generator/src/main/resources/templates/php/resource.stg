@@ -150,7 +150,7 @@ class Resource<resource.index> extends Resource
 
     public function delete(<resource.deleteType.name> $<resource.deleteType.name; format="lowercamel">)
     {
-        return $this->withIDValue($<resource.deleteType.name; format="lowercamel">->getId())->delete()->withVersion($<resource.deleteType.name; format="lowercamel">->getVersion());
+        return $this-><if(resource.idMethod)><resource.idMethod><else>withIDValue<endif>($<resource.deleteType.name; format="lowercamel">->getId())->delete()->withVersion($<resource.deleteType.name; format="lowercamel">->getVersion());
     }
     <endif>
     <if(resource.createType)>

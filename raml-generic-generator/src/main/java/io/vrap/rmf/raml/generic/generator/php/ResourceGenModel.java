@@ -155,4 +155,9 @@ public class ResourceGenModel {
     List<Resource> getAllResources() {
         return allResources;
     }
+
+    @Nullable
+    public String getIdMethod() {
+        return new BuilderGenModel(this).getIdMethod();
+    }
 }
