@@ -152,4 +152,7 @@ public class ResourceGenModel {
         return GeneratorHelper.getParent(resource, Api.class);
     }
 
+    List<Resource> getAllResources() {
+        return allResources;
+    }
 }

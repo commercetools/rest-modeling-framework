@@ -138,7 +138,7 @@ class Resource<resource.index> extends Resource
 
     public function update(<resource.updateBuilder.resourceType.name> $<resource.updateBuilder.resourceType.name; format="lowercamel">)
     {
-        $builder = new <resource.updateBuilder.updateType.name>Builder(function(<resource.updateBuilder.updateType.name>Builder $builder) { return $this<if(resource.updateBuilder.hasId)>->withIDValue($builder->getResource()->getId())<endif>->post($builder->build()); });
+        $builder = new <resource.updateBuilder.updateType.name>Builder(function(<resource.updateBuilder.updateType.name>Builder $builder) { return $this<if(resource.updateBuilder.hasId)>-><resource.updateBuilder.idMethod>($builder->getResource()->getId())<endif>->post($builder->build()); });
         $builder->with($<resource.updateBuilder.resourceType.name; format="lowercamel">);
         if ($<resource.updateBuilder.resourceType.name; format="lowercamel"> instanceof MapperAware) {
             $builder->setMapper($<resource.updateBuilder.resourceType.name; format="lowercamel">->getMapper());

@@ -23,9 +23,10 @@ public class BuilderGenModel {
     private final List<TypeGenModel> updates;
     private final TypeGenModel updateType;
     private final TypeGenModel baseActionType;
+    private final ResourceGenModel resource;
 
     public BuilderGenModel(ResourceGenModel resource) {
-
+        this.resource = resource;
         Annotation annotation = resource.getResource().getAnnotation("updateable");
         resourceType =  new TypeGenModel(resource.getApi().getType(((StringInstance)annotation.getValue()).getValue()));
         updateType = resourceType.getUpdateType();
@@ -107,4 +108,9 @@ public class BuilderGenModel {
     public Boolean getHasId() {
         return resourceType.getType() instanceof ObjectType && ((ObjectType)resourceType.getType()).getProperty("id") != null;
     }
+
+    public String getIdMethod() {
+        return new ResourceGenModel(request.getResource(), resource.getAllResources()).getMethodName();
+    }
+
 }
