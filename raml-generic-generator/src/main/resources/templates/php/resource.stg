@@ -230,7 +230,7 @@ public function <request.method.method>(): <request.name> {
 
 >>
 
-builderTest(vendorName, resources, createResources, deleteResources) ::=<<
+builderTest(vendorName, resources, createResources, deleteResources, updateResources, modelResources) ::=<<
 \<?php
 <generatorInfo()>
 
@@ -240,29 +240,33 @@ use Commercetools\Request\RequestBuilder;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\RequestInterface;
 <createResources: {r |<useTypeImport(vendorName, r.createType.import)>}>
-<deleteResources: {r |<useTypeImport(vendorName, r.deleteType.import, "Model")>}>
+<modelResources: {import |<useTypeImport(vendorName, import, "Model")>}>
 
 class RequestBuilderTest extends TestCase
 {
     public function getRequests()
     {
         return [
-            <resources: {r |<resourceTest(r)>}; separator=", ">,
-            <createResources: {r |<resourceCreateTest(r)>}; separator=", ">,
-            <deleteResources: {r |<resourceDeleteTest(r)>}; separator=", ">
+            <resources: {r |<resourceTest(r)>, }>
+            <createResources: {r |<resourceCreateTest(r)>, }>
+            <deleteResources: {r |<resourceDeleteTest(r)>, }>
+            <updateResources: {r |<resourceUpdateTest(r)>, }>
         ];
     }
 
     /**
      * @dataProvider getRequests()
      */
-    public function testBuilder(callable $builderFunction, string $method, string $relativeUri)
+    public function testBuilder(callable $builderFunction, string $method, string $relativeUri, string $body = null)
     {
         $builder = new RequestBuilder();
         $request = $builderFunction($builder);
 
         $this->assertSame(strtolower($method), strtolower($request->getMethod()));
         $this->assertContains(str_replace(['{', '}'], '', $relativeUri), (string)$request->getUri());
+        if (!is_null($body)) {
+            $this->assertJsonStringEqualsJsonString($body, (string)$request->getBody());
+        };
     }
 }
 >>
@@ -272,9 +276,10 @@ resourceTest(resource) ::=<<
 >>
 
 requestTest(resource, request) ::=<<
+
 '<request.name>' => [
     function(RequestBuilder $builder): RequestInterface {
-        return $builder-><resource.resourcePath: {p |<p.methodName>(<if(p.hasParams)>'<p.relativeUri; format="paramValues">'<endif>)->}><request.method.method>(<if(request.bodyType)>$body = null<endif>);
+        return $builder-><resource.resourcePath: {p |<p.methodName>(<if(p.hasParams)>'<p.relativeUri; format="paramValues">'<endif>)->}><request.method.method>(<if(request.bodyType)>null<endif>);
     },
     '<request.method.method>',
     '<request.absoluteUri.template>',
@@ -282,9 +287,10 @@ requestTest(resource, request) ::=<<
 >>
 
 resourceCreateTest(resource) ::=<<
+
 'create_<resource.createType.name>' => [
     function(RequestBuilder $builder): RequestInterface {
-        return $builder->withProjectKeyValue('projectKey')-><resource.methodName>()->create(function ($draft){
+        return $builder-><resource.resourcePath: {p |<p.methodName>(<if(p.hasParams)>'<p.relativeUri; format="paramValues">'<endif>)->}>create(function($draft) {
             static::assertInstanceOf(<resource.createType.name>::class, $draft);
             return $draft;
         });
@@ -294,10 +300,23 @@ resourceCreateTest(resource) ::=<<
 ]
 >>
 
+resourceUpdateTest(resource) ::=<<
+
+'update_<resource.updateBuilder.resourceType.name>' => [
+    function(RequestBuilder $builder): ?RequestInterface {
+        return $builder-><resource.resourcePath: {p |<p.methodName>(<if(p.hasParams)>'<p.relativeUri; format="paramValues">'<endif>)->}>update(new <resource.updateBuilder.resourceType.name>Model(['id' => 'ID', 'version' => 1]))->buildRequest();
+    },
+    'post',
+    '<resource.absoluteUri.template><if(resource.updateBuilder.hasId)>/{ID}<endif>',
+    '{"version": 1, "actions": []}'
+]
+>>
+
 resourceDeleteTest(resource) ::=<<
+
 'delete_<resource.deleteType.name>' => [
     function(RequestBuilder $builder): RequestInterface {
-        return $builder->withProjectKeyValue('projectKey')-><resource.methodName>()->delete(new <resource.deleteType.name>Model(['id' => 'ID', 'version' => 1]));
+        return $builder-><resource.resourcePath: {p |<p.methodName>(<if(p.hasParams)>'<p.relativeUri; format="paramValues">'<endif>)->}>delete(new <resource.deleteType.name>Model(['id' => 'ID', 'version' => 1]));
     },
     'delete',
     '<resource.absoluteUri.template>/{ID}?version=1',

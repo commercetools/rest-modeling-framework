@@ -26,7 +26,6 @@ public class ImportGenModel {
         return parts;
     }
 
-    @Nullable
     public String getName() {
         return parts.get(parts.size() - 1);
     }

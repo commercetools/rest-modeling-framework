@@ -9,6 +9,8 @@ import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
 import io.vrap.rmf.raml.generic.generator.AbstractTemplateGenerator;
 import io.vrap.rmf.raml.generic.generator.GeneratorHelper;
+import io.vrap.rmf.raml.generic.generator.ImportGenModel;
+import io.vrap.rmf.raml.generic.generator.TypeGenModel;
 import io.vrap.rmf.raml.model.resources.HttpMethod;
 import io.vrap.rmf.raml.model.resources.Method;
 import io.vrap.rmf.raml.model.resources.Resource;
@@ -21,8 +23,7 @@ import org.stringtemplate.v4.STGroupFile;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.capitalize;
@@ -90,9 +91,24 @@ public class RequestGenerator extends AbstractTemplateGenerator {
         final STGroupFile stGroup = createSTGroup(Resources.getResource(resourcesPath + TYPE_RESOURCE + ".stg"));
         final ST st = stGroup.getInstanceOf("builderTest");
         st.add("vendorName", vendorName);
-        st.add("resources", flatResources.stream().filter(resourceGenModel -> resourceGenModel.getMethods().size() > 0).collect(Collectors.toList()));
-        st.add("createResources", flatResources.stream().filter(resourceGenModel -> resourceGenModel.getCreateType() != null).collect(Collectors.toList()));
-        st.add("deleteResources", flatResources.stream().filter(resourceGenModel -> resourceGenModel.getDeleteType() != null).collect(Collectors.toList()));
+        st.add("resources", flatResources.stream().filter(resourceGenModel -> resourceGenModel.getMethods().size() > 0)
+                .sorted(Comparator.comparing(resourceGenModel -> resourceGenModel.getAbsoluteUri().getTemplate(), Comparator.naturalOrder()))
+                .collect(Collectors.toList()));
+        st.add("createResources", flatResources.stream().filter(resourceGenModel -> resourceGenModel.getCreateType() != null)
+                .sorted(Comparator.comparing(resourceGenModel -> resourceGenModel.getAbsoluteUri().getTemplate(), Comparator.naturalOrder()))
+                .collect(Collectors.toList()));
+        st.add("deleteResources", flatResources.stream().filter(resourceGenModel -> resourceGenModel.getDeleteType() != null)
+                .sorted(Comparator.comparing(resourceGenModel -> resourceGenModel.getAbsoluteUri().getTemplate(), Comparator.naturalOrder()))
+                .collect(Collectors.toList()));
+        st.add("updateResources", flatResources.stream().filter(resourceGenModel -> resourceGenModel.getUpdateBuilder() != null)
+                .sorted(Comparator.comparing(resourceGenModel -> resourceGenModel.getAbsoluteUri().getTemplate(), Comparator.naturalOrder()))
+                .collect(Collectors.toList()));
+        Set<ImportGenModel> modelResources = new LinkedHashSet<>();
+        modelResources.addAll(flatResources.stream().filter(resourceGenModel -> resourceGenModel.getDeleteType() != null).map(resourceGenModel -> resourceGenModel.getDeleteType().getImport()).collect(Collectors.toList()));
+        modelResources.addAll(flatResources.stream().filter(resourceGenModel -> resourceGenModel.getUpdateBuilder() != null).map(resourceGenModel -> resourceGenModel.getUpdateBuilder().getResourceType().getImport()).collect(Collectors.toList()));
+
+        st.add("modelResources", modelResources.stream().sorted(Comparator.comparing(ImportGenModel::getName, Comparator.naturalOrder())).collect(Collectors.toList()));
+
         return st.render();
     }
 
