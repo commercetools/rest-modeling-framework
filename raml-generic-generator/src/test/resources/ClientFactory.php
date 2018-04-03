@@ -10,6 +10,7 @@ namespace Test\Client;
 use Cache\Adapter\Filesystem\FilesystemCachePool;
 use Test\Client\Subscriber\Log\Formatter;
 use Test\Client\Subscriber\Log\LogSubscriber;
+use Test\Exception\InvalidArgumentException;
 use GuzzleHttp\Client as HttpClient;
 use GuzzleHttp\Event\BeforeEvent;
 use GuzzleHttp\HandlerStack;
@@ -54,7 +55,7 @@ class ClientFactory
     /**
      * @param Config|array $config
      * @return Config
-     * @throws \InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     private function createConfig($config): Config
     {
@@ -64,7 +65,7 @@ class ClientFactory
         if (is_array($config)) {
             return new Config($config);
         }
-        throw new \InvalidArgumentException();
+        throw new InvalidArgumentException();
     }
 
     /**
@@ -220,7 +221,7 @@ class ClientFactory
             );
         }
 
-        throw new \InvalidArgumentException(
+        throw new InvalidArgumentException(
             'Argument 1 must be an instance of Psr\Http\Message\ResponseInterface ' .
             'or GuzzleHttp\Message\ResponseInterface'
         );

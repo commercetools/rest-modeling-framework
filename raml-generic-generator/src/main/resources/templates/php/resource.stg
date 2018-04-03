@@ -6,7 +6,7 @@ builder(vendorName, resource) ::=<<
 
 namespace <vendorName>\\<resource.package.parts; separator="\\">;
 
-use Commercetools\\Base\\Mapper;
+use <vendorName>\\Base\\Mapper;
 use <vendorName>\\Client\\Resource;
 use <vendorName>\\Client\\ApiRequest;
 
@@ -122,7 +122,8 @@ namespace <vendorName>\\<resource.package.parts; separator="\\">;
 
 use <vendorName>\\Client\\Resource;
 <if (resource.updateBuilder)>
-use Commercetools\Base\MapperAware;
+use <vendorName>\Base\MapperAware;
+use <vendorName>\Exception\InvalidArgumentException;
 <resource.updateBuilder.builderImports: {bi |<useTypeImport(vendorName, bi)>}>
 <endif>
 <resource.methods: {m |<methodUse(m)>}>
@@ -171,7 +172,7 @@ class Resource<resource.index> extends Resource
             $<resource.createType.name; format="lowercamel"> = $callback($emptyDraft);
         }
         if (!$<resource.createType.name; format="lowercamel"> instanceof <resource.createType.name>) {
-            throw new \InvalidArgumentException();
+            throw new InvalidArgumentException();
         }
         return $this->post($<resource.createType.name; format="lowercamel">);
     }
@@ -236,7 +237,7 @@ builderTest(vendorName, resources, createResources, deleteResources, updateResou
 
 namespace <vendorName>\\Request\\Test;
 
-use Commercetools\Request\RequestBuilder;
+use <vendorName>\Request\RequestBuilder;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\RequestInterface;
 <createResources: {r |<useTypeImport(vendorName, r.createType.import)>}>

@@ -6,10 +6,10 @@ main(vendorName) ::=<<
 
 namespace <vendorName>\Client;
 
-use Commercetools\Base\Mapper;
-use Commercetools\Base\MapperAware;
-use Commercetools\Base\ResultMapper;
-use Commercetools\Types\ModelClassMap;
+use <vendorName>\Base\Mapper;
+use <vendorName>\Base\MapperAware;
+use <vendorName>\Base\ResultMapper;
+use <vendorName>\Types\ModelClassMap;
 
 class Resource implements MapperAware
 {

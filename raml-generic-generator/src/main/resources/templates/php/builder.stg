@@ -9,8 +9,8 @@ updateBuilder(vendorName, builder)::=<<
 
 namespace <vendorName>\\Builder;
 
-use Commercetools\Base\BaseBuilder;
-use Psr\Http\Message\RequestInterface;
+use <vendorName>\Base\BaseBuilder;
+use <vendorName>\Exception\InvalidArgumentException;
 <useTypeImport(vendorName, builder.baseActionType.import)>
 <builder.typeImports: {ti |<useTypeImport(vendorName, ti)>}>
 
@@ -51,17 +51,15 @@ class <builder.resourceType.name>UpdateBuilder extends BaseBuilder {
             $emptyAction = $this->mapData($class, null);
             $action = $this->callback($emptyAction, $callback);
         }
-
-        return $action;
-    }
-
-    private function tryAddAction(<builder.baseActionType.name> $action = null)
-    {
-        if (!is_null($action)) {
-            $this->addAction($action);
+        if ($action instanceof $class) {
+            return $action;
         }
-        return $this;
+
+        throw new InvalidArgumentException(
+            sprintf('Expected method to be called with or callable to return %s', $class)
+        );
     }
+
 
     /*
      * @param $action
@@ -140,7 +138,7 @@ update(action)::=<<
  */
 public function <action.discriminatorValue>($action = null)
 {
-    $this->tryAddAction($this->resolveAction(<action.typeName>::class, $action));
+    $this->addAction($this->resolveAction(<action.typeName>::class, $action));
     return $this;
 }
 >>
@@ -164,7 +162,8 @@ builderTest(vendorName, builder) ::=<<
 
 namespace <vendorName>\\Builder;
 
-use  <vendorName>\\Builder\\<builder.resourceType.name>UpdateBuilder;
+use <vendorName>\\Builder\\<builder.resourceType.name>UpdateBuilder;
+use <vendorName>\\Exception\\InvalidArgumentException;
 <builder.typeImports: {ti |<useTypeImport(vendorName, ti)>}>
 <builder.updateImports: {ti |<useTypeImport(vendorName, ti, "Model")>}>
 use PHPUnit\\Framework\\TestCase;
@@ -216,12 +215,24 @@ public function test<action.discriminatorValue; format="uppercamel">Callback() {
     static::assertInstanceOf(<action.typeName>::class, $update->getActions()->current());
 }
 
+public function test<action.discriminatorValue; format="uppercamel">InvalidCallback() {
+    $this->expectException(InvalidArgumentException::class);
+    $builder = new <builder.resourceType.name>UpdateBuilder();
+    $builder-><action.discriminatorValue>(function($action) { static::assertInstanceOf(<action.typeName>::class, $action); return []; });
+}
+
 public function test<action.discriminatorValue; format="uppercamel">Instance() {
     $builder = new <builder.resourceType.name>UpdateBuilder();
     $builder-><action.discriminatorValue>(new <action.typeName>Model());
     $update = $builder->build();
     static::assertInstanceOf(<builder.updateType.typeName>::class, $update);
     static::assertInstanceOf(<action.typeName>::class, $update->getActions()->current());
+}
+
+public function test<action.discriminatorValue; format="uppercamel">InvalidInstance() {
+    $this->expectException(InvalidArgumentException::class);
+    $builder = new <builder.resourceType.name>UpdateBuilder();
+    $builder-><action.discriminatorValue>([]);
 }
 
 >>

@@ -7,6 +7,7 @@ collectionModel(vendorName, type) ::= <<
 namespace <vendorName>\\<type.package.parts; separator="\\">;
 
 use <vendorName>\\Base\\JsonCollection;
+use <vendorName>\\Exception\\InvalidArgumentException;
 
 class <type.name>Model extends JsonCollection implements <type.name> {
 
@@ -16,7 +17,7 @@ class <type.name>Model extends JsonCollection implements <type.name> {
      */
     public function add($value) {
         if (!$value instanceof <type.elementName>) {
-            throw new \InvalidArgumentException();
+            throw new InvalidArgumentException();
         }
         parent::add($value);
 

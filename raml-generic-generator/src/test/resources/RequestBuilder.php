@@ -7,7 +7,7 @@ declare(strict_types = 1);
 
 namespace Test\Request;
 
-use Commercetools\Base\Mapper;
+use Test\Base\Mapper;
 use Test\Client\Resource;
 use Test\Client\ApiRequest;
 

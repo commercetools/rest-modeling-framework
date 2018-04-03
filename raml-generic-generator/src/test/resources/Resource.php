@@ -7,10 +7,10 @@ declare(strict_types = 1);
 
 namespace Test\Client;
 
-use Commercetools\Base\Mapper;
-use Commercetools\Base\MapperAware;
-use Commercetools\Base\ResultMapper;
-use Commercetools\Types\ModelClassMap;
+use Test\Base\Mapper;
+use Test\Base\MapperAware;
+use Test\Base\ResultMapper;
+use Test\Types\ModelClassMap;
 
 class Resource implements MapperAware
 {

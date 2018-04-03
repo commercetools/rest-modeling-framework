@@ -7,6 +7,7 @@ declare(strict_types = 1);
 
 namespace Test\Types;
 
+use Test\Exception\InvalidArgumentException;
 use Test\Base\JsonObjectModel;
 
 class ContainerModel extends JsonObjectModel implements Container {
@@ -23,7 +24,7 @@ class ContainerModel extends JsonObjectModel implements Container {
                     $value = $this->raw($key);
                     break;
                 default:
-                    throw new \InvalidArgumentException();
+                    throw new InvalidArgumentException();
             }
             $this->patternData[$key] = $value;
         }
@@ -38,7 +39,7 @@ class ContainerModel extends JsonObjectModel implements Container {
     public function set(string $key, $value)
     {
         if (!$this->validKey($key)) {
-            throw new \InvalidArgumentException();
+            throw new InvalidArgumentException();
         }
         $this->patternData[$key] = $value;
         return $this;
