@@ -44,6 +44,12 @@ class <builder.resourceType.name>UpdateBuilder extends BaseBuilder {
         return $this;
     }
 
+    /**
+     * @param $class
+     * @param $action
+     * @return <builder.baseActionType.name>
+     * @throws InvalidArgumentException
+     */
     private function resolveAction($class, $action = null)
     {
         if (is_null($action) || is_callable($action)) {
@@ -135,6 +141,7 @@ update(action)::=<<
  *   }
  *   \</code\>
  * @return $this
+ * @throws InvalidArgumentException
  */
 public function <action.discriminatorValue>($action = null)
 {

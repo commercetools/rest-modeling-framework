@@ -137,9 +137,13 @@ class Resource<resource.index> extends Resource
     <resource.methods: {m |<(m.method.method)(m)>}>
     <if(resource.updateBuilder)>
 
-    public function update(<resource.updateBuilder.resourceType.name> $<resource.updateBuilder.resourceType.name; format="lowercamel">)
+    /**
+     * @param <resource.updateBuilder.resourceType.name> $<resource.updateBuilder.resourceType.name; format="lowercamel">
+     * @return <resource.updateBuilder.updateType.name>Builder
+     */
+    public function update(<resource.updateBuilder.resourceType.name> $<resource.updateBuilder.resourceType.name; format="lowercamel">): <resource.updateBuilder.updateType.name>Builder
     {
-        $builder = new <resource.updateBuilder.updateType.name>Builder(function(<resource.updateBuilder.updateType.name>Builder $builder) { return $this<if(resource.updateBuilder.hasId)>-><resource.updateBuilder.idMethod>($builder->getResource()->getId())<endif>->post($builder->build()); });
+        $builder = new <resource.updateBuilder.updateType.name>Builder(function(<resource.updateBuilder.updateType.name>Builder $builder) { return $this<if(resource.updateBuilder.hasId)>-><resource.updateBuilder.idMethod.methodName>($builder->getResource()->getId())<endif>->post($builder->build()); });
         $builder->with($<resource.updateBuilder.resourceType.name; format="lowercamel">);
         if ($<resource.updateBuilder.resourceType.name; format="lowercamel"> instanceof MapperAware) {
             $builder->setMapper($<resource.updateBuilder.resourceType.name; format="lowercamel">->getMapper());
@@ -149,22 +153,28 @@ class Resource<resource.index> extends Resource
     <endif>
     <if(resource.deleteType)>
 
-    public function delete(<resource.deleteType.name> $<resource.deleteType.name; format="lowercamel">)
+    /**
+     * @param <resource.deleteType.name> $<resource.deleteType.name; format="lowercamel">
+     * @return <if(resource.idMethod.methodName)><resource.idMethod.delete.name><else><resource.delete.name><endif>
+     */
+    public function delete(<resource.deleteType.name> $<resource.deleteType.name; format="lowercamel">): <if(resource.idMethod.methodName)><resource.idMethod.delete.name><else><resource.delete.name><endif>
     {
-        return $this-><if(resource.idMethod)><resource.idMethod><else>withIDValue<endif>($<resource.deleteType.name; format="lowercamel">->getId())->delete()->withVersion($<resource.deleteType.name; format="lowercamel">->getVersion());
+        return $this-><if(resource.idMethod.methodName)><resource.idMethod.methodName><else>withIDValue<endif>($<resource.deleteType.name; format="lowercamel">->getId())->delete()->withVersion($<resource.deleteType.name; format="lowercamel">->getVersion());
     }
     <endif>
     <if(resource.createType)>
 
     /**
-     * @param <resource.createType.name>|callable $<resource.createType.name; format="lowercamel">Draft builder function \<code\>
+     * @param <resource.createType.name>|callable $<resource.createType.name; format="lowercamel"> builder function \<code\>
      *   function(<resource.createType.name> $<resource.createType.name; format="lowercamel">): <resource.createType.name> {
      *     // modify $draft as needed
      *     return $<resource.createType.name; format="lowercamel">;
      *   }
      *   \</code\>
+     * @throws InvalidArgumentException
+     * @return <resource.post.name>
      */
-    public function create($<resource.createType.name; format="lowercamel">)
+    public function create($<resource.createType.name; format="lowercamel">): <resource.post.name>
     {
         if (is_callable($<resource.createType.name; format="lowercamel">)) {
             $callback = $<resource.createType.name; format="lowercamel">;

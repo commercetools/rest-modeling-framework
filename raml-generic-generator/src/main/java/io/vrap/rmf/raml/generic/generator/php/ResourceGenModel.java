@@ -9,6 +9,7 @@ import io.vrap.rmf.raml.generic.generator.GeneratorHelper;
 import io.vrap.rmf.raml.generic.generator.PackageGenModel;
 import io.vrap.rmf.raml.generic.generator.TypeGenModel;
 import io.vrap.rmf.raml.model.modules.Api;
+import io.vrap.rmf.raml.model.resources.HttpMethod;
 import io.vrap.rmf.raml.model.resources.Parameter;
 import io.vrap.rmf.raml.model.resources.Resource;
 import io.vrap.rmf.raml.model.resources.UriParameter;
@@ -105,6 +106,15 @@ public class ResourceGenModel {
         return resource.getMethods().stream().map(RequestGenModel::new).collect(Collectors.toList());
     }
 
+    public RequestGenModel getPost() {
+        return new RequestGenModel(resource.getMethod(HttpMethod.POST));
+    }
+
+    public RequestGenModel getDelete() {
+        return new RequestGenModel(resource.getMethod(HttpMethod.DELETE));
+    }
+
+
     public Boolean getHasParams() {
         return resource.getRelativeUri().getComponents().size() > 1;
     }
@@ -162,7 +172,7 @@ public class ResourceGenModel {
     }
 
     @Nullable
-    public String getIdMethod() {
+    public ResourceGenModel getIdMethod() {
         return new BuilderGenModel(this).getIdMethod();
     }
 }

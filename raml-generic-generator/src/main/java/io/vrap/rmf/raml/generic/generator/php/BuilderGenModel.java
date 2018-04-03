@@ -109,7 +109,11 @@ public class BuilderGenModel {
         return resourceType.getType() instanceof ObjectType && ((ObjectType)resourceType.getType()).getProperty("id") != null;
     }
 
-    public String getIdMethod() {
+    public ResourceGenModel getIdMethod() {
+        return new ResourceGenModel(request.getResource(), resource.getAllResources());
+    }
+
+    public String getIdMethodName() {
         return new ResourceGenModel(request.getResource(), resource.getAllResources()).getMethodName();
     }
 
