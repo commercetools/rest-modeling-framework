@@ -258,10 +258,11 @@ class RequestBuilderTest extends TestCase
     public function getRequests()
     {
         return [
-            <resources: {r |<resourceTest(r)>, }>
-            <createResources: {r |<resourceCreateTest(r)>, }>
-            <deleteResources: {r |<resourceDeleteTest(r)>, }>
-            <updateResources: {r |<resourceUpdateTest(r)>, }>
+            <resources: {r |<resourceTest(r)>}>
+            <resources: {r |<parameterTest(r)>}>
+            <createResources: {r |<resourceCreateTest(r)>}>
+            <deleteResources: {r |<resourceDeleteTest(r)>}>
+            <updateResources: {r |<resourceUpdateTest(r)>}>
         ];
     }
 
@@ -283,7 +284,26 @@ class RequestBuilderTest extends TestCase
 >>
 
 resourceTest(resource) ::=<<
-<resource.methods: {request |<requestTest(resource, request)>}; separator=", ">
+<resource.methods: {request |<requestTest(resource, request)>}>
+>>
+
+parameterTest(resource) ::=<<
+<resource.methods: {request |<requestParametersTest(resource, request)>}>
+>>
+
+requestParametersTest(resource, request) ::=<<
+<request.queryParameters: {parameter |<requestParameterTest(resource, request, parameter)>}>
+>>
+
+requestParameterTest(resource, request, parameter) ::=<<
+
+'<request.name>_<parameter.name>' => [
+    function(RequestBuilder $builder): RequestInterface {
+        return $builder-><resource.resourcePath: {p |<p.methodName>(<if(p.hasParams)>'<p.relativeUri; format="paramValues">'<endif>)->}><request.method.method>(<if(request.bodyType)>null<endif>)-><parameter; format="methodName">(<parameter; format="template">);
+    },
+    '<request.method.method>',
+    '<request.absoluteUri.template>?<parameter.name>=<parameter.name>',
+],
 >>
 
 requestTest(resource, request) ::=<<
@@ -294,7 +314,7 @@ requestTest(resource, request) ::=<<
     },
     '<request.method.method>',
     '<request.absoluteUri.template>',
-]
+],
 >>
 
 resourceCreateTest(resource) ::=<<
@@ -308,7 +328,7 @@ resourceCreateTest(resource) ::=<<
     },
     'post',
     '<resource.absoluteUri.template>',
-]
+],
 >>
 
 resourceUpdateTest(resource) ::=<<
@@ -320,7 +340,7 @@ resourceUpdateTest(resource) ::=<<
     'post',
     '<resource.absoluteUri.template><if(resource.updateBuilder.hasId)>/{ID}<endif>',
     '{"version": 1, "actions": []}'
-]
+],
 >>
 
 resourceDeleteTest(resource) ::=<<
@@ -331,5 +351,5 @@ resourceDeleteTest(resource) ::=<<
     },
     'delete',
     '<resource.absoluteUri.template>/{ID}?version=1',
-]
+],
 >>

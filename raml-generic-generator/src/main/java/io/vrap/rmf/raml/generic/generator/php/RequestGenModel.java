@@ -12,13 +12,11 @@ import io.vrap.rmf.raml.generic.generator.TypeGenModel;
 import io.vrap.rmf.raml.model.modules.Api;
 import io.vrap.rmf.raml.model.resources.HttpMethod;
 import io.vrap.rmf.raml.model.resources.Method;
+import io.vrap.rmf.raml.model.resources.Parameter;
 import io.vrap.rmf.raml.model.resources.Resource;
 import io.vrap.rmf.raml.model.responses.Body;
 import io.vrap.rmf.raml.model.responses.Response;
-import io.vrap.rmf.raml.model.types.ArrayType;
-import io.vrap.rmf.raml.model.types.BuiltinType;
-import io.vrap.rmf.raml.model.types.FileType;
-import io.vrap.rmf.raml.model.types.ObjectType;
+import io.vrap.rmf.raml.model.types.*;
 import org.eclipse.emf.ecore.EObject;
 
 import javax.annotation.Nullable;
@@ -137,5 +135,12 @@ public class RequestGenModel {
             return params;
         }
         return null;
+    }
+
+    public List<QueryParameter> getQueryParameters() {
+        return method.getQueryParameters().stream().filter(parameter -> {
+            final boolean placeholderParam = parameter.getAnnotation("placeholderParam") == null;
+            return placeholderParam;
+        }).collect(Collectors.toList());
     }
 }

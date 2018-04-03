@@ -178,7 +178,7 @@ public class RequestGenerator extends AbstractTemplateGenerator {
                                 ObjectInstance o = (ObjectInstance) anno.getValue();
                                 StringInstance template = (StringInstance) o.getValue().stream().filter(propertyValue -> propertyValue.getName().equals("template")).findFirst().orElse(null).getValue();
                                 StringInstance placeholder = (StringInstance) o.getValue().stream().filter(propertyValue -> propertyValue.getName().equals("placeholder")).findFirst().orElse(null).getValue();
-                                return "sprintf('" + template.getValue().replace("<<" + placeholder.getValue() + ">>", "%s") + "', $" + placeholder.getValue() + ")";
+                                return "sprintf('" + template.getValue().replace("<" + placeholder.getValue() + ">", "%s") + "', $" + placeholder.getValue() + ")";
                             }
                             return "'" + param.getName() + "'";
                         default:
