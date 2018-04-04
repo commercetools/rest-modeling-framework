@@ -241,7 +241,7 @@ public function <request.method.method>(): <request.name> {
 
 >>
 
-builderTest(vendorName, resources, createResources, deleteResources, updateResources, modelResources) ::=<<
+builderTest(vendorName, resources, modelResources) ::=<<
 \<?php
 <generatorInfo()>
 
@@ -250,8 +250,6 @@ namespace <vendorName>\\Request\\Test;
 use <vendorName>\Request\RequestBuilder;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\RequestInterface;
-<createResources: {r |<useTypeImport(vendorName, r.createType.import)>}>
-<modelResources: {import |<useTypeImport(vendorName, import, "Model")>}>
 
 class RequestBuilderTest extends TestCase
 {
@@ -259,10 +257,155 @@ class RequestBuilderTest extends TestCase
     {
         return [
             <resources: {r |<resourceTest(r)>}>
+        ];
+    }
+
+    /**
+     * @dataProvider getRequests()
+     */
+    public function testBuilder(callable $builderFunction, string $method, string $relativeUri, string $body = null)
+    {
+        $builder = new RequestBuilder();
+        $request = $builderFunction($builder);
+
+        $this->assertSame(strtolower($method), strtolower($request->getMethod()));
+        $this->assertContains(str_replace(['{', '}'], '', $relativeUri), (string)$request->getUri());
+        if (!is_null($body)) {
+            $this->assertJsonStringEqualsJsonString($body, (string)$request->getBody());
+        };
+    }
+}
+>>
+
+builderCreateTest(vendorName, resources, modelResources) ::=<<
+\<?php
+<generatorInfo()>
+
+namespace <vendorName>\\Request\\Test;
+
+use <vendorName>\Request\RequestBuilder;
+use PHPUnit\Framework\TestCase;
+use Psr\Http\Message\RequestInterface;
+<resources: {r |<useTypeImport(vendorName, r.createType.import)>}>
+<modelResources: {import |<useTypeImport(vendorName, import, "Model")>}>
+
+class RequestCreateBuilderTest extends TestCase
+{
+    public function getRequests()
+    {
+        return [
+            <resources: {r |<resourceCreateTest(r)>}>
+        ];
+    }
+
+    /**
+     * @dataProvider getRequests()
+     */
+    public function testBuilder(callable $builderFunction, string $method, string $relativeUri, string $body = null)
+    {
+        $builder = new RequestBuilder();
+        $request = $builderFunction($builder);
+
+        $this->assertSame(strtolower($method), strtolower($request->getMethod()));
+        $this->assertContains(str_replace(['{', '}'], '', $relativeUri), (string)$request->getUri());
+        if (!is_null($body)) {
+            $this->assertJsonStringEqualsJsonString($body, (string)$request->getBody());
+        };
+    }
+}
+>>
+
+builderDeleteTest(vendorName, resources, modelResources) ::=<<
+\<?php
+<generatorInfo()>
+
+namespace <vendorName>\\Request\\Test;
+
+use <vendorName>\Request\RequestBuilder;
+use PHPUnit\Framework\TestCase;
+use Psr\Http\Message\RequestInterface;
+<resources: {r |<useTypeImport(vendorName, r.deleteType.import)>}>
+<modelResources: {import |<useTypeImport(vendorName, import, "Model")>}>
+
+class RequestBuilderDeleteTest extends TestCase
+{
+    public function getRequests()
+    {
+        return [
+            <resources: {r |<resourceDeleteTest(r)>}>
+        ];
+    }
+
+    /**
+     * @dataProvider getRequests()
+     */
+    public function testBuilder(callable $builderFunction, string $method, string $relativeUri, string $body = null)
+    {
+        $builder = new RequestBuilder();
+        $request = $builderFunction($builder);
+
+        $this->assertSame(strtolower($method), strtolower($request->getMethod()));
+        $this->assertContains(str_replace(['{', '}'], '', $relativeUri), (string)$request->getUri());
+        if (!is_null($body)) {
+            $this->assertJsonStringEqualsJsonString($body, (string)$request->getBody());
+        };
+    }
+}
+>>
+
+builderUpdateTest(vendorName, resources, modelResources) ::=<<
+\<?php
+<generatorInfo()>
+
+namespace <vendorName>\\Request\\Test;
+
+use <vendorName>\Request\RequestBuilder;
+use PHPUnit\Framework\TestCase;
+use Psr\Http\Message\RequestInterface;
+<modelResources: {import |<useTypeImport(vendorName, import, "Model")>}>
+
+class RequestUpdateBuilderTest extends TestCase
+{
+    public function getRequests()
+    {
+        return [
+            <resources: {r |<resourceUpdateTest(r)>}>
+        ];
+    }
+
+    /**
+     * @dataProvider getRequests()
+     */
+    public function testBuilder(callable $builderFunction, string $method, string $relativeUri, string $body = null)
+    {
+        $builder = new RequestBuilder();
+        $request = $builderFunction($builder);
+
+        $this->assertSame(strtolower($method), strtolower($request->getMethod()));
+        $this->assertContains(str_replace(['{', '}'], '', $relativeUri), (string)$request->getUri());
+        if (!is_null($body)) {
+            $this->assertJsonStringEqualsJsonString($body, (string)$request->getBody());
+        };
+    }
+}
+>>
+
+builderParameterTest(vendorName, resources, modelResources) ::=<<
+\<?php
+<generatorInfo()>
+
+namespace <vendorName>\\Request\\Test;
+
+use <vendorName>\Request\RequestBuilder;
+use PHPUnit\Framework\TestCase;
+use Psr\Http\Message\RequestInterface;
+
+class RequestParameterBuilderTest extends TestCase
+{
+    public function getRequests()
+    {
+        return [
             <resources: {r |<parameterTest(r)>}>
-            <createResources: {r |<resourceCreateTest(r)>}>
-            <deleteResources: {r |<resourceDeleteTest(r)>}>
-            <updateResources: {r |<resourceUpdateTest(r)>}>
         ];
     }
 

@@ -45,14 +45,57 @@ public class RequestGenerator extends AbstractTemplateGenerator {
         final List<File> f = Lists.newArrayList();
         f.addAll(generateResources(new File(outputPath, PhpGenerator.SRC_DIR + "/Request"), resources));
         f.addAll(generateRequests(new File(outputPath, PhpGenerator.SRC_DIR + "/Request"), resources));
-        f.add(generateTest(outputPath, resources));
+        f.addAll(generateTests(outputPath, resources));
 
         return f;
     }
 
-    private File generateTest(final File outputPath, final List<Resource> resources) throws IOException {
-        final File requestTestFile = new File(outputPath, "test/unit/Request/RequestBuilderTest.php");
-        return generateFile(generateRequestTest(resources), requestTestFile);
+    private List<File> generateTests(final File outputPath, final List<Resource> resources) throws IOException {
+        final List<ResourceGenModel> flatResources = GeneratorHelper.flattenResources(resources);
+        final List<File> f = Lists.newArrayList();
+        f.add(generateFile(generateRequestTest(flatResources, Lists.newArrayList(), "builderTest"), new File(outputPath, "test/unit/Request/RequestBuilderTest.php")));
+        f.add(generateFile(
+                generateRequestTest(
+                        flatResources.stream().filter(resourceGenModel -> resourceGenModel.getCreateType() != null)
+                            .sorted(Comparator.comparing(resourceGenModel -> resourceGenModel.getAbsoluteUri().getTemplate(), Comparator.naturalOrder()))
+                            .collect(Collectors.toList()),
+                        Lists.newArrayList(),
+                        "builderCreateTest"
+                ),
+                new File(outputPath, "test/unit/Request/RequestBuilderCreateTest.php"))
+        );
+        f.add(generateFile(
+                generateRequestTest(
+                        flatResources.stream().filter(resourceGenModel -> resourceGenModel.getDeleteType() != null)
+                                .sorted(Comparator.comparing(resourceGenModel -> resourceGenModel.getAbsoluteUri().getTemplate(), Comparator.naturalOrder()))
+                                .collect(Collectors.toList()),
+                        flatResources.stream().filter(resourceGenModel -> resourceGenModel.getDeleteType() != null)
+                                .map(resourceGenModel -> resourceGenModel.getDeleteType().getImport()).collect(Collectors.toList()),
+                        "builderDeleteTest"
+                ),
+                new File(outputPath, "test/unit/Request/RequestBuilderDeleteTest.php"))
+        );
+        f.add(generateFile(
+                generateRequestTest(
+                        flatResources.stream().filter(resourceGenModel -> resourceGenModel.getUpdateBuilder() != null)
+                                .sorted(Comparator.comparing(resourceGenModel -> resourceGenModel.getAbsoluteUri().getTemplate(), Comparator.naturalOrder()))
+                                .collect(Collectors.toList()),
+                        flatResources.stream().filter(resourceGenModel -> resourceGenModel.getUpdateBuilder() != null)
+                                .map(resourceGenModel -> resourceGenModel.getUpdateBuilder().getResourceType().getImport()).collect(Collectors.toList()),
+                        "builderUpdateTest"
+                ),
+                new File(outputPath, "test/unit/Request/RequestBuilderUpdateTest.php"))
+        );
+        f.add(generateFile(
+                generateRequestTest(
+                        flatResources,
+                        Lists.newArrayList(),
+                        "builderParameterTest"
+                ),
+                new File(outputPath, "test/unit/Request/RequestBuilderParameterTest.php"))
+        );
+
+        return f;
     }
 
     private List<File> generateResources(final File outputPath, final List<Resource> resources) throws IOException {
@@ -85,30 +128,14 @@ public class RequestGenerator extends AbstractTemplateGenerator {
         return f;
     }
 
-    String generateRequestTest(final List<Resource> resources) throws IOException {
-        final List<ResourceGenModel> flatResources = GeneratorHelper.flattenResources(resources);
-
+    String generateRequestTest(final List<ResourceGenModel> resources, final List<ImportGenModel> modelResources, final String template) throws IOException {
         final STGroupFile stGroup = createSTGroup(Resources.getResource(resourcesPath + TYPE_RESOURCE + ".stg"));
-        final ST st = stGroup.getInstanceOf("builderTest");
+        final ST st = stGroup.getInstanceOf(template);
         st.add("vendorName", vendorName);
-        st.add("resources", flatResources.stream().filter(resourceGenModel -> resourceGenModel.getMethods().size() > 0)
+        st.add("resources", resources.stream().filter(resourceGenModel -> resourceGenModel.getMethods().size() > 0)
                 .sorted(Comparator.comparing(resourceGenModel -> resourceGenModel.getAbsoluteUri().getTemplate(), Comparator.naturalOrder()))
                 .collect(Collectors.toList()));
-        st.add("createResources", flatResources.stream().filter(resourceGenModel -> resourceGenModel.getCreateType() != null)
-                .sorted(Comparator.comparing(resourceGenModel -> resourceGenModel.getAbsoluteUri().getTemplate(), Comparator.naturalOrder()))
-                .collect(Collectors.toList()));
-        st.add("deleteResources", flatResources.stream().filter(resourceGenModel -> resourceGenModel.getDeleteType() != null)
-                .sorted(Comparator.comparing(resourceGenModel -> resourceGenModel.getAbsoluteUri().getTemplate(), Comparator.naturalOrder()))
-                .collect(Collectors.toList()));
-        st.add("updateResources", flatResources.stream().filter(resourceGenModel -> resourceGenModel.getUpdateBuilder() != null)
-                .sorted(Comparator.comparing(resourceGenModel -> resourceGenModel.getAbsoluteUri().getTemplate(), Comparator.naturalOrder()))
-                .collect(Collectors.toList()));
-        Set<ImportGenModel> modelResources = new LinkedHashSet<>();
-        modelResources.addAll(flatResources.stream().filter(resourceGenModel -> resourceGenModel.getDeleteType() != null).map(resourceGenModel -> resourceGenModel.getDeleteType().getImport()).collect(Collectors.toList()));
-        modelResources.addAll(flatResources.stream().filter(resourceGenModel -> resourceGenModel.getUpdateBuilder() != null).map(resourceGenModel -> resourceGenModel.getUpdateBuilder().getResourceType().getImport()).collect(Collectors.toList()));
-
-        st.add("modelResources", modelResources.stream().sorted(Comparator.comparing(ImportGenModel::getName, Comparator.naturalOrder())).collect(Collectors.toList()));
-
+        st.add("modelResources", modelResources);
         return st.render();
     }
 
