@@ -2,6 +2,7 @@ package io.vrap.rmf.nodes;
 
 import io.vrap.rmf.nodes.antlr.*;
 import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.ListTokenSource;
 import org.antlr.v4.runtime.TokenStream;
 import org.eclipse.emf.common.notify.impl.AdapterImpl;
 import org.eclipse.emf.common.util.EList;
@@ -10,6 +11,7 @@ import org.eclipse.emf.ecore.resource.URIConverter;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * Provides methods to build a node {@link Node} model from a string
@@ -35,10 +37,11 @@ public class NodeModelBuilder {
      * Parses a node instance from the given uri using the given uri converter.
      *
      * @return the parsed node
+     * @param tokens
      */
-    public Node parse() {
-        final NodeLexer lexer = new NodeLexer(uri, uriConverter);
-        final TokenStream tokenStream = new CommonTokenStream(lexer);
+    public Node parse(final List<NodeToken> tokens) {
+        final ListTokenSource tokenSource = new ListTokenSource(tokens);
+        final TokenStream tokenStream = new CommonTokenStream(tokenSource);
         final NodeParser nodeParser = new NodeParser(tokenStream);
 
         final NodeParser.NodeContext node = nodeParser.node();
