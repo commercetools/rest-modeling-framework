@@ -1,0 +1,22 @@
+main(vendorName, builders) ::= <<
+
+===============================================
+<vendorName> RAML PHP SDK Manual
+===============================================
+
+Contents:
+
+.. toctree::
+    :maxdepth: 2
+    :numbered: 1
+
+    installation
+    usage
+    requestbuilder
+    <builders: {builder |<builder(builder)>}>
+>>
+
+builder(builder) ::= <<
+
+<builder.updateType.name; format="lowercase">builder
+>>

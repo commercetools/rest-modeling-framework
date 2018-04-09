@@ -15,6 +15,7 @@ import io.vrap.rmf.raml.persistence.constructor.Scope
 import org.antlr.v4.runtime.CommonTokenStream
 import org.antlr.v4.runtime.TokenStream
 import org.apache.commons.io.FileUtils
+import org.apache.commons.io.filefilter.FileFilterUtils
 import org.apache.commons.io.filefilter.TrueFileFilter
 import org.assertj.core.util.Files
 import org.eclipse.emf.common.util.URI
@@ -36,7 +37,12 @@ class PHPGeneratorTest extends Specification implements ResourceFixtures {
     @Shared
     File resourcePath = new File(Resources.getResource("templates/php/statics/").getFile())
     @Shared
-    Collection<File> files = FileUtils.listFiles(resourcePath, TrueFileFilter.INSTANCE, TrueFileFilter.INSTANCE)
+    Collection<File> files = FileUtils.listFiles(resourcePath, TrueFileFilter.INSTANCE, FileFilterUtils.notFileFilter(
+            FileFilterUtils.and(
+                    FileFilterUtils.directoryFileFilter(),
+                    FileFilterUtils.nameFileFilter("docs")
+            )
+    ))
 
     void setup() {
         GeneratorHelper.setInstance(new PhpGeneratorHelper());
