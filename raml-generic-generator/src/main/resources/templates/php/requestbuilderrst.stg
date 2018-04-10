@@ -51,7 +51,7 @@ Create <resource.createType.name>
 Update <resource.updateBuilder.resourceType.name>
 ################################################################################
 
-All <resource.updateBuilder.resourceType.name> update methods can be found :ref:`here \<<resource.updateBuilder.updateType.name; format="lowercase">builder>`
+All <resource.updateBuilder.resourceType.name> update methods can be found :ref:`here \<updatebuilder.<resource.updateBuilder.updateType.name; format="lowercase">builder>`
 
 .. code-block:: php
     :name: requestbuilder.examples.update-<resource.updateBuilder.resourceType.name>.php

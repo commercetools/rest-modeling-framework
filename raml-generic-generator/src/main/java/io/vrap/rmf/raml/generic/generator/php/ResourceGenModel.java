@@ -41,6 +41,10 @@ public class ResourceGenModel {
         this.allResources = allResources;
     }
 
+    public String getName() {
+        return GeneratorHelper.toParamName(getAbsoluteUri(), "By");
+    }
+
     public String getMethodName() {
         Annotation annotation = resource.getAnnotation("methodName");
         if (annotation != null) {

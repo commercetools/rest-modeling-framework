@@ -107,7 +107,7 @@ public class RequestGenerator extends AbstractTemplateGenerator {
         f.add(generateFile(generateBuilder(root), requestFile));
 
         for (final ResourceGenModel resource : flatResources) {
-            final File resourceFile = new File(outputPath, "Resource" + resource.getIndex() + ".php");
+            final File resourceFile = new File(outputPath, "Resource" + resource.getName() + ".php");
 
             f.add(generateFile(generateResource(resource), resourceFile));
         }

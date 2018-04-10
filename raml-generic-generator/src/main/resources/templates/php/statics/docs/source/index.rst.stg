@@ -1,4 +1,4 @@
-main(vendorName, builders) ::= <<
+main(vendorName) ::= <<
 
 ===============================================
 <vendorName> RAML PHP SDK Manual
@@ -13,10 +13,5 @@ Contents:
     installation
     usage
     requestbuilder
-    <builders: {builder |<builder(builder)>}>
->>
-
-builder(builder) ::= <<
-
-<builder.updateType.name; format="lowercase">builder
+    updatebuilder
 >>

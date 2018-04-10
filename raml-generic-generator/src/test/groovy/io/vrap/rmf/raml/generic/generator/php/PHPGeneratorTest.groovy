@@ -315,7 +315,7 @@ class PHPGeneratorTest extends Specification implements ResourceFixtures {
         requestBuilderClass == fileContent("RequestBuilder.php")
 
         String resourceClass = generator.generateResource(flatResources.get(0))
-        resourceClass == fileContent("Resource0.php")
+        resourceClass == fileContent("ResourceByProject.php")
     }
 
     @Unroll

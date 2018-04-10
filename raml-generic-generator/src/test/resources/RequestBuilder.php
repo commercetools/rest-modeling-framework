@@ -19,11 +19,11 @@ class RequestBuilder extends Resource
     }
 
     /**
-     * @return Resource0
+     * @return ResourceByProject
      */
-    public function withProjectValue($project = null): Resource0 {
+    public function withProjectValue($project = null): ResourceByProject {
         $args = array_merge($this->getArgs(), array_filter(['project' => $project], function($value) { return !is_null($value); }));
-        return new Resource0($this->getUri() . '/{project}', $args, $this->getMapper());
+        return new ResourceByProject($this->getUri() . '/{project}', $args, $this->getMapper());
     }
 
 

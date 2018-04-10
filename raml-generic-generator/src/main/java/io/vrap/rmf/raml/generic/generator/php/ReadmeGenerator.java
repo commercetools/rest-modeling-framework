@@ -39,18 +39,17 @@ public class ReadmeGenerator extends AbstractTemplateGenerator {
                         .map(ResourceGenModel::getUpdateBuilder)
                         .collect(Collectors.toList()));
         f.addAll(generateUpdates(outputPath, builders));
-        f.addAll(generateUpdatesRst(outputPath, builders));
-        f.add(generateIndexRst(outputPath, builders));
+        f.add(generateUpdateRst(outputPath, builders));
         return f;
     }
 
-    File generateIndexRst(final File outputPath, List<BuilderGenModel> builders) throws IOException {
-        return generateFile(generateIndexRst(builders), new File(outputPath, "docs/source/index.rst"));
+    File generateUpdateRst(final File outputPath, List<BuilderGenModel> builders) throws IOException {
+        return generateFile(generateUpdateRst(builders), new File(outputPath, "docs/source/updatebuilder.rst"));
     }
 
     @VisibleForTesting
-    private String generateIndexRst(List<BuilderGenModel> builders) {
-        final STGroupFile stGroup = createSTGroup(Resources.getResource(resourcesPath + "index.rst.stg"));
+    private String generateUpdateRst(List<BuilderGenModel> builders) {
+        final STGroupFile stGroup = createSTGroup(Resources.getResource(resourcesPath + "updatebuilderrst.stg"));
         final ST st = stGroup.getInstanceOf("main");
         st.add("vendorName", vendorName);
         st.add("builders", builders);
@@ -98,26 +97,6 @@ public class ReadmeGenerator extends AbstractTemplateGenerator {
     @VisibleForTesting
     String generateUpdateBuilder(BuilderGenModel builder) {
         final STGroupFile stGroup = createSTGroup(Resources.getResource(resourcesPath + TYPE_UPDATEBUILDER + "md.stg"));
-        final ST st = stGroup.getInstanceOf("main");
-        st.add("vendorName", vendorName);
-        st.add("builder", builder);
-        return st.render();
-    }
-
-    private List<File> generateUpdatesRst(final File outputPath, List<BuilderGenModel> builders) throws IOException {
-        final List<File> f = Lists.newArrayList();
-        for (final BuilderGenModel builder : builders) {
-
-            final File builderFile = new File(outputPath, "docs/source/" + builder.getUpdateType().getName().concat("builder.rst").toLowerCase());
-
-            f.add(generateFile(generateUpdateBuilderRst(builder), builderFile));
-        }
-        return f;
-    }
-
-    @VisibleForTesting
-    String generateUpdateBuilderRst(BuilderGenModel builder) {
-        final STGroupFile stGroup = createSTGroup(Resources.getResource(resourcesPath + TYPE_UPDATEBUILDER + "rst.stg"));
         final ST st = stGroup.getInstanceOf("main");
         st.add("vendorName", vendorName);
         st.add("builder", builder);

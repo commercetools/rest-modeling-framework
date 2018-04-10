@@ -128,7 +128,7 @@ use <vendorName>\Exception\InvalidArgumentException;
 <endif>
 <resource.methods: {m |<methodUse(m)>}>
 
-class Resource<resource.index> extends Resource
+class Resource<resource.name> extends Resource
 {
     <if(resource.resources)>
     <resource.resources: {r |<resourceMethod(r)>}>
@@ -198,11 +198,11 @@ methodUse(method) ::=<<
 
 resourceMethod(resource) ::=<<
 /**
- * @return Resource<resource.index>
+ * @return Resource<resource.name>
  */
-public function <resource.methodName>(<if(resource.hasParams)>$<resource.relativeUri; format="params"> = null<endif>): Resource<resource.index> {
+public function <resource.methodName>(<if(resource.hasParams)>$<resource.relativeUri; format="params"> = null<endif>): Resource<resource.name> {
     <if(resource.hasParams)>$args = array_merge($this->getArgs(), array_filter([<resource.relativeUri; format="paramArray">], function($value) { return !is_null($value); }));<endif>
-    return new Resource<resource.index>($this->getUri() . '<resource.relativeUri.template>', <if(resource.hasParams)>$args<else>$this->getArgs()<endif>, $this->getMapper());
+    return new Resource<resource.name>($this->getUri() . '<resource.relativeUri.template>', <if(resource.hasParams)>$args<else>$this->getArgs()<endif>, $this->getMapper());
 }
 
 >>

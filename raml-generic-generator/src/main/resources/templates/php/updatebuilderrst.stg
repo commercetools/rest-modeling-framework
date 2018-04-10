@@ -1,10 +1,20 @@
-main(vendorName, builder) ::= <<
+main(vendorName, builders) ::= <<
 
-.. _<builder.updateType.name; format="lowercase">builder:
+.. _updatebuilder:
 
-========================================================
+=============
+UpdateBuilder
+=============
+
+<builders: {builder |<builder(vendorName, builder)>}>
+>>
+
+builder(vendorName, builder) ::=<<
+
+.. _updatebuilder.<builder.updateType.name; format="lowercase">builder:
+
 <builder.updateType.name>Builder
-========================================================
+#########################################################
 
 .. code-block:: php
     :name: updatebuilder.<builder.updateType.name; format="lowercase">builder.examples.builder.php
@@ -22,7 +32,7 @@ main(vendorName, builder) ::= <<
 update(action)::=<<
 
 <action.discriminatorValue>
-#########################################################
+---------------------------------------------------------
 
 .. code-block:: php
     :name: updatebuilder.<builder.updateType.name; format="lowercase">builder.examples.<action.discriminatorValue>.php
