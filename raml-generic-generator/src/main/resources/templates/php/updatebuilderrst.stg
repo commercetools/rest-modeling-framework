@@ -11,7 +11,7 @@ UpdateBuilder
 
 builder(vendorName, builder) ::=<<
 
-.. _updatebuilder.<builder.updateType.name; format="lowercase">builder:
+.. _<builder.updateType.name; format="lowercase">builder:
 
 <builder.updateType.name>Builder
 #########################################################
