@@ -26,7 +26,7 @@ The main entry point is the `io.vrap.rmf.raml.model.RamlModelBuilder` class, see
   final RamlModelResult<Api> modelResult = new RamlModelBuilder().buildApi(fileURI);
   final List<RamlDiagnostic> validationResults = modelResult.getValidationResults();
 
-if (validationResults.isEmpty()) {
+  if (validationResults.isEmpty()) {
       final Api api = modelResult.getRootObject();
   }  
 ```
