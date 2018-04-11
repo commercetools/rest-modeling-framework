@@ -1,0 +1,14 @@
+import "../../../generic.stg"
+
+main(vendorName) ::=<<
+\<?php
+<generatorInfo()>
+
+namespace <vendorName>\Exception;
+
+
+abstract class BaseException extends \Exception
+{
+}
+
+>>

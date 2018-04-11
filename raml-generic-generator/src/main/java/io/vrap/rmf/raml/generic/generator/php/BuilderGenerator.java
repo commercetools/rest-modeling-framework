@@ -4,16 +4,8 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
 import io.vrap.rmf.raml.generic.generator.AbstractTemplateGenerator;
-import io.vrap.rmf.raml.generic.generator.CollectionGenModel;
-import io.vrap.rmf.raml.generic.generator.TypeGenModel;
-import io.vrap.rmf.raml.generic.generator.postman.ProjectGenModel;
-import io.vrap.rmf.raml.generic.generator.postman.ResourceGenModel;
+import io.vrap.rmf.raml.generic.generator.GeneratorHelper;
 import io.vrap.rmf.raml.model.modules.Api;
-import io.vrap.rmf.raml.model.resources.HttpMethod;
-import io.vrap.rmf.raml.model.types.*;
-import io.vrap.rmf.raml.model.types.impl.TypesFactoryImpl;
-import io.vrap.rmf.raml.model.types.util.TypesSwitch;
-import org.eclipse.emf.ecore.EObject;
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroupFile;
 
@@ -39,20 +31,15 @@ public class BuilderGenerator extends AbstractTemplateGenerator {
         final List<File> f = Lists.newArrayList();
 
         final List<BuilderGenModel> builders = Lists.newArrayList();
-        // project resource
-        builders.add(new BuilderGenModel(api.getResources().get(0).getMethod(HttpMethod.POST)));
 
-        // everything under /project
         builders.addAll(
-                api.getResources().get(0).getResources().stream().flatMap(
-                        resource -> resource.getResources().stream()
-                                .filter(resource1 -> resource1.getUriParameter("ID") != null)
-                                .filter(resource1 -> resource1.getMethod(HttpMethod.POST) != null)
-                                .map(resource1 -> new BuilderGenModel(resource1.getMethod(HttpMethod.POST)))
-                )
+                GeneratorHelper.flattenResources(api.getResources()).stream()
+                        .filter(resourceGenModel -> resourceGenModel.getUpdateBuilder() != null)
+                        .map(ResourceGenModel::getUpdateBuilder)
                 .collect(Collectors.toList()));
 
-        f.addAll(generateBuilders(outputPath, builders));
+        f.addAll(generateBuilders(new File(outputPath, PhpGenerator.SRC_DIR + "/" + BUILDER), builders));
+        f.addAll(generateBuilderTests(new File(outputPath, "test/unit/" + BUILDER), builders));
 
         return f;
     }
@@ -73,10 +60,30 @@ public class BuilderGenerator extends AbstractTemplateGenerator {
         return f;
     }
 
+    private List<File> generateBuilderTests(final File outputPath, List<BuilderGenModel> builders) throws IOException {
+        final List<File> f = Lists.newArrayList();
+        for (final BuilderGenModel builder : builders) {
+
+            final File builderFile = new File(outputPath, builder.getUpdateType().getName().concat("BuilderTest.php"));
+
+            f.add(generateFile(generateBuilderTest(builder), builderFile));
+        }
+        return f;
+    }
+
     @VisibleForTesting
     String generateBuilder(BuilderGenModel builder) {
         final STGroupFile stGroup = createSTGroup(Resources.getResource(resourcesPath + TYPE_BUILDER + ".stg"));
         final ST st = stGroup.getInstanceOf("updateBuilder");
+        st.add("vendorName", vendorName);
+        st.add("builder", builder);
+        return st.render();
+    }
+
+    @VisibleForTesting
+    String generateBuilderTest(BuilderGenModel builder) {
+        final STGroupFile stGroup = createSTGroup(Resources.getResource(resourcesPath + TYPE_BUILDER + ".stg"));
+        final ST st = stGroup.getInstanceOf("builderTest");
         st.add("vendorName", vendorName);
         st.add("builder", builder);
         return st.render();

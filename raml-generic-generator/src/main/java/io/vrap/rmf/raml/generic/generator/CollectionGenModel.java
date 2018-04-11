@@ -9,7 +9,6 @@ public class CollectionGenModel extends TypeGenModel {
         super(type);
     }
 
-    @Nullable
     public String getName()
     {
         return super.getName() + "Collection";
@@ -20,5 +19,15 @@ public class CollectionGenModel extends TypeGenModel {
     public String getElementName()
     {
         return super.getName();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        CollectionGenModel that = (CollectionGenModel) o;
+
+        return getName().equals(that.getName());
     }
 }

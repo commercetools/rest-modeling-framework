@@ -39,8 +39,8 @@ class ApiRequest extends Request
     protected function ensureHeader(array $headers, string $header, $defaultValue): array
     {
         $normalizedHeader = strtolower($header);
-        foreach ($headers as $header => $value) {
-            $normalized = strtolower($header);
+        foreach ($headers as $headerName => $value) {
+            $normalized = strtolower($headerName);
             if ($normalized !== $normalizedHeader) {
                 continue;
             }
@@ -64,6 +64,7 @@ class ApiRequest extends Request
     /**
      * @param string $parameterName
      * @param mixed $value
+     * @return ApiRequest
      */
     public function withQueryParam(string $parameterName, $value): ApiRequest
     {

@@ -28,6 +28,12 @@ interface <type.name> extends <if(!type.hasBuiltinParent)><type.parent.name><els
     public function get(string $key);
     public function set(string $key, $value);
     <endif>
+    <if(type.updateType)>
+    /**
+     * @return <type.updateType.name>Builder
+     */
+    public function update();
+    <endif>
 }
 
 >>
@@ -71,6 +77,6 @@ propertyInterfaceSet(property) ::= <<
  * @param <property.type.typeName> $<property.name>
  * @return $this
  */
-public function set<property.name; format="capitalize">(<if(property.paramType)><property.paramType> <endif>$<property.name>);
+public function set<property.name; format="capitalize">(<if(property.setter.paramType)><property.setter.paramType> <endif>$<property.name>);
 
 >>

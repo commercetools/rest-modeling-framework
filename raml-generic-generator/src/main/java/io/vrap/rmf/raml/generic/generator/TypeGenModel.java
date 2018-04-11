@@ -1,16 +1,14 @@
 package io.vrap.rmf.raml.generic.generator;
 
 import com.google.common.collect.Lists;
+import io.vrap.rmf.raml.generic.generator.php.BuilderGenerator;
 import io.vrap.rmf.raml.model.modules.Api;
 import io.vrap.rmf.raml.model.types.*;
 import io.vrap.rmf.raml.model.types.util.TypesSwitch;
 import org.eclipse.emf.ecore.EObject;
 
 import javax.annotation.Nullable;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class TypeGenModel {
@@ -31,6 +29,11 @@ public class TypeGenModel {
     public String getName()
     {
         return type.getName();
+    }
+
+    private String getNameString()
+    {
+        return Optional.ofNullable(type.getName()).orElse("");
     }
 
     public TypeGenModel getParent()
@@ -82,7 +85,7 @@ public class TypeGenModel {
     @Nullable
     public List<TypeGenModel> getSubTypes()
     {
-        return type.getSubTypes().stream().map(TypeGenModel::new).collect(Collectors.toList());
+        return type.getSubTypes().stream().map(TypeGenModel::new).sorted(Comparator.comparing(TypeGenModel::getNameString, Comparator.naturalOrder())).collect(Collectors.toList());
     }
 
     public List<PropertyGenModel> getTypeProperties()
@@ -166,6 +169,7 @@ public class TypeGenModel {
                         AnyType t = property.getType() instanceof ArrayType ? ((ArrayType) property.getType()).getItems() : property.getType();
                         return !new TypeGenModel(t).getPackage().equals(getPackage());
                     })
+                    .filter(property -> !new BuiltinVisitor().doSwitch(property.getType()))
                     .map(property -> {
                         AnyType t = property.getType() instanceof ArrayType ? ((ArrayType) property.getType()).getItems() : property.getType();
                         return new TypeGenModel(t).getImport();
@@ -179,6 +183,7 @@ public class TypeGenModel {
                                 AnyType t = property.getType() instanceof ArrayType ? ((ArrayType) property.getType()).getItems() : property.getType();
                                 return !new TypeGenModel(t).getPackage().equals(getPackage());
                             })
+                            .filter(property -> !new BuiltinVisitor().doSwitch(property.getType()))
                             .map(property -> new TypeGenModel(property.getType()).getImport())
                             .collect(Collectors.toSet())
             );
@@ -187,6 +192,9 @@ public class TypeGenModel {
             }
             if (getDiscriminator() != null && getPackage().getHasPackage()) {
                 uses.add(new ImportGenModel(new PackageGenModel(TYPES)));
+            }
+            if (getUpdateType() != null) {
+                uses.add(new ImportGenModel(new PackageGenModel(BuilderGenerator.BUILDER), getUpdateType().getName() + BuilderGenerator.BUILDER));
             }
             return uses;
         }
@@ -229,6 +237,15 @@ public class TypeGenModel {
         return GeneratorHelper.getParent(type, Api.class);
     }
 
+    @Nullable
+    public TypeGenModel getUpdateType() {
+        Annotation updateTypeAnnotation = type.getAnnotation("updateType");
+        if (updateTypeAnnotation != null) {
+            return new TypeGenModel(getApi().getType(((StringInstance)updateTypeAnnotation.getValue()).getValue()));
+        }
+        return null;
+    }
+
     private class BuiltinParentVisitor extends TypesSwitch<Boolean> {
         @Override
         public Boolean defaultCase(EObject object) {
@@ -244,6 +261,24 @@ public class TypeGenModel {
         @Override
         public Boolean caseObjectType(final ObjectType objectType) {
             return objectType.getName() != null && (objectType.getType() == null || BuiltinType.of(objectType.getType().getName()).isPresent());
+        }
+    }
+
+    private class BuiltinVisitor extends TypesSwitch<Boolean> {
+        @Override
+        public Boolean defaultCase(EObject object) {
+            return true;
+        }
+
+        @Override
+        public Boolean caseArrayType(final ArrayType arrayType) {
+            final AnyType items = arrayType.getItems();
+            return items != null && items.getName() != null && BuiltinType.of(items.getName()).isPresent();
+        }
+
+        @Override
+        public Boolean caseObjectType(final ObjectType objectType) {
+            return objectType.getName() != null && BuiltinType.of(objectType.getName()).isPresent();
         }
     }
 

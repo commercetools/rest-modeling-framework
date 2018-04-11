@@ -9,16 +9,18 @@ import io.vrap.rmf.raml.generic.generator.GeneratorHelper;
 import io.vrap.rmf.raml.generic.generator.ImportGenModel;
 import io.vrap.rmf.raml.generic.generator.PackageGenModel;
 import io.vrap.rmf.raml.generic.generator.TypeGenModel;
+import io.vrap.rmf.raml.model.modules.Api;
+import io.vrap.rmf.raml.model.resources.HttpMethod;
 import io.vrap.rmf.raml.model.resources.Method;
+import io.vrap.rmf.raml.model.resources.Parameter;
 import io.vrap.rmf.raml.model.resources.Resource;
 import io.vrap.rmf.raml.model.responses.Body;
 import io.vrap.rmf.raml.model.responses.Response;
-import io.vrap.rmf.raml.model.types.ArrayType;
-import io.vrap.rmf.raml.model.types.BuiltinType;
-import io.vrap.rmf.raml.model.types.FileType;
-import io.vrap.rmf.raml.model.types.ObjectType;
+import io.vrap.rmf.raml.model.types.*;
+import org.eclipse.emf.ecore.EObject;
 
 import javax.annotation.Nullable;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -107,6 +109,10 @@ public class RequestGenModel {
         return null;
     }
 
+    public ImportGenModel getImport() {
+        return new ImportGenModel(getPackage(), getName());
+    }
+
     @Nullable
     public Set<Map.Entry<String, String>> getAllParams() {
         Map<String, String> params = getAbsoluteUri().getComponents().stream()
@@ -117,5 +123,24 @@ public class RequestGenModel {
             return params.entrySet();
         }
         return null;
+    }
+
+    @Nullable
+    public List<String> getAllParamNames() {
+        List<String> params = getAbsoluteUri().getComponents().stream()
+                .filter(uriTemplatePart -> uriTemplatePart instanceof Expression)
+                .flatMap(uriTemplatePart -> ((Expression)uriTemplatePart).getVarSpecs().stream().map(VarSpec::getVariableName))
+                .collect(Collectors.toList());
+        if (params.size() > 0) {
+            return params;
+        }
+        return null;
+    }
+
+    public List<QueryParameter> getQueryParameters() {
+        return method.getQueryParameters().stream().filter(parameter -> {
+            final boolean placeholderParam = parameter.getAnnotation("placeholderParam") == null;
+            return placeholderParam;
+        }).collect(Collectors.toList());
     }
 }

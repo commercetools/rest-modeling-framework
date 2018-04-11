@@ -9,6 +9,8 @@ import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
 import io.vrap.rmf.raml.generic.generator.AbstractTemplateGenerator;
 import io.vrap.rmf.raml.generic.generator.GeneratorHelper;
+import io.vrap.rmf.raml.generic.generator.ImportGenModel;
+import io.vrap.rmf.raml.generic.generator.TypeGenModel;
 import io.vrap.rmf.raml.model.resources.HttpMethod;
 import io.vrap.rmf.raml.model.resources.Method;
 import io.vrap.rmf.raml.model.resources.Resource;
@@ -21,8 +23,7 @@ import org.stringtemplate.v4.STGroupFile;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.capitalize;
@@ -42,8 +43,57 @@ public class RequestGenerator extends AbstractTemplateGenerator {
     public List<File> generate(final List<Resource> resources, final File outputPath) throws IOException {
 
         final List<File> f = Lists.newArrayList();
-        f.addAll(generateResources(outputPath, resources));
-        f.addAll(generateRequests(outputPath, resources));
+        f.addAll(generateResources(new File(outputPath, PhpGenerator.SRC_DIR + "/Request"), resources));
+        f.addAll(generateRequests(new File(outputPath, PhpGenerator.SRC_DIR + "/Request"), resources));
+        f.addAll(generateTests(outputPath, resources));
+
+        return f;
+    }
+
+    private List<File> generateTests(final File outputPath, final List<Resource> resources) throws IOException {
+        final List<ResourceGenModel> flatResources = GeneratorHelper.flattenResources(resources);
+        final List<File> f = Lists.newArrayList();
+        f.add(generateFile(generateRequestTest(flatResources, Lists.newArrayList(), "builderTest"), new File(outputPath, "test/unit/Request/RequestBuilderTest.php")));
+        f.add(generateFile(
+                generateRequestTest(
+                        flatResources.stream().filter(resourceGenModel -> resourceGenModel.getCreateType() != null)
+                            .sorted(Comparator.comparing(resourceGenModel -> resourceGenModel.getAbsoluteUri().getTemplate(), Comparator.naturalOrder()))
+                            .collect(Collectors.toList()),
+                        Lists.newArrayList(),
+                        "builderCreateTest"
+                ),
+                new File(outputPath, "test/unit/Request/RequestBuilderCreateTest.php"))
+        );
+        f.add(generateFile(
+                generateRequestTest(
+                        flatResources.stream().filter(resourceGenModel -> resourceGenModel.getDeleteType() != null)
+                                .sorted(Comparator.comparing(resourceGenModel -> resourceGenModel.getAbsoluteUri().getTemplate(), Comparator.naturalOrder()))
+                                .collect(Collectors.toList()),
+                        flatResources.stream().filter(resourceGenModel -> resourceGenModel.getDeleteType() != null)
+                                .map(resourceGenModel -> resourceGenModel.getDeleteType().getImport()).collect(Collectors.toList()),
+                        "builderDeleteTest"
+                ),
+                new File(outputPath, "test/unit/Request/RequestBuilderDeleteTest.php"))
+        );
+        f.add(generateFile(
+                generateRequestTest(
+                        flatResources.stream().filter(resourceGenModel -> resourceGenModel.getUpdateBuilder() != null)
+                                .sorted(Comparator.comparing(resourceGenModel -> resourceGenModel.getAbsoluteUri().getTemplate(), Comparator.naturalOrder()))
+                                .collect(Collectors.toList()),
+                        flatResources.stream().filter(resourceGenModel -> resourceGenModel.getUpdateBuilder() != null)
+                                .map(resourceGenModel -> resourceGenModel.getUpdateBuilder().getResourceType().getImport()).collect(Collectors.toList()),
+                        "builderUpdateTest"
+                ),
+                new File(outputPath, "test/unit/Request/RequestBuilderUpdateTest.php"))
+        );
+        f.add(generateFile(
+                generateRequestTest(
+                        flatResources,
+                        Lists.newArrayList(),
+                        "builderParameterTest"
+                ),
+                new File(outputPath, "test/unit/Request/RequestBuilderParameterTest.php"))
+        );
 
         return f;
     }
@@ -55,8 +105,9 @@ public class RequestGenerator extends AbstractTemplateGenerator {
         final File requestFile = new File(outputPath, "RequestBuilder.php");
         final RootResourceGenModel root = new RootResourceGenModel(flatResources.stream().filter(resourceGenModel -> resources.contains(resourceGenModel.getResource())).collect(Collectors.toList()));
         f.add(generateFile(generateBuilder(root), requestFile));
+
         for (final ResourceGenModel resource : flatResources) {
-            final File resourceFile = new File(outputPath, "Resource" + resource.getIndex() + ".php");
+            final File resourceFile = new File(outputPath, "Resource" + resource.getName() + ".php");
 
             f.add(generateFile(generateResource(resource), resourceFile));
         }
@@ -73,7 +124,19 @@ public class RequestGenerator extends AbstractTemplateGenerator {
                 f.add(generateFile(generateRequest(request), resourceFile));
             }
         }
+
         return f;
+    }
+
+    String generateRequestTest(final List<ResourceGenModel> resources, final List<ImportGenModel> modelResources, final String template) throws IOException {
+        final STGroupFile stGroup = createSTGroup(Resources.getResource(resourcesPath + TYPE_RESOURCE + ".stg"));
+        final ST st = stGroup.getInstanceOf(template);
+        st.add("vendorName", vendorName);
+        st.add("resources", resources.stream().filter(resourceGenModel -> resourceGenModel.getMethods().size() > 0)
+                .sorted(Comparator.comparing(resourceGenModel -> resourceGenModel.getAbsoluteUri().getTemplate(), Comparator.naturalOrder()))
+                .collect(Collectors.toList()));
+        st.add("modelResources", modelResources);
+        return st.render();
     }
 
     String generateBuilder(final RootResourceGenModel resource) {
@@ -142,7 +205,7 @@ public class RequestGenerator extends AbstractTemplateGenerator {
                                 ObjectInstance o = (ObjectInstance) anno.getValue();
                                 StringInstance template = (StringInstance) o.getValue().stream().filter(propertyValue -> propertyValue.getName().equals("template")).findFirst().orElse(null).getValue();
                                 StringInstance placeholder = (StringInstance) o.getValue().stream().filter(propertyValue -> propertyValue.getName().equals("placeholder")).findFirst().orElse(null).getValue();
-                                return "sprintf('" + template.getValue().replace("<<" + placeholder.getValue() + ">>", "%s") + "', $" + placeholder.getValue() + ")";
+                                return "sprintf('" + template.getValue().replace("<" + placeholder.getValue() + ">", "%s") + "', $" + placeholder.getValue() + ")";
                             }
                             return "'" + param.getName() + "'";
                         default:
@@ -156,20 +219,20 @@ public class RequestGenerator extends AbstractTemplateGenerator {
                     switch (Strings.nullToEmpty(formatString)) {
                         case "optionalBody":
                             if (method.getMethod().equals(HttpMethod.POST)) {
-                                return "";
+                                return " = null";
                             }
                             return " = null";
                         case "ensureHeader":
                             if (firstBodyType != null) {
                                 if (firstBodyType.getType() instanceof FileType) {
-                                    return "$headers = $this->ensureHeader($headers, 'Content-Type', $body->getClientMediaType());";
+                                    return "if (!is_null($body)) { $headers = $this->ensureHeader($headers, 'Content-Type', $body->getClientMediaType()); }";
                                 }
                             }
                             return "";
                         case "serialize":
                             if (firstBodyType != null) {
                                 if (firstBodyType.getType() instanceof FileType) {
-                                    return "$body->getStream()";
+                                    return "!is_null($body) ? $body->getStream() : null";
                                 }
                             }
                             return "!is_null($body) ? json_encode($body) : null";
@@ -178,53 +241,6 @@ public class RequestGenerator extends AbstractTemplateGenerator {
                     }
                 }
         );
-        stGroup.registerRenderer(UriTemplate.class,
-                (arg, formatString, locale) -> {
-                    final List<Expression> parts = ((UriTemplate)arg).getComponents().stream()
-                            .filter(uriTemplatePart -> uriTemplatePart instanceof Expression)
-                            .map(uriTemplatePart -> (Expression)uriTemplatePart)
-                            .collect(Collectors.toList());
-                    switch (Strings.nullToEmpty(formatString)) {
-                        case "methodName":
-                            if (parts.size() > 0) {
-                                return CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, GeneratorHelper.toParamName((UriTemplate)arg, "With", "Value"));
-                            }
-
-                            final String uri = ((UriTemplate) arg).getTemplate();
-                            return CaseFormat.LOWER_HYPHEN.to(CaseFormat.LOWER_CAMEL, uri.replaceFirst("/", ""));
-                        case "params":
-                            if (parts.size() > 0) {
-                                return parts.stream().map(
-                                        uriTemplateExpression -> uriTemplateExpression.getVarSpecs().stream().map(VarSpec::getVariableName).collect(Collectors.joining(", $"))
-                                ).collect(Collectors.joining(", $"));
-                            }
-                            return "";
-                        case "paramArray":
-                            if (parts.size() > 0) {
-                                return parts.stream().map(
-                                        uriTemplateExpression -> uriTemplateExpression.getVarSpecs().stream().map(VarSpec::getVariableName).map(s -> "'" + s + "' => $" + s).collect(Collectors.joining(", "))
-                                ).collect(Collectors.joining(", "));
-                            }
-                            return "";
-                        case "sprintf":
-                            final Map<String, Object> params = parts.stream()
-                                    .flatMap(uriTemplatePart -> uriTemplatePart.getVarSpecs().stream().map(VarSpec::getVariableName))
-                                    .collect(Collectors.toMap(o -> o, o -> "%s"));
-                            return ((UriTemplate)arg).expand(params).replace("%25s", "%s");
-                        case "uri":
-                            if (parts.size() > 0) {
-                                return ((UriTemplate)arg).getComponents().stream().map(uriTemplatePart -> {
-                                    if (uriTemplatePart instanceof Expression) {
-                                        return ((Expression) uriTemplatePart).getVarSpecs().stream().map(VarSpec::getVariableName).map(s -> "' . $" + s + " . '").collect(Collectors.joining());
-                                    }
-                                    return uriTemplatePart.toString();
-                                }).collect(Collectors.joining());
-                            }
-                            return arg.toString();
-                        default:
-                            return arg.toString();
-                    }
-                });
         return stGroup;
     }
 }

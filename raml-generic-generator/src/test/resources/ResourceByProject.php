@@ -9,13 +9,13 @@ namespace Test\Request;
 
 use Test\Client\Resource;
 
-class Resource0 extends Resource
+class ResourceByProject extends Resource
 {
     /**
-     * @return Resource1
+     * @return ResourceByProjectCategories
      */
-    public function categories(): Resource1 {
-        return new Resource1($this->getUri() . '/categories', $this->getArgs());
+    public function categories(): ResourceByProjectCategories {
+        return new ResourceByProjectCategories($this->getUri() . '/categories', $this->getArgs(), $this->getMapper());
     }
 
 

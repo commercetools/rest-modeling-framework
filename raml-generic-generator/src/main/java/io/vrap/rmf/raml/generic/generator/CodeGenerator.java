@@ -27,7 +27,7 @@ public class CodeGenerator {
         final long startTimeMillis = System.currentTimeMillis();
 
         final URI fileURI = URI.createFileURI(options.getRamlPath().toString());
-        final File generateTo = new File(options.getOutputPath().toString() + "/" + options.getLanguage());
+        final File generateTo = new File(options.getOutputPath().toString());
 
         final RamlModelResult<Api> apiRamlModelResult = new RamlModelBuilder().buildApi(fileURI);
         final List<RamlDiagnostic> validationResults = apiRamlModelResult.getValidationResults();

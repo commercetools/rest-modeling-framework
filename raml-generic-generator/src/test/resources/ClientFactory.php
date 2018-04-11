@@ -10,6 +10,7 @@ namespace Test\Client;
 use Cache\Adapter\Filesystem\FilesystemCachePool;
 use Test\Client\Subscriber\Log\Formatter;
 use Test\Client\Subscriber\Log\LogSubscriber;
+use Test\Exception\InvalidArgumentException;
 use GuzzleHttp\Client as HttpClient;
 use GuzzleHttp\Event\BeforeEvent;
 use GuzzleHttp\HandlerStack;
@@ -26,7 +27,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
 
-class Factory
+class ClientFactory
 {
     /**
      * @var bool
@@ -40,7 +41,7 @@ class Factory
      * @param TokenProvider $provider
      * @return HttpClient
      */
-    public static function create(
+    public function create(
         $config = [],
         LoggerInterface $logger = null,
         CacheItemPoolInterface $cache = null,
@@ -54,7 +55,7 @@ class Factory
     /**
      * @param Config|array $config
      * @return Config
-     * @throws \InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     private function createConfig($config): Config
     {
@@ -64,7 +65,7 @@ class Factory
         if (is_array($config)) {
             return new Config($config);
         }
-        throw new \InvalidArgumentException();
+        throw new InvalidArgumentException();
     }
 
     /**
@@ -173,14 +174,12 @@ class Factory
             $options
         );
         $client = new HttpClient($options);
-        if (!is_null($logger)) {
-            if ($logger instanceof LoggerInterface) {
-                $formatter = new Formatter();
-                $client->getEmitter()->attach(new LogSubscriber($logger, $formatter, LogLevel::INFO));
-            }
+        if ($logger instanceof LoggerInterface) {
+            $formatter = new Formatter();
+            $client->getEmitter()->attach(new LogSubscriber($logger, $formatter, LogLevel::INFO));
         }
 
-        $client->getEmitter()->on('before', function (BeforeEvent $e) use ($oauthHandler) {
+        $client->getEmitter()->on('before', function(BeforeEvent $e) use ($oauthHandler) {
             $e->getRequest()->setHeader('Authorization', $oauthHandler->getAuthorizationHeader());
         });
 
@@ -192,7 +191,7 @@ class Factory
      * @param HttpClient $client
      * @return GuzzleRequestInterface|RequestInterface
      */
-    public static function createRequest(RequestInterface $psrRequest, HttpClient $client)
+    public function createRequest(RequestInterface $psrRequest, HttpClient $client)
     {
         if (self::isGuzzle6()) {
             return $psrRequest;
@@ -209,7 +208,7 @@ class Factory
      * @param GuzzleResponseInferface|ResponseInterface $response
      * @return ResponseInterface
      */
-    public static function createResponse($response): ResponseInterface
+    public function createResponse($response): ResponseInterface
     {
         if ($response instanceof ResponseInterface) {
             return $response;
@@ -222,7 +221,7 @@ class Factory
             );
         }
 
-        throw new \InvalidArgumentException(
+        throw new InvalidArgumentException(
             'Argument 1 must be an instance of Psr\Http\Message\ResponseInterface ' .
             'or GuzzleHttp\Message\ResponseInterface'
         );
@@ -263,5 +262,13 @@ class Factory
             }
         }
         return self::$isGuzzle6;
+    }
+
+    /**
+     * @return ClientFactory
+     */
+    public static function of(): ClientFactory
+    {
+        return new self();
     }
 }

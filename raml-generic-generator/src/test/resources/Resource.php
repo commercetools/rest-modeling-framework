@@ -7,10 +7,12 @@ declare(strict_types = 1);
 
 namespace Test\Client;
 
-use GuzzleHttp\Psr7;
-use Psr\Http\Message\RequestInterface;
+use Test\Base\Mapper;
+use Test\Base\MapperAware;
+use Test\Base\ResultMapper;
+use Test\Types\ModelClassMap;
 
-class Resource
+class Resource implements MapperAware
 {
     /**
      * @var string
@@ -22,13 +24,20 @@ class Resource
     private $args = [];
 
     /**
+     * @var Mapper
+     */
+    private $mapper;
+
+    /**
      * @param string $uri
      * @param array $args
+     * @param Mapper|null $mapper
      */
-    public function __construct(string $uri, array $args = [])
+    public function __construct(string $uri, array $args = [], Mapper $mapper = null)
     {
         $this->uri = $uri;
         $this->args = $args;
+        $this->mapper = $mapper;
     }
 
     /**
@@ -48,33 +57,31 @@ class Resource
     }
 
     /**
-     * @param string $method
-     * @param string $uri
-     * @param mixed $body
-     * @param array $options
-     * @param string $requestClass
-     * @return ApiRequest
+     * @param Mapper $mapper
      */
-    final protected function buildRequest(
-        string $method,
-        string $uri,
-        $body = null,
-        array $options = [],
-        string $requestClass = ApiRequest::class
-    ): ApiRequest {
-        $headers = isset($options['headers']) ? $options['headers'] : [];
-        /**
-         * @var ApiRequest $request
-         */
-        $request = new $requestClass($method, $uri, $headers, $body);
+    public function setMapper(Mapper $mapper)
+    {
+        $this->mapper = $mapper;
+    }
 
-        if (isset($options['query'])) {
-            ksort($options['query']);
-            $uri = $request->getUri()->withQuery(Psr7\build_query($options['query']));
-            $request = $request->withUri($uri);
+    /**
+     * @returns Mapper
+     */
+    public function getMapper(): Mapper
+    {
+        if (is_null($this->mapper)) {
+            $this->mapper = new ResultMapper(new ModelClassMap());
         }
+        return $this->mapper;
+    }
 
-
-        return $request;
+    /**
+     * @param string $class
+     * @param mixed $data
+     * @return mixed
+     */
+    protected function mapData($class, $data)
+    {
+        return $this->getMapper()->mapData($class, $data);
     }
 }

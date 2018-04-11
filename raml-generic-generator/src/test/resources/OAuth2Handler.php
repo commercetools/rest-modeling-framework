@@ -32,7 +32,7 @@ class OAuth2Handler {
     public function __construct(TokenProvider $provider, CacheItemPoolInterface $cache = null) {
         $this->provider = $provider;
         if (is_null($cache)) {
-            $filesystemAdapter = new Local(__DIR__.'/');
+            $filesystemAdapter = new Local(__DIR__ . '/');
             $filesystem        = new Filesystem($filesystemAdapter);
             $cache = new FilesystemCachePool($filesystem);
         }
@@ -85,7 +85,8 @@ class OAuth2Handler {
     private function saveToken(string $token, CacheItemInterface $item, int $ttl)
     {
         if (!is_null($this->cache)) {
-            $item->set($token)->expiresAfter($ttl);
+            $item->set($token);
+            $item->expiresAfter($ttl);
             $this->cache->save($item);
         }
     }

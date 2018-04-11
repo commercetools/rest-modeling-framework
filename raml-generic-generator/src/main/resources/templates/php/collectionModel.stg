@@ -7,10 +7,7 @@ collectionModel(vendorName, type) ::= <<
 namespace <vendorName>\\<type.package.parts; separator="\\">;
 
 use <vendorName>\\Base\\JsonCollection;
-<if(type.discriminator)>
-use <vendorName>\\Base\\DiscriminatorResolver;
-<endif>
-
+use <vendorName>\\Exception\\InvalidArgumentException;
 
 class <type.name>Model extends JsonCollection implements <type.name> {
 
@@ -20,7 +17,7 @@ class <type.name>Model extends JsonCollection implements <type.name> {
      */
     public function add($value) {
         if (!$value instanceof <type.elementName>) {
-            throw new \InvalidArgumentException();
+            throw new InvalidArgumentException();
         }
         parent::add($value);
 
@@ -52,7 +49,7 @@ class <type.name>Model extends JsonCollection implements <type.name> {
         }
     }
 
-    <type.identifiers: {id |<indexGetter(id)>}>
+    <type.identifiers: {id |<indexGetter(type, id)>}>
     <endif>
 }
 
@@ -65,10 +62,11 @@ if (isset($value['<identifier.name>'])) {
 }
 >>
 
-indexGetter(identifier) ::=<<
+indexGetter(type, identifier) ::=<<
 
 /**
- * @return <identifier.type.name>
+ * @param <identifier.type.name> $<identifier.name>
+ * @return <type.elementName>
  */
 public function by<identifier.name; format="capitalize">($<identifier.name>)
 {

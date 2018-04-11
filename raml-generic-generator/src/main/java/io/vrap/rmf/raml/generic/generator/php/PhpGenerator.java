@@ -6,20 +6,14 @@ import io.vrap.rmf.raml.generic.generator.TypeGenModel;
 import io.vrap.rmf.raml.model.modules.Api;
 import io.vrap.rmf.raml.model.types.AnyAnnotationType;
 import io.vrap.rmf.raml.model.util.StringCaseFormat;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.filefilter.FileFilterUtils;
-import org.apache.commons.io.filefilter.TrueFileFilter;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 public class PhpGenerator implements Generator {
-    private static final String SRC_DIR = "src";
+    static final String SRC_DIR = "src";
     private final String vendorName;
 
     public PhpGenerator(final String vendorName) {
@@ -40,26 +34,14 @@ public class PhpGenerator implements Generator {
         f.addAll(staticGenerator.generate(outputPath, api));
 
         RequestGenerator requestGenerator = new RequestGenerator(vendorName, placeholderParamAnnotation);
-        f.addAll(requestGenerator.generate(api.getResources(), new File(outputPath, SRC_DIR + "/Request")));
+        f.addAll(requestGenerator.generate(api.getResources(), outputPath));
 
         BuilderGenerator builderGenerator = new BuilderGenerator(vendorName);
-        f.addAll(builderGenerator.generate(api, new File(outputPath, SRC_DIR + "/" + BuilderGenerator.BUILDER)));
-        Helper.deleteObsoleteFiles(outputPath, f);
-        Collection<File> files = FileUtils.listFiles(
-                outputPath,
-                TrueFileFilter.INSTANCE,
-                FileFilterUtils.notFileFilter(
-                        FileFilterUtils.and(
-                                FileFilterUtils.directoryFileFilter(),
-                                FileFilterUtils.nameFileFilter("vendor")
-                        )
-                )
-        ).stream().filter(file -> !f.contains(file)).collect(Collectors.toSet());
+        f.addAll(builderGenerator.generate(api, outputPath));
 
-        for (File file : files) {
-            if (file.isFile()) {
-                Files.deleteIfExists(file.toPath());
-            }
-        }
+        ReadmeGenerator readmeGenerator = new ReadmeGenerator(vendorName);
+        f.addAll(readmeGenerator.generate(api, outputPath));
+
+        Helper.deleteObsoleteFiles(outputPath, f);
     }
 }

@@ -7,6 +7,7 @@ declare(strict_types = 1);
 
 namespace Test\Types;
 
+use Test\Exception\InvalidArgumentException;
 use Test\Base\JsonObjectModel;
 
 class AttributeModel extends JsonObjectModel implements Attribute {
@@ -62,6 +63,30 @@ class AttributeModel extends JsonObjectModel implements Attribute {
         $this->value = $value;
 
         return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getValueAsString()
+    {
+        return null;
+    }
+
+    /**
+     * @return Money
+     */
+    public function getValueAsMoney()
+    {
+        return null;
+    }
+
+    /**
+     * @return Enum
+     */
+    public function getValueAsEnum()
+    {
+        return null;
     }
 
 }

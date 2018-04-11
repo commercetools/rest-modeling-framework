@@ -7,6 +7,7 @@ declare(strict_types = 1);
 
 namespace Test\Types;
 
+use Test\Exception\InvalidArgumentException;
 use Test\Base\JsonObjectModel;
 
 class CustomerModel extends JsonObjectModel implements Customer {

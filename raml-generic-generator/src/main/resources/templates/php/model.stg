@@ -9,6 +9,7 @@ model(vendorName, type) ::= <<
 
 namespace <vendorName>\\<type.package.parts; separator="\\">;
 
+use <vendorName>\\Exception\\InvalidArgumentException;
 <if(type.hasBuiltinParent)>
 use <vendorName>\\Base\\JsonObjectModel;
 
@@ -37,6 +38,7 @@ class <type.name>Model extends <if(!type.hasBuiltinParent)><type.parent.name>Mod
     <type.nonPatternProperties: {p |<property(p)>}>
     <type.nonPatternProperties: {p |<getter(type, p)>}>
     <type.nonPatternProperties: {p |<(p.setter.setter)(p)>}>
+    <type.unionProperties: {p |<propertyInterfaceGetAs(p)>}>
     <if(type.patternProperties)>
     <patternGetter(type, type.patternProperties)>
     <patternSetter(type, type.patternProperties)>
@@ -47,6 +49,19 @@ class <type.name>Model extends <if(!type.hasBuiltinParent)><type.parent.name>Mod
         $data = parent::jsonSerialize();
         <type.serializers: {s|<(s.serializer)(type, s.property, s.format)>}>
         return $data;
+    }
+    <endif>
+    <if(type.updateType)>
+
+    /**
+     * @return <type.updateType.name>Builder
+     */
+    public function update()
+    {
+        $builder = new <type.updateType.name>Builder();
+        $builder->setMapper($this->getMapper());
+        $builder->with($this);
+        return $builder;
     }
     <endif>
     <if(type.patternProperties)>
@@ -75,6 +90,23 @@ class <type.name>Model extends <if(!type.hasBuiltinParent)><type.parent.name>Mod
 
 >>
 
+propertyInterfaceGetAs(property) ::= <<
+<property.type.oneOf: {st |<propertyInterfaceGetAsType(property, st)>}>
+>>
+
+propertyInterfaceGetAsType(property, type) ::= <<
+
+/**
+ * @return <type.typeName>
+ */
+public function get<property.name; format="capitalize">As<type.typeName; format="capitalize">()
+{
+    return null;
+}
+
+>>
+
+
 patternGetter(type, properties) ::= <<
 /**
  * @param string $key
@@ -82,11 +114,11 @@ patternGetter(type, properties) ::= <<
  */
 public function get(string $key)
 {
-    if(!isset($this->patternData[$key])) {
+    if (!isset($this->patternData[$key])) {
         switch (true) {
             <type.patternProperties: {p |<patternGet(type, p)>}>
             default:
-                throw new \InvalidArgumentException();
+                throw new InvalidArgumentException();
         }
         $this->patternData[$key] = $value;
     }
@@ -96,7 +128,7 @@ public function get(string $key)
 >>
 
 patternGet(type, property) ::= <<
-case preg_match('<property.name>', $key):
+case preg_match('<property.name>', $key) === 1:
     <(property.getter.getter)(type, p, "$key")>
     break;
 >>
@@ -110,7 +142,7 @@ patternSetter(type, properties) ::= <<
 public function set(string $key, $value)
 {
     if (!$this->validKey($key)) {
-        throw new \InvalidArgumentException();
+        throw new InvalidArgumentException();
     }
     $this->patternData[$key] = $value;
     return $this;
@@ -119,7 +151,7 @@ public function set(string $key, $value)
 >>
 
 patternValid(type, property) ::= <<
-case preg_match('<property.name>', $key):
+case preg_match('<property.name>', $key) === 1:
     return true;
 >>
 
@@ -186,7 +218,7 @@ defaultSetter(property) ::= <<
  * @param $<property.name>
  * @return $this
  */
-public function set<property.name; format="capitalize">(<if(property.paramType)><property.paramType> <endif>$<property.name>)
+public function set<property.name; format="capitalize">(<if(property.setter.paramType)><property.setter.paramType> <endif>$<property.name>)
 {
     $this-><property.name> = $<property.name>;
 
@@ -200,7 +232,7 @@ dateTimeSetter(property) ::= <<
  * @param \DateTimeImmutable|\DateTime|string $<property.name>
  * @return $this
  */
-public function set<property.name; format="capitalize">(<if(property.paramType)><property.paramType> <endif>$<property.name>)
+public function set<property.name; format="capitalize">(<if(property.setter.paramType)><property.setter.paramType> <endif>$<property.name>)
 {
     if ($<property.name> instanceof \DateTime) {
         $<property.name> = \DateTimeImmutable::createFromMutable($<property.name>);
@@ -220,7 +252,7 @@ scalarSetter(property) ::= <<
  * @param <property.type.typeName> $<property.name>
  * @return $this
  */
-public function set<property.name; format="capitalize">(<if(property.paramType)><property.paramType> <endif>$<property.name>)
+public function set<property.name; format="capitalize">(<if(property.setter.paramType)><property.setter.paramType> <endif>$<property.name>)
 {
     $this-><property.name> = (<property.type.typeName>)$<property.name>;
 
@@ -234,11 +266,11 @@ classSetter(property) ::= <<
  * @param <if(property.setter.docType)><property.setter.docType><else>mixed<endif> $<property.name>
  * @return $this
  */
-public function set<property.name; format="capitalize">(<if(property.paramType)><property.paramType> <endif>$<property.name>)
+public function set<property.name; format="capitalize">(<if(property.setter.paramType)><property.setter.paramType> <endif>$<property.name>)
 {
     <if(property.setter.paramCheck)>
     if (!$<property.name> instanceof <property.setter.docType>) {
-        throw new \InvalidArgumentException();
+        throw new InvalidArgumentException();
     }
     <endif>
     $this-><property.name> = $<property.name>;
@@ -250,14 +282,14 @@ public function set<property.name; format="capitalize">(<if(property.paramType)>
 
 arraySetter(property) ::= <<
 /**
- * @param <if(property.setter.paramCheck)><property.setter.docType> <else><if(property.paramType)><property.paramType><else>mixed<endif><endif> $<property.name>
+ * @param <if(property.setter.paramCheck)><property.setter.docType><else><if(property.type.typeName)><property.type.typeName><else>mixed<endif><endif> $<property.name>
  * @return $this
  */
-public function set<property.name; format="capitalize">(<if(property.paramType)><property.paramType> <endif>$<property.name>)
+public function set<property.name; format="capitalize">(<if(property.setter.paramType)><property.setter.paramType> <endif>$<property.name>)
 {
     <if(property.setter.paramCheck)>
     if (!$<property.name> instanceof <property.setter.docType>) {
-        throw new \InvalidArgumentException();
+        throw new InvalidArgumentException();
     }
     <endif>
     $this-><property.name> = $<property.name>;

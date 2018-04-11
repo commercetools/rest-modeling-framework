@@ -28,17 +28,17 @@ interface <type.name> extends Collection {
     public function map($data, $index);
     <if(type.identifiers)>
 
-    <type.identifiers: {id |<indexGetter(id)>}>
+    <type.identifiers: {id |<indexGetter(type, id)>}>
     <endif>
 }
 
 >>
 
-indexGetter(identifier) ::=<<
+indexGetter(type, identifier) ::=<<
 
 /**
- * @param $<identifier.name>
- * @return <identifier.type.name>
+ * @param <identifier.type.name> $<identifier.name>
+ * @return <type.elementName>
  */
 public function by<identifier.name; format="capitalize">($<identifier.name>);
 >>
