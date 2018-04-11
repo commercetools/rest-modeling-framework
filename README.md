@@ -2,7 +2,7 @@
 
 ### Using in your own project
 
-The latest unstable release can be retrieved from jcenter with:
+The latest unstable release can be retrieved from [jcenter](https://bintray.com/vrapio/vrapio/rmf)  with:
 ```gradle
 ext {
     rmfVersion = "0.1.0-20180304205259"
