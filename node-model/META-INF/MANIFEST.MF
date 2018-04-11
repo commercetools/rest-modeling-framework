@@ -7,11 +7,8 @@ Bundle-ClassPath: .
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Export-Package: io.vrap.rmf.nodess,
- io.vrap.rmf.nodess.impl,
- io.vrap.rmf.nodess.util,
- io.vrap.rmf.nodes,
- io.vrap.rmf.nodes.impl,
+Export-Package: io.vrap.rmf.nodes,
+ io.vrap.rmf.nodes.antlr,
  io.vrap.rmf.nodes.util
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.emf.ecore;visibility:=reexport,
