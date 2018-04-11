@@ -80,7 +80,13 @@ public class NodeModelBuilder {
         return parse(lexer);
     }
 
-    public List<NodeToken> asToken(final Node node) {
+    /**
+     * Returns the tokens that the node consists of.
+     *
+     * @param node the node
+     * @return list of tokens in the parsing order
+     */
+    public List<NodeToken> asTokens(final Node node) {
         return new NodeTokenCollector().doSwitch(node);
     }
 

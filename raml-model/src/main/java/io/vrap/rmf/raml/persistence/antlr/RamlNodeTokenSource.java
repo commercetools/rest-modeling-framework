@@ -15,12 +15,15 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+/**
+ * This class acts as a bridge between the {@link NodeParser}s token types and the {@link RAMLParser}s token types.
+ * And implements the {@link TokenSource} so that it can be used as a lexer in the {@link RAMLParser}.
+ */
 public class RamlNodeTokenSource implements TokenSource {
     private static final Pattern ANNOTATION_TYPE_REF_PATTERN = Pattern.compile("\\(([^\\)]*)\\)");
+    private static final NodeModelBuilder NODE_MODEL_BUILDER = new NodeModelBuilder();
 
     private final URI uri;
-    private final NodeModelBuilder nodeModelBuilder = new NodeModelBuilder();
-    private final Node node;
     private final List<NodeToken> tokens;
     private int index;
 
@@ -29,19 +32,18 @@ public class RamlNodeTokenSource implements TokenSource {
     private RamlNodeTokenSource(final URI uri, final Node node) {
         initTokens();
         this.uri = uri;
-        this.node = node;
-        tokens = nodeModelBuilder.asToken(node)
+        tokens = NODE_MODEL_BUILDER.asTokens(node)
                 .stream()
-                .map(this::tokenize)
+                .map(this::toRamlToken)
                 .collect(Collectors.toList());
     }
 
     public RamlNodeTokenSource(final URI uri, final URIConverter uriConverter) {
-        this(uri, new NodeModelBuilder().parse(uri, uriConverter));
+        this(uri, NODE_MODEL_BUILDER.parse(uri, uriConverter));
     }
 
     public RamlNodeTokenSource(final String input, final URI uri, final URIConverter uriConverter) {
-        this(uri, new NodeModelBuilder().parse(input, uri, uriConverter));
+        this(uri, NODE_MODEL_BUILDER.parse(input, uri, uriConverter));
     }
 
 
@@ -56,7 +58,10 @@ public class RamlNodeTokenSource implements TokenSource {
         }
     }
 
-    private NodeToken tokenize(final NodeToken nodeToken) {
+    /**
+     * This method maps the {@link NodeParser} token types to the {@link RAMLParser} token types.
+     */
+    private NodeToken toRamlToken(final NodeToken nodeToken) {
         final int type;
         String text = nodeToken.getText();
         if (nodeToken.getType() == NodeParser.STRING) {

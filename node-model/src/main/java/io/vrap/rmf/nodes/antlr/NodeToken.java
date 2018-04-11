@@ -8,7 +8,7 @@ import org.antlr.v4.runtime.TokenSource;
 import org.antlr.v4.runtime.misc.Pair;
 
 /**
- * Common token with additional location info.
+ * Common token with additional location info and with a link to the corresponding node {@link #getNode()}.
  */
 public class NodeToken extends CommonToken {
     private String location;
@@ -75,8 +75,12 @@ public class NodeToken extends CommonToken {
      */
     public NodeToken withType(final int newType, final String newText) {
         final NodeToken nodeToken = new NodeToken(source, newType, channel, start, stop);
+
+        nodeToken.setIncludeUri(getIncludeUri());
+        nodeToken.setLocation(getLocation());
         nodeToken.setText(newText);
         nodeToken.setNode(getNode());
+
         return nodeToken;
     }
 }

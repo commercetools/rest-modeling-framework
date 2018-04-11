@@ -1,5 +1,6 @@
 package io.vrap.rmf.nodes
 
+import io.vrap.rmf.nodes.antlr.NodeToken
 import io.vrap.rmf.nodes.antlr.NodeTokenProvider
 import org.eclipse.emf.ecore.util.EcoreUtil
 import spock.lang.Shared
@@ -70,5 +71,17 @@ class NodeModelBuilderTest extends Specification {
         arrayNode.elements[1] instanceof StringNode
 
         EcoreUtil.getExistingAdapter(arrayNode, NodeTokenProvider.class) != null
+    }
+
+    def "reparsing works correctly"() {
+        when:
+        Node node = nodeModelBuilder.parseYaml('''\
+        - test
+        - me: test
+        ''')
+        List<NodeToken> tokens = nodeModelBuilder.asTokens(node)
+        Node reparsedNode = nodeModelBuilder.parse(tokens)
+        then:
+        EcoreUtil.equals(node, reparsedNode) == true
     }
 }
