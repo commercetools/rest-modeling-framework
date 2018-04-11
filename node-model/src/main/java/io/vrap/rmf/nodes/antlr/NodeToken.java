@@ -65,4 +65,18 @@ public class NodeToken extends CommonToken {
             return String.format("%s(%s:%d:%d)", location, lastSegment, getLine(), getCharPositionInLine());
         }
     }
+
+    /**
+     * This methods copies this token and sets its type to the given type and text.
+     *
+     * @param newType the new token type
+     * @param newText the new token text
+     * @return a copy of this token with the given type
+     */
+    public NodeToken withType(final int newType, final String newText) {
+        final NodeToken nodeToken = new NodeToken(source, newType, channel, start, stop);
+        nodeToken.setText(newText);
+        nodeToken.setNode(getNode());
+        return nodeToken;
+    }
 }

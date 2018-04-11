@@ -5,8 +5,8 @@ import io.vrap.rmf.raml.model.RamlModelResult;
 import io.vrap.rmf.raml.model.types.AnyType;
 import io.vrap.rmf.raml.model.types.Instance;
 import io.vrap.rmf.raml.persistence.RamlResourceSet;
-import io.vrap.rmf.raml.persistence.antlr.RAMLCustomLexer;
 import io.vrap.rmf.raml.persistence.antlr.RAMLParser;
+import io.vrap.rmf.raml.persistence.antlr.RamlNodeTokenSource;
 import io.vrap.rmf.raml.persistence.constructor.InstanceConstructor;
 import io.vrap.rmf.raml.persistence.constructor.Scope;
 import io.vrap.rmf.raml.validation.InstanceValidator;
@@ -49,7 +49,7 @@ public interface InstanceHelper {
         final ResourceSet resourceSet = new RamlResourceSet();
         final URIConverter uriConverter = resourceSet.getURIConverter();
         final URI uri = URI.createURI(UUID.randomUUID() + ".raml");
-        final RAMLCustomLexer lexer = new RAMLCustomLexer(text, uri, uriConverter);
+        final RamlNodeTokenSource lexer = new RamlNodeTokenSource(text, uri, uriConverter);
         final TokenStream tokenStream = new CommonTokenStream(lexer);
         final RAMLParser parser = new RAMLParser(tokenStream);
         final Scope scope = Scope.of(resourceSet.createResource(uri));
@@ -60,7 +60,7 @@ public interface InstanceHelper {
         final ResourceSet resourceSet = new RamlResourceSet();
         final URIConverter uriConverter = resourceSet.getURIConverter();
         final URI uri = URI.createURI(UUID.randomUUID() + ".json");
-        final RAMLCustomLexer lexer = new RAMLCustomLexer(text, uri, uriConverter);
+        final RamlNodeTokenSource lexer = new RamlNodeTokenSource(text, uri, uriConverter);
         final TokenStream tokenStream = new CommonTokenStream(lexer);
         final RAMLParser parser = new RAMLParser(tokenStream);
         final Scope scope = Scope.of(resourceSet.createResource(uri, "application/json"));

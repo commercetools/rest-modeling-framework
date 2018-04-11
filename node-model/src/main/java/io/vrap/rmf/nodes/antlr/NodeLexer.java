@@ -21,7 +21,6 @@ public class NodeLexer implements TokenSource {
         currentLexer.push(createLexer(uri));
     }
 
-
     public NodeLexer(final String input, final URI uri, final URIConverter uriConverter) {
         this.uri.push(uri);
         this.uriConverter = uriConverter;

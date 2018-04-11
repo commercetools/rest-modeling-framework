@@ -1,15 +1,14 @@
 package io.vrap.rmf.raml.persistence.constructor;
 
-import io.vrap.rmf.raml.persistence.antlr.ParserRuleContextProvider;
-import io.vrap.rmf.raml.persistence.antlr.RamlToken;
-import io.vrap.rmf.raml.persistence.antlr.RamlTokenProvider;
+import io.vrap.rmf.nodes.antlr.NodeToken;
+import io.vrap.rmf.nodes.antlr.NodeTokenProvider;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.eclipse.emf.common.notify.impl.AdapterImpl;
 
 /**
- * EMF adapter for {@link RamlTokenProvider}.
+ * EMF adapter for {@link io.vrap.rmf.nodes.antlr.NodeTokenProvider}.
  */
-class RAMLParserAdapter extends AdapterImpl implements RamlTokenProvider, ParserRuleContextProvider {
+class RAMLParserAdapter extends AdapterImpl implements NodeTokenProvider {
     private final ParserRuleContext parserRuleContext;
 
     private RAMLParserAdapter(final ParserRuleContext parserRuleContext) {
@@ -18,23 +17,21 @@ class RAMLParserAdapter extends AdapterImpl implements RamlTokenProvider, Parser
 
     @Override
     public boolean isAdapterForType(final Object type) {
-        return type == RamlTokenProvider.class;
-    }
-
-    /**
-     * @return the raml token associated with the adaptee
-     */
-    public RamlToken getToken() {
-        return (RamlToken) parserRuleContext.getStart();
-    }
-
-    @Override
-    public ParserRuleContext getParserRuleContext() {
-        return parserRuleContext;
+        return type == NodeTokenProvider.class;
     }
 
     public static final RAMLParserAdapter of(final ParserRuleContext parserRuleContext) {
         final RAMLParserAdapter adapter = new RAMLParserAdapter(parserRuleContext);
         return adapter;
+    }
+
+    @Override
+    public NodeToken getStart() {
+        return (NodeToken) parserRuleContext.getStart();
+    }
+
+    @Override
+    public NodeToken getStop() {
+        return (NodeToken) parserRuleContext.getStop();
     }
 }

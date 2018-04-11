@@ -1,7 +1,7 @@
 package io.vrap.rmf.raml.model;
 
-import io.vrap.rmf.raml.persistence.antlr.RamlToken;
-import io.vrap.rmf.raml.persistence.antlr.RamlTokenProvider;
+import io.vrap.rmf.nodes.antlr.NodeToken;
+import io.vrap.rmf.nodes.antlr.NodeTokenProvider;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.util.EcoreUtil;
@@ -62,12 +62,12 @@ public class RamlDiagnostic implements Resource.Diagnostic {
         String source = diagnostic.getSource();
         if (diagnostic.getData().size() > 0 && diagnostic.getData().get(0) instanceof EObject) {
             final EObject eObject = (EObject) diagnostic.getData().get(0);
-            final RamlTokenProvider ramlTokenProvider = (RamlTokenProvider) EcoreUtil.getExistingAdapter(eObject, RamlTokenProvider.class);
-            if (ramlTokenProvider != null) {
-                final RamlToken ramlToken = ramlTokenProvider.getToken();
-                line = ramlToken.getLine();
-                column = ramlToken.getCharPositionInLine();
-                source = ramlToken.getLocation();
+            final NodeTokenProvider nodeTokenProvider = (NodeTokenProvider) EcoreUtil.getExistingAdapter(eObject, NodeTokenProvider.class);
+            if (nodeTokenProvider != null) {
+                final NodeToken nodeToken = nodeTokenProvider.getStart();
+                line = nodeToken.getLine();
+                column = nodeToken.getCharPositionInLine();
+                source = nodeToken.getLocation();
             }
         }
         return of(diagnostic.getMessage(), source, line, column);

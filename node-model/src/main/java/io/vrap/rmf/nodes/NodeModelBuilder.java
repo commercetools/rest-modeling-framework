@@ -8,33 +8,17 @@ import org.eclipse.emf.common.notify.impl.AdapterImpl;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.URIConverter;
-import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 
 import java.math.BigDecimal;
 import java.util.List;
 
 /**
- * Provides methods to build a node {@link Node} model from a string
+ * Provides methods to build a node {@link Node} model from a string or an uri.
  */
 public class NodeModelBuilder {
-    private final URI uri;
-    private final URIConverter uriConverter;
-
-    public NodeModelBuilder() {
-        this(null, null);
-    }
 
     /**
-     * @param uri          the uri to parse a node from
-     * @param uriConverter the uri converter
-     */
-    public NodeModelBuilder(final URI uri, final URIConverter uriConverter) {
-        this.uri = uri;
-        this.uriConverter = uriConverter;
-    }
-
-    /**
-     * Parses a node instance from the given uri using the given uri converter.
+     * Parses a node instance from the given list of node tokens.
      *
      * @return the parsed node
      * @param tokens
@@ -52,24 +36,35 @@ public class NodeModelBuilder {
     }
 
     /**
+     * Parses the input from the given uri.
+     *
+     * @param uri          the uri to parse
+     * @param uriConverter the uri converter to handle !include tags
+     * @return the parsed node
+     */
+    public Node parse(final URI uri, final URIConverter uriConverter) {
+        final NodeLexer lexer = new NodeLexer(uri, uriConverter);
+
+        return parse(lexer);
+    }
+
+    public Node parse(final String input, final URI uri, final URIConverter uriConverter) {
+        final NodeLexer lexer = new NodeLexer(input, uri, uriConverter);
+
+        return parse(lexer);
+    }
+
+    /**
      * Parses the given input json as a node.
      *
      * @param input the json input
      * @return the parsed node
      */
     public Node parseJson(final String input) {
-        final ResourceSetImpl resourceSet = new ResourceSetImpl();
         final URI uri = URI.createFileURI("input.json");
+        final NodeLexer lexer = new NodeLexer(input, uri, null);
 
-        final NodeLexer lexer = new NodeLexer(input, uri, resourceSet.getURIConverter());
-        final TokenStream tokenStream = new CommonTokenStream(lexer);
-        final NodeParser nodeParser = new NodeParser(tokenStream);
-
-        final NodeParser.NodeContext node = nodeParser.node();
-
-        final Node parsedNode = new NodeModelBuilderVisitor().visit(node);
-
-        return parsedNode;
+        return parse(lexer);
     }
 
     /**
@@ -79,10 +74,17 @@ public class NodeModelBuilder {
      * @return the parsed node
      */
     public Node parseYaml(final String input) {
-        final ResourceSetImpl resourceSet = new ResourceSetImpl();
         final URI uri = URI.createFileURI("input.yaml");
+        final NodeLexer lexer = new NodeLexer(input, uri, null);
 
-        final NodeLexer lexer = new NodeLexer(input, uri, resourceSet.getURIConverter());
+        return parse(lexer);
+    }
+
+    public List<NodeToken> asToken(final Node node) {
+        return new NodeTokenCollector().doSwitch(node);
+    }
+
+    private Node parse(final NodeLexer lexer) {
         final TokenStream tokenStream = new CommonTokenStream(lexer);
         final NodeParser nodeParser = new NodeParser(tokenStream);
 
