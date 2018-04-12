@@ -21,11 +21,12 @@ public class TypeDeclarationFragmentConstructor extends BaseConstructor {
     public EObject construct(final RAMLParser parser, final Scope scope) {
         final TypeDeclarationResolver typeDeclarationResolver =
                 new TypeDeclarationResolver();
-        typeDeclarationResolver.resolve(parser.typeDeclarationFragment(), scope.with(typeContainer));
-        parser.reset();
+        final RAMLParser.TypeDeclarationFragmentContext typeDeclarationFragmentContext =
+                parser.typeDeclarationFragment();
+        typeDeclarationResolver.resolve(typeDeclarationFragmentContext, scope.with(typeContainer));
 
         return (EObject) withinScope(scope.with(typeContainer),
-                typeScope -> visitTypeDeclarationFragment(parser.typeDeclarationFragment()));
+                typeScope -> visitTypeDeclarationFragment(typeDeclarationFragmentContext));
     }
 
     @Override

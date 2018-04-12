@@ -24,11 +24,11 @@ public class ApiConstructor extends BaseConstructor {
     @Override
     public EObject construct(final RAMLParser parser, final Scope scope) {
         final TypeDeclarationResolver typeDeclarationResolver = new TypeDeclarationResolver();
-        typeDeclarationResolver.resolve(parser.api(), scope);
-        parser.reset();
+        final RAMLParser.ApiContext apiContext = parser.api();
+        typeDeclarationResolver.resolve(apiContext, scope);
 
         final Api api = (Api) withinScope(scope,
-                s -> visitApi(parser.api()));
+                s -> visitApi(apiContext));
         return api;
     }
 

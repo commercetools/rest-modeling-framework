@@ -15,11 +15,11 @@ public class LibraryConstructor extends BaseConstructor {
     public EObject construct(final RAMLParser parser, final Scope scope) {
         final TypeDeclarationResolver typeDeclarationResolver =
                 new TypeDeclarationResolver();
-        typeDeclarationResolver.resolve(parser.library(), scope);
-        parser.reset();
+        final RAMLParser.LibraryContext libraryContext = parser.library();
+        typeDeclarationResolver.resolve(libraryContext, scope);
 
         final Library library = (Library) withinScope(scope,
-                s -> visitLibrary(parser.library()));
+                s -> visitLibrary(libraryContext));
         return library;
     }
 

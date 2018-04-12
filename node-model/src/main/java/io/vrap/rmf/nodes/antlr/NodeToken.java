@@ -76,9 +76,14 @@ public class NodeToken extends CommonToken {
     public NodeToken withType(final int newType, final String newText) {
         final NodeToken nodeToken = new NodeToken(source, newType, channel, start, stop);
 
-        nodeToken.setIncludeUri(getIncludeUri());
-        nodeToken.setLocation(getLocation());
         nodeToken.setText(newText);
+
+        nodeToken.setTokenIndex(getTokenIndex());
+        nodeToken.setLine(getLine());
+        nodeToken.setCharPositionInLine(getCharPositionInLine());
+        nodeToken.setLocation(getLocation());
+
+        nodeToken.setIncludeUri(getIncludeUri());
         nodeToken.setNode(getNode());
 
         return nodeToken;
