@@ -201,7 +201,7 @@ public class GeneratorHelper {
 
         @Override
         public GetterGenModel defaultCase(EObject object) {
-            return new GetterGenModel("defaultGetter", property);
+            return new GetterGenModel("defaultGetter", (AnyType)object, property);
         }
     }
 

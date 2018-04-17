@@ -38,7 +38,7 @@ class <type.name>Model extends <if(!type.hasBuiltinParent)><type.parent.name>Mod
     <type.nonPatternProperties: {p |<property(p)>}>
     <type.nonPatternProperties: {p |<getter(type, p)>}>
     <type.nonPatternProperties: {p |<(p.setter.setter)(p)>}>
-    <type.unionProperties: {p |<propertyInterfaceGetAs(p)>}>
+    <type.unionProperties: {p |<propertyInterfaceGetAs(type, p)>}>
     <if(type.patternProperties)>
     <patternGetter(type, type.patternProperties)>
     <patternSetter(type, type.patternProperties)>
@@ -90,18 +90,22 @@ class <type.name>Model extends <if(!type.hasBuiltinParent)><type.parent.name>Mod
 
 >>
 
-propertyInterfaceGetAs(property) ::= <<
-<property.type.oneOf: {st |<propertyInterfaceGetAsType(property, st)>}>
+propertyInterfaceGetAs(objectType, property) ::= <<
+<property.unionGetters: {getter |<propertyInterfaceGetAsType(objectType, getter, getter.type)>}>
 >>
 
-propertyInterfaceGetAsType(property, type) ::= <<
+propertyInterfaceGetAsType(objectType, getter, type) ::= <<
 
 /**
  * @return <type.typeName>
  */
-public function get<property.name; format="capitalize">As<type.typeName; format="capitalize">()
+public function get<getter.property.name; format="capitalize">As<if(type.name)><type.name; format="uppercamel"><else><type.typeName; format="uppercamel"><endif>()
 {
-    return null;
+    if (is_null($this-><getter.property.name>)) {
+        <(getter.getter)(type, getter, {<objectType.name>::<getter.property.constantName>})>
+        $this-><getter.property.name> = $value;
+    }
+    return $this-><getter.property.name>;
 }
 
 >>
@@ -129,7 +133,7 @@ public function get(string $key)
 
 patternGet(type, property) ::= <<
 case preg_match('<property.name>', $key) === 1:
-    <(property.getter.getter)(type, p, "$key")>
+    <(property.getter.getter)(type, p.getter, "$key")>
     break;
 >>
 
@@ -162,7 +166,7 @@ getter(type, property) ::=<<
 public function get<property.name; format="capitalize">()
 {
     if (is_null($this-><property.name>)) {
-        <(property.getter.getter)(type, property, {<type.name>::<property.constantName>})>
+        <(property.getter.getter)(type, property.getter, {<type.name>::<property.constantName>})>
         $this-><property.name> = $value;
     }
     return $this-><property.name>;
@@ -170,47 +174,47 @@ public function get<property.name; format="capitalize">()
 
 >>
 
-defaultGetter(type, property, get) ::= <<
+defaultGetter(type, getter, get) ::= <<
 $value = $this->raw(<get>);
 >>
 
-dateTimeGetter(type, property, get) ::= <<
+dateTimeGetter(type, getter, get) ::= <<
 $value = $this->raw(<get>);
-<if(property.getter.format)>
-$dateTime = \DateTimeImmutable::createFromFormat('<property.getter.format>', $value);
+<if(getter.format)>
+$dateTime = \DateTimeImmutable::createFromFormat('<getter.format>', $value);
 $value = $dateTime ? $dateTime : null;
 <else>
 $value = new \DateTimeImmutable($value);
 <endif>
 >>
 
-scalarGetter(type, property, get) ::= <<
+scalarGetter(type, getter, get) ::= <<
 $value = $this->raw(<get>);
-$value = (<property.getter.format>)$value;
+$value = (<getter.format>)$value;
 >>
 
-classGetter(type, property, get) ::= <<
+classGetter(type, getter, get) ::= <<
 $value = $this->raw(<get>);
-<if(property.type.discriminator)>
-$resolvedClass = $this->resolveDiscriminator(<property.type.name>::class, $value);
+<if(getter.type.discriminator)>
+$resolvedClass = $this->resolveDiscriminator(<getter.type.name>::class, $value);
 if (is_null($value)) {
     return $this->mapData($resolvedClass, null);
 }
 $value = $this->mapData($resolvedClass, $value);
 <else>
 if (is_null($value)) {
-    return $this->mapData(<property.type.name>::class, null);
+    return $this->mapData(<getter.type.name>::class, null);
 }
-$value = $this->mapData(<property.type.name>::class, $value);
+$value = $this->mapData(<getter.type.name>::class, $value);
 <endif>
 >>
 
-arrayGetter(type, property, get) ::= <<
+arrayGetter(type, getter, get) ::= <<
 $value = $this->raw(<get>);
 if (is_null($value)) {
-    return $this->mapData(<property.type.typeName>::class, null);
+    return $this->mapData(<getter.type.typeName>::class, null);
 }
-$value = $this->mapData(<property.type.typeName>::class, $value);
+$value = $this->mapData(<getter.type.typeName>::class, $value);
 >>
 
 defaultSetter(property) ::= <<

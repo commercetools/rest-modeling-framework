@@ -213,22 +213,22 @@ public class PhpGeneratorHelper extends GeneratorHelper {
 
         @Override
         public GetterGenModel caseTimeOnlyType(TimeOnlyType object) {
-            return new GetterGenModel("dateTimeGetter", property, "H:i:s.u");
+            return new GetterGenModel("dateTimeGetter", object, property, "H:i:s.u");
         }
 
         @Override
         public GetterGenModel caseDateOnlyType(DateOnlyType object) {
-            return new GetterGenModel("dateTimeGetter", property, "Y-m-d");
+            return new GetterGenModel("dateTimeGetter", object, property, "Y-m-d");
         }
 
         @Override
         public GetterGenModel caseDateTimeType(DateTimeType object) {
-            return new GetterGenModel("dateTimeGetter", property, "Y-m-d?H:i:s.uT");
+            return new GetterGenModel("dateTimeGetter", object, property, "Y-m-d?H:i:s.uT");
         }
 
         @Override
         public GetterGenModel caseStringType(StringType object) {
-            return new GetterGenModel("scalarGetter", property, "string");
+            return new GetterGenModel("scalarGetter", object, property, "string");
         }
 
         @Override
@@ -239,14 +239,14 @@ public class PhpGeneratorHelper extends GeneratorHelper {
                 case INT16:
                 case INT32:
                 case INT64:
-                    return new GetterGenModel("scalarGetter", property, "int");
+                    return new GetterGenModel("scalarGetter", object, property, "int");
                 default:
-                    return new GetterGenModel("scalarGetter", property, "float");
+                    return new GetterGenModel("scalarGetter", object, property, "float");
             }
         }
 
         public GetterGenModel caseIntegerType(IntegerType object) {
-            return new GetterGenModel("scalarGetter", property, "int");
+            return new GetterGenModel("scalarGetter", object, property, "int");
         }
 
         @Override
@@ -254,9 +254,9 @@ public class PhpGeneratorHelper extends GeneratorHelper {
             if (arrayType.getItems() == null) {
                 return null;
             } else if (arrayType.getItems() instanceof UnionType || arrayType.getItems() instanceof StringType || BuiltinType.of(arrayType.getItems().getName()).isPresent()) {
-                return new GetterGenModel("scalarGetter", property, "array");
+                return new GetterGenModel("scalarGetter", arrayType, property, "array");
             } else {
-                return new GetterGenModel("arrayGetter", property, "array");
+                return new GetterGenModel("arrayGetter", arrayType, property, "array");
             }
         }
 
@@ -265,13 +265,13 @@ public class PhpGeneratorHelper extends GeneratorHelper {
             if (BuiltinType.of(objectType.getName()).isPresent()) {
                 return null;
             } else {
-                return new GetterGenModel("classGetter", property);
+                return new GetterGenModel("classGetter", objectType, property);
             }
         }
 
         @Override
         public GetterGenModel defaultCase(EObject object) {
-            return new GetterGenModel("defaultGetter", property);
+            return new GetterGenModel("defaultGetter", (AnyType)object, property);
         }
     }
 

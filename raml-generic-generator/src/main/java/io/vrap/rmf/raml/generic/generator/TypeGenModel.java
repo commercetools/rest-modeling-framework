@@ -187,6 +187,18 @@ public class TypeGenModel {
                             .map(property -> new TypeGenModel(property.getType()).getImport())
                             .collect(Collectors.toSet())
             );
+            uses.addAll(
+                    objectType.getProperties().stream()
+                            .filter(property -> property.getType() instanceof UnionType)
+                            .flatMap(property -> ((UnionType)property.getType()).getOneOf().stream()
+                                    .filter(type -> type instanceof ObjectType || type instanceof ArrayType && ((ArrayType) type).getItems() instanceof ObjectType)
+                                    .filter(type -> {
+                                        AnyType t = type instanceof ArrayType ? ((ArrayType) type).getItems() : type;
+                                        return !new TypeGenModel(t).getPackage().equals(getPackage());
+                                    })
+                                    .map(anyType -> new TypeGenModel(anyType).getImport()))
+                            .collect(Collectors.toSet())
+            );
             if (!getHasBuiltinParent() && !getParent().getPackage().equals(getPackage())) {
                 uses.add(getParent().getImport());
             }

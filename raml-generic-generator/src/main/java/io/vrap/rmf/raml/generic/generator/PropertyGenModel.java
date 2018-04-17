@@ -1,12 +1,12 @@
 package io.vrap.rmf.raml.generic.generator;
 
-import io.vrap.rmf.raml.model.types.Annotation;
-import io.vrap.rmf.raml.model.types.AnyAnnotationType;
-import io.vrap.rmf.raml.model.types.ObjectType;
-import io.vrap.rmf.raml.model.types.Property;
+import com.google.common.collect.Lists;
+import io.vrap.rmf.raml.model.types.*;
 import io.vrap.rmf.raml.model.util.StringCaseFormat;
 
 import javax.annotation.Nullable;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class PropertyGenModel {
     final private static String CONSTANT_PREFIX = "FIELD_";
@@ -42,6 +42,17 @@ public class PropertyGenModel {
     public GetterGenModel getGetter()
     {
         return GeneratorHelper.getPropertyGetterVisitor(this).doSwitch(property.getType());
+    }
+
+    public List<GetterGenModel> getUnionGetters()
+    {
+        List<GetterGenModel> getters = Lists.newArrayList();
+        if (!(property.getType() instanceof UnionType)) {
+            return null;
+        }
+        UnionType type = (UnionType)property.getType();
+        final List<GetterGenModel> collect = type.getOneOf().stream().map(anyType -> GeneratorHelper.getPropertyGetterVisitor(this).doSwitch(anyType)).collect(Collectors.toList());
+        return collect;
     }
 
     public SetterGenModel getSetter()
