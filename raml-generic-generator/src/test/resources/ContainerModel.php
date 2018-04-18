@@ -10,7 +10,8 @@ namespace Test\Types;
 use Test\Exception\InvalidArgumentException;
 use Test\Base\JsonObjectModel;
 
-class ContainerModel extends JsonObjectModel implements Container {
+class ContainerModel extends JsonObjectModel implements Container
+{
     private $patternData = [];
     /**
      * @param string $key

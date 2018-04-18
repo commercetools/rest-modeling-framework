@@ -10,7 +10,8 @@ namespace Test\Types;
 use Test\Exception\InvalidArgumentException;
 use Test\Base\JsonObjectModel;
 
-class EnumModel extends JsonObjectModel implements Enum {
+class EnumModel extends JsonObjectModel implements Enum
+{
     /**
      * @var string
      */

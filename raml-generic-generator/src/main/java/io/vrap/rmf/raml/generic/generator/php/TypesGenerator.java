@@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
 import io.vrap.rmf.raml.generic.generator.AbstractTemplateGenerator;
 import io.vrap.rmf.raml.generic.generator.CollectionGenModel;
+import io.vrap.rmf.raml.generic.generator.MapGenModel;
 import io.vrap.rmf.raml.generic.generator.TypeGenModel;
 import io.vrap.rmf.raml.model.types.*;
 import io.vrap.rmf.raml.model.types.impl.TypesFactoryImpl;
@@ -23,6 +24,8 @@ public class TypesGenerator extends AbstractTemplateGenerator {
     static final String TYPE_INTERFACE = "interface";
     static final String TYPE_COLLECTION_MODEL = "collectionModel";
     static final String TYPE_COLLECTION_INTERFACE = "collectionInterface";
+    static final String TYPE_MAP_MODEL = "mapModel";
+    static final String TYPE_MAP_INTERFACE = "mapInterface";
     static final String TYPE_MODEL_MAP = "modelMap";
     private final String vendorName;
 
@@ -64,19 +67,12 @@ public class TypesGenerator extends AbstractTemplateGenerator {
         final List<File> f = Lists.newArrayList();
         for (final AnyType anyType : types) {
             if (anyType instanceof ObjectType) {
-                for( final Property property : ((ObjectType) anyType).getProperties()) {
-                    if (property.getType() instanceof ArrayType) {
-                        ArrayType arrayType = (ArrayType)property.getType();
-                        if (arrayType.getItems() != null && arrayType.getItems() instanceof ObjectType && arrayType.getItems().getName() != null) {
-                            final String packageFolder = new TypeGenModel(arrayType.getItems()).getPackage().getSubPackageFolder();
-                            final File interfaceFile = new File(outputPath, packageFolder + arrayType.getItems().getName().concat("Collection.php"));
-                            final File modelFile = new File(outputPath, packageFolder + arrayType.getItems().getName().concat("CollectionModel.php"));
+                final String packageFolder = new TypeGenModel(anyType).getPackage().getSubPackageFolder();
+                final File interfaceFile = new File(outputPath, packageFolder + anyType.getName().concat("Collection.php"));
+                final File modelFile = new File(outputPath, packageFolder + anyType.getName().concat("CollectionModel.php"));
 
-                            f.add(generateFile(generateType(collectionInterfaceGeneratingVisitor, arrayType), interfaceFile));
-                            f.add(generateFile(generateType(collectionModelGeneratingVisitor, arrayType), modelFile));
-                        }
-                    }
-                }
+                f.add(generateFile(generateType(collectionInterfaceGeneratingVisitor, anyType), interfaceFile));
+                f.add(generateFile(generateType(collectionModelGeneratingVisitor, anyType), modelFile));
             }
         }
         return f;
@@ -90,16 +86,9 @@ public class TypesGenerator extends AbstractTemplateGenerator {
                 .collect(Collectors.toList());
         for (final AnyType anyType : types) {
             if (anyType instanceof ObjectType) {
-                for (final Property property : ((ObjectType) anyType).getProperties()) {
-                    if (property.getType() instanceof ArrayType) {
-                        ArrayType arrayType = (ArrayType) property.getType();
-                        if (arrayType.getItems() != null && arrayType.getItems() instanceof ObjectType && arrayType.getItems().getName() != null) {
-                            final CollectionGenModel collection = new CollectionGenModel(arrayType.getItems());
-                            if (!objectTypes.contains(collection)) {
-                                objectTypes.add(collection);
-                            }
-                        }
-                    }
+                final CollectionGenModel collection = new CollectionGenModel(anyType);
+                if (!objectTypes.contains(collection)) {
+                    objectTypes.add(collection);
                 }
             }
         }
@@ -174,13 +163,23 @@ public class TypesGenerator extends AbstractTemplateGenerator {
             } else {
                 final TypeGenModel typeGenModel = new TypeGenModel(objectType);
 
-                final ST st = stGroup.getInstanceOf(type);
-                st.add("vendorName", vendorName);
-                if (type.equals(TYPE_INTERFACE) || type.equals(TYPE_MODEL)) {
-                    st.add("type", typeGenModel);
-                } else if (type.equals(TYPE_COLLECTION_INTERFACE) || type.equals(TYPE_COLLECTION_MODEL)) {
+                ST st = stGroup.getInstanceOf(type);
+
+                if (type.equals(TYPE_COLLECTION_INTERFACE) || type.equals(TYPE_COLLECTION_MODEL)) {
                     st.add("type", new CollectionGenModel(objectType));
+                } else if (type.equals(TYPE_INTERFACE) || type.equals(TYPE_MODEL)) {
+                    if (objectType.getAnnotation("asMap") != null) {
+                        if (type.equals(TYPE_INTERFACE)) {
+                            st = stGroup.getInstanceOf(TYPE_MAP_INTERFACE);
+                        } else if (type.equals(TYPE_MODEL)) {
+                            st = stGroup.getInstanceOf(TYPE_MAP_MODEL);
+                        }
+                        st.add("type", new MapGenModel(objectType));
+                    } else {
+                        st.add("type", typeGenModel);
+                    }
                 }
+                st.add("vendorName", vendorName);
 
                 return st.render();
             }

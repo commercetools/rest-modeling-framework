@@ -17,7 +17,8 @@ use <vendorName>\\Base\\JsonObjectModel;
 <useTypeImport(vendorName, type.parent.import, "Model")>
 <endif>
 <type.typeImports: {ti |<useTypeImport(vendorName, ti)>}>
-class <type.name>Model extends <if(!type.hasBuiltinParent)><type.parent.name>Model<else>JsonObjectModel<endif> implements <type.name> {
+class <type.name>Model extends <if(!type.hasBuiltinParent)><type.parent.name>Model<else>JsonObjectModel<endif> implements <type.name>
+{
     <if(type.discriminator || type.discriminatorValue)>
     const DISCRIMINATOR_VALUE = '<type.discriminatorValue>';
 
@@ -329,5 +330,96 @@ dateTimeSerializer(type, property, dateTimeFormat) ::= <<
 
 if (isset($data[<type.name>::<property.constantName>]) && $data[<type.name>::<property.constantName>] instanceof \DateTimeImmutable) {
     $data[<type.name>::<property.constantName>] = $data[<type.name>::<property.constantName>]->setTimeZone(new \DateTimeZone('UTC'))->format('<dateTimeFormat>');
+}
+>>
+
+
+mapModel(vendorName, type) ::= <<
+\<?php
+<generatorInfo()>
+
+namespace <vendorName>\\<type.package.parts; separator="\\">;
+
+use <vendorName>\\Base\\JsonMap;
+use <vendorName>\\Exception\\InvalidArgumentException;
+
+class <type.name>Model extends JsonMap implements <type.name>
+{
+
+    /**
+     * @param $data
+     * @param $index
+     * @return <type.valueType.typeName>
+     */
+    public function map($data, $index)
+    {
+        <(type.mapper.getter)(type, type.mapper)>
+        return $data;
+    }
+    <if(type.valueType.identifiers)>
+
+    protected function index($data)
+    {
+        foreach ($data as $key => $value) {
+            <type.valueType.identifiers: {id |<index(id)>}>
+        }
+    }
+
+    <type.valueType.identifiers: {id |<indexGetter(type, id)>}>
+    <endif>
+}
+
+>>
+
+index(identifier) ::=<<
+
+if (isset($value['<identifier.name>'])) {
+    $this->addToIndex('<identifier.name>', $value['<identifier.name>'], $key);
+}
+>>
+
+indexGetter(type, identifier) ::=<<
+
+/**
+ * @param <identifier.type.name> $<identifier.name>
+ * @return <type.valueType.name>
+ */
+public function by<identifier.name; format="capitalize">($<identifier.name>)
+{
+    return $this->valueByKey('<identifier.name>', $<identifier.name>);
+}
+>>
+
+defaultMapper(type, mapper) ::= <<
+>>
+
+dateTimeMapper(type, mapper) ::= <<
+if (!is_null($data) && !$data instanceof \DateTimeImmutable) {
+    <if(mapper.format)>
+    $dateTime = \DateTimeImmutable::createFromFormat('<mapper.format>', $data);
+    $data = $dateTime ? $dateTime : null;
+    <else>
+    $data = new \DateTimeImmutable($value);
+    <endif>
+    $this->rawSet($data, $index);
+}
+>>
+
+scalarMapper(type, mapper) ::= <<
+if (!is_null($data)) {
+    $data = (<mapper.format>)$data;
+    $this->rawSet($data, $index);
+}
+>>
+
+classMapper(type, mapper) ::= <<
+if (!is_null($data) && !$data instanceof <type.valueType.name>) {
+    <if(type.valueType.discriminator)>
+    $resolvedClass = $this->resolveDiscriminator(<type.valueType.name>::class, $data);
+    $data = $this->mapData($resolvedClass, $data);
+    <else>
+    $data = $this->mapData(<type.valueType.name>::class, $data);
+    <endif>
+    $this->rawSet($data, $index);
 }
 >>

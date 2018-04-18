@@ -136,6 +136,11 @@ public class GeneratorHelper {
         return instance.propertyGetterVisitor(propertyGenModel);
     }
 
+    public static PropertyMapperVisitor getPropertyMapperVisitor()
+    {
+        return instance.propertyMapperVisitor();
+    }
+
     public static PropertySetterVisitor getPropertySetterVisitor(final PropertyGenModel propertyGenModel)
     {
         return instance.propertySetterVisitor(propertyGenModel);
@@ -159,6 +164,11 @@ public class GeneratorHelper {
     protected PropertyGetterVisitor propertyGetterVisitor(final PropertyGenModel propertyGenModel)
     {
         return new PropertyGetterVisitor(propertyGenModel);
+    }
+
+    protected PropertyMapperVisitor propertyMapperVisitor()
+    {
+        return new PropertyMapperVisitor();
     }
 
     protected PropertySetterVisitor propertySetterVisitor(final PropertyGenModel propertyGenModel)
@@ -202,6 +212,13 @@ public class GeneratorHelper {
         @Override
         public GetterGenModel defaultCase(EObject object) {
             return new GetterGenModel("defaultGetter", (AnyType)object, property);
+        }
+    }
+
+    public static class PropertyMapperVisitor extends TypesSwitch<GetterGenModel> {
+        @Override
+        public GetterGenModel defaultCase(EObject object) {
+            return new GetterGenModel("defaultGetter", (AnyType)object, null);
         }
     }
 

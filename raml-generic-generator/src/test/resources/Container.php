@@ -9,7 +9,8 @@ namespace Test\Types;
 
 use Test\Base\JsonObject;
 
-interface Container extends JsonObject {
+interface Container extends JsonObject
+{
     const FIELD_PATTERN0 = '//';
 
     public function get(string $key);

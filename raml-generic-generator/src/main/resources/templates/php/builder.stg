@@ -14,7 +14,8 @@ use <vendorName>\Exception\InvalidArgumentException;
 <useTypeImport(vendorName, builder.baseActionType.import)>
 <builder.typeImports: {ti |<useTypeImport(vendorName, ti)>}>
 
-class <builder.resourceType.name>UpdateBuilder extends BaseBuilder {
+class <builder.resourceType.name>UpdateBuilder extends BaseBuilder
+{
     /**
      * @var <builder.resourceType.typeName>
      */

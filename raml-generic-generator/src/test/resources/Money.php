@@ -9,7 +9,8 @@ namespace Test\Types;
 
 use Test\Base\JsonObject;
 
-interface Money extends JsonObject {
+interface Money extends JsonObject
+{
     const FIELD_CENT_AMOUNT = 'centAmount';
     const FIELD_CURRENCY_CODE = 'currencyCode';
 

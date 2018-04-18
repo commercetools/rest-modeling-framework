@@ -30,6 +30,11 @@ public class PhpGeneratorHelper extends GeneratorHelper {
     }
 
     @Override
+    protected PropertyMapperVisitor propertyMapperVisitor() {
+        return new PropertyMapperVisitor();
+    }
+
+    @Override
     public PropertySetterVisitor propertySetterVisitor(final PropertyGenModel propertyGenModel)
     {
         return new PropertySetterVisitor(propertyGenModel);
@@ -272,6 +277,71 @@ public class PhpGeneratorHelper extends GeneratorHelper {
         @Override
         public GetterGenModel defaultCase(EObject object) {
             return new GetterGenModel("defaultGetter", (AnyType)object, property);
+        }
+    }
+
+    static class PropertyMapperVisitor extends GeneratorHelper.PropertyMapperVisitor {
+        @Override
+        public GetterGenModel caseTimeOnlyType(TimeOnlyType object) {
+            return new GetterGenModel("dateTimeMapper", object, null, "H:i:s.u");
+        }
+
+        @Override
+        public GetterGenModel caseDateOnlyType(DateOnlyType object) {
+            return new GetterGenModel("dateTimeMapper", object, null, "Y-m-d");
+        }
+
+        @Override
+        public GetterGenModel caseDateTimeType(DateTimeType object) {
+            return new GetterGenModel("dateTimeMapper", object, null, "Y-m-d?H:i:s.uT");
+        }
+
+        @Override
+        public GetterGenModel caseStringType(StringType object) {
+            return new GetterGenModel("scalarMapper", object, null, "string");
+        }
+
+        @Override
+        public GetterGenModel caseNumberType(NumberType object) {
+            switch (object.getFormat()) {
+                case INT:
+                case INT8:
+                case INT16:
+                case INT32:
+                case INT64:
+                    return new GetterGenModel("scalarMapper", object, null, "int");
+                default:
+                    return new GetterGenModel("scalarMapper", object, null, "float");
+            }
+        }
+
+        public GetterGenModel caseIntegerType(IntegerType object) {
+            return new GetterGenModel("scalarMapper", object, null, "int");
+        }
+
+        @Override
+        public GetterGenModel caseArrayType(final ArrayType arrayType) {
+            if (arrayType.getItems() == null) {
+                return null;
+            } else if (arrayType.getItems() instanceof UnionType || arrayType.getItems() instanceof StringType || BuiltinType.of(arrayType.getItems().getName()).isPresent()) {
+                return new GetterGenModel("scalarMapper", arrayType, null, "array");
+            } else {
+                return new GetterGenModel("arrayMapper", arrayType, null, "array");
+            }
+        }
+
+        @Override
+        public GetterGenModel caseObjectType(final ObjectType objectType) {
+            if (BuiltinType.of(objectType.getName()).isPresent()) {
+                return null;
+            } else {
+                return new GetterGenModel("classMapper", objectType, null);
+            }
+        }
+
+        @Override
+        public GetterGenModel defaultCase(EObject object) {
+            return new GetterGenModel("defaultMapper", (AnyType)object, null);
         }
     }
 

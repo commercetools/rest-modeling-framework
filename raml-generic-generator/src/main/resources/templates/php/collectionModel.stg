@@ -6,10 +6,15 @@ collectionModel(vendorName, type) ::= <<
 
 namespace <vendorName>\\<type.package.parts; separator="\\">;
 
+<if(type.hasBuiltinParent)>
 use <vendorName>\\Base\\JsonCollection;
+<else>
+<useTypeImport(vendorName, type.parent.import, "CollectionModel")>
+<endif>
 use <vendorName>\\Exception\\InvalidArgumentException;
 
-class <type.name>Model extends JsonCollection implements <type.name> {
+class <type.name>Model extends <if(!type.hasBuiltinParent)><type.parent.name>CollectionModel<else>JsonCollection<endif> implements <type.name>
+{
 
     /**
      * @param <type.elementName> $value

@@ -6,9 +6,15 @@ collectionInterface(vendorName, type) ::= <<
 
 namespace <vendorName>\\<type.package.parts; separator="\\">;
 
+<if(type.hasBuiltinParent)>
 use <vendorName>\\Base\\Collection;
 
-interface <type.name> extends Collection {
+<else>
+<useTypeImport(vendorName, type.parent.import, "Collection")>
+<endif>
+
+interface <type.name> extends <if(!type.hasBuiltinParent)><type.parent.name><endif>Collection
+{
     /**
      * @param $index
      * @return <type.elementName>

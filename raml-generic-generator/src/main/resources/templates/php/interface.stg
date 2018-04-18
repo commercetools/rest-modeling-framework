@@ -11,7 +11,8 @@ use <vendorName>\\Base\\JsonObject;
 
 <endif>
 <type.typeImports: {ti |<useTypeImport(vendorName, ti)>}>
-interface <type.name> extends <if(!type.hasBuiltinParent)><type.parent.name><else>JsonObject<endif> {
+interface <type.name> extends <if(!type.hasBuiltinParent)><type.parent.name><else>JsonObject<endif>
+{
     <if(type.discriminator)>
     const DISCRIMINATOR = '<type.discriminator>';
     const SUB_TYPES = [
@@ -36,6 +37,45 @@ interface <type.name> extends <if(!type.hasBuiltinParent)><type.parent.name><els
     <endif>
 }
 
+>>
+
+mapInterface(vendorName, type) ::= <<
+\<?php
+<generatorInfo()>
+
+namespace <vendorName>\\<type.package.parts; separator="\\">;
+
+use <vendorName>\\Base\\Map;
+
+interface <type.name> extends Map
+{
+    /**
+     * @param $key
+     * @return <type.valueType.typeName>
+     */
+    public function get($key);
+
+    /**
+     * @param $data
+     * @param $index
+     * @return <type.valueType.typeName>
+     */
+    public function map($data, $index);
+    <if(type.valueType.identifiers)>
+
+    <type.valueType.identifiers: {id |<indexGetter(type, id)>}>
+    <endif>
+}
+
+>>
+
+indexGetter(type, identifier) ::=<<
+
+/**
+ * @param <identifier.type.name> $<identifier.name>
+ * @return <type.valueType.typeName>
+ */
+public function by<identifier.name; format="capitalize">($<identifier.name>);
 >>
 
 discriminatorMapping(type) ::= <<
