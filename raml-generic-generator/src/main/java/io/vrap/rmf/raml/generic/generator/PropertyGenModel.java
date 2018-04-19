@@ -73,9 +73,22 @@ public class PropertyGenModel {
         return t.getApi().getAnnotationType("identifier");
     }
 
+    private AnyAnnotationType getElementIdentifierAnnotation()
+    {
+        final ObjectType o = (ObjectType)property.eContainer();
+        final TypeGenModel t = new TypeGenModel(o);
+        return t.getApi().getAnnotationType("elementIdentifier");
+    }
+
     @Nullable
     public Annotation getIdentifier()
     {
         return property.getAnnotation("identifier");
+    }
+
+    @Nullable
+    public Annotation getElementIdentifier()
+    {
+        return property.getAnnotation("elementIdentifier");
     }
 }

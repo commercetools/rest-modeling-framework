@@ -56,6 +56,28 @@ class <type.name>Model extends <if(!type.hasBuiltinParent)><type.parent.name>Col
 
     <type.identifiers: {id |<indexGetter(type, id)>}>
     <endif>
+
+    <if(type.elementIdentifier)>
+
+    /**
+     * @inheritdoc
+     */
+    public function offsetGet($offset)
+    {
+        if (is_string($offset)) {
+            return $this->by<type.elementIdentifier.name; format="capitalize">($offset);
+        }
+        return parent::at($offset);
+    }
+
+    public function __call(string $method, array $args)
+    {
+        if (strpos($method, 'get') === 0) {
+            $method = lcfirst(substr($method, 3));
+        }
+        return $this->by<type.elementIdentifier.name; format="capitalize">($method);
+    }
+    <endif>
 }
 
 >>
