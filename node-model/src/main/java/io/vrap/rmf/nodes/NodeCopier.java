@@ -6,21 +6,21 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
 /**
- * Provides a copy method to copy a node element ({@link Node}, {@link Property}) with all required information
+ * Provides a copy method to copy a node {@link Node} with all required information
  * to convert it back to a token stream.
  */
-public class NodeElementCopier {
+public class NodeCopier {
 
     /**
      * Copies the given node and all adapters required to convert it back to a
      * token stream.
      *
      * @param nodeElement the node element
-     * @param <T> the node element type, this is necessary to be able to handle {@link Node} and {@link Property}.
+     * @param <T> the node type
      *
-     * @return the copy of the given node element
+     * @return the copy of the given node
      */
-    public static <T extends EObject> T copy(final T nodeElement) {
+    public static <T extends Node> T copy(final T nodeElement) {
         final Copier copier = new Copier();
         final T copy = (T) copier.copy(nodeElement);
 

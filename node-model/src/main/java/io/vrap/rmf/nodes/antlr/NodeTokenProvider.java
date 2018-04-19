@@ -1,7 +1,7 @@
 package io.vrap.rmf.nodes.antlr;
 
 import io.vrap.rmf.nodes.Node;
-import io.vrap.rmf.nodes.Property;
+import io.vrap.rmf.nodes.PropertyNode;
 import org.eclipse.emf.ecore.EObject;
 
 /**
@@ -23,14 +23,14 @@ public interface NodeTokenProvider {
     }
 
     /**
-     * Returns the property {@link Property} that contains this node.
+     * Returns the property {@link PropertyNode} that contains this node.
      *
      * @return the container property or null
      */
-    default Property getPropertyContainer() {
+    default PropertyNode getPropertyContainer() {
         final EObject container = getNode().eContainer();
-        return container instanceof Property ?
-                (Property) container : null;
+        return container instanceof PropertyNode ?
+                (PropertyNode) container : null;
     }
 
     /**

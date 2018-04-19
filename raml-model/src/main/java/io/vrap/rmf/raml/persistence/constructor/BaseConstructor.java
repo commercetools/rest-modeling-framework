@@ -181,7 +181,7 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
         final String traitName = ctx.id().getText();
         final Trait trait = (Trait) scope.with(TRAIT_APPLICATION__TRAIT).getEObjectByName(traitName);
         traitApplication.setTrait(trait);
-        return withinScope(scope.with(traitApplication, TRAIT_APPLICATION__PARAMETERS),
+        return withinScope(scope.with(traitApplication, PARAMETERIZED_APPLICATION__PARAMETERS),
                 argumentsScope -> ctx.argument().stream()
                         .map(this::visitArgument)
                         .collect(Collectors.toList()));
@@ -717,7 +717,7 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
         scope.setValue(resourceTypeApplication, ctx.getStart());
         final ResourceType resourceType = (ResourceType) scope.with(RESOURCE_TYPE_APPLICATION__TYPE).getEObjectByName(ctx.type.getText());
         resourceTypeApplication.setType(resourceType);
-        return withinScope(scope.with(resourceTypeApplication, RESOURCE_TYPE_APPLICATION__PARAMETERS),
+        return withinScope(scope.with(resourceTypeApplication, PARAMETERIZED_APPLICATION__PARAMETERS),
                 argumentsScope -> ctx.argument().stream()
                         .map(this::visitArgument)
                         .collect(Collectors.toList()));

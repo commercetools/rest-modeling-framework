@@ -1,13 +1,10 @@
 package io.vrap.rmf.nodes;
 
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import io.vrap.rmf.nodes.antlr.*;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ListTokenSource;
 import org.antlr.v4.runtime.TokenStream;
 import org.eclipse.emf.common.notify.impl.AdapterImpl;
-import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.URIConverter;
 
@@ -93,12 +90,6 @@ public class NodeModelBuilder {
         return nodeTokens;
     }
 
-    public List<NodeToken> asTokens(final Property property) {
-        final List<NodeToken> keyTokens = asTokens(property.getKey());
-        final List<NodeToken> valueTokens = asTokens(property.getValue());
-        return Lists.newArrayList(Iterables.concat(keyTokens, valueTokens));
-    }
-
     private Node parse(final NodeLexer lexer) {
         final TokenStream tokenStream = new CommonTokenStream(lexer);
         final NodeParser nodeParser = new NodeParser(tokenStream);
@@ -143,12 +134,12 @@ public class NodeModelBuilder {
 
             objectNode.eAdapters().add(NodeParserAdapter.of(start, stop));
 
-            final EList<Property> properties = objectNode.getProperties();
+            final List<PropertyNode> properties = objectNode.getProperties();
             for (final NodeParser.PropertyContext propertyContext : ctx.property()) {
                 final Node key = visitValueNode(propertyContext.key);
                 final Node node = visitNode(propertyContext.node());
 
-                final Property property = NodesFactory.eINSTANCE.createProperty();
+                final PropertyNode property = NodesFactory.eINSTANCE.createPropertyNode();
                 property.setKey((ValueNode<?>) key);
                 property.setValue(node);
 

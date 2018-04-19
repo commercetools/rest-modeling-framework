@@ -4,7 +4,7 @@ package io.vrap.rmf.nodes;
 import io.vrap.rmf.nodes.util.NodesSwitch;
 import org.eclipse.emf.common.util.EList;
 
-import static io.vrap.rmf.nodes.NodeElementCopier.copy;
+import static io.vrap.rmf.nodes.NodeCopier.copy;
 
 /**
  * This class provides merging of different nodes.
@@ -71,7 +71,7 @@ public class NodeMerger {
         final ArrayNode merged = copy(target);
         final EList<Node> elements = merged.getElements();
         source.getElements().stream()
-                .map(NodeElementCopier::copy)
+                .map(NodeCopier::copy)
                 .forEach(elements::add);
 
         return merged;
@@ -80,20 +80,20 @@ public class NodeMerger {
     private Node mergeObjectNodes(final ObjectNode source, final ObjectNode target) {
         final ObjectNode merged = copy(target);
 
-        for (final Property sourceProperty : source.getProperties()) {
+        for (final PropertyNode sourceProperty : source.getProperties()) {
             final Object key = sourceProperty.getKey().getValue();
             final String keyValue = key.toString();
             final boolean isOptionalNode = mergeOptionalNodes && keyValue.endsWith("?");
             final Object targetValue = isOptionalNode ?
                     keyValue.substring(0, keyValue.length() - 1) : key;
-            final Property targetProperty = merged.getProperty(targetValue);
+            final PropertyNode targetProperty = merged.getProperty(targetValue);
             if (targetProperty != null) {
                 if (sourceProperty.getValue() != null) {
                     final Node mergedValue = merge(sourceProperty.getValue(), targetProperty.getValue());
                     targetProperty.setValue(mergedValue);
                 }
             } else if (!isOptionalNode) {
-                final Property copied = copy(sourceProperty);
+                final PropertyNode copied = copy(sourceProperty);
                 merged.getProperties().add(copied);
             }
 

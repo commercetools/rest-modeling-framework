@@ -38,7 +38,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static io.vrap.rmf.nodes.NodeElementCopier.copy;
+import static io.vrap.rmf.nodes.NodeCopier.copy;
 
 /**
  * This class is the main interface for accessing RAML models.
@@ -234,8 +234,8 @@ public class RamlModelBuilder {
 
             io.vrap.rmf.raml.model.resources.Resource mergedResource = resource;
             if (resourceTypeApplication != null) {
-                final ResourceMerger resourceMerger = new ResourceMerger(resource, resourceTypeApplication.getParameters());
-                mergedResource = resourceMerger.resolve(resourceTypeApplication.getType());
+                final ResourceMerger resourceMerger = new ResourceMerger(resource);
+                mergedResource = resourceMerger.resolve(resourceTypeApplication);
             }
             mergedResource.getResources().forEach(this::doSwitch);
 
@@ -243,25 +243,24 @@ public class RamlModelBuilder {
         }
     }
 
+
     private static class ResourceMerger {
         private final NodeMerger nodeMerger = new NodeMerger(true);
         private final io.vrap.rmf.raml.model.resources.Resource resource;
-        private final StringTemplateResolver stringTemplateResolver;
         private final NodeTokenProvider resourceNodeTokenProvider;
 
-        public ResourceMerger(final io.vrap.rmf.raml.model.resources.Resource resource, final List<Parameter> parameters) {
+        public ResourceMerger(final io.vrap.rmf.raml.model.resources.Resource resource) {
             this.resource = resource;
-            stringTemplateResolver = new StringTemplateResolver(parameters);
-            stringTemplateResolver.put("resourcePath", resource.getResourcePath());
-            stringTemplateResolver.put("resourcePathName", resource.getResourcePathName());
             resourceNodeTokenProvider =
                     (NodeTokenProvider) EcoreUtil.getExistingAdapter(resource, NodeTokenProvider.class);
         }
 
-        public io.vrap.rmf.raml.model.resources.Resource resolve(final ResourceType resourceType) {
-            final Property resourceProperty = resourceNodeTokenProvider.getPropertyContainer();
+        public io.vrap.rmf.raml.model.resources.Resource resolve(final ResourceTypeApplication resourceTypeApplication) {
+            final StringTemplateResolver stringTemplateResolver = getStringTemplateResolver(resourceTypeApplication);
+            final PropertyNode resourceProperty = resourceNodeTokenProvider.getPropertyContainer();
 
             final Node resourceValueNode = resourceProperty.getValue();
+            final ResourceType resourceType = resourceTypeApplication.getType();
             final Node resourceTypeNode = getMergedResourceTypeNode(resourceType);
             final Node mergedNode = nodeMerger.merge(resourceTypeNode, resourceValueNode);
             resourceProperty.setValue(mergedNode);
@@ -284,24 +283,34 @@ public class RamlModelBuilder {
             return mergedResource;
         }
 
+        private StringTemplateResolver getStringTemplateResolver(final ParameterizedApplication application) {
+            final Map<String, String> allParameters = application.getParameters().stream()
+                    .filter(p -> p.getValue() instanceof StringInstance)
+                    .collect(Collectors.toMap(Parameter::getName, p -> ((StringInstance) p.getValue()).getValue()));
+            allParameters.put("resourcePath", resource.getResourcePath());
+            allParameters.put("resourcePathName", resource.getResourcePathName());
+
+            return new StringTemplateResolver(allParameters);
+        }
+
         private Node getMergedResourceTypeNode(final ResourceType resourceType) {
             final ObjectNode mergedResourceTypeNode = NodesFactory.eINSTANCE.createObjectNode();
             for (final Method method : resourceType.getMethods()) {
                 final NodeTokenProvider methodNodeTokenProvider  =
                         (NodeTokenProvider) EcoreUtil.getExistingAdapter(method, NodeTokenProvider.class);
 
-                final Property propertyContainer = methodNodeTokenProvider.getPropertyContainer();
-                final Property mergedMethodProperty = copy(propertyContainer);
+                final PropertyNode propertyContainer = methodNodeTokenProvider.getPropertyContainer();
+                final PropertyNode mergedMethodProperty = copy(propertyContainer);
                 final Node methodNode = propertyContainer.getValue();
 
                 Node mergedMethodNode = methodNode;
                 for (final TraitApplication traitApplication : resourceType.getIs()) {
                     mergedMethodNode = apply(traitApplication, mergedMethodNode);
-                    new StringTemplateResolver(traitApplication.getParameters()).resolve(mergedMethodNode);
+                    getStringTemplateResolver(traitApplication).resolve(mergedMethodNode);
                 }
                 for (final TraitApplication traitApplication : method.getIs()) {
                     mergedMethodNode = apply(traitApplication, mergedMethodNode);
-                    new StringTemplateResolver(traitApplication.getParameters()).resolve(mergedMethodNode);
+                    getStringTemplateResolver(traitApplication).resolve(mergedMethodNode);
                 }
                 mergedMethodProperty.setValue(mergedMethodNode);
                 mergedResourceTypeNode.getProperties().add(mergedMethodProperty);
@@ -329,18 +338,8 @@ public class RamlModelBuilder {
     private static class StringTemplateResolver extends NodesSwitch<EObject> {
         private final Map<String, String> parameters;
 
-        /**
-         *
-         * @param parameters the parameters to replace in the value of a {@link StringNode}
-         */
-        public StringTemplateResolver(final List<Parameter> parameters) {
-            this.parameters = parameters.stream()
-                    .filter(p -> p.getValue() instanceof StringInstance)
-                    .collect(Collectors.toMap(Parameter::getName, p -> ((StringInstance) p.getValue()).getValue()));
-        }
-
-        public void put(final String key, final String value) {
-            parameters.put(key, value);
+        public StringTemplateResolver(final Map<String, String> parameters) {
+            this.parameters = parameters;
         }
 
         @Override

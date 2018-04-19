@@ -45,7 +45,7 @@ class NodeTokenCollector extends NodesSwitch<List<NodeToken>> {
     }
 
     @Override
-    public List<NodeToken> caseProperty(final Property property) {
+    public List<NodeToken> casePropertyNode(final PropertyNode property) {
         final List<NodeToken> tokens = new ArrayList<>();
 
         if (property.getKey() != null) {

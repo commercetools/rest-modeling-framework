@@ -2,7 +2,6 @@ package io.vrap.rmf.raml.persistence.antlr;
 
 import io.vrap.rmf.nodes.Node;
 import io.vrap.rmf.nodes.NodeModelBuilder;
-import io.vrap.rmf.nodes.Property;
 import io.vrap.rmf.nodes.antlr.NodeParser;
 import io.vrap.rmf.nodes.antlr.NodeToken;
 import org.antlr.v4.runtime.*;
@@ -34,16 +33,6 @@ public class RamlNodeTokenSource implements TokenSource {
         initTokens();
         this.uri = uri;
         tokens = NODE_MODEL_BUILDER.asTokens(node)
-                .stream()
-                .map(this::toRamlToken)
-                .collect(Collectors.toList());
-    }
-
-
-    public RamlNodeTokenSource(final URI uri, final Property property) {
-        initTokens();
-        this.uri = uri;
-        tokens = NODE_MODEL_BUILDER.asTokens(property)
                 .stream()
                 .map(this::toRamlToken)
                 .collect(Collectors.toList());
