@@ -34,4 +34,9 @@ class RAMLParserAdapter extends AdapterImpl implements NodeTokenProvider {
     public NodeToken getStop() {
         return (NodeToken) parserRuleContext.getStop();
     }
+
+    @Override
+    public NodeTokenProvider copy() {
+        return null;
+    }
 }

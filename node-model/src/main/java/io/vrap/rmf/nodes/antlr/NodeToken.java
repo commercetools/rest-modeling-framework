@@ -88,4 +88,13 @@ public class NodeToken extends CommonToken {
 
         return nodeToken;
     }
+
+    /**
+     * Copies this token.
+     *
+     * @return the copy of this token
+     */
+    public NodeToken copy() {
+        return withType(type, text);
+    }
 }

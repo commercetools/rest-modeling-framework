@@ -14,7 +14,7 @@ import java.util.function.Function;
 abstract class AbstractScopedVisitor<T> extends RAMLBaseVisitor<T> {
     protected Scope scope;
 
-    protected <T> T withinScope(final Scope scope, final Function<Scope, T> within) {
+    public  <T> T withinScope(final Scope scope, final Function<Scope, T> within) {
         pushScope(scope);
 
         T value = within.apply(this.scope);

@@ -16,7 +16,7 @@ import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.ANY_TYPE;
  * Enumeration of the RAML typed fragment identifiers {@link #getIdentifier()}
  * and their type {@link #getType()}.
  */
-public enum RamlFragmentKind {
+enum RamlFragmentKind {
     /**
      * A RAML api specification.
      */

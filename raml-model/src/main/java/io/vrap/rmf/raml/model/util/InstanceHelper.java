@@ -85,7 +85,8 @@ public interface InstanceHelper {
 
     static String resourceFile(EObject object) {
         String source = null;
-        final NodeTokenProvider ramlTokenProvider = (NodeTokenProvider) EcoreUtil.getExistingAdapter(object, NodeTokenProvider.class);
+        final NodeTokenProvider ramlTokenProvider =
+                (NodeTokenProvider) EcoreUtil.getExistingAdapter(object, NodeTokenProvider.class);
         if (ramlTokenProvider != null) {
             final NodeToken nodeToken = ramlTokenProvider.getStart();
             source = nodeToken.getLocation();

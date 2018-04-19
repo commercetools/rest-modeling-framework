@@ -160,7 +160,7 @@ public class StringTemplate {
         @Override
         public String render(final Map<String, String> values) {
             final String value = values.get(param);
-            return transformation.apply(value);
+            return value == null ? toString() : transformation.apply(value);
         }
 
         @Override

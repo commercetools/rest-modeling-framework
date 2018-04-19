@@ -37,17 +37,18 @@ public class ApiConstructor extends BaseConstructor {
         final EObject rootObject = scope.getResource().getContents().get(0);
 
         return withinScope(scope.with(rootObject), rootScope -> {
-            final Predicate<RAMLParser.TypeContainerFacetsContext> isSecuritySchemesFacet =
+            final Predicate<RAMLParser.TypeContainerFacetsContext> hasSecuritySchemesFacet =
                     typeContainerFacets -> typeContainerFacets.securitySchemesFacet() != null;
 
             // TODO move to first pass
             // order is relevant here: first create security schemes
             ctx.typeContainerFacets().stream()
-                    .filter(isSecuritySchemesFacet)
-                    .forEach(this::visitTypeContainerFacets);
+                    .filter(hasSecuritySchemesFacet)
+                    .map(RAMLParser.TypeContainerFacetsContext::securitySchemesFacet)
+                    .forEach(this::visitSecuritySchemesFacet);
 
             ctx.typeContainerFacets().stream()
-                    .filter(isSecuritySchemesFacet.negate())
+                    .filter(hasSecuritySchemesFacet.negate())
                     .forEach(this::visitTypeContainerFacets);
 
             ctx.apiFacets().forEach(this::visitApiFacets);

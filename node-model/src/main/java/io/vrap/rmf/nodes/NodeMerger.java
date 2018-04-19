@@ -3,16 +3,37 @@ package io.vrap.rmf.nodes;
 
 import io.vrap.rmf.nodes.util.NodesSwitch;
 import org.eclipse.emf.common.util.EList;
-import org.eclipse.emf.ecore.util.EcoreUtil;
 
+import static io.vrap.rmf.nodes.NodeElementCopier.copy;
+
+/**
+ * This class provides merging of different nodes.
+ */
 public class NodeMerger {
+    private final boolean mergeOptionalNodes;
 
+    /**
+     * @param mergeOptionalNodes if set to true, optional nodes (string nodes which value ends with '?')
+     *                           will be merged into mandatory nodes
+     */
+    public NodeMerger(final boolean mergeOptionalNodes) {
+        this.mergeOptionalNodes = mergeOptionalNodes;
+    }
+
+    /**
+     * Merges the given source and target node into a newly created node.
+     *
+     * @param source the source node
+     * @param target the target node
+     *
+     * @return the merged node
+     */
     public Node merge(final Node source, final Node target) {
         if (source.eClass() != target.eClass()) {
             if (target instanceof NullNode || (target instanceof ValueNode && source instanceof ContainerNode)) {
-                return EcoreUtil.copy(source);
+                return copy(source);
             } else {
-                return EcoreUtil.copy(target);
+                return copy(target);
             }
         } else {
             return new MergeSwitch(target).doSwitch(source);
@@ -43,27 +64,36 @@ public class NodeMerger {
     }
 
     private Node mergeValueNodes(final Node source, final Node target) {
-        return EcoreUtil.copy(target);
+        return copy(target);
     }
 
     private Node mergeArrayNodes(final ArrayNode source, final ArrayNode target) {
-        final ArrayNode merged = EcoreUtil.copy(target);
+        final ArrayNode merged = copy(target);
         final EList<Node> elements = merged.getElements();
-        source.getElements().stream().map(EcoreUtil::copy).forEach(elements::add);
+        source.getElements().stream()
+                .map(NodeElementCopier::copy)
+                .forEach(elements::add);
 
         return merged;
     }
 
     private Node mergeObjectNodes(final ObjectNode source, final ObjectNode target) {
-        final ObjectNode merged = EcoreUtil.copy(target);
+        final ObjectNode merged = copy(target);
 
         for (final Property sourceProperty : source.getProperties()) {
-            final Property targetProperty = merged.getProperty(sourceProperty.getKey().getValue());
+            final Object key = sourceProperty.getKey().getValue();
+            final String keyValue = key.toString();
+            final boolean isOptionalNode = mergeOptionalNodes && keyValue.endsWith("?");
+            final Object targetValue = isOptionalNode ?
+                    keyValue.substring(0, keyValue.length() - 1) : key;
+            final Property targetProperty = merged.getProperty(targetValue);
             if (targetProperty != null) {
-                final Node mergedValue = merge(sourceProperty.getValue(), targetProperty.getValue());
-                targetProperty.setValue(mergedValue);
-            } else {
-                final Property copied = EcoreUtil.copy(sourceProperty);
+                if (sourceProperty.getValue() != null) {
+                    final Node mergedValue = merge(sourceProperty.getValue(), targetProperty.getValue());
+                    targetProperty.setValue(mergedValue);
+                }
+            } else if (!isOptionalNode) {
+                final Property copied = copy(sourceProperty);
                 merged.getProperties().add(copied);
             }
 

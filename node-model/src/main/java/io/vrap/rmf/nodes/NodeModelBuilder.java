@@ -1,5 +1,7 @@
 package io.vrap.rmf.nodes;
 
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import io.vrap.rmf.nodes.antlr.*;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ListTokenSource;
@@ -87,7 +89,14 @@ public class NodeModelBuilder {
      * @return list of tokens in the parsing order
      */
     public List<NodeToken> asTokens(final Node node) {
-        return new NodeTokenCollector().doSwitch(node);
+        final List<NodeToken> nodeTokens = new NodeTokenCollector().doSwitch(node);
+        return nodeTokens;
+    }
+
+    public List<NodeToken> asTokens(final Property property) {
+        final List<NodeToken> keyTokens = asTokens(property.getKey());
+        final List<NodeToken> valueTokens = asTokens(property.getValue());
+        return Lists.newArrayList(Iterables.concat(keyTokens, valueTokens));
     }
 
     private Node parse(final NodeLexer lexer) {
@@ -203,11 +212,11 @@ public class NodeModelBuilder {
         }
     }
 
-    private static class NodeParserAdapter extends AdapterImpl implements NodeTokenProvider {
+    public static class NodeParserAdapter extends AdapterImpl implements NodeTokenProvider {
         private final NodeToken start;
         private final NodeToken end;
 
-        private NodeParserAdapter(final NodeToken start, final NodeToken end) {
+        public NodeParserAdapter(final NodeToken start, final NodeToken end) {
             this.start = start;
             this.end = end;
         }
@@ -229,11 +238,17 @@ public class NodeModelBuilder {
         }
 
         public static NodeParserAdapter of(final NodeToken start, final NodeToken end) {
-            return new NodeParserAdapter(start, end);
+            return new NodeParserAdapter(start.copy(), end.copy());
         }
 
         public static NodeParserAdapter of(final NodeToken token) {
             return new NodeParserAdapter(token, token);
+        }
+
+        @Override
+        public NodeTokenProvider copy() {
+            final NodeParserAdapter nodeParserAdapter = of(getStart(), getStop());
+            return nodeParserAdapter;
         }
     }
 }
