@@ -29,6 +29,27 @@ class NodeMergerTest extends Specification {
         EcoreUtil.equals(merged, expected) == true
     }
 
+    def "merge with missing source property"() {
+        when:
+        Node source = parse('''\
+        get:
+            queryParameters:
+        ''')
+        Node target = parse('''\
+        get:
+            queryParameters:
+                id:
+        ''')
+        Node merged = merger.merge(source, target)
+        then:
+        Node expected = parse('''\
+        get:
+            queryParameters:
+                id:
+        ''')
+        EcoreUtil.equals(merged, expected) == true
+    }
+
     def "merge resource types from RAML spec"() {
         when:
         Node source = parse('''\
