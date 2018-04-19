@@ -10,7 +10,8 @@ namespace Test\Types;
 use Test\Exception\InvalidArgumentException;
 use Test\Types\PersonModel;
 
-class UserModel extends PersonModel implements User {
+class UserModel extends PersonModel implements User
+{
     /**
      * @var string
      */

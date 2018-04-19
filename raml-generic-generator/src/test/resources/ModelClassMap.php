@@ -20,7 +20,9 @@ class ModelClassMap extends ClassMapModel
         JsonObject::class => JsonObjectModel::class,
         Collection::class => JsonCollection::class,
         Types\Address::class => Types\AddressModel::class,
+        Types\AddressCollection::class => Types\AddressCollectionModel::class,
         Types\Customer::class => Types\CustomerModel::class,
+        Types\CustomerCollection::class => Types\CustomerCollectionModel::class,
 
     ];
 }

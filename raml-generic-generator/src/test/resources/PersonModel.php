@@ -10,7 +10,8 @@ namespace Test\Types;
 use Test\Exception\InvalidArgumentException;
 use Test\Base\JsonObjectModel;
 
-class PersonModel extends JsonObjectModel implements Person {
+class PersonModel extends JsonObjectModel implements Person
+{
     /**
      * @var string
      */

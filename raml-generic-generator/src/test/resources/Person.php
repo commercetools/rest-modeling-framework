@@ -9,7 +9,8 @@ namespace Test\Types;
 
 use Test\Base\JsonObject;
 
-interface Person extends JsonObject {
+interface Person extends JsonObject
+{
     const FIELD_NAME = 'name';
 
     /**

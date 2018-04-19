@@ -1,6 +1,7 @@
 package io.vrap.rmf.raml.validation;
 
 import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
 import io.vrap.rmf.raml.model.types.*;
 import io.vrap.rmf.raml.model.types.util.TypesSwitch;
 import io.vrap.rmf.raml.model.util.InstanceHelper;
@@ -86,6 +87,10 @@ public class InstanceValidator implements DiagnosticsCreator {
         public List<Diagnostic> caseStringInstance(final StringInstance stringInstance) {
             final List<Diagnostic> validationResults = new ArrayList<>();
 
+            if (typeIs(UNION_TYPE)) {
+                return validationResults;
+            }
+
             final String value = stringInstance.getValue();
             if (typeInstanceOf(StringTypeFacet.class)) {
                 final StringTypeFacet stringType = (StringTypeFacet) types.peek();
@@ -121,6 +126,11 @@ public class InstanceValidator implements DiagnosticsCreator {
         @Override
         public List<Diagnostic> caseNumberInstance(final NumberInstance numberInstance) {
             final List<Diagnostic> validationResults = new ArrayList<>();
+
+            if (typeIs(UNION_TYPE)) {
+                return validationResults;
+            }
+
             if (typeInstanceOf(NumberTypeFacet.class)) {
                 final NumberTypeFacet numberType = (NumberTypeFacet) types.peek();
                 final BigDecimal value = numberInstance.getValue();
@@ -148,6 +158,10 @@ public class InstanceValidator implements DiagnosticsCreator {
         public List<Diagnostic> caseIntegerInstance(final IntegerInstance integerInstance) {
             final List<Diagnostic> validationResults = new ArrayList<>();
             final Integer value = integerInstance.getValue();
+
+            if (typeIs(UNION_TYPE)) {
+                return validationResults;
+            }
 
             if (typeInstanceOf(CommonNumberTypeFacet.class)) {
                 final CommonNumberTypeFacet commonNumberType = (CommonNumberTypeFacet) types.peek();
@@ -186,6 +200,10 @@ public class InstanceValidator implements DiagnosticsCreator {
         @Override
         public List<Diagnostic> caseArrayInstance(final ArrayInstance arrayInstance) {
             final List<Diagnostic> validationResults = new ArrayList<>();
+
+            if (typeIs(UNION_TYPE)) {
+                return validationResults;
+            }
             if (typeInstanceOf(ArrayTypeFacet.class)) {
                 final ArrayTypeFacet arrayType = (ArrayTypeFacet) types.peek();
                 final EList<Instance> values = arrayInstance.getValue();
@@ -226,6 +244,10 @@ public class InstanceValidator implements DiagnosticsCreator {
         @Override
         public List<Diagnostic> caseObjectInstance(final ObjectInstance objectInstance) {
             final List<Diagnostic> validationResults = new ArrayList<>();
+
+            if (typeIs(UNION_TYPE)) {
+                return validationResults;
+            }
 
             if (typeInstanceOf(ObjectTypeFacet.class)) {
                 final ObjectTypeFacet objectTypeFacet = (ObjectTypeFacet) types.peek();

@@ -10,7 +10,8 @@ namespace Test\Types;
 use Test\Exception\InvalidArgumentException;
 use Test\Types\AnimalModel;
 
-class CatModel extends AnimalModel implements Cat {
+class CatModel extends AnimalModel implements Cat
+{
     const DISCRIMINATOR_VALUE = 'cat';
 
 }

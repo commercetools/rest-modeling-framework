@@ -9,7 +9,8 @@ namespace Test\Types;
 
 use Test\Base\JsonObject;
 
-interface Document extends JsonObject {
+interface Document extends JsonObject
+{
     const FIELD_CREATED_AT = 'createdAt';
 
     /**

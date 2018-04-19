@@ -10,7 +10,8 @@ namespace Test\Types;
 use Test\Exception\InvalidArgumentException;
 use Test\Base\JsonObjectModel;
 
-class DocumentModel extends JsonObjectModel implements Document {
+class DocumentModel extends JsonObjectModel implements Document
+{
     /**
      * @var \DateTimeImmutable
      */

@@ -10,7 +10,8 @@ namespace Test\Types;
 use Test\Exception\InvalidArgumentException;
 use Test\Base\JsonObjectModel;
 
-class AttributeModel extends JsonObjectModel implements Attribute {
+class AttributeModel extends JsonObjectModel implements Attribute
+{
     /**
      * @var string
      */
@@ -70,7 +71,12 @@ class AttributeModel extends JsonObjectModel implements Attribute {
      */
     public function getValueAsString()
     {
-        return null;
+        if (is_null($this->value)) {
+            $value = $this->raw(Attribute::FIELD_VALUE);
+            $value = (string)$value;
+            $this->value = $value;
+        }
+        return $this->value;
     }
 
     /**
@@ -78,7 +84,16 @@ class AttributeModel extends JsonObjectModel implements Attribute {
      */
     public function getValueAsMoney()
     {
-        return null;
+        if (is_null($this->value)) {
+            $value = $this->raw(Attribute::FIELD_VALUE);
+            if (is_null($value)) {
+                return $this->mapData(Money::class, null);
+            }
+            $value = $this->mapData(Money::class, $value);
+
+            $this->value = $value;
+        }
+        return $this->value;
     }
 
     /**
@@ -86,7 +101,16 @@ class AttributeModel extends JsonObjectModel implements Attribute {
      */
     public function getValueAsEnum()
     {
-        return null;
+        if (is_null($this->value)) {
+            $value = $this->raw(Attribute::FIELD_VALUE);
+            if (is_null($value)) {
+                return $this->mapData(Enum::class, null);
+            }
+            $value = $this->mapData(Enum::class, $value);
+
+            $this->value = $value;
+        }
+        return $this->value;
     }
 
 }

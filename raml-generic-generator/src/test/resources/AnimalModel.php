@@ -10,7 +10,8 @@ namespace Test\Types;
 use Test\Exception\InvalidArgumentException;
 use Test\Base\JsonObjectModel;
 
-class AnimalModel extends JsonObjectModel implements Animal {
+class AnimalModel extends JsonObjectModel implements Animal
+{
     const DISCRIMINATOR_VALUE = '';
 
     /**

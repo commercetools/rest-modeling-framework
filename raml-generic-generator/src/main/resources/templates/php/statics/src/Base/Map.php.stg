@@ -1,0 +1,21 @@
+import "../../../generic.stg"
+
+main(vendorName) ::=<<
+\<?php
+<generatorInfo()>
+
+namespace <vendorName>\\Base;
+
+interface Map extends Nullable
+{
+    public function get($key);
+
+    /**
+     * @param mixed $key
+     * @param mixed $value
+     * @return Collection
+     */
+    public function set($key, $value);
+}
+
+>>

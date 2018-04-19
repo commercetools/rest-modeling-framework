@@ -7,7 +7,8 @@ declare(strict_types = 1);
 
 namespace Test\Types;
 
-interface User extends Person {
+interface User extends Person
+{
     const FIELD_ROLE = 'role';
 
     /**

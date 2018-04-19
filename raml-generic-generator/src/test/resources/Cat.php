@@ -7,5 +7,6 @@ declare(strict_types = 1);
 
 namespace Test\Types;
 
-interface Cat extends Animal {
+interface Cat extends Animal
+{
 }

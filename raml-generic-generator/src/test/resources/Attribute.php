@@ -9,7 +9,8 @@ namespace Test\Types;
 
 use Test\Base\JsonObject;
 
-interface Attribute extends JsonObject {
+interface Attribute extends JsonObject
+{
     const FIELD_NAME = 'name';
     const FIELD_VALUE = 'value';
 
