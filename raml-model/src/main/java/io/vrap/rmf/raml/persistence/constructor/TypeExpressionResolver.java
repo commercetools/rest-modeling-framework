@@ -132,6 +132,7 @@ public class TypeExpressionResolver {
         @Override
         public EObject visitArrayType(final TypeExpressionParser.ArrayTypeContext ctx) {
             final EObject arrayType = EcoreUtil.create(ARRAY_TYPE);
+            scope.addValue(INLINE_TYPE_CONTAINER__INLINE_TYPES, arrayType);
             this.nestedTypes = true;
             final EObject itemsType = visit(ctx.primary_type_expr());
             arrayType.eSet(ARRAY_TYPE_FACET__ITEMS, itemsType);
@@ -142,6 +143,7 @@ public class TypeExpressionResolver {
         @Override
         public EObject visitUnionType(final TypeExpressionParser.UnionTypeContext ctx) {
             final EObject unionType = EcoreUtil.create(UNION_TYPE);
+            scope.addValue(INLINE_TYPE_CONTAINER__INLINE_TYPES, unionType);
             this.nestedTypes = true;
             final EList<AnyType> oneOfType = ECollections.asEList(ctx.primary_type_expr().stream()
                     .map(this::visit)
@@ -149,7 +151,6 @@ public class TypeExpressionResolver {
                     .map(AnyType.class::cast)
                     .collect(Collectors.toList()));
             unionType.eSet(ONE_OF_FACET__ONE_OF, oneOfType);
-
             return unionType;
         }
 

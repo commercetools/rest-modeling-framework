@@ -52,7 +52,6 @@ class TypesTest extends RegressionTest {
         ramlModelResult.validationResults.size() == 1
     }
 
-    @Ignore
     def "union type array"() {
         when:
 
