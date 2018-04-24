@@ -64,7 +64,7 @@ public class TypeDeclarationResolver {
 
                     final EObject resolvedType = typeResolvingVisitor.visitTypeDeclarationFacet(typeDeclarationFacet);
                     if (resolvedType != null && !resolvedType.eIsProxy()) {
-                        unresolvedTypeDeclarations.remove(typeDeclarationFacet, resolvedType);
+                        unresolvedTypeDeclarations.remove(typeDeclarationFacet, unresolved);
                     }
                 }
             }
