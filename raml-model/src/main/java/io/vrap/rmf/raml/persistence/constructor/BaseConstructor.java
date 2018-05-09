@@ -64,8 +64,8 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
 
     @Override
     public Object visitDefaultFacet(RAMLParser.DefaultFacetContext defaultFacet) {
-        return instanceConstructor.withinScope(scope.with(ANY_TYPE_FACET__DEFAULT), defaultScope ->
-                instanceConstructor.visitInstance(defaultFacet.instance()));
+        return instanceConstructor.withinScope(scope.with(ANY_TYPE_FACET__DEFAULT),
+                defaultScope -> instanceConstructor.visitInstance(defaultFacet.instance()));
     }
 
     @Override
@@ -144,11 +144,8 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
 
     @Override
     public Object visitTraitsFacet(RAMLParser.TraitsFacetContext traitsFacet) {
-        return withinScope(scope.with(TYPE_CONTAINER__TRAITS), traitsScope ->
-                traitsFacet.traitFacet().stream()
-                        .map(this::visitTraitFacet)
-                        .collect(Collectors.toList())
-        );
+        return withinScope(scope.with(TYPE_CONTAINER__TRAITS),
+                traitsScope -> super.visitTraitsFacet(traitsFacet));
     }
 
     @Override
@@ -198,40 +195,40 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
     @Override
     public Object visitSecuritySchemeFacet(RAMLParser.SecuritySchemeFacetContext securitySchemeFacet) {
         final SecurityScheme securityScheme = (SecurityScheme) scope.getEObjectByName(securitySchemeFacet.name.getText());
-            return withinScope(scope.with(securityScheme), securitySchemeScope -> {
-                securitySchemeFacet.attributeFacet().forEach(this::visitAttributeFacet);
-                securitySchemeFacet.descriptionFacet().forEach(this::visitDescriptionFacet);
-                securitySchemeFacet.displayNameFacet().forEach(this::visitDisplayNameFacet);
-                securitySchemeFacet.describedByFacet().forEach(this::visitDescribedByFacet);
+        return withinScope(scope.with(securityScheme), securitySchemeScope -> {
+            securitySchemeFacet.attributeFacet().forEach(this::visitAttributeFacet);
+            securitySchemeFacet.descriptionFacet().forEach(this::visitDescriptionFacet);
+            securitySchemeFacet.displayNameFacet().forEach(this::visitDisplayNameFacet);
+            securitySchemeFacet.describedByFacet().forEach(this::visitDescribedByFacet);
 
-                withinScope(securitySchemeScope.with(SECURITY_SCHEME__TYPE), s ->
-                        securitySchemeFacet.securitySchemeTypeFacet().stream()
-                                .map(this::visitSecuritySchemeTypeFacet)
-                                .collect(Collectors.toList()));
-                SecuritySchemeSettings securitySchemeSettings = null;
-                switch (securityScheme.getType()) {
-                    case OAUTH_10:
-                        securitySchemeSettings = create(OAUTH10_SETTINGS, securitySchemeFacet);
-                        break;
-                    case OAUTH_20:
-                        securitySchemeSettings = create(OAUTH20_SETTINGS, securitySchemeFacet);
-                        break;
-                    default:
-                        if (securitySchemeFacet.securitySchemeSettingsFacet().size() > 0) {
-                            scope.addError("Settings not supported for type {0} at {0}",
-                                    securityScheme.getType(), securitySchemeFacet.getStart());
-                        }
-                }
-                if (securitySchemeSettings != null) {
-                    scope.with(SECURITY_SCHEME__SETTINGS).setValue(securitySchemeSettings, securitySchemeFacet.getStart());
-                    withinScope(scope.with(securitySchemeSettings),
-                            settingsScope ->
-                            securitySchemeFacet.securitySchemeSettingsFacet().stream()
-                                    .map(this::visitSecuritySchemeSettingsFacet)
-                                    .collect(Collectors.toList()));
-                }
-                return securitySchemeScope.getEObject();
-            });
+            withinScope(securitySchemeScope.with(SECURITY_SCHEME__TYPE), s ->
+                    securitySchemeFacet.securitySchemeTypeFacet().stream()
+                            .map(this::visitSecuritySchemeTypeFacet)
+                            .collect(Collectors.toList()));
+            SecuritySchemeSettings securitySchemeSettings = null;
+            switch (securityScheme.getType()) {
+                case OAUTH_10:
+                    securitySchemeSettings = create(OAUTH10_SETTINGS, securitySchemeFacet);
+                    break;
+                case OAUTH_20:
+                    securitySchemeSettings = create(OAUTH20_SETTINGS, securitySchemeFacet);
+                    break;
+                default:
+                    if (securitySchemeFacet.securitySchemeSettingsFacet().size() > 0) {
+                        scope.addError("Settings not supported for type {0} at {0}",
+                                securityScheme.getType(), securitySchemeFacet.getStart());
+                    }
+            }
+            if (securitySchemeSettings != null) {
+                scope.with(SECURITY_SCHEME__SETTINGS).setValue(securitySchemeSettings, securitySchemeFacet.getStart());
+                withinScope(scope.with(securitySchemeSettings),
+                        settingsScope ->
+                                securitySchemeFacet.securitySchemeSettingsFacet().stream()
+                                        .map(this::visitSecuritySchemeSettingsFacet)
+                                        .collect(Collectors.toList()));
+            }
+            return securitySchemeScope.getEObject();
+        });
     }
 
     @Override
