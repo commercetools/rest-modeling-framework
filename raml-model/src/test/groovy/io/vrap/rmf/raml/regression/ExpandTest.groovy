@@ -6,7 +6,6 @@ import spock.lang.Ignore
 
 class ExpandTest extends RegressionTest {
 
-    @Ignore
     def "expand-traits-with-resource-type" () {
         when:
         RamlModelResult<Api> ramlModelResult = constructApi(
@@ -40,7 +39,6 @@ class ExpandTest extends RegressionTest {
         ramlModelResult.rootObject.resources.get(0).methods.get(0).queryParameters[0].type.maximum == 20
     }
 
-    @Ignore
     def "expand-traits-without-resource-type" () {
         when:
         RamlModelResult<Api> ramlModelResult = constructApi(

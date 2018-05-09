@@ -88,7 +88,7 @@ public class NodeMerger {
                     keyValue.substring(0, keyValue.length() - 1) : key;
             final PropertyNode targetProperty = merged.getProperty(targetValue);
             if (targetProperty != null) {
-                if (sourceProperty.getValue() != null) {
+                if (sourceProperty.getValue() != null && targetProperty.getValue() != null) {
                     final Node mergedValue = merge(sourceProperty.getValue(), targetProperty.getValue());
                     targetProperty.setValue(mergedValue);
                 }
