@@ -9,15 +9,11 @@ import io.vrap.rmf.raml.generic.generator.GeneratorHelper;
 import io.vrap.rmf.raml.generic.generator.ImportGenModel;
 import io.vrap.rmf.raml.generic.generator.PackageGenModel;
 import io.vrap.rmf.raml.generic.generator.TypeGenModel;
-import io.vrap.rmf.raml.model.modules.Api;
-import io.vrap.rmf.raml.model.resources.HttpMethod;
 import io.vrap.rmf.raml.model.resources.Method;
-import io.vrap.rmf.raml.model.resources.Parameter;
 import io.vrap.rmf.raml.model.resources.Resource;
 import io.vrap.rmf.raml.model.responses.Body;
 import io.vrap.rmf.raml.model.responses.Response;
 import io.vrap.rmf.raml.model.types.*;
-import org.eclipse.emf.ecore.EObject;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -48,7 +44,7 @@ public class RequestGenModel {
         Response response = method.getResponses().stream().filter(response1 -> response1.getStatusCode().matches("^2[0-9]{2}$")).findFirst().orElse(null);
         if (response != null) {
             Body bodyType = response.getBodies().stream()
-                    .filter(bodyType1 -> bodyType1.getContentTypes().size() == 0 || bodyType1.getContentMediaTypes().contains(MediaType.parse("application/json")))
+                    .filter(bodyType1 -> bodyType1.getContentType() == null || bodyType1.getContentMediaType().equals(MediaType.parse("application/json")))
                     .findFirst().orElse(null);
             if (bodyType != null && !BuiltinType.of(bodyType.getName()).isPresent()) {
                 return new TypeGenModel(bodyType.getType());

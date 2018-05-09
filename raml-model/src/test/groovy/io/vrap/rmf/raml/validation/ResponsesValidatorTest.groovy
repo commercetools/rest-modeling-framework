@@ -1,6 +1,5 @@
 package io.vrap.rmf.raml.validation
 
-import com.google.common.net.MediaType
 import io.vrap.rmf.raml.model.modules.Api
 import io.vrap.rmf.raml.model.modules.ModulesFactory
 import io.vrap.rmf.raml.model.resources.Method
@@ -44,7 +43,7 @@ class ResponsesValidatorTest extends BaseValidatorTest {
 
     def "should accept bodies with content type"() {
         when:
-        body.contentTypes.add('application/json')
+        body.contentType = 'application/json'
         then:
         validate(api) == true
         diagnostic.severity == Diagnostic.OK

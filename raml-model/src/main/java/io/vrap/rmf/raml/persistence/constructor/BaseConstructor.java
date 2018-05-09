@@ -10,7 +10,6 @@ import io.vrap.rmf.raml.model.values.RegExp;
 import io.vrap.rmf.raml.persistence.antlr.RAMLParser;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
-import org.eclipse.emf.common.util.ECollections;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
@@ -274,7 +273,7 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
             scope.setValue(body, bodyContentType.getStart());
         }
         if (bodyContentType.contentType != null) {
-            body.getContentTypes().add(bodyContentType.contentType.getText());
+            body.setContentType(bodyContentType.contentType.getText());
         }
         return body;
     }

@@ -43,9 +43,9 @@ class ResponsesValidator extends AbstractRamlValidator {
             final boolean contentTypesDefined;
             if (rootContainer instanceof Api) {
                 final Api api = (Api) rootContainer;
-                contentTypesDefined = api.getMediaType().size() > 0 || body.getContentTypes().size() > 0;
+                contentTypesDefined = api.getMediaType().size() > 0 || body.getContentType() != null;
             } else {
-                contentTypesDefined = body.getContentTypes().size() > 0;
+                contentTypesDefined = body.getContentType() != null;
             }
             if (!contentTypesDefined) {
                 validationErrors.add(error(body, "Content type undefined"));

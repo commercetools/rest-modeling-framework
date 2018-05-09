@@ -79,8 +79,7 @@ public class UriFragmentBuilder {
         if (body.eContainer() != null) {
             final List<String> segments = uriFragmentsBuilderSwitch.apply(body.eContainer());
             segments.add(body.eContainmentFeature().getName());
-            segments.add(body.getContentTypes().stream()
-                    .collect(Collectors.joining(",")));
+            segments.add(body.getContentType());
             return segments;
         }
         return new ArrayList<>();

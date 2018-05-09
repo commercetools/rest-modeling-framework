@@ -378,8 +378,17 @@ public class RamlModelBuilder {
 
         @Override
         public EObject caseBody(final Body body) {
-            if (body.getContentTypes().isEmpty()) {
-                body.getContentTypes().addAll(defaultMediaTypes);
+            if (body.getContentType() == null) {
+                if (defaultMediaTypes.size() >= 1) {
+                    final String firstMediaType = defaultMediaTypes.get(0);
+                    body.setContentType(firstMediaType);
+
+                    for (int i = 1; i < defaultMediaTypes.size(); i++) {
+                        final Body copy = EcoreUtil.copy(body);
+                        copy.setContentType(defaultMediaTypes.get(i));
+                        body.eContainer().eContents().add(copy);
+                    }
+                }
             }
             return body;
         }

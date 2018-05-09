@@ -4,7 +4,7 @@
 package io.vrap.rmf.raml.model.responses
 
 import io.vrap.rmf.raml.model.util.ModelHelper
-import io.vrap.rmf.raml.model.values.MediaTypes
+import io.vrap.rmf.raml.model.values.MediaType
 import io.vrap.rmf.raml.model.types.DescriptionFacet
 import io.vrap.rmf.raml.model.types.AnnotationsFacet
 import io.vrap.rmf.raml.model.types.HeadersFacet
@@ -26,12 +26,12 @@ class Response extends AnnotationsFacet, HeadersFacet, BodyContainer, Descriptio
 
 class Body extends AnnotationsFacet, TypedElement {
 	/*
-	 * The content types that this body supports.
+	 * The content type that this body supports.
 	 */
-	String[] contentTypes
+	String contentType
 
-    op MediaTypes getContentMediaTypes() {
-        ModelHelper.getMediaTypes(contentTypes)
+    op MediaType getContentMediaType() {
+        ModelHelper.getMediaType(contentType)
     }
 }
 
