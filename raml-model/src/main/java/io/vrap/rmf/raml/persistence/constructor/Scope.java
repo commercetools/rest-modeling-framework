@@ -27,6 +27,7 @@ import static io.vrap.rmf.raml.model.modules.ModulesPackage.Literals.*;
 import static io.vrap.rmf.raml.model.resources.ResourcesPackage.Literals.RESOURCE_TYPE;
 import static io.vrap.rmf.raml.model.resources.ResourcesPackage.Literals.TRAIT;
 import static io.vrap.rmf.raml.model.security.SecurityPackage.Literals.SECURED_BY;
+import static io.vrap.rmf.raml.model.security.SecurityPackage.Literals.SECURITY_SCHEME;
 import static io.vrap.rmf.raml.model.security.SecurityPackage.Literals.SECURITY_SCHEME_CONTAINER__SECURITY_SCHEMES;
 import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.ANY_ANNOTATION_TYPE;
 
@@ -97,7 +98,7 @@ public class Scope {
         // TODO replace ternary with visitor
         final String fragment = ANY_ANNOTATION_TYPE.isSuperTypeOf(type) ?
                 TYPE_CONTAINER__ANNOTATION_TYPES.getName() :
-                SECURED_BY.isSuperTypeOf(type) ?
+                SECURITY_SCHEME.isSuperTypeOf(type) ?
                         SECURITY_SCHEME_CONTAINER__SECURITY_SCHEMES.getName() :
                         TRAIT.isSuperTypeOf(type) ?
                                 TYPE_CONTAINER__TRAITS.getName() :

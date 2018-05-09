@@ -37,7 +37,7 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
         final SecuredBy securedBy = create(SECURED_BY, ctx);
         scope.setValue(securedBy, ctx.getStart());
 
-        final SecurityScheme scheme = (SecurityScheme) scope.getEObjectByName(ctx.name.getText());
+        final SecurityScheme scheme = (SecurityScheme) scope.getEObjectByName(ctx.name.getText(), SECURITY_SCHEME);
         securedBy.setScheme(scheme);
 
         if (ctx.parameters != null) {
@@ -200,16 +200,15 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
     }
 
     @Override
+    public Object visitSecuritySchemesFacet(final RAMLParser.SecuritySchemesFacetContext ctx) {
+        return withinScope(scope.with(SECURITY_SCHEME_CONTAINER__SECURITY_SCHEMES),
+                scope -> super.visitSecuritySchemesFacet(ctx));
+    }
+
+    @Override
     public Object visitSecuritySchemeFacet(RAMLParser.SecuritySchemeFacetContext securitySchemeFacet) {
-        final SecurityScheme securityScheme;
-        if (securitySchemeFacet.securitySchemeTypeFacet() == null) {
-            scope.addError("Missing type for security scheme at {0}", securitySchemeFacet.getStart());
-            securityScheme = null;
-        } else {
-            securityScheme = create(SECURITY_SCHEME, securitySchemeFacet);
-            final String name = securitySchemeFacet.name.getText();
-            securityScheme.setName(name);
-            withinScope(scope.with(securityScheme), securitySchemeScope -> {
+        final SecurityScheme securityScheme = (SecurityScheme) scope.getEObjectByName(securitySchemeFacet.name.getText());
+            return withinScope(scope.with(securityScheme), securitySchemeScope -> {
                 securitySchemeFacet.attributeFacet().forEach(this::visitAttributeFacet);
                 securitySchemeFacet.descriptionFacet().forEach(this::visitDescriptionFacet);
                 securitySchemeFacet.displayNameFacet().forEach(this::visitDisplayNameFacet);
@@ -242,9 +241,6 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
                 }
                 return securitySchemeScope.getEObject();
             });
-            scope.with(SECURITY_SCHEME_CONTAINER__SECURITY_SCHEMES).setValue(securityScheme, securitySchemeFacet.getStart());
-        }
-        return securityScheme;
     }
 
     @Override

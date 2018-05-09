@@ -13,10 +13,10 @@ public class LibraryConstructor extends BaseConstructor {
 
     @Override
     public EObject construct(final RAMLParser parser, final Scope scope) {
-        final TypeDeclarationResolver typeDeclarationResolver =
-                new TypeDeclarationResolver();
+        final DeclarationResolver declarationResolver =
+                new DeclarationResolver();
         final RAMLParser.LibraryContext libraryContext = parser.library();
-        typeDeclarationResolver.resolve(libraryContext, scope);
+        declarationResolver.resolve(libraryContext, scope);
 
         final Library library = (Library) withinScope(scope,
                 s -> visitLibrary(libraryContext));
