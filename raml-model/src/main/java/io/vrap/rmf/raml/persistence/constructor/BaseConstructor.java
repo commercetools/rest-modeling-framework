@@ -41,10 +41,8 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
         securedBy.setScheme(scheme);
 
         if (ctx.parameters != null) {
-            instanceConstructor.withinScope(scope.with(securedBy, SECURED_BY__PARAMETERS), securedByParametersScope -> {
-                final ObjectInstance parameters = (ObjectInstance) instanceConstructor.visitObjectInstance(ctx.parameters);
-                return  parameters;
-            });
+            instanceConstructor.withinScope(scope.with(securedBy, SECURED_BY__PARAMETERS),
+                    securedByParametersScope -> instanceConstructor.visitObjectInstance(ctx.parameters));
         }
 
         return securedBy;
@@ -52,16 +50,16 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
 
     @Override
     public Object visitEnumFacet(RAMLParser.EnumFacetContext enumFacet) {
-        return instanceConstructor.withinScope(scope.with(ANY_TYPE_FACET__ENUM), enumScope ->
-                enumFacet.instance().stream()
+        return instanceConstructor.withinScope(scope.with(ANY_TYPE_FACET__ENUM),
+                enumScope -> enumFacet.instance().stream()
                         .map(instanceConstructor::visitInstance)
                         .collect(Collectors.toList()));
     }
 
     @Override
     public Object visitInstance(RAMLParser.InstanceContext instance) {
-        return instanceConstructor.withinScope(scope, instanceScope ->
-            instanceConstructor.visitInstance(instance));
+        return instanceConstructor.withinScope(scope,
+                instanceScope -> instanceConstructor.visitInstance(instance));
     }
 
     @Override
@@ -130,11 +128,8 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
 
     @Override
     public Object visitExamplesFacet(RAMLParser.ExamplesFacetContext examplesFacet) {
-        return withinScope(scope.with(ANY_TYPE__EXAMPLES), examplesScope ->
-                ECollections.asEList(examplesFacet.namedExample().stream()
-                        .map(this::visitNamedExample)
-                        .collect(Collectors.toList()))
-        );
+        return withinScope(scope.with(ANY_TYPE__EXAMPLES),
+                examplesScope -> super.visitExamplesFacet(examplesFacet));
     }
 
     @Override
@@ -159,18 +154,14 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
     @Override
     public Object visitTraitFacet(RAMLParser.TraitFacetContext traitFacet) {
         final Trait trait = (Trait) scope.getEObjectByName(traitFacet.name.getText());
-        return withinScope(scope.with(trait), traitScope -> {
-            traitFacet.methodBaseFacet().forEach(this::visitMethodBaseFacet);
-            return trait;
-        });
+        return withinScope(scope.with(trait),
+                traitScope -> super.visitTraitFacet(traitFacet));
     }
 
     @Override
     public Object visitIsFacet(RAMLParser.IsFacetContext isFacet) {
-        return withinScope(scope.with(APPLY_TRAITS_FACET__IS), isScope ->
-                isFacet.traitApplication().stream()
-                        .map(this::visitTraitApplication)
-                        .collect(Collectors.toList()));
+        return withinScope(scope.with(APPLY_TRAITS_FACET__IS),
+                isScope -> super.visitIsFacet(isFacet));
 
     }
 
@@ -181,10 +172,9 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
         final String traitName = ctx.id().getText();
         final Trait trait = (Trait) scope.with(TRAIT_APPLICATION__TRAIT).getEObjectByName(traitName);
         traitApplication.setTrait(trait);
+
         return withinScope(scope.with(traitApplication, PARAMETERIZED_APPLICATION__PARAMETERS),
-                argumentsScope -> ctx.argument().stream()
-                        .map(this::visitArgument)
-                        .collect(Collectors.toList()));
+                argumentsScope -> super.visitTraitApplication(ctx));
     }
 
     @Override
@@ -194,7 +184,7 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
 
         traitParameter.setName(ctx.name.getText());
         withinScope(scope.with(traitParameter, PARAMETER__VALUE),
-                valueScope -> this.visitInstance(ctx.instance()));
+                valueScope -> super.visitArgument(ctx));
 
         return traitParameter;
     }
@@ -234,7 +224,8 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
                 }
                 if (securitySchemeSettings != null) {
                     scope.with(SECURITY_SCHEME__SETTINGS).setValue(securitySchemeSettings, securitySchemeFacet.getStart());
-                    withinScope(scope.with(securitySchemeSettings), settingsScope ->
+                    withinScope(scope.with(securitySchemeSettings),
+                            settingsScope ->
                             securitySchemeFacet.securitySchemeSettingsFacet().stream()
                                     .map(this::visitSecuritySchemeSettingsFacet)
                                     .collect(Collectors.toList()));
@@ -248,23 +239,14 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
         final SecuritySchemeDescription securitySchemeDescription = create(SECURITY_SCHEME_DESCRIPTION, describedByFacet);
         scope.with(SECURITY_SCHEME__DESCRIBED_BY).setValue(securitySchemeDescription, describedByFacet.getStart());
 
-        return withinScope(scope.with(securitySchemeDescription), securitySchemeDescriptionScope -> {
-            describedByFacet.headersFacet().forEach(this::visitHeadersFacet);
-            describedByFacet.responsesFacet().forEach(this::visitResponsesFacet);
-
-            return null;
-        });
+        return withinScope(scope.with(securitySchemeDescription),
+                securitySchemeDescriptionScope -> super.visitDescribedByFacet(describedByFacet));
     }
 
     @Override
     public Object visitResponsesFacet(RAMLParser.ResponsesFacetContext responsesFacetContext) {
-        return withinScope(scope.with(RESPONSES_FACET__RESPONSES), responsesScope -> {
-            final List<Object> responses = ECollections.asEList(responsesFacetContext.responseFacet().stream()
-                    .map(this::visitResponseFacet)
-                    .collect(Collectors.toList()));
-
-            return responses;
-        });
+        return withinScope(scope.with(RESPONSES_FACET__RESPONSES),
+                responsesScope -> super.visitResponsesFacet(responsesFacetContext));
     }
 
     @Override
@@ -272,15 +254,9 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
         final Response response = create(RESPONSE, responseFacet);
         scope.setValue(response, responseFacet.getStart());
         response.setStatusCode(responseFacet.statusCode.getText());
-        return withinScope(scope.with(response), responseScope -> {
-            responseFacet.attributeFacet().forEach(this::visitAttributeFacet);
-            responseFacet.descriptionFacet().forEach(this::visitDescriptionFacet);
-            responseFacet.headersFacet().forEach(this::visitHeadersFacet);
 
-            responseFacet.bodyFacet().forEach(this::visitBodyFacet);
-
-            return response;
-        });
+        return withinScope(scope.with(response),
+                responseScope -> super.visitResponseFacet(responseFacet));
     }
 
     @Override
@@ -334,23 +310,10 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
                             bodyFacet.itemsFacet().size() > 0;
             if (isInlineTypeDeclaration) {
                 type = inlineTypeDeclaration(type, bodyScope, bodyFacet);
-                withinScope(scope.with(type),
-                        inlineTypeDeclarationScope -> {
-                            bodyFacet.attributeFacet().forEach(this::visitAttributeFacet);
-                            bodyFacet.descriptionFacet().forEach(this::visitDescriptionFacet);
-                            bodyFacet.propertiesFacet().forEach(this::visitPropertiesFacet);
-                            bodyFacet.exampleFacet().forEach(this::visitExampleFacet);
-                            bodyFacet.examplesFacet().forEach(this::visitExamplesFacet);
-                            bodyFacet.defaultFacet().forEach(this::visitDefaultFacet);
-                            bodyFacet.enumFacet().forEach(this::visitEnumFacet);
-                            bodyFacet.itemsFacet().forEach(this::visitItemsFacet);
-
-                            return inlineTypeDeclarationScope.getEObject();
-                        });
             }
+            withinScope(scope.with(type),
+                    inlineTypeDeclarationScope -> super.visitBodyFacets(bodyFacet));
             bodyScope.with(TYPED_ELEMENT__TYPE).setValue(type, bodyFacet.getStart());
-
-            bodyFacet.annotationFacet().forEach(this::visitAnnotationFacet);
 
             return body;
         });
@@ -378,26 +341,14 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
 
     @Override
     public Object visitHeadersFacet(RAMLParser.HeadersFacetContext headersFacet) {
-        return withinScope(scope.with(HEADERS_FACET__HEADERS), headersScope -> {
-            final List<Object> headers = ECollections.asEList(headersFacet.headerFacets.stream()
-                    .map(this::visitTypedElementFacet)
-                    .collect(Collectors.toList()));
-            scope.setValue(headers, headersFacet.getStart());
-
-            return headers;
-        });
+        return withinScope(scope.with(HEADERS_FACET__HEADERS),
+                headersScope -> super.visitHeadersFacet(headersFacet));
     }
 
     @Override
     public Object visitQueryParametersFacet(RAMLParser.QueryParametersFacetContext queryParametersFacet) {
-        return withinScope(scope.with(QUERY_PARAMETERS_FACET__QUERY_PARAMETERS), queryParametersScope -> {
-            final List<Object> queryParameters = ECollections.asEList(queryParametersFacet.queryParameters.stream()
-                    .map(this::visitTypedElementFacet)
-                    .collect(Collectors.toList()));
-            scope.setValue(queryParameters, queryParametersFacet.getStart());
-
-            return queryParameters;
-        });
+        return withinScope(scope.with(QUERY_PARAMETERS_FACET__QUERY_PARAMETERS),
+                queryParametersScope -> super.visitQueryParametersFacet(queryParametersFacet));
     }
 
     @Override
@@ -421,10 +372,8 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
 
     @Override
     public Object visitSecuredByFacet(RAMLParser.SecuredByFacetContext securedByFacet) {
-        return withinScope(scope.with(SECURED_BY_FACET__SECURED_BY), securedByScope ->
-                ECollections.asEList(securedByFacet.securedBy().stream()
-                        .map(this::visitSecuredBy)
-                        .collect(Collectors.toList())));
+        return withinScope(scope.with(SECURED_BY_FACET__SECURED_BY),
+                securedByScope -> super.visitSecuredByFacet(securedByFacet));
     }
 
     @Override
@@ -454,13 +403,8 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
      */
     @Override
     public Object visitTypesFacet(final RAMLParser.TypesFacetContext typesFacet) {
-        return withinScope(scope.with(TYPE_CONTAINER__TYPES), typesScope -> {
-            final List<Object> types = typesFacet.types.stream()
-                    .map(this::visitTypeDeclarationFacet)
-                    .collect(Collectors.toList());
-
-            return types;
-        });
+        return withinScope(scope.with(TYPE_CONTAINER__TYPES),
+                typesScope -> super.visitTypesFacet(typesFacet));
     }
 
     /**
@@ -471,13 +415,8 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
      */
     @Override
     public Object visitAnnotationTypesFacet(RAMLParser.AnnotationTypesFacetContext annotationTypesFacet) {
-        return withinScope(scope.with(TYPE_CONTAINER__ANNOTATION_TYPES), typesScope -> {
-            final List<Object> types = annotationTypesFacet.annotationTypes.stream()
-                    .map(this::visitTypeDeclarationFacet)
-                    .collect(Collectors.toList());
-
-            return types;
-        });
+        return withinScope(scope.with(TYPE_CONTAINER__ANNOTATION_TYPES),
+                typesScope -> super.visitAnnotationTypesFacet(annotationTypesFacet));
     }
 
     /**
@@ -520,19 +459,7 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
                     typedElementType = EcoreUtil.create(typedElementType.eClass());
                     scope.addValue(INLINE_TYPE_CONTAINER__INLINE_TYPES, typedElementType);
                     withinScope(scope.with(typedElementType),
-                            inlineTypeDeclarationScope -> {
-                                itemsFacet.attributeFacet().forEach(this::visitAttributeFacet);
-                                itemsFacet.descriptionFacet().forEach(this::visitDescriptionFacet);
-                                itemsFacet.displayNameFacet().forEach(this::visitDisplayNameFacet);
-                                itemsFacet.propertiesFacet().forEach(this::visitPropertiesFacet);
-                                itemsFacet.defaultFacet().forEach(this::visitDefaultFacet);
-                                itemsFacet.exampleFacet().forEach(this::visitExampleFacet);
-                                itemsFacet.examplesFacet().forEach(this::visitExamplesFacet);
-                                itemsFacet.enumFacet().forEach(this::visitEnumFacet);
-                                itemsFacet.itemsFacet().forEach(this::visitItemsFacet);
-
-                                return inlineTypeDeclarationScope.getEObject();
-                            });
+                            inlineTypeDeclarationScope -> super.visitItemsFacet(itemsFacet));
                 }
                 itemsType = typedElementType;
             }
@@ -557,19 +484,8 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
         final String text = typeDeclarationMap.name.getText();
         final EObject declaredType = scope.getEObjectByName(text);
 
-        return withinScope(scope.with(declaredType), typeScope -> {
-            typeDeclarationMap.annotationFacet().forEach(this::visitAnnotationFacet);
-            typeDeclarationMap.attributeFacet().forEach(this::visitAttributeFacet);
-            typeDeclarationMap.descriptionFacet().forEach(this::visitDescriptionFacet);
-            typeDeclarationMap.displayNameFacet().forEach(this::visitDisplayNameFacet);
-            typeDeclarationMap.propertiesFacet().forEach(this::visitPropertiesFacet);
-            typeDeclarationMap.defaultFacet().forEach(this::visitDefaultFacet);
-            typeDeclarationMap.exampleFacet().forEach(this::visitExampleFacet);
-            typeDeclarationMap.examplesFacet().forEach(this::visitExamplesFacet);
-            typeDeclarationMap.enumFacet().forEach(this::visitEnumFacet);
-
-            return declaredType;
-        });
+        return withinScope(scope.with(declaredType),
+                typeScope -> super.visitTypeDeclarationMap(typeDeclarationMap));
     }
 
     /**
@@ -580,13 +496,8 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
      */
     @Override
     public Object visitPropertiesFacet(final RAMLParser.PropertiesFacetContext propertiesFacet) {
-        return withinScope(scope.with(OBJECT_TYPE_FACET__PROPERTIES), propertiesScope -> {
-            final List<Object> properties = propertiesFacet.propertyFacets.stream()
-                    .map(this::visitTypedElementFacet)
-                    .collect(Collectors.toList());
-
-            return properties;
-        });
+        return withinScope(scope.with(OBJECT_TYPE_FACET__PROPERTIES),
+                propertiesScope -> super.visitPropertiesFacet(propertiesFacet));
     }
 
     @Override
@@ -595,8 +506,8 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
         final EObject typedElement = create(eType, typedElementFacet);
         scope.setValue(typedElement, typedElementFacet.getStart());
 
-        return withinScope(scope.with(typedElement, TYPED_ELEMENT__TYPE), propertyScope ->
-                super.visitTypedElementFacet(typedElementFacet));
+        return withinScope(scope.with(typedElement, TYPED_ELEMENT__TYPE),
+                propertyScope -> super.visitTypedElementFacet(typedElementFacet));
     }
 
     @Override
@@ -667,23 +578,10 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
         if (isInlineTypeDeclaration) {
             typedElementType = inlineTypeDeclaration(typedElementType, scope, typedElementMap);
             scope.addValue(INLINE_TYPE_CONTAINER__INLINE_TYPES, typedElementType);
-            withinScope(scope.with(typedElementType),
-                    inlineTypeDeclarationScope -> {
-                        typedElementMap.attributeFacet().forEach(this::visitAttributeFacet);
-                        typedElementMap.descriptionFacet().forEach(this::visitDescriptionFacet);
-                        typedElementMap.displayNameFacet().forEach(this::visitDisplayNameFacet);
-                        typedElementMap.propertiesFacet().forEach(this::visitPropertiesFacet);
-                        typedElementMap.defaultFacet().forEach(this::visitDefaultFacet);
-                        typedElementMap.exampleFacet().forEach(this::visitExampleFacet);
-                        typedElementMap.examplesFacet().forEach(this::visitExamplesFacet);
-                        typedElementMap.enumFacet().forEach(this::visitEnumFacet);
-                        typedElementMap.itemsFacet().forEach(this::visitItemsFacet);
-
-                        return inlineTypeDeclarationScope.getEObject();
-                    });
         }
 
-        typedElementMap.annotationFacet().forEach(this::visitAnnotationFacet);
+        withinScope(scope.with(typedElementType),
+                inlineTypeDeclarationScope -> super.visitTypedElementMap(typedElementMap));
         scope.setValue(TYPED_ELEMENT__TYPE, typedElementType, typedElementMap.getStart());
 
         return scope.getEObject();
@@ -698,13 +596,13 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
     @Override
     public Object visitResourceTypesFacet(RAMLParser.ResourceTypesFacetContext ctx) {
         return withinScope(scope.with(TYPE_CONTAINER__RESOURCE_TYPES),
-                resourceTypeesScope -> super.visitResourceTypesFacet(ctx));
+                resourceTypesScope -> super.visitResourceTypesFacet(ctx));
     }
 
     @Override
     public Object visitResourceTypeFacet(RAMLParser.ResourceTypeFacetContext ctx) {
-        return withinScope(scope.with(RESOURCE_BASE__TYPE), resourceTypeScope ->
-                visitResourceTypeApplication(ctx.resourceTypeApplication()));
+        return withinScope(scope.with(RESOURCE_BASE__TYPE),
+                resourceTypeScope -> super.visitResourceTypeFacet(ctx));
     }
 
     @Override
@@ -713,21 +611,18 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
         scope.setValue(resourceTypeApplication, ctx.getStart());
         final ResourceType resourceType = (ResourceType) scope.with(RESOURCE_TYPE_APPLICATION__TYPE).getEObjectByName(ctx.type.getText());
         resourceTypeApplication.setType(resourceType);
+
         return withinScope(scope.with(resourceTypeApplication, PARAMETERIZED_APPLICATION__PARAMETERS),
-                argumentsScope -> ctx.argument().stream()
-                        .map(this::visitArgument)
-                        .collect(Collectors.toList()));
+                argumentsScope -> super.visitResourceTypeApplication(ctx));
     }
 
     @Override
     public Object visitResourceTypeDeclarationFacet(RAMLParser.ResourceTypeDeclarationFacetContext resourceTypeDeclarationFacet) {
         final String type = resourceTypeDeclarationFacet.name.getText();
         final EObject resourceType = scope.getEObjectByName(type);
-        return withinScope(scope.with(resourceType), resourceTypeScope -> {
-            resourceTypeDeclarationFacet.resourceBaseFacet().forEach(this::visitResourceBaseFacet);
 
-            return resourceType;
-        });
+        return withinScope(scope.with(resourceType),
+                resourceTypeScope -> super.visitResourceTypeDeclarationFacet(resourceTypeDeclarationFacet));
     }
 
     @Override
@@ -744,10 +639,8 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
             method.setMethod(httpMethod);
             methodsScope.setValue(method, methodFacet.getStart());
 
-            withinScope(methodsScope.with(method), methodScope -> {
-                methodFacet.methodBaseFacet().forEach(this::visitMethodBaseFacet);
-                return method;
-            });
+            withinScope(methodsScope.with(method),
+                    methodScope -> super.visitMethodFacet(methodFacet));
 
             return method;
         });
