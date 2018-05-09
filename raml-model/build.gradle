@@ -56,7 +56,7 @@ xtext {
 sourceSets {
     test {
         resources {
-            srcDirs += '$buildDir/resources/test/raml'
+            srcDirs += "${buildDir}/resources/test/raml"
         }
     }
 }
