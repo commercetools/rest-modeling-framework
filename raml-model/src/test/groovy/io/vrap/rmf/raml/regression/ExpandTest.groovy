@@ -59,6 +59,37 @@ class ExpandTest extends RegressionTest {
         ramlModelResult.rootObject.resources.get(0).methods.get(0).queryParameters.size() == 1
     }
 
+    def "traits using predefined params" () {
+        when:
+        RamlModelResult<Api> ramlModelResult = constructApi(
+                '''\
+        #%RAML 1.0
+        title: Some API
+        traits:
+            autodoc:
+               description: The <<methodName>> operation on <<resourcePathName>> is available at <<resourcePath>>
+        /category:
+            delete:
+                is:
+                   - autodoc
+            /kind:
+                get:
+                    is:
+                       - autodoc
+        ''')
+        then:
+        ramlModelResult.validationResults.size() == 0
+        with(ramlModelResult.rootObject) {
+            resources.size() == 1
+            with(resources[0]) {
+                methods.size() == 1
+                methods[0].description.value == 'The delete operation on category is available at /category'
+                resources.size == 1
+                resources[0].methods[0].description.value == 'The get operation on kind is available at /category/kind'
+            }
+        }
+    }
+
     def "expand-traits-with-resource-type-in-resource" () {
         when:
         RamlModelResult<Api> ramlModelResult = constructApi(

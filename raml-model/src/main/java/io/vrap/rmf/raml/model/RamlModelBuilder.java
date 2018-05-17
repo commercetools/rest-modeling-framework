@@ -244,8 +244,13 @@ public class RamlModelBuilder {
     }
 
     private static class ResourceNodeMerge extends ResourcesSwitch<PropertyNode> {
-        private final NodeMerger nodeMerger = new NodeMerger(true); // TODO really true?
-        private final NodeMerger resourceTypeNodeMerger = new NodeMerger(false); // TODO really true?
+        private final NodeMerger nodeMerger = new NodeMerger(true);
+        private final NodeMerger resourceTypeNodeMerger = new NodeMerger(false);
+        private final io.vrap.rmf.raml.model.resources.Resource resource;
+
+        public ResourceNodeMerge(final io.vrap.rmf.raml.model.resources.Resource resource) {
+            this.resource = resource;
+        }
 
         @Override
         public PropertyNode caseResource(final io.vrap.rmf.raml.model.resources.Resource resource) {
@@ -347,20 +352,12 @@ public class RamlModelBuilder {
             return traitNode;
         }
 
-        private StringTemplateResolver getStringTemplateResolver(final ParameterizedApplication application, final io.vrap.rmf.raml.model.resources.Resource resource) {
+        private StringTemplateResolver getStringTemplateResolver(final ParameterizedApplication application, final Method method) {
             final Map<String, String> allParameters = application.getParameters().stream()
                     .filter(p -> p.getValue() instanceof StringInstance)
                     .collect(Collectors.toMap(Parameter::getName, p -> ((StringInstance) p.getValue()).getValue()));
             allParameters.put("resourcePath", resource.getResourcePath());
             allParameters.put("resourcePathName", resource.getResourcePathName());
-
-            return new StringTemplateResolver(allParameters);
-        }
-
-        private StringTemplateResolver getStringTemplateResolver(final ParameterizedApplication application, final Method method) {
-            final Map<String, String> allParameters = application.getParameters().stream()
-                    .filter(p -> p.getValue() instanceof StringInstance)
-                    .collect(Collectors.toMap(Parameter::getName, p -> ((StringInstance) p.getValue()).getValue()));
             allParameters.put("methodName", method.getMethodName());
 
             return new StringTemplateResolver(allParameters);
@@ -370,6 +367,8 @@ public class RamlModelBuilder {
             final Map<String, String> allParameters = application.getParameters().stream()
                     .filter(p -> p.getValue() instanceof StringInstance)
                     .collect(Collectors.toMap(Parameter::getName, p -> ((StringInstance) p.getValue()).getValue()));
+            allParameters.put("resourcePath", resource.getResourcePath());
+            allParameters.put("resourcePathName", resource.getResourcePathName());
 
             return new StringTemplateResolver(allParameters);
         }
@@ -382,9 +381,9 @@ public class RamlModelBuilder {
     }
 
     private static class ResourceMerger {
-        private ResourceNodeMerge resourceNodeMerge = new ResourceNodeMerge();
 
         public io.vrap.rmf.raml.model.resources.Resource resolve(final io.vrap.rmf.raml.model.resources.Resource resource) {
+            final ResourceNodeMerge resourceNodeMerge = new ResourceNodeMerge(resource);
             final PropertyNode resourceNode = resourceNodeMerge.doSwitch(resource);
 
             final URI uri = resource.eResource() == null ? null : resource.eResource().getURI();
@@ -401,7 +400,6 @@ public class RamlModelBuilder {
             EcoreUtil.remove(resource);
             return mergedResource;
         }
-
     }
 
     /**
