@@ -2,7 +2,6 @@ package io.vrap.rmf.raml.regression
 
 import io.vrap.rmf.raml.model.RamlModelResult
 import io.vrap.rmf.raml.model.modules.Api
-import spock.lang.Ignore
 
 class ExpandTest extends RegressionTest {
 
@@ -60,7 +59,6 @@ class ExpandTest extends RegressionTest {
         ramlModelResult.rootObject.resources.get(0).methods.get(0).queryParameters.size() == 1
     }
 
-    @Ignore
     def "expand-traits-with-resource-type-in-resource" () {
         when:
         RamlModelResult<Api> ramlModelResult = constructApi(
