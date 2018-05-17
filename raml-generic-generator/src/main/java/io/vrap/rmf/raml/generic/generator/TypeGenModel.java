@@ -234,12 +234,24 @@ public class TypeGenModel {
     public List<PropertyGenModel> getIdentifiers()
     {
         final AnyType t = type instanceof ArrayType ? ((ArrayType) type).getItems() : type;
-        AnyAnnotationType identifierAnnotationType = getApi().getAnnotationType("identifier");
         if (t instanceof ObjectType) {
             return  ((ObjectType)t).getAllProperties().stream()
                     .map(PropertyGenModel::new)
-                    .filter(property -> property.getIdentifier() != null)
+                    .filter(property -> property.getIdentifier() != null && ((BooleanInstance)property.getIdentifier().getValue()).getValue())
                     .collect(Collectors.toList());
+        }
+        return null;
+    }
+
+    @Nullable
+    public PropertyGenModel getElementIdentifier()
+    {
+        final AnyType t = type instanceof ArrayType ? ((ArrayType) type).getItems() : type;
+        if (t instanceof ObjectType) {
+            return  ((ObjectType)t).getAllProperties().stream()
+                    .map(PropertyGenModel::new)
+                    .filter(property -> property.getElementIdentifier() != null && ((BooleanInstance)property.getElementIdentifier().getValue()).getValue())
+                    .findFirst().orElse(null);
         }
         return null;
     }

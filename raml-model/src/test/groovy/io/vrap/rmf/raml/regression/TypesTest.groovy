@@ -51,4 +51,25 @@ class TypesTest extends RegressionTest {
         then:
         ramlModelResult.validationResults.size() == 1
     }
+
+    def "union type array"() {
+        when:
+
+        RamlModelResult<Api> ramlModelResult = constructApi(
+                '''\
+                #%RAML 1.0
+                title: Example API
+                version: v1
+                types:
+                  SomeType:
+                    type: object
+                  AttributeValue:
+                    type: SomeType |
+                          SomeType[]
+                    
+                '''
+        )
+        then:
+        ramlModelResult.validationResults.size() == 0
+    }
 }

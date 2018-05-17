@@ -1,5 +1,7 @@
 package io.vrap.rmf.raml.persistence.constructor;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 import io.vrap.rmf.raml.model.modules.Api;
 import io.vrap.rmf.raml.model.modules.Extension;
 import io.vrap.rmf.raml.model.modules.Library;
@@ -11,7 +13,13 @@ import io.vrap.rmf.raml.model.security.SecurityScheme;
 import io.vrap.rmf.raml.model.security.SecuritySchemeSettings;
 import io.vrap.rmf.raml.model.security.SecuritySchemeType;
 import io.vrap.rmf.raml.model.types.AnyType;
+import io.vrap.rmf.raml.model.types.ArrayType;
+import io.vrap.rmf.raml.model.types.ArrayType;
 import io.vrap.rmf.raml.model.types.BuiltinType;
+import io.vrap.rmf.raml.model.types.UnionType;
+import io.vrap.rmf.raml.model.types.util.TypesSwitch;
+import io.vrap.rmf.raml.model.types.UnionType;
+import io.vrap.rmf.raml.model.types.util.TypesSwitch;
 import io.vrap.rmf.raml.persistence.antlr.RAMLParser;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
@@ -20,7 +28,9 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static io.vrap.rmf.raml.model.elements.ElementsPackage.Literals.NAMED_ELEMENT__NAME;
@@ -41,7 +51,8 @@ public class DeclarationResolver {
     /**
      * The ordered map of unresolved type declarations.
      */
-    private final Map<RAMLParser.TypeDeclarationFacetContext, EObject> unresolvedTypeDeclarations = new LinkedHashMap<>();
+    private final Multimap<RAMLParser.TypeDeclarationFacetContext, EObject> unresolvedTypeDeclarations
+            = ArrayListMultimap.create();
 
     public void resolve(final ParserRuleContext ruleContext, final Scope scope) {
         final DeclarationConstructingVisitor declarationConstructingVisitor = new DeclarationConstructingVisitor(scope);
@@ -52,15 +63,16 @@ public class DeclarationResolver {
         while (newUnresolvedTypes < unresolvedTypes) {
             unresolvedTypes = unresolvedTypeDeclarations.size();
 
-            final Map<RAMLParser.TypeDeclarationFacetContext, EObject> typeDeclarationsToResolve =
-                    new HashMap<>(unresolvedTypeDeclarations);
+            final Multimap<RAMLParser.TypeDeclarationFacetContext, EObject> typeDeclarationsToResolve =
+                    ArrayListMultimap.create(unresolvedTypeDeclarations);
             for (final RAMLParser.TypeDeclarationFacetContext typeDeclarationFacet : typeDeclarationsToResolve.keySet()) {
-                EObject unresolved = typeDeclarationsToResolve.get(typeDeclarationFacet);
-                final TypeResolvingVisitor typeResolvingVisitor = new TypeResolvingVisitor(unresolved, scope.with(rootObject));
+                for (final EObject unresolved : typeDeclarationsToResolve.get(typeDeclarationFacet)) {
+                    final TypeResolvingVisitor typeResolvingVisitor = new TypeResolvingVisitor(unresolved, scope.with(rootObject));
 
-                final EObject resolvedType = typeResolvingVisitor.visitTypeDeclarationFacet(typeDeclarationFacet);
-                if (resolvedType != null && !resolvedType.eIsProxy()) {
-                    unresolvedTypeDeclarations.remove(typeDeclarationFacet);
+                    final EObject resolvedType = typeResolvingVisitor.visitTypeDeclarationFacet(typeDeclarationFacet);
+                    if (resolvedType != null && !resolvedType.eIsProxy()) {
+                        unresolvedTypeDeclarations.remove(typeDeclarationFacet, unresolved);
+                    }
                 }
             }
             newUnresolvedTypes = unresolvedTypeDeclarations.size();
@@ -72,8 +84,8 @@ public class DeclarationResolver {
                         Optional.ofNullable(typeDeclarationFacet.typeDeclarationTuple()).map(t -> t.name).orElse(null);
 
                 if (nameToken == null) {
-                    final EObject eObject = unresolvedTypeDeclarations.get(typeDeclarationFacet);
-                    scope.addError("Type {0} couldn't be resolved", eObject);
+                    unresolvedTypeDeclarations.get(typeDeclarationFacet)
+                            .forEach(eObject -> scope.addError("Type {0} couldn't be resolved", eObject));
                 } else {
                     scope.addError("Type {0} couldn't be resolved at {1}",
                             nameToken.getText(), nameToken);
@@ -86,6 +98,7 @@ public class DeclarationResolver {
      * This visitor creates declrations and potentially unresolved types.
      */
     private class DeclarationConstructingVisitor extends AbstractScopedVisitor<Object> {
+        private final UnresolvedTypesCollector unresolvedTypesCollector = new UnresolvedTypesCollector();
 
         public DeclarationConstructingVisitor(final Scope scope) {
             this.scope = scope;
@@ -197,10 +210,11 @@ public class DeclarationResolver {
         @Override
         public Object visitTypeDeclarationFacet(final RAMLParser.TypeDeclarationFacetContext typeDeclarationFacet) {
             final EObject eObject = (EObject) super.visitTypeDeclarationFacet(typeDeclarationFacet);
-            if (eObject == null || eObject.eIsProxy()) {
-                unresolvedTypeDeclarations.put(typeDeclarationFacet, eObject);
+            final List<EObject> unresolvedTypes = getUnresolvedTypes(eObject);
+            if (unresolvedTypes.isEmpty()) {
+                unresolvedTypeDeclarations.removeAll(typeDeclarationFacet);
             } else {
-                unresolvedTypeDeclarations.remove(typeDeclarationFacet);
+                unresolvedTypeDeclarations.putAll(typeDeclarationFacet, unresolvedTypes);
             }
             return eObject;
         }
@@ -236,6 +250,43 @@ public class DeclarationResolver {
             scope.setValue(securityScheme, securitySchemeFacet.getStart());
 
             return securityScheme;
+        }
+
+
+        private List<EObject> getUnresolvedTypes(final EObject type) {
+            return unresolvedTypesCollector.doSwitch(type);
+        }
+    }
+
+    /**
+     * This switch returns the unresolved types of a given type.
+     * E.g. an array or union type can reference a yet unresolved type.
+     */
+    private static class UnresolvedTypesCollector extends TypesSwitch<List<EObject>> {
+
+        @Override
+        public List<EObject> doSwitch(final EObject eObject) {
+            return eObject != null ?
+                    super.doSwitch(eObject) : Collections.emptyList();
+        }
+
+        @Override
+        public List<EObject> defaultCase(final EObject eObject) {
+            return eObject.eIsProxy() ?
+                    Collections.singletonList(eObject) : Collections.emptyList();
+        }
+
+        @Override
+        public List<EObject> caseArrayType(final ArrayType arrayType) {
+            return doSwitch(arrayType.getItems());
+        }
+
+        @Override
+        public List<EObject> caseUnionType(final UnionType unionType) {
+            return unionType.getOneOf().stream()
+                    .map(this::doSwitch)
+                    .flatMap(List::stream)
+                    .collect(Collectors.toList());
         }
     }
 

@@ -36,6 +36,10 @@ interface <type.name> extends <if(!type.hasBuiltinParent)><type.parent.name><end
 
     <type.identifiers: {id |<indexGetter(type, id)>}>
     <endif>
+
+    <if(type.elementIdentifier)>
+    public function __call(string $method, array $args);
+    <endif>
 }
 
 >>
