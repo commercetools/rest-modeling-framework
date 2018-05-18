@@ -91,6 +91,32 @@ class ExpandTest extends RegressionTest {
         }
     }
 
+    def "trait with usage" () {
+        when:
+        RamlModelResult<Api> ramlModelResult = constructApi(
+                '''\
+        #%RAML 1.0
+        title: Some API
+        traits:
+            info:
+                usage: This trait adds an info query parameter
+                queryParameters:
+                    info:
+        /category:
+            get:
+                is: [info]
+        ''')
+        then:
+        ramlModelResult.validationResults.size() == 0
+        ramlModelResult.rootObject.resources.size() == 1
+        with(ramlModelResult.rootObject.resources[0]) {
+            methods.size() == 1
+            with(methods[0]) {
+                queryParameters.size() == 1
+            }
+        }
+    }
+
     def "expand-traits-with-resource-type-in-resource" () {
         when:
         RamlModelResult<Api> ramlModelResult = constructApi(
@@ -168,5 +194,4 @@ class ExpandTest extends RegressionTest {
             methods.size() == 2
         }
     }
-
 }

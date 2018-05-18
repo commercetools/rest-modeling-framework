@@ -320,10 +320,7 @@ public class RamlModelBuilder {
                 resourceTypeNode.setValue(mergedTypeValueNode);
             }
 
-            final PropertyNode usagePropertyNode = ((ObjectNode) resourceTypeNode.getValue()).getProperty("usage");
-            if (usagePropertyNode != null) {
-                resourceTypeValueNode.getProperties().remove(usagePropertyNode);
-            }
+            removeUsagePropertyNode(resourceTypeNode.getValue());
 
             return resourceTypeNode;
         }
@@ -366,8 +363,19 @@ public class RamlModelBuilder {
                 allProperContents.forEachRemaining(stringTemplateResolver::resolve);
             }
             traitNode.setValue(traitValueNode);
+            removeUsagePropertyNode(traitValueNode);
 
             return traitNode;
+        }
+
+        private void removeUsagePropertyNode(final Node node) {
+            if (node instanceof ObjectNode) {
+                final ObjectNode objectNode = (ObjectNode) node;
+                final PropertyNode usagePropertyNode = objectNode.getProperty("usage");
+                if (usagePropertyNode != null) {
+                    objectNode.getProperties().remove(usagePropertyNode);
+                }
+            }
         }
 
         private StringTemplateResolver getStringTemplateResolver(final ParameterizedApplication application, final Method method) {
