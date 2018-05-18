@@ -2,6 +2,7 @@ package io.vrap.rmf.raml.regression
 
 import io.vrap.rmf.raml.model.RamlModelResult
 import io.vrap.rmf.raml.model.modules.Api
+import io.vrap.rmf.raml.model.resources.HttpMethod
 
 class ExpandTest extends RegressionTest {
 
@@ -119,5 +120,31 @@ class ExpandTest extends RegressionTest {
         then:
         ramlModelResult.validationResults.size() == 0
         ramlModelResult.rootObject.resources.get(0).methods.get(0).queryParameters.size() == 2
+    }
+
+    def "resource type inheritance" () {
+        when:
+        RamlModelResult<Api> ramlModelResult = constructApi(
+                '''\
+        #%RAML 1.0
+        title: Some API
+        traits:
+        resourceTypes:
+            base-methods:
+                get:
+            full-methods:
+                type: base-methods
+                delete:
+        /category:
+            type: full-methods
+        ''')
+        then:
+        ramlModelResult.validationResults.size() == 0
+        ramlModelResult.rootObject.resources.size() == 1
+        with(ramlModelResult.rootObject.resources[0]) {
+            methods.size() == 2
+            methods[0].method == HttpMethod.DELETE
+            methods[1].method == HttpMethod.GET
+        }
     }
 }

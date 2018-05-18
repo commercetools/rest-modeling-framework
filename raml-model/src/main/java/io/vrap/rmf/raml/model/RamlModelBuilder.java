@@ -289,7 +289,6 @@ public class RamlModelBuilder {
             final ObjectNode resourceTypeValueNode = (ObjectNode) resourceTypeNode.getValue();
 
             for (final Method method : resourceType.getMethods()) {
-
                 PropertyNode methodNode = doSwitch(method);
                 Node methodValueNode = methodNode.getValue();
                 for (final TraitApplication traitApplication : resourceType.getIs()) {
@@ -307,6 +306,15 @@ public class RamlModelBuilder {
                 final int index = methodPropertyContainer.eContainer().eContents().indexOf(methodPropertyContainer);
                 resourceTypeValueNode.getProperties().set(index, methodNode);
             }
+
+            if (resourceType.getType() != null) {
+                final PropertyNode typeNode = doSwitch(resourceType.getType());
+                final Node typeValueNode = typeNode.getValue();
+
+                final Node mergedTypeValueNode = resourceTypeNodeMerger.merge(typeValueNode, resourceTypeValueNode);
+                resourceTypeNode.setValue(mergedTypeValueNode);
+            }
+
             return resourceTypeNode;
         }
 
