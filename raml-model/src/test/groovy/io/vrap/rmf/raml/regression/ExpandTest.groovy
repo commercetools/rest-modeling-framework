@@ -128,7 +128,6 @@ class ExpandTest extends RegressionTest {
                 '''\
         #%RAML 1.0
         title: Some API
-        traits:
         resourceTypes:
             base-methods:
                 get:
@@ -147,4 +146,27 @@ class ExpandTest extends RegressionTest {
             methods[1].method == HttpMethod.GET
         }
     }
+
+    def "resource type with usage" () {
+        when:
+        RamlModelResult<Api> ramlModelResult = constructApi(
+                '''\
+        #%RAML 1.0
+        title: Some API
+        resourceTypes:
+            base-methods:
+                usage: Use this to add get and delete methods.
+                get:
+                delete:
+        /category:
+            type: base-methods
+        ''')
+        then:
+        ramlModelResult.validationResults.size() == 0
+        ramlModelResult.rootObject.resources.size() == 1
+        with(ramlModelResult.rootObject.resources[0]) {
+            methods.size() == 2
+        }
+    }
+
 }

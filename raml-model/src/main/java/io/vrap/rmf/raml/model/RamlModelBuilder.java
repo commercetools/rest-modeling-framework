@@ -67,10 +67,15 @@ public class RamlModelBuilder {
         final EObject rootObject = resource.getContents().isEmpty() ?
                 null :
                 resource.getContents().get(0);
-        final EObject resolved = rootObject instanceof ApiBase ?
-                resolveToApi(rootObject) :
-                rootObject;
-        return RamlModelResult.of(resource.getErrors(), resolved);
+        if (resource.getErrors().isEmpty()) {
+            final EObject resolved = rootObject instanceof ApiBase ?
+                    resolveToApi(rootObject) :
+                    rootObject;
+            final List<Resource.Diagnostic> errors = resolved.eResource().getErrors();
+            return RamlModelResult.of(errors, resolved);
+        } else {
+            return RamlModelResult.of(resource.getErrors(), rootObject);
+        }
     }
 
     private Resource load(final URI uri) {
@@ -313,6 +318,11 @@ public class RamlModelBuilder {
 
                 final Node mergedTypeValueNode = resourceTypeNodeMerger.merge(typeValueNode, resourceTypeValueNode);
                 resourceTypeNode.setValue(mergedTypeValueNode);
+            }
+
+            final PropertyNode usagePropertyNode = ((ObjectNode) resourceTypeNode.getValue()).getProperty("usage");
+            if (usagePropertyNode != null) {
+                resourceTypeValueNode.getProperties().remove(usagePropertyNode);
             }
 
             return resourceTypeNode;
