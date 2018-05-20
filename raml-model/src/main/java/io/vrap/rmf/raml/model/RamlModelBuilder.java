@@ -259,22 +259,27 @@ public class RamlModelBuilder {
 
         @Override
         public PropertyNode caseResource(final io.vrap.rmf.raml.model.resources.Resource resource) {
-            final PropertyNode resourceProperty = copy(getPropertyContainer(resource));
+            final PropertyNode resourcePropertyNode = copy(getPropertyContainer(resource));
 
-            ObjectNode resourceValueNode = (ObjectNode) resourceProperty.getValue();
-            resourceValueNode.getProperties().clear();
+            if (resourcePropertyNode.getValue() instanceof  ObjectNode) {
+                final ObjectNode resourceValueNode = (ObjectNode) resourcePropertyNode.getValue();
 
-            for (final Method method : resource.getMethods()) {
-                final PropertyNode methodNode = doSwitch(method);
-                resourceValueNode.getProperties().add(methodNode);
+                for (final Method method : resource.getMethods()) {
+                    final PropertyNode methodNode = doSwitch(method);
+
+                    replacePropertyNode(method, methodNode, resourceValueNode);
+                }
             }
+
             if (resource.getType() != null) {
+                Node resourceValueNode = resourcePropertyNode.getValue();
                 final PropertyNode resourceTypeNode = doSwitch(resource.getType());
                 final Node resourceTypeValueNode = resourceTypeNode.getValue();
-                resourceValueNode = (ObjectNode) nodeMerger.merge(resourceTypeValueNode, resourceValueNode);
-                resourceProperty.setValue(resourceValueNode);
+                resourceValueNode = nodeMerger.merge(resourceTypeValueNode, resourceValueNode);
+                resourcePropertyNode.setValue(resourceValueNode);
             }
-            return resourceProperty;
+
+            return resourcePropertyNode;
         }
 
         @Override
@@ -307,9 +312,7 @@ public class RamlModelBuilder {
                     }
                 }
                 methodNode.setValue(methodValueNode);
-                final PropertyNode methodPropertyContainer = getPropertyContainer(method);
-                final int index = methodPropertyContainer.eContainer().eContents().indexOf(methodPropertyContainer);
-                resourceTypeValueNode.getProperties().set(index, methodNode);
+                replacePropertyNode(method, methodNode, resourceTypeValueNode);
             }
 
             if (resourceType.getType() != null) {
@@ -323,6 +326,19 @@ public class RamlModelBuilder {
             removeUsagePropertyNode(resourceTypeNode.getValue());
 
             return resourceTypeNode;
+        }
+
+        /**
+         * Replaces an existing node for the given eObject in the given new container with the replacement node.
+         *
+         * @param eObject
+         * @param replacementNode
+         * @param newContainer
+         */
+        private void replacePropertyNode(final EObject eObject, final PropertyNode replacementNode, final ObjectNode newContainer) {
+            final PropertyNode methodPropertyContainer = getPropertyContainer(eObject);
+            final int index = methodPropertyContainer.eContainer().eContents().indexOf(methodPropertyContainer);
+            newContainer.getProperties().set(index, replacementNode);
         }
 
         @Override
