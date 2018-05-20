@@ -3,12 +3,28 @@ buildscript {
         mavenCentral()
         jcenter()
     }
-    dependencies {
-        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.0'
-    }
 }
 
-apply plugin: 'com.jfrog.bintray'
+plugins {
+    // Here we define all plugins that are used by subprojects and specify the version for external ones
+
+    id 'idea'
+    id 'eclipse'
+    id 'antlr'
+
+    id 'maven'
+    id 'maven-publish'
+
+    id 'java'
+    id 'java-library' // needed to make sure that transitive deps have 'compile' scope
+    id 'groovy'
+
+    id 'de.undercouch.download' version '3.4.3'
+    id 'com.jfrog.bintray' version '1.8.0'
+    id 'com.github.johnrengelman.shadow' version '2.0.4' apply false
+
+    id 'org.xtext.builder' version '1.0.18' apply false
+}
 
 ext {
     versions = [
@@ -56,17 +72,21 @@ subprojects { project ->
         mavenCentral()
     }
 
-    group='io.vrap.rmf'
-    version=globalVersion
-
-    apply plugin: 'java'
     apply plugin: 'idea'
     apply plugin: 'eclipse'
-    apply plugin: 'groovy'
+
     apply plugin: 'maven'
     apply plugin: 'maven-publish'
+
+    apply plugin: 'java'
     apply plugin: 'java-library' // needed to make sure that transitive deps have 'compile' scope
+    apply plugin: 'groovy'
+
+    apply plugin: 'de.undercouch.download'
     apply plugin: 'com.jfrog.bintray'
+
+    group='io.vrap.rmf'
+    version=globalVersion
 
     task sourceJar(type: Jar) {
         from sourceSets.main.allSource

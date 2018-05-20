@@ -1,4 +1,3 @@
-
 sourceSets {
     generated {
         java.srcDir "/src/generated/java"

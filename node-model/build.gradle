@@ -1,7 +1,5 @@
-plugins {
-    id 'antlr'
-    id 'org.xtext.builder' version '1.0.18'
-}
+apply plugin: 'antlr'
+apply plugin: 'org.xtext.builder'
 
 ext {
     xtextVersion = '2.10.0'
