@@ -22,8 +22,18 @@ apiFacets:
     | baseUriParametersFacet
     | documentationFacet
     | resourceFacet
+    | mediaTypeFacet
     | securedByFacet
     ;
+
+mediaTypeFacet:
+    'mediaType'
+    (
+        SCALAR |
+        LIST_START
+            types +=id*
+        LIST_END
+    );
 
 extension:
     MAP_START
@@ -736,6 +746,7 @@ id:
     |   'items' | 'is'
     |   'properties'
     |   'queryParameters'
+    |   'mediaType'
     |   'required' | 'resourceTypes'
     |   'type' | 'types'
     |   'uses' | 'uriParameters'

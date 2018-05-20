@@ -8,16 +8,10 @@ import io.vrap.rmf.raml.model.modules.Library;
 import io.vrap.rmf.raml.model.modules.LibraryUse;
 import io.vrap.rmf.raml.model.resources.ResourceType;
 import io.vrap.rmf.raml.model.resources.Trait;
-import io.vrap.rmf.raml.model.security.SecurityFactory;
 import io.vrap.rmf.raml.model.security.SecurityScheme;
-import io.vrap.rmf.raml.model.security.SecuritySchemeSettings;
-import io.vrap.rmf.raml.model.security.SecuritySchemeType;
 import io.vrap.rmf.raml.model.types.AnyType;
 import io.vrap.rmf.raml.model.types.ArrayType;
-import io.vrap.rmf.raml.model.types.ArrayType;
 import io.vrap.rmf.raml.model.types.BuiltinType;
-import io.vrap.rmf.raml.model.types.UnionType;
-import io.vrap.rmf.raml.model.types.util.TypesSwitch;
 import io.vrap.rmf.raml.model.types.UnionType;
 import io.vrap.rmf.raml.model.types.util.TypesSwitch;
 import io.vrap.rmf.raml.persistence.antlr.RAMLParser;
@@ -37,9 +31,8 @@ import static io.vrap.rmf.raml.model.elements.ElementsPackage.Literals.NAMED_ELE
 import static io.vrap.rmf.raml.model.modules.ModulesPackage.Literals.*;
 import static io.vrap.rmf.raml.model.resources.ResourcesPackage.Literals.RESOURCE_TYPE;
 import static io.vrap.rmf.raml.model.resources.ResourcesPackage.Literals.TRAIT;
-import static io.vrap.rmf.raml.model.security.SecurityPackage.Literals.*;
+import static io.vrap.rmf.raml.model.security.SecurityPackage.Literals.SECURITY_SCHEME;
 import static io.vrap.rmf.raml.model.security.SecurityPackage.Literals.SECURITY_SCHEME_CONTAINER__SECURITY_SCHEMES;
-import static io.vrap.rmf.raml.model.security.SecurityPackage.Literals.SECURITY_SCHEME__SETTINGS;
 import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.ANY_TYPE__TYPE;
 
 /**
@@ -124,6 +117,16 @@ public class DeclarationResolver {
                     super.visitApi(ctx));
 
             return api;
+        }
+
+        @Override
+        public Object visitMediaTypeFacet(final RAMLParser.MediaTypeFacetContext ctx) {
+            final List<String> mediaTypes = ctx.types.isEmpty() ?
+                    Collections.singletonList(ctx.SCALAR().getText()) :
+                    ctx.types.stream().map(RAMLParser.IdContext::getText).collect(Collectors.toList());
+
+            scope.setValue(API_BASE__MEDIA_TYPE, mediaTypes, ctx.start);
+            return super.visitMediaTypeFacet(ctx);
         }
 
         @Override
@@ -238,7 +241,7 @@ public class DeclarationResolver {
         @Override
         public Object visitSecuritySchemesFacet(final RAMLParser.SecuritySchemesFacetContext ctx) {
             return withinScope(scope.with(SECURITY_SCHEME_CONTAINER__SECURITY_SCHEMES), securitySchemesScope ->
-                super.visitSecuritySchemesFacet(ctx));
+                    super.visitSecuritySchemesFacet(ctx));
         }
 
         @Override
