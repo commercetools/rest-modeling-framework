@@ -39,17 +39,14 @@ public class ModelHelper {
         if (relativeUri == null) {
             fullUriTemplate = null;
         } else {
-            final Stack<String> uris = new Stack<>();
-            uris.push(relativeUri.getTemplate());
-
-            for (Resource parent = resource.getParent(); parent != null; parent = parent.getParent()) {
-                uris.push(parent.getRelativeUri().getTemplate());
-            }
+            final Resource resourceParent = resource.getParent();
+            final UriTemplate fullParentUri = resourceParent != null ? fullUri(resourceParent) : null;
 
             final StringBuffer stringBuffer = new StringBuffer();
-            while (!uris.empty()) {
-                stringBuffer.append(uris.pop());
+            if (fullParentUri != null) {
+                stringBuffer.append(fullParentUri.getTemplate());
             }
+            stringBuffer.append(relativeUri.getTemplate());
 
             final String fullUri = stringBuffer.toString();
             fullUriTemplate = UriTemplate.fromTemplate(fullUri);

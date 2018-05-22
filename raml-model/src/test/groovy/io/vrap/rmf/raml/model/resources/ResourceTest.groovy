@@ -12,7 +12,6 @@ class ResourceTest extends Specification {
 
     def setup() {
         parentResource = ResourcesFactory.eINSTANCE.createResource()
-        parentResource.relativeUri = UriTemplate.fromTemplate('/parent')
         resource = ResourcesFactory.eINSTANCE.createResource()
         parentResource.resources.add(resource)
     }
