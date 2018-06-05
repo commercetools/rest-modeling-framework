@@ -1,1 +1,1 @@
-include 'functional-utils', 'raml-model', 'raml-generic-generator', 'demo', 'raml-test'
+include 'functional-utils', 'raml-model', 'raml-generic-generator', 'demo', 'raml-test', 'node-model'

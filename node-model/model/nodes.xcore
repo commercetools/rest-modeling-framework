@@ -1,0 +1,72 @@
+@Ecore(nsPrefix="nodes",nsURI="http://www.vrap.io/raml/nodes")
+@GenModel(
+    modelDirectory="/node-model/src/main/java-gen",
+    complianceLevel="8.0"
+)
+package io.vrap.rmf.nodes
+
+interface Node {
+
+}
+
+interface ContainerNode extends Node {
+
+}
+
+class ArrayNode extends ContainerNode {
+    /*
+     * The element nodes of this array node.
+     */
+    contains Node[] elements
+}
+
+class ObjectNode extends ContainerNode {
+    /*
+     * The properties of this object.
+     */
+    contains PropertyNode[] properties
+
+    /*
+     * Returns the property with the given key value.
+     * @return property with the given key value or null
+     */
+    op PropertyNode getProperty(Object keyValue) {
+        properties.findFirst[it.key?.value == keyValue]
+    }
+}
+
+class PropertyNode extends Node {
+    /*
+     * The property key node.
+     */
+    contains ValueNode<?> key
+
+    /*
+     * The property value node.
+     */
+    contains Node value
+}
+
+interface ValueNode<T> extends Node {
+    T value
+}
+
+class StringNode extends ValueNode<String> {
+
+}
+
+class IntegerNode extends ValueNode<Integer> {
+
+}
+
+class NumberNode extends ValueNode<BigDecimal> {
+
+}
+
+class BooleanNode extends ValueNode<Boolean> {
+
+}
+
+class NullNode extends ValueNode<Object> {
+
+}

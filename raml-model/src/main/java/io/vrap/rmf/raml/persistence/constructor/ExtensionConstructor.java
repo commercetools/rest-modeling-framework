@@ -14,12 +14,12 @@ import java.util.function.Predicate;
 public class ExtensionConstructor extends ApiConstructor {
     @Override
     public EObject construct(final RAMLParser parser, final Scope scope) {
-        final TypeDeclarationResolver typeDeclarationResolver = new TypeDeclarationResolver();
-        typeDeclarationResolver.resolve(parser.extension(), scope);
-        parser.reset();
+        final DeclarationResolver declarationResolver = new DeclarationResolver();
+        final RAMLParser.ExtensionContext extensionContext = parser.extension();
+        declarationResolver.resolve(extensionContext, scope);
 
         final Extension extension = (Extension) withinScope(scope,
-                s -> visitExtension(parser.extension()));
+                s -> visitExtension(extensionContext));
         return extension;
     }
 

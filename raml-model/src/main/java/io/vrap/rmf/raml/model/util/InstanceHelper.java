@@ -1,14 +1,14 @@
 package io.vrap.rmf.raml.model.util;
 
+import io.vrap.rmf.nodes.antlr.NodeToken;
+import io.vrap.rmf.nodes.antlr.NodeTokenProvider;
 import io.vrap.rmf.raml.model.RamlDiagnostic;
 import io.vrap.rmf.raml.model.RamlModelResult;
 import io.vrap.rmf.raml.model.types.AnyType;
 import io.vrap.rmf.raml.model.types.Instance;
 import io.vrap.rmf.raml.persistence.RamlResourceSet;
-import io.vrap.rmf.raml.persistence.antlr.RAMLCustomLexer;
 import io.vrap.rmf.raml.persistence.antlr.RAMLParser;
-import io.vrap.rmf.raml.persistence.antlr.RamlToken;
-import io.vrap.rmf.raml.persistence.antlr.RamlTokenProvider;
+import io.vrap.rmf.raml.persistence.antlr.RamlNodeTokenSource;
 import io.vrap.rmf.raml.persistence.constructor.InstanceConstructor;
 import io.vrap.rmf.raml.persistence.constructor.Scope;
 import io.vrap.rmf.raml.validation.InstanceValidator;
@@ -57,7 +57,7 @@ public interface InstanceHelper {
         final ResourceSet resourceSet = new RamlResourceSet();
         final URIConverter uriConverter = resourceSet.getURIConverter();
         final URI uri = URI.createURI(resource == null ? UUID.randomUUID() + ".raml": resource);
-        final RAMLCustomLexer lexer = new RAMLCustomLexer(text, uri, uriConverter);
+        final RamlNodeTokenSource lexer = new RamlNodeTokenSource(text, uri, uriConverter);
         final TokenStream tokenStream = new CommonTokenStream(lexer);
         final RAMLParser parser = new RAMLParser(tokenStream);
         final Scope scope = Scope.of(resourceSet.createResource(uri));
@@ -72,7 +72,7 @@ public interface InstanceHelper {
         final ResourceSet resourceSet = new RamlResourceSet();
         final URIConverter uriConverter = resourceSet.getURIConverter();
         final URI uri = URI.createURI(resource == null ? UUID.randomUUID() + ".json": resource);
-        final RAMLCustomLexer lexer = new RAMLCustomLexer(text, uri, uriConverter);
+        final RamlNodeTokenSource lexer = new RamlNodeTokenSource(text, uri, uriConverter);
         final TokenStream tokenStream = new CommonTokenStream(lexer);
         final RAMLParser parser = new RAMLParser(tokenStream);
         final Scope scope = Scope.of(resourceSet.createResource(uri, "application/json"));
@@ -85,10 +85,11 @@ public interface InstanceHelper {
 
     static String resourceFile(EObject object) {
         String source = null;
-        final RamlTokenProvider ramlTokenProvider = (RamlTokenProvider) EcoreUtil.getExistingAdapter(object, RamlTokenProvider.class);
+        final NodeTokenProvider ramlTokenProvider =
+                (NodeTokenProvider) EcoreUtil.getExistingAdapter(object, NodeTokenProvider.class);
         if (ramlTokenProvider != null) {
-            final RamlToken ramlToken = ramlTokenProvider.get();
-            source = ramlToken.getLocation();
+            final NodeToken nodeToken = ramlTokenProvider.getStart();
+            source = nodeToken.getLocation();
         }
 
         return source;

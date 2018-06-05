@@ -8,8 +8,8 @@ import io.vrap.rmf.raml.model.resources.Resource
 import io.vrap.rmf.raml.model.types.AnyAnnotationType
 import io.vrap.rmf.raml.model.types.AnyType
 import io.vrap.rmf.raml.persistence.RamlResourceSet
-import io.vrap.rmf.raml.persistence.antlr.RAMLCustomLexer
 import io.vrap.rmf.raml.persistence.antlr.RAMLParser
+import io.vrap.rmf.raml.persistence.antlr.RamlNodeTokenSource
 import io.vrap.rmf.raml.persistence.constructor.ApiConstructor
 import io.vrap.rmf.raml.persistence.constructor.Scope
 import org.antlr.v4.runtime.CommonTokenStream
@@ -369,7 +369,7 @@ class PHPGeneratorTest extends Specification implements ResourceFixtures {
     RAMLParser parser(final String input) {
         final URIConverter uriConverter = resourceSet.getURIConverter();
         def strippedInput = input.stripIndent()
-        final RAMLCustomLexer lexer = new RAMLCustomLexer(strippedInput, uri, uriConverter)
+        final RamlNodeTokenSource lexer = new RamlNodeTokenSource(strippedInput, uri, uriConverter)
         final TokenStream tokenStream = new CommonTokenStream(lexer)
         return new RAMLParser(tokenStream)
     }

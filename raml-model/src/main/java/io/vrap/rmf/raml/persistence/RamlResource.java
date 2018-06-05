@@ -2,8 +2,8 @@ package io.vrap.rmf.raml.persistence;
 
 import io.vrap.rmf.raml.model.RamlDiagnostic;
 import io.vrap.rmf.raml.persistence.antlr.ParserErrorCollector;
-import io.vrap.rmf.raml.persistence.antlr.RAMLCustomLexer;
 import io.vrap.rmf.raml.persistence.antlr.RAMLParser;
+import io.vrap.rmf.raml.persistence.antlr.RamlNodeTokenSource;
 import io.vrap.rmf.raml.persistence.constructor.*;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.TokenStream;
@@ -44,7 +44,7 @@ public class RamlResource extends ResourceImpl {
 
         if (optionalRootConstructor.isPresent()) {
             final BaseConstructor rootConstructor = optionalRootConstructor.get();
-            final RAMLCustomLexer lexer = new RAMLCustomLexer(uri, getURIConverter());
+            final RamlNodeTokenSource lexer = new RamlNodeTokenSource(uri, getURIConverter());
             final TokenStream tokenStream = new CommonTokenStream(lexer);
             final RAMLParser parser = new RAMLParser(tokenStream);
 

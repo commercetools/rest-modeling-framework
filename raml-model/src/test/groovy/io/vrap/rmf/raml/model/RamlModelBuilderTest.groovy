@@ -40,7 +40,7 @@ class RamlModelBuilderTest extends Specification implements ResourceFixtures {
         getMethod.responses.size() == 1
         getMethod.responses[0].statusCode == "200"
         getMethod.responses[0].bodies.size() == 1
-        getMethod.responses[0].bodies[0].contentTypes == api.mediaType
+        getMethod.responses[0].bodies[0].contentType == api.mediaType[0]
         getMethod.responses[0].bodies[0].type == user
 
         Method postMethod = userResource.getMethod(HttpMethod.POST)

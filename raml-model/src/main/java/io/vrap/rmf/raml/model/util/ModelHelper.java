@@ -39,17 +39,14 @@ public class ModelHelper {
         if (relativeUri == null) {
             fullUriTemplate = null;
         } else {
-            final Stack<String> uris = new Stack<>();
-            uris.push(relativeUri.getTemplate());
-
-            for (Resource parent = resource.getParent(); parent != null; parent = parent.getParent()) {
-                uris.push(parent.getRelativeUri().getTemplate());
-            }
+            final Resource resourceParent = resource.getParent();
+            final UriTemplate fullParentUri = resourceParent != null ? fullUri(resourceParent) : null;
 
             final StringBuffer stringBuffer = new StringBuffer();
-            while (!uris.empty()) {
-                stringBuffer.append(uris.pop());
+            if (fullParentUri != null) {
+                stringBuffer.append(fullParentUri.getTemplate());
             }
+            stringBuffer.append(relativeUri.getTemplate());
 
             final String fullUri = stringBuffer.toString();
             fullUriTemplate = UriTemplate.fromTemplate(fullUri);
@@ -84,7 +81,7 @@ public class ModelHelper {
     public static Body getBody(final BodyContainer container, final String contentType) {
         final MediaType parsedContentType = MediaType.parse(contentType);
         return container.getBodies().stream()
-                .filter(body -> body.getContentMediaTypes().stream().filter(mediaType -> parsedContentType.is(mediaType)).findFirst().isPresent())
+                .filter(body -> Optional.ofNullable(body.getContentMediaType()).filter(mediaType -> parsedContentType.is(mediaType)).isPresent())
                 .findFirst()
                 .orElse(null);
     }
@@ -108,6 +105,10 @@ public class ModelHelper {
     public static EList<MediaType> getMediaTypes(final List<String> mediaTypes) {
         final List<MediaType> types = mediaTypes.stream().map(MediaType::parse).collect(Collectors.toList());
         return ECollections.toEList(types);
+    }
+
+    public static MediaType getMediaType(final String mediaType) {
+        return MediaType.parse(mediaType);
     }
 
     /**

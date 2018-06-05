@@ -84,12 +84,6 @@ interface ResourceBase extends DocumentableElement, AnnotationsFacet, SecuredByF
 	contains ResourceTypeApplication ^type
 }
 
-
-class ResourceTypeApplication {
-	refers ResourceType ^type
-	contains Parameter[] parameters 
-}
-
 class Resource extends ResourceBase, ResourceContainer, ApplyTraitsFacet {
 	/*
 	 * The relative uri of this resource.
@@ -184,12 +178,19 @@ class Trait extends NamedElement, MethodBase {
 	String usage
 }
 
+class ParameterizedApplication {
+    contains Parameter[] parameters
+}
+
+class ResourceTypeApplication extends ParameterizedApplication {
+	refers ResourceType ^type
+}
+
+class TraitApplication extends ParameterizedApplication {
+	refers Trait trait
+}
+
 class Parameter {
 	String name
 	contains Instance value
-}
-
-class TraitApplication {
-	refers Trait trait
-	contains Parameter[] parameters 
 }

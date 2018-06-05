@@ -1,5 +1,10 @@
 package io.vrap.rmf.raml.model;
 
+import com.google.common.collect.Lists;
+import io.vrap.rmf.nodes.*;
+import io.vrap.rmf.nodes.antlr.NodeToken;
+import io.vrap.rmf.nodes.antlr.NodeTokenProvider;
+import io.vrap.rmf.nodes.util.NodesSwitch;
 import io.vrap.rmf.raml.model.modules.Api;
 import io.vrap.rmf.raml.model.modules.ApiBase;
 import io.vrap.rmf.raml.model.modules.ApiExtension;
@@ -8,20 +13,22 @@ import io.vrap.rmf.raml.model.resources.*;
 import io.vrap.rmf.raml.model.resources.util.ResourcesSwitch;
 import io.vrap.rmf.raml.model.responses.Body;
 import io.vrap.rmf.raml.model.responses.util.ResponsesSwitch;
-import io.vrap.rmf.raml.model.types.*;
-import io.vrap.rmf.raml.model.types.util.TypesSwitch;
+import io.vrap.rmf.raml.model.types.BuiltinType;
+import io.vrap.rmf.raml.model.types.StringInstance;
 import io.vrap.rmf.raml.model.util.UriFragmentBuilder;
 import io.vrap.rmf.raml.model.values.StringTemplate;
 import io.vrap.rmf.raml.persistence.RamlResourceSet;
+import io.vrap.rmf.raml.persistence.antlr.RAMLParser;
+import io.vrap.rmf.raml.persistence.antlr.RamlNodeTokenSource;
+import io.vrap.rmf.raml.persistence.constructor.ApiConstructor;
 import io.vrap.rmf.raml.persistence.constructor.Scope;
-import io.vrap.rmf.raml.persistence.constructor.TypeExpressionResolver;
-import org.eclipse.emf.common.util.EList;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.TokenStream;
 import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EReference;
-import org.eclipse.emf.ecore.EcorePackage;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.util.EcoreUtil;
@@ -30,10 +37,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.TYPED_ELEMENT__TYPE;
+import static io.vrap.rmf.nodes.NodeCopier.copy;
 
 /**
  * This class is the main interface for accessing RAML models.
@@ -61,10 +67,15 @@ public class RamlModelBuilder {
         final EObject rootObject = resource.getContents().isEmpty() ?
                 null :
                 resource.getContents().get(0);
-        final EObject resolved = rootObject instanceof ApiBase ?
-                resolveToApi(rootObject) :
-                rootObject;
-        return RamlModelResult.of(resource.getErrors(), resolved);
+        if (resource.getErrors().isEmpty()) {
+            final EObject resolved = rootObject instanceof ApiBase ?
+                    resolveToApi(rootObject) :
+                    rootObject;
+            final List<Resource.Diagnostic> errors = resolved.eResource().getErrors();
+            return RamlModelResult.of(errors, resolved);
+        } else {
+            return RamlModelResult.of(resource.getErrors(), rootObject);
+        }
     }
 
     private Resource load(final URI uri) {
@@ -101,10 +112,9 @@ public class RamlModelBuilder {
             final ResourceResolver resourceResolver = new ResourceResolver();
             final BodyContentTypeResolver bodyContentTypeResolver = new BodyContentTypeResolver(api.getMediaType());
 
-            resolvedApi.eAllContents().forEachRemaining(eObject -> {
-                resourceResolver.doSwitch(eObject);
-                bodyContentTypeResolver.doSwitch(eObject);
-            });
+            resolvedApi.getResources().forEach(resourceResolver::doSwitch);
+
+            resolvedApi.eAllContents().forEachRemaining(bodyContentTypeResolver::doSwitch);
 
             return resolvedApi;
         }
@@ -222,213 +232,248 @@ public class RamlModelBuilder {
         }
     }
 
-    private static class ResourceResolver extends ResourcesSwitch<EObject> {
+    private static class ResourceResolver extends ResourcesSwitch<io.vrap.rmf.raml.model.resources.Resource> {
+        private final ResourceMerger resourceMerger = new ResourceMerger();
 
         @Override
-        public EObject caseResource(final io.vrap.rmf.raml.model.resources.Resource resource) {
-            final ResourceTypeApplication resourceTypeApplication = resource.getType();
-            if (resourceTypeApplication != null) {
-                final ResourceTypeResolver resourceTypeResolver = new ResourceTypeResolver(resource, resourceTypeApplication.getParameters());
-                resourceTypeResolver.resolve(resourceTypeApplication.getType());
+        public io.vrap.rmf.raml.model.resources.Resource caseResource(final io.vrap.rmf.raml.model.resources.Resource resource) {
+            final List<io.vrap.rmf.raml.model.resources.Resource> resources = Lists.newArrayList(resource.getResources());
+
+            final io.vrap.rmf.raml.model.resources.Resource resolvedResource = resourceMerger.resolve(resource);
+            for (final io.vrap.rmf.raml.model.resources.Resource child : resources) {
+                final io.vrap.rmf.raml.model.resources.Resource childResource = doSwitch(child);
+                resolvedResource.getResources().add(childResource);
             }
-            return resource;
+            return resolvedResource;
         }
     }
 
-    private static class ResourceTypeResolver {
+    private static class ResourceNodeMerge extends ResourcesSwitch<PropertyNode> {
+        private final NodeMerger nodeMerger = new NodeMerger(true);
+        private final NodeMerger resourceTypeNodeMerger = new NodeMerger(false);
         private final io.vrap.rmf.raml.model.resources.Resource resource;
-        private final Map<String, String> parameters;
-        private final TypedElementResolver typedElementResolver;
-        private final StringTemplateResolver stringTemplateResolver;
 
-        public ResourceTypeResolver(final io.vrap.rmf.raml.model.resources.Resource resource, final List<Parameter> parameters) {
+        public ResourceNodeMerge(final io.vrap.rmf.raml.model.resources.Resource resource) {
             this.resource = resource;
-            this.parameters = parameters.stream()
-                    .filter(p -> p.getValue() instanceof StringInstance)
-                    .collect(Collectors.toMap(Parameter::getName, p -> ((StringInstance) p.getValue()).getValue()));
-            this.parameters.put("resourcePath", resource.getResourcePath());
-            this.parameters.put("resourcePathName", resource.getResourcePathName());
-            typedElementResolver = new TypedElementResolver(resource.eResource(), this.parameters);
-            stringTemplateResolver = new StringTemplateResolver(this.parameters);
         }
 
-        public io.vrap.rmf.raml.model.resources.Resource resolve(final ResourceType resourceType) {
-            for (final UriParameter uriParameter : resourceType.getUriParameters()) {
-                final UriParameter resolvedUriParameter = EcoreUtil.copy(uriParameter);
-                typedElementResolver.resolve(resolvedUriParameter);
-                resource.getUriParameters().add(resolvedUriParameter);
-            }
-            for (final Method method : resourceType.getMethods()) {
-                final Method resolvedMethod = EcoreUtil.copy(method);
-                for (final TraitApplication traitApplication : method.getIs()) {
-                    new TraitResolver(resolvedMethod, traitApplication.getParameters()).resolve(traitApplication.getTrait());
-                }
-                for (final TraitApplication traitApplication : resourceType.getIs()) {
-                    new TraitResolver(resolvedMethod, traitApplication.getParameters()).resolve(traitApplication.getTrait());
-                }
+        @Override
+        public PropertyNode caseResource(final io.vrap.rmf.raml.model.resources.Resource resource) {
+            final PropertyNode resourcePropertyNode = copy(getPropertyContainer(resource));
 
-                mergeMethod(resolvedMethod);
+            if (resourcePropertyNode.getValue() instanceof  ObjectNode) {
+                final ObjectNode resourceValueNode = (ObjectNode) resourcePropertyNode.getValue();
+
+                for (final Method method : resource.getMethods()) {
+                    final PropertyNode methodNode = doSwitch(method);
+
+                    replacePropertyNode(method, methodNode, resourceValueNode);
+                }
             }
-            final TreeIterator<EObject> allProperContents = EcoreUtil.getAllProperContents(resource, false);
+
+            if (resource.getType() != null) {
+                Node resourceValueNode = resourcePropertyNode.getValue();
+                final PropertyNode resourceTypeNode = doSwitch(resource.getType());
+                final Node resourceTypeValueNode = resourceTypeNode.getValue();
+                resourceValueNode = nodeMerger.merge(resourceTypeValueNode, resourceValueNode);
+                resourcePropertyNode.setValue(resourceValueNode);
+            }
+
+            return resourcePropertyNode;
+        }
+
+        @Override
+        public PropertyNode caseResourceTypeApplication(final ResourceTypeApplication resourceTypeApplication) {
+            final PropertyNode resourceTypeNode = doSwitch(resourceTypeApplication.getType());
+
+            final StringTemplateResolver stringTemplateResolver = getStringTemplateResolver(resourceTypeApplication);
+            final TreeIterator<EObject> allProperContents = EcoreUtil.getAllProperContents(resourceTypeNode, false);
             allProperContents.forEachRemaining(stringTemplateResolver::resolve);
-            return resource;
+
+            return resourceTypeNode;
         }
 
+        @Override
+        public PropertyNode caseResourceType(final ResourceType resourceType) {
+            final PropertyNode resourceTypeNode = copy(getPropertyContainer(resourceType));
+            final ObjectNode resourceTypeValueNode = (ObjectNode) resourceTypeNode.getValue();
 
-        private void mergeMethod(final Method resolvedMethod) {
-            final Method existingMethod = resource.getMethod(resolvedMethod.getMethod());
-            if (existingMethod == null) {
-                if (resolvedMethod.isRequired()) {
-                    resource.getMethods().add(resolvedMethod);
-                    typedElementResolver.resolveAll(resolvedMethod);
-                }
-            } else {
-                typedElementResolver.resolveAll(resolvedMethod);
-                final EList<EAttribute> allAttributes = ResourcesPackage.Literals.METHOD.getEAllAttributes();
-                final Consumer<EAttribute> copyAttribute = attribute -> existingMethod.eSet(attribute, resolvedMethod.eGet(attribute));
-                allAttributes.stream()
-                        .filter(attribute -> !existingMethod.eIsSet(attribute))
-                        .filter(attribute -> resolvedMethod.eIsSet(attribute))
-                        .forEach(copyAttribute);
-                final Consumer<EReference> copyReference = eReference -> {
-                    final Object value;
-                    if (eReference.isContainment()) {
-                        if (eReference.isMany()) {
-                            value = EcoreUtil.copyAll((List) resolvedMethod.eGet(eReference));
-                        } else {
-                            value = EcoreUtil.copy((EObject) resolvedMethod.eGet(eReference));
-                        }
-                    } else {
-                        value = resolvedMethod.eGet(eReference);
+            for (final Method method : resourceType.getMethods()) {
+                PropertyNode methodNode = doSwitch(method);
+                Node methodValueNode = methodNode.getValue();
+                for (final TraitApplication traitApplication : resourceType.getIs()) {
+                    final PropertyNode traitApplicationNode = doSwitch(traitApplication);
+                    final Node traitApplicationValueNode = traitApplicationNode.getValue();
+                    if (traitApplicationValueNode != null) {
+                        methodValueNode = resourceTypeNodeMerger.merge(traitApplicationValueNode, methodValueNode);
+                        final StringTemplateResolver stringTemplateResolver = getStringTemplateResolver(traitApplication, method);
+                        final TreeIterator<EObject> allProperContents = EcoreUtil.getAllProperContents(methodValueNode, false);
+                        allProperContents.forEachRemaining(stringTemplateResolver::resolve);
                     }
-                    existingMethod.eSet(eReference, value);
-                };
-                ResourcesPackage.Literals.METHOD.getEAllReferences().stream()
-                        .filter(reference -> !existingMethod.eIsSet(reference))
-                        .filter(reference -> resolvedMethod.eIsSet(reference))
-                        .forEach(copyReference);
+                }
+                methodNode.setValue(methodValueNode);
+                replacePropertyNode(method, methodNode, resourceTypeValueNode);
+            }
+
+            if (resourceType.getType() != null) {
+                final PropertyNode typeNode = doSwitch(resourceType.getType());
+                final Node typeValueNode = typeNode.getValue();
+
+                final Node mergedTypeValueNode = resourceTypeNodeMerger.merge(typeValueNode, resourceTypeValueNode);
+                resourceTypeNode.setValue(mergedTypeValueNode);
+            }
+
+            removeUsagePropertyNode(resourceTypeNode.getValue());
+
+            return resourceTypeNode;
+        }
+
+        /**
+         * Replaces an existing node for the given eObject in the given new container with the replacement node.
+         *
+         * @param eObject
+         * @param replacementNode
+         * @param newContainer
+         */
+        private void replacePropertyNode(final EObject eObject, final PropertyNode replacementNode, final ObjectNode newContainer) {
+            final PropertyNode methodPropertyContainer = getPropertyContainer(eObject);
+            final int index = methodPropertyContainer.eContainer().eContents().indexOf(methodPropertyContainer);
+            newContainer.getProperties().set(index, replacementNode);
+        }
+
+        @Override
+        public PropertyNode caseMethod(final Method method) {
+            final PropertyNode methodNode = copy(getPropertyContainer(method));
+
+            Node methodValueNode = methodNode.getValue();
+            for (final TraitApplication traitApplication : method.getIs()) {
+                final PropertyNode traitApplicationNode = doSwitch(traitApplication);
+                final Node traitApplicationValueNode = traitApplicationNode.getValue();
+                methodValueNode = nodeMerger.merge(traitApplicationValueNode, methodValueNode);
+
+                final StringTemplateResolver stringTemplateResolver = getStringTemplateResolver(traitApplication, method);
+                final TreeIterator<EObject> allProperContents = EcoreUtil.getAllProperContents(methodValueNode, false);
+                allProperContents.forEachRemaining(stringTemplateResolver::resolve);
+            }
+            methodNode.setValue(methodValueNode);
+
+            return methodNode;
+        }
+
+        @Override
+        public PropertyNode caseTraitApplication(final TraitApplication traitApplication) {
+            return doSwitch(traitApplication.getTrait());
+        }
+
+        @Override
+        public PropertyNode caseTrait(final Trait trait) {
+            final PropertyNode traitNode = copy(getPropertyContainer(trait));
+
+            Node traitValueNode = traitNode.getValue();
+            for (final TraitApplication traitApplication : trait.getIs()) {
+                final Node traitApplicationNode = doSwitch(traitApplication);
+                traitValueNode = nodeMerger.merge(traitApplicationNode, traitValueNode);
+
+                final StringTemplateResolver stringTemplateResolver = getStringTemplateResolver(traitApplication);
+                final TreeIterator<EObject> allProperContents = EcoreUtil.getAllProperContents(traitValueNode, false);
+                allProperContents.forEachRemaining(stringTemplateResolver::resolve);
+            }
+            traitNode.setValue(traitValueNode);
+            removeUsagePropertyNode(traitValueNode);
+
+            return traitNode;
+        }
+
+        private void removeUsagePropertyNode(final Node node) {
+            if (node instanceof ObjectNode) {
+                final ObjectNode objectNode = (ObjectNode) node;
+                final PropertyNode usagePropertyNode = objectNode.getProperty("usage");
+                if (usagePropertyNode != null) {
+                    objectNode.getProperties().remove(usagePropertyNode);
+                }
             }
         }
-    }
 
-    private static class TraitResolver extends ResourcesSwitch<Method> {
-        private final Method method;
-        private final Map<String, String> parameters;
-        private final TypedElementResolver typedElementResolver;
-
-        public TraitResolver(final Method method, final List<Parameter> parameters) {
-            this.method = method;
-            this.parameters = parameters.stream()
+        private StringTemplateResolver getStringTemplateResolver(final ParameterizedApplication application, final Method method) {
+            final Map<String, String> allParameters = application.getParameters().stream()
                     .filter(p -> p.getValue() instanceof StringInstance)
                     .collect(Collectors.toMap(Parameter::getName, p -> ((StringInstance) p.getValue()).getValue()));
-            this.parameters.put("methodName", method.getMethodName());
-            typedElementResolver = new TypedElementResolver(method.eResource(), this.parameters);
+            allParameters.put("resourcePath", resource.getResourcePath());
+            allParameters.put("resourcePathName", resource.getResourcePathName());
+            allParameters.put("methodName", method.getMethodName());
+
+            return new StringTemplateResolver(allParameters);
         }
 
-        public Method resolve(final Trait trait) {
-            for (final Header header : trait.getHeaders()) {
-                final Header resolvedHeader = EcoreUtil.copy(header);
-                typedElementResolver.resolveAll(resolvedHeader);
-                method.getHeaders().add(resolvedHeader);
-            }
-            for (final QueryParameter queryParameter : trait.getQueryParameters()) {
-                final QueryParameter resolvedQueryParameter = EcoreUtil.copy(queryParameter);
-                typedElementResolver.resolveAll(resolvedQueryParameter);
-                method.getQueryParameters().add(resolvedQueryParameter);
-            }
+        private StringTemplateResolver getStringTemplateResolver(final ParameterizedApplication application) {
+            final Map<String, String> allParameters = application.getParameters().stream()
+                    .filter(p -> p.getValue() instanceof StringInstance)
+                    .collect(Collectors.toMap(Parameter::getName, p -> ((StringInstance) p.getValue()).getValue()));
+            allParameters.put("resourcePath", resource.getResourcePath());
+            allParameters.put("resourcePathName", resource.getResourcePathName());
 
-            return method;
+            return new StringTemplateResolver(allParameters);
+        }
+
+        private PropertyNode getPropertyContainer(final EObject eObject) {
+            final NodeTokenProvider nodeTokenProvider =
+                    (NodeTokenProvider) EcoreUtil.getExistingAdapter(eObject, NodeTokenProvider.class);
+            return nodeTokenProvider.getPropertyContainer();
         }
     }
 
-    private static class StringTemplateResolver {
+    private static class ResourceMerger {
+
+        public io.vrap.rmf.raml.model.resources.Resource resolve(final io.vrap.rmf.raml.model.resources.Resource resource) {
+            final ResourceNodeMerge resourceNodeMerge = new ResourceNodeMerge(resource);
+            final PropertyNode resourceNode = resourceNodeMerge.doSwitch(resource);
+
+            final URI uri = resource.eResource() == null ? null : resource.eResource().getURI();
+            final RamlNodeTokenSource lexer = new RamlNodeTokenSource(uri, resourceNode);
+            final TokenStream tokenStream = new CommonTokenStream(lexer);
+            final RAMLParser parser = new RAMLParser(tokenStream);
+            final RAMLParser.ResourceFacetContext resourceFacetContext = parser.resourceFacet();
+            final ApiConstructor apiConstructor = new ApiConstructor();
+            final io.vrap.rmf.raml.model.resources.Resource mergedResource =
+                    apiConstructor.withinScope(Scope.of(resource.eResource()).with(resource.eContainer()),
+                        scope -> (io.vrap.rmf.raml.model.resources.Resource) apiConstructor.visitResourceFacet(resourceFacetContext));
+            mergedResource.getResources().clear();
+            mergedResource.getResources().addAll(resource.getResources());
+            EcoreUtil.remove(resource);
+            return mergedResource;
+        }
+    }
+
+    /**
+     * This class replaces string templates inside of a {@link StringNode#getValue()}.
+     */
+    private static class StringTemplateResolver extends NodesSwitch<EObject> {
         private final Map<String, String> parameters;
 
-        public StringTemplateResolver(Map<String, String> parameters) {
+        public StringTemplateResolver(final Map<String, String> parameters) {
             this.parameters = parameters;
+        }
+
+        @Override
+        public EObject caseStringNode(final StringNode stringNode) {
+            final StringTemplate stringTemplate = StringTemplate.of(stringNode.getValue());
+            if (stringTemplate.getParameters().size() > 0) {
+                final String render = stringTemplate.render(parameters);
+                stringNode.setValue(render);
+                final NodeTokenProvider existingAdapter =
+                        (NodeTokenProvider) EcoreUtil.getExistingAdapter(stringNode, NodeTokenProvider.class);
+                final NodeToken start = existingAdapter.getStart();
+                final NodeToken nodeToken = start.withType(start.getType(), render);
+                stringNode.eAdapters().remove(existingAdapter);
+                stringNode.eAdapters().add(new NodeModelBuilder.NodeParserAdapter(nodeToken, nodeToken));
+            }
+            return stringNode;
         }
 
         public EObject resolve(final EObject eObject) {
-            final List<EAttribute> stringAttributes = eObject.eClass().getEAllAttributes().stream()
-                    .filter(attribute -> attribute.getEType() == EcorePackage.Literals.ESTRING)
-                    .collect(Collectors.toList());
-            for (final EAttribute attribute : stringAttributes) {
-                if (eObject.eIsSet(attribute)) {
-                    if (attribute.isMany()) {
-
-                    } else {
-                        final String template = (String) eObject.eGet(attribute);
-                        final StringTemplate stringTemplate = StringTemplate.of(template);
-                        if (stringTemplate.getParameters().size() > 0) {
-                            final String render = stringTemplate.render(parameters);
-                            eObject.eSet(attribute, render);
-                        }
-                    }
-                }
-            }
+            TreeIterator<EObject> allProperContents = EcoreUtil.getAllProperContents(eObject, false);
+            allProperContents.forEachRemaining(this::doSwitch);
             return eObject;
-        }
-    }
-
-    private static class TypedElementResolver extends TypesSwitch<AnyType> {
-        private final Resource resource;
-        private final Map<String, String> parameters;
-        private final TypeExpressionResolver typeExpressionResolver;
-        private Scope scope;
-
-        public TypedElementResolver(final Resource resource, final Map<String, String> parameters) {
-            this.parameters = parameters;
-            this.resource = resource;
-            this.typeExpressionResolver = new TypeExpressionResolver();
-        }
-
-        public void resolveAll(final EObject eObject) {
-            final TreeIterator<EObject> allContents = EcoreUtil.getAllContents(eObject, true);
-            while (allContents.hasNext()) {
-                final EObject next = allContents.next();
-                if (next instanceof TypedElement) {
-                    scope = Scope.of(resource).with(next, TYPED_ELEMENT__TYPE);
-                    resolve((TypedElement) next);
-                }
-            }
-        }
-
-        private TypedElement resolve(final TypedElement typedElement) {
-            final AnyType resolvedType = doSwitch(typedElement.getType());
-            typedElement.setType(resolvedType);
-
-            return typedElement;
-        }
-
-        @Override
-        public AnyType caseAnyType(final AnyType anyType) {
-            return anyType;
-        }
-
-        @Override
-        public AnyType caseTypeTemplate(final TypeTemplate typeTemplate) {
-            final String template = typeTemplate.getName();
-            final String typeName = StringTemplate.of(template).render(parameters);
-            final AnyType resolvedType = (AnyType) typeExpressionResolver.resolve(typeName, scope);
-            EcoreUtil.remove(typeTemplate);
-            return resolvedType;
-        }
-
-        @Override
-        public AnyType caseArrayType(final ArrayType arrayType) {
-            final AnyType resolvedItems = doSwitch(arrayType.getItems());
-            arrayType.setItems(resolvedItems);
-            return arrayType;
-        }
-
-        @Override
-        public AnyType caseUnionType(final UnionType unionType) {
-            final List<AnyType> resolvedOneOf = unionType.getOneOf().stream()
-                    .map(this::doSwitch)
-                    .collect(Collectors.toList());
-            unionType.getOneOf().clear();
-            unionType.getOneOf().addAll(resolvedOneOf);
-            return unionType;
         }
     }
 
@@ -445,8 +490,17 @@ public class RamlModelBuilder {
 
         @Override
         public EObject caseBody(final Body body) {
-            if (body.getContentTypes().isEmpty()) {
-                body.getContentTypes().addAll(defaultMediaTypes);
+            if (body.getContentType() == null) {
+                if (defaultMediaTypes.size() >= 1) {
+                    final String firstMediaType = defaultMediaTypes.get(0);
+                    body.setContentType(firstMediaType);
+
+                    for (int i = 1; i < defaultMediaTypes.size(); i++) {
+                        final Body copy = EcoreUtil.copy(body);
+                        copy.setContentType(defaultMediaTypes.get(i));
+                        body.eContainer().eContents().add(copy);
+                    }
+                }
             }
             return body;
         }

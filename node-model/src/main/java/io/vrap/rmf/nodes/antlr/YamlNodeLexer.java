@@ -1,4 +1,4 @@
-package io.vrap.rmf.raml.persistence.antlr;
+package io.vrap.rmf.nodes.antlr;
 
 import com.google.common.collect.ImmutableSet;
 import io.vrap.functional.utils.TypeSwitch;
@@ -19,19 +19,15 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
- * An antlr lexer that uses snakeyaml events {@link Event} to
- * generate antlr tokens.
+ * A node lexer that can tokenize yaml.
  */
-class YamlLexer implements TokenSource {
+class YamlNodeLexer implements TokenSource {
     private static final String INCLUDE_TAG = "!include";
     private static final Set<Event.ID> RELEVANT_EVENT_IDS =
             ImmutableSet.of(Event.ID.MappingEnd, Event.ID.MappingStart, Event.ID.SequenceEnd, Event.ID.SequenceStart, Event.ID.Scalar);
-    private static final Pattern ANNOTATION_TYPE_REF_PATTERN = Pattern.compile("\\(([^\\)]*)\\)");
     public static final Mark EMPTY_FILE_MARK = new Mark(null, 0, 0, 0, "", 0);
     public static final ScalarEvent EMPTY_SCALAR_EVENT = new ScalarEvent(null, null, null, "", EMPTY_FILE_MARK, EMPTY_FILE_MARK, null);
 
@@ -41,36 +37,34 @@ class YamlLexer implements TokenSource {
     private Map<String, Integer> literalTokenTypes = new HashMap<>();
     private final TypeSwitch<Event, Token> eventSwitch;
     private final Map<Tag, Integer> scalarTagTokenTypes = new HashMap<>();
-    private RamlTokenFactory factory;
+    private NodeTokenFactory factory;
     private Event currentEvent;
 
-    private final int mapStart  = RAMLParser.MAP_START;
-    private final int mapEnd = RAMLParser.MAP_END;
-    private final int listStart = RAMLParser.LIST_START;
-    private final int listEnd = RAMLParser.LIST_END;
-    private final int scalar = RAMLParser.SCALAR;
-    private final int annotationTypeRef = RAMLParser.ANNOTATION_TYPE_REF;
-    private final int relativeUri = RAMLParser.RELATIVE_URI;
+    private final int mapStart  = NodeParser.MAP_START;
+    private final int mapEnd = NodeParser.MAP_END;
+    private final int listStart = NodeParser.LIST_START;
+    private final int listEnd = NodeParser.LIST_END;
+    private final int scalar = NodeParser.STRING;
 
     private URI uri;
     private final URIConverter uriConverter;
 
-    public YamlLexer(final URI uri, final URIConverter uriConverter) {
+    public YamlNodeLexer(final URI uri, final URIConverter uriConverter) {
         this(uriConverter);
         this.uri = uri;
         loadEvents(uri);
     }
 
-    public YamlLexer(final String input, final URI uri, final URIConverter uriConverter) {
+    public YamlNodeLexer(final String input, final URI uri, final URIConverter uriConverter) {
         this(uriConverter);
         this.uri = uri;
         final InputStream inputStream = new ByteArrayInputStream(input.getBytes(StandardCharsets.UTF_8));
         loadEvents(inputStream);
     }
 
-    private YamlLexer(final URIConverter uriConverter) {
+    private YamlNodeLexer(final URIConverter uriConverter) {
         initTokens();
-        setTokenFactory(RamlTokenFactory.DEFAULT);
+        setTokenFactory(NodeTokenFactory.DEFAULT);
         this.uriConverter = uriConverter;
         eventSwitch = new TypeSwitch<Event, Token>()
                 .on(MappingStartEvent.class, this::mapStart)
@@ -82,7 +76,7 @@ class YamlLexer implements TokenSource {
     }
 
     private void initTokens() {
-        final Vocabulary vocabulary = RAMLParser.VOCABULARY;
+        final Vocabulary vocabulary = NodeParser.VOCABULARY;
         for (int tokenType = 0; tokenType <= vocabulary.getMaxTokenType(); tokenType++) {
             final String literalName = vocabulary.getLiteralName(tokenType);
             if (literalName != null) {
@@ -90,9 +84,10 @@ class YamlLexer implements TokenSource {
                 literalTokenTypes.put(literalText, tokenType);
             }
         }
-        scalarTagTokenTypes.put(Tag.FLOAT, RAMLParser.FLOAT);
-        scalarTagTokenTypes.put(Tag.INT, RAMLParser.INT);
-        scalarTagTokenTypes.put(Tag.BOOL, RAMLParser.BOOL);
+        scalarTagTokenTypes.put(Tag.FLOAT, NodeParser.FLOAT);
+        scalarTagTokenTypes.put(Tag.INT, NodeParser.INT);
+        scalarTagTokenTypes.put(Tag.BOOL, NodeParser.BOOL);
+        scalarTagTokenTypes.put(Tag.NULL, NodeParser.NULL);
     }
 
     private void loadEvents(final URI uri) {
@@ -145,18 +140,11 @@ class YamlLexer implements TokenSource {
                 scalarValue,
                 Optional.ofNullable(scalarEvent.getImplicit()).map(ImplicitTuple::canOmitTagInPlainScalar).orElse(false)
         );
-        final Matcher matcher = ANNOTATION_TYPE_REF_PATTERN.matcher(scalarValue);
         final int type = literalTokenTypes.containsKey(scalarValue) ?
                 literalTokenTypes.get(scalarValue) :
-                matcher.matches() ?
-                        annotationTypeRef :
-                        scalarValue.startsWith("/") && !scalarValue.endsWith("/") ?
-                                relativeUri : scalarTagTokenTypes.getOrDefault(implicitTag, scalar);
-        final String text = matcher.matches() ?
-                matcher.group(1) :
-                scalarValue;
+                scalarTagTokenTypes.getOrDefault(implicitTag, scalar);
 
-        return createToken(type, text);
+        return createToken(type, scalarValue);
     }
 
     @Override
@@ -205,7 +193,7 @@ class YamlLexer implements TokenSource {
 
     @Override
     public void setTokenFactory(final TokenFactory<?> factory) {
-        this.factory = (RamlTokenFactory) factory;
+        this.factory = (NodeTokenFactory) factory;
     }
 
     @Override
@@ -220,11 +208,11 @@ class YamlLexer implements TokenSource {
     private Token createToken(final int type, final String text, final String includeUri) {
         final Pair<TokenSource, CharStream> source = new Pair<>(this, null);
 
-        final RamlToken ramlToken = factory.create(source, type, text, Token.DEFAULT_CHANNEL,
+        final NodeToken nodeToken = factory.create(source, type, text, Token.DEFAULT_CHANNEL,
                 0, 0,
                 getLine(), getCharPositionInLine());
-        ramlToken.setLocation(uri.toString());
-        ramlToken.setIncludeUri(includeUri);
-        return ramlToken;
+        nodeToken.setLocation(uri.toString());
+        nodeToken.setIncludeUri(includeUri);
+        return nodeToken;
     }
 }

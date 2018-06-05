@@ -6,14 +6,14 @@ import org.junit.Test;
 import java.net.URL;
 
 /**
- * Unit tests for {@link RAMLCustomLexer}.
+ * Unit tests for {@link RamlNodeTokenSource}.
  */
-public class RAMLCustomLexerTest implements RAMLParserFixtures {
+public class RamlNodeTokenSourceTest implements RAMLParserFixtures {
 
     @Test
     public void circularInclude() {
         final URL url = getClass().getResource("/includes/circular-include.raml");
-        final RAMLCustomLexer lexer = lexer(url);
+        final RamlNodeTokenSource lexer = lexer(url);
 
         for (Token token = lexer.nextToken(); token.getType() != Token.EOF; token = lexer.nextToken()) {
 

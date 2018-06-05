@@ -23,12 +23,12 @@ public class ApiConstructor extends BaseConstructor {
 
     @Override
     public EObject construct(final RAMLParser parser, final Scope scope) {
-        final TypeDeclarationResolver typeDeclarationResolver = new TypeDeclarationResolver();
-        typeDeclarationResolver.resolve(parser.api(), scope);
-        parser.reset();
+        final DeclarationResolver declarationResolver = new DeclarationResolver();
+        final RAMLParser.ApiContext apiContext = parser.api();
+        declarationResolver.resolve(apiContext, scope);
 
         final Api api = (Api) withinScope(scope,
-                s -> visitApi(parser.api()));
+                s -> visitApi(apiContext));
         return api;
     }
 
@@ -37,19 +37,7 @@ public class ApiConstructor extends BaseConstructor {
         final EObject rootObject = scope.getResource().getContents().get(0);
 
         return withinScope(scope.with(rootObject), rootScope -> {
-            final Predicate<RAMLParser.TypeContainerFacetsContext> isSecuritySchemesFacet =
-                    typeContainerFacets -> typeContainerFacets.securitySchemesFacet() != null;
-
-            // TODO move to first pass
-            // order is relevant here: first create security schemes
-            ctx.typeContainerFacets().stream()
-                    .filter(isSecuritySchemesFacet)
-                    .forEach(this::visitTypeContainerFacets);
-
-            ctx.typeContainerFacets().stream()
-                    .filter(isSecuritySchemesFacet.negate())
-                    .forEach(this::visitTypeContainerFacets);
-
+            ctx.typeContainerFacets().forEach(this::visitTypeContainerFacets);
             ctx.apiFacets().forEach(this::visitApiFacets);
 
             return rootObject;
@@ -115,18 +103,8 @@ public class ApiConstructor extends BaseConstructor {
             final UriTemplate relativeUri = (UriTemplate) ResourcesFactory.eINSTANCE.createFromString(ResourcesPackage.Literals.URI_TEMPLATE, resourceFacet.relativeUri.getText());
             resource.setRelativeUri(relativeUri);
             return withinScope(resourcesScope.with(resource), resourceScope -> {
-                resourceFacet.attributeFacet().forEach(this::visitAttributeFacet);
-                resourceFacet.descriptionFacet().forEach(this::visitDescriptionFacet);
-                resourceFacet.displayNameFacet().forEach(this::visitDisplayNameFacet);
-                resourceFacet.annotationFacet().forEach(this::visitAnnotationFacet);
-                resourceFacet.securedByFacet().forEach(this::visitSecuredByFacet);
-
-                resourceFacet.methodFacet().forEach(this::visitMethodFacet);
-                resourceFacet.uriParametersFacet().forEach(this::visitUriParametersFacet);
+                resourceFacet.resourceBaseFacet().forEach(this::visitResourceBaseFacet);
                 resourceFacet.resourceFacet().forEach(this::visitResourceFacet);
-
-                resourceFacet.isFacet().forEach(this::visitIsFacet);
-                resourceFacet.resourceTypeFacet().forEach(this::visitResourceTypeFacet);
 
                 return resource;
             });

@@ -1,7 +1,7 @@
-package io.vrap.rmf.raml.regression;
+package io.vrap.rmf.raml.regression
 
-import io.vrap.rmf.raml.model.RamlModelResult;
-import io.vrap.rmf.raml.model.modules.Api;
+import io.vrap.rmf.raml.model.RamlModelResult
+import io.vrap.rmf.raml.model.modules.Api
 
 class UriParameterTest extends RegressionTest {
     def "baseuriparameter-with-invalid-type"() {
@@ -23,7 +23,7 @@ class UriParameterTest extends RegressionTest {
         api.types.size() == 0
         api.baseUriParameters.size() == 1
         api.baseUriParameters.get(0).type != null
-        api.baseUriParameters.get(0).type.type == null
+        api.baseUriParameters.get(0).type.type.eIsProxy() == true
     }
 
     def "simple-baseuri"() {

@@ -8,6 +8,7 @@ import io.vrap.rmf.raml.model.modules.Library;
 import io.vrap.rmf.raml.model.modules.LibraryUse;
 import io.vrap.rmf.raml.model.resources.ResourceType;
 import io.vrap.rmf.raml.model.resources.Trait;
+import io.vrap.rmf.raml.model.security.SecurityScheme;
 import io.vrap.rmf.raml.model.types.AnyType;
 import io.vrap.rmf.raml.model.types.ArrayType;
 import io.vrap.rmf.raml.model.types.BuiltinType;
@@ -30,15 +31,14 @@ import static io.vrap.rmf.raml.model.elements.ElementsPackage.Literals.NAMED_ELE
 import static io.vrap.rmf.raml.model.modules.ModulesPackage.Literals.*;
 import static io.vrap.rmf.raml.model.resources.ResourcesPackage.Literals.RESOURCE_TYPE;
 import static io.vrap.rmf.raml.model.resources.ResourcesPackage.Literals.TRAIT;
+import static io.vrap.rmf.raml.model.security.SecurityPackage.Literals.SECURITY_SCHEME;
+import static io.vrap.rmf.raml.model.security.SecurityPackage.Literals.SECURITY_SCHEME_CONTAINER__SECURITY_SCHEMES;
 import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.ANY_TYPE__TYPE;
 
 /**
- * Resolves all types and annotation types so that they all have a resolved type.
- * This is necessary because the type defines which facets a type declaration can have.
- *
- * Additionally it creates all traits and resource types.
+ * Resolves all declarations so that we can reference them during the next parse phases.
  */
-public class TypeDeclarationResolver {
+public class DeclarationResolver {
     private final TypeExpressionResolver typeExpressionResolver = new TypeExpressionResolver();
 
     /**
@@ -48,8 +48,8 @@ public class TypeDeclarationResolver {
             = ArrayListMultimap.create();
 
     public void resolve(final ParserRuleContext ruleContext, final Scope scope) {
-        final TypeConstructingVisitor typeConstructingVisitor = new TypeConstructingVisitor(scope);
-        final EObject rootObject = (EObject) typeConstructingVisitor.visit(ruleContext);
+        final DeclarationConstructingVisitor declarationConstructingVisitor = new DeclarationConstructingVisitor(scope);
+        final EObject rootObject = (EObject) declarationConstructingVisitor.visit(ruleContext);
 
         int unresolvedTypes = unresolvedTypeDeclarations.size();
         int newUnresolvedTypes = 0;
@@ -88,12 +88,12 @@ public class TypeDeclarationResolver {
     }
 
     /**
-     * This visitor creates potentially unresolved types.
+     * This visitor creates declrations and potentially unresolved types.
      */
-    private class TypeConstructingVisitor extends AbstractScopedVisitor<Object> {
+    private class DeclarationConstructingVisitor extends AbstractScopedVisitor<Object> {
         private final UnresolvedTypesCollector unresolvedTypesCollector = new UnresolvedTypesCollector();
 
-        public TypeConstructingVisitor(final Scope scope) {
+        public DeclarationConstructingVisitor(final Scope scope) {
             this.scope = scope;
         }
 
@@ -120,6 +120,16 @@ public class TypeDeclarationResolver {
         }
 
         @Override
+        public Object visitMediaTypeFacet(final RAMLParser.MediaTypeFacetContext ctx) {
+            final List<String> mediaTypes = ctx.types.isEmpty() ?
+                    Collections.singletonList(ctx.SCALAR().getText()) :
+                    ctx.types.stream().map(RAMLParser.IdContext::getText).collect(Collectors.toList());
+
+            scope.setValue(API_BASE__MEDIA_TYPE, mediaTypes, ctx.start);
+            return super.visitMediaTypeFacet(ctx);
+        }
+
+        @Override
         public Object visitExtension(RAMLParser.ExtensionContext ctx) {
             final Extension extension = create(EXTENSION, ctx);
             scope.getResource().getContents().add(extension);
@@ -134,11 +144,14 @@ public class TypeDeclarationResolver {
         public Object visitLibraryUse(final RAMLParser.LibraryUseContext libraryUseFacet) {
             final String libraryUri = libraryUseFacet.libraryUri.getText();
             final Resource libraryResource = scope.getResource(libraryUri);
-            final EList<EObject> contents = libraryResource.getContents();
-            final LibraryUse libraryUse = create(LIBRARY_USE, libraryUseFacet);
+            final EList<EObject> libraryResourceContents = libraryResource.getContents();
 
+            final LibraryUse libraryUse = create(LIBRARY_USE, libraryUseFacet);
             libraryUse.setName(libraryUseFacet.name.getText());
-            libraryUse.setLibrary((Library) contents.get(0));
+            if (libraryResourceContents.size() == 1 && libraryResourceContents.get(0) instanceof Library) {
+                final Library library = (Library) libraryResourceContents.get(0);
+                libraryUse.setLibrary(library);
+            }
 
             scope.with(TYPE_CONTAINER__USES).setValue(libraryUse, libraryUseFacet.name);
 
@@ -148,7 +161,7 @@ public class TypeDeclarationResolver {
         @Override
         public Object visitResourceTypesFacet(RAMLParser.ResourceTypesFacetContext resourceTypesFacet) {
             return withinScope(scope.with(TYPE_CONTAINER__RESOURCE_TYPES), resourceTypesScope ->
-                super.visitResourceTypesFacet(resourceTypesFacet));
+                    super.visitResourceTypesFacet(resourceTypesFacet));
         }
 
         @Override
@@ -163,7 +176,7 @@ public class TypeDeclarationResolver {
         @Override
         public Object visitTraitsFacet(RAMLParser.TraitsFacetContext ctx) {
             return withinScope(scope.with(TYPE_CONTAINER__TRAITS), traitScope ->
-                super.visitTraitsFacet(ctx));
+                    super.visitTraitsFacet(ctx));
         }
 
         @Override
@@ -224,6 +237,24 @@ public class TypeDeclarationResolver {
 
             return resolved;
         }
+
+        @Override
+        public Object visitSecuritySchemesFacet(final RAMLParser.SecuritySchemesFacetContext ctx) {
+            return withinScope(scope.with(SECURITY_SCHEME_CONTAINER__SECURITY_SCHEMES), securitySchemesScope ->
+                    super.visitSecuritySchemesFacet(ctx));
+        }
+
+        @Override
+        public Object visitSecuritySchemeFacet(final RAMLParser.SecuritySchemeFacetContext securitySchemeFacet) {
+            final SecurityScheme securityScheme = create(SECURITY_SCHEME, securitySchemeFacet);
+
+            final String name = securitySchemeFacet.name.getText();
+            securityScheme.setName(name);
+            scope.setValue(securityScheme, securitySchemeFacet.getStart());
+
+            return securityScheme;
+        }
+
 
         private List<EObject> getUnresolvedTypes(final EObject type) {
             return unresolvedTypesCollector.doSwitch(type);

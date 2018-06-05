@@ -1,7 +1,6 @@
 package io.vrap.rmf.raml.persistence.antlr;
 
 import io.vrap.rmf.raml.persistence.RamlResourceSet;
-import org.antlr.v4.runtime.CommonTokenFactory;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.TokenStream;
 import org.eclipse.emf.common.util.URI;
@@ -23,8 +22,8 @@ public interface RAMLParserFixtures {
      */
     default RAMLParser parserFromClasspath(final String name) throws IOException {
         final URL url = getClass().getResource(name);
-        final RAMLCustomLexer yamlLexer = lexer(url);
-        final TokenStream tokenStream = new CommonTokenStream(yamlLexer);
+        final RamlNodeTokenSource lexer = lexer(url);
+        final TokenStream tokenStream = new CommonTokenStream(lexer);
 
         final RAMLParser ramlParser = new RAMLParser(tokenStream);
 
@@ -34,9 +33,9 @@ public interface RAMLParserFixtures {
         return ramlParser;
     }
 
-    default RAMLCustomLexer lexer(final URL url) {
+    default RamlNodeTokenSource lexer(final URL url) {
         final URIConverter uriConverter = new RamlResourceSet().getURIConverter();
-        final RAMLCustomLexer lexer = new RAMLCustomLexer(URI.createURI(url.toString()), uriConverter);
+        final RamlNodeTokenSource lexer = new RamlNodeTokenSource(URI.createURI(url.toString()), uriConverter);
         return lexer;
     }
 }

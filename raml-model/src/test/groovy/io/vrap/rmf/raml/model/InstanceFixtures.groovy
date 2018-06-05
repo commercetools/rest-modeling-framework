@@ -2,8 +2,8 @@ package io.vrap.rmf.raml.model
 
 import io.vrap.rmf.raml.model.types.*
 import io.vrap.rmf.raml.persistence.RamlResourceSet
-import io.vrap.rmf.raml.persistence.antlr.RAMLCustomLexer
 import io.vrap.rmf.raml.persistence.antlr.RAMLParser
+import io.vrap.rmf.raml.persistence.antlr.RamlNodeTokenSource
 import io.vrap.rmf.raml.persistence.constructor.InstanceConstructor
 import io.vrap.rmf.raml.persistence.constructor.Scope
 import org.antlr.v4.runtime.CommonTokenStream
@@ -66,7 +66,7 @@ trait InstanceFixtures {
 
     private RAMLParser parser(String input, URI uri, URIConverter uriConverter) {
         def strippedInput = input.stripIndent()
-        final RAMLCustomLexer lexer = new RAMLCustomLexer(strippedInput, uri, uriConverter);
+        final RamlNodeTokenSource lexer = new RamlNodeTokenSource(strippedInput, uri, uriConverter);
         final TokenStream tokenStream = new CommonTokenStream(lexer);
         new RAMLParser(tokenStream)
     }

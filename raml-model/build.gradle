@@ -1,15 +1,6 @@
-buildscript {
-    dependencies {
-        classpath 'com.github.jengelman.gradle.plugins:shadow:1.2.3'
-    }
-}
-
-plugins {
-    id 'org.xtext.builder' version '1.0.18'
-    id 'antlr'
-}
-
-apply plugin: 'com.github.johnrengelman.shadow'
+apply plugin: 'org.xtext.builder'
+apply plugin: 'antlr'
+apply plugin:  'com.github.johnrengelman.shadow'
 
 publishing {
     publications {
@@ -56,7 +47,7 @@ xtext {
 sourceSets {
     test {
         resources {
-            srcDirs += '$buildDir/resources/test/raml'
+            srcDirs += "${buildDir}/resources/test/raml"
         }
     }
 }
@@ -71,14 +62,14 @@ clean {
 }
 
 dependencies {
-    testCompile group: 'junit', name: 'junit', version: '4.12'
-    testCompile 'com.tngtech.java:junit-dataprovider:1.12.0'
-    testCompile 'org.assertj:assertj-core:3.8.0'
-    testCompile "org.spockframework:spock-core:${versions.spock}"
-    testCompile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.0'
-
     compile project(':functional-utils')
+    compile project(':node-model')
+    
     compile 'org.yaml:snakeyaml:1.18'
+
+    compile 'com.fasterxml.jackson.core:jackson-databind:2.9.1'
+    compile 'com.fasterxml.jackson.core:jackson-core:2.9.1'
+    compile 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.9.1'
 
     compile 'org.eclipse.platform:org.eclipse.equinox.common:3.8.0'
     compile 'org.eclipse.emf:org.eclipse.emf.common:2.11+'
@@ -104,6 +95,11 @@ dependencies {
     xtextLanguages 'org.eclipse.emf:org.eclipse.emf.ecore.xcore.lib:1.1.100'
     xtextLanguages 'org.eclipse.emf:org.eclipse.emf.codegen:2.11+'
     xtextLanguages 'org.eclipse.emf:org.eclipse.emf.codegen.ecore:2.11+'
+
+    testCompile 'junit:junit:4.12'
+    testCompile 'com.tngtech.java:junit-dataprovider:1.12.0'
+    testCompile 'org.assertj:assertj-core:3.8.0'
+    testCompile "org.spockframework:spock-core:${versions.spock}"
 }
 
 shadowJar {
