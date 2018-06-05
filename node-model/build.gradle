@@ -1,6 +1,19 @@
 apply plugin: 'antlr'
 apply plugin: 'org.xtext.builder'
 
+publishing {
+    publications {
+        Maven(MavenPublication) {
+            from components.java
+            artifactId 'functional-utils'
+
+            artifact sourceJar {
+                classifier 'sources'
+            }
+        }
+    }
+}
+
 ext {
     xtextVersion = '2.10.0'
 }
