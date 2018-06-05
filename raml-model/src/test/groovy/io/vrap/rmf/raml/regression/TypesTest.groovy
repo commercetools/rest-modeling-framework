@@ -2,7 +2,6 @@ package io.vrap.rmf.raml.regression
 
 import io.vrap.rmf.raml.model.RamlModelResult
 import io.vrap.rmf.raml.model.modules.Api
-import spock.lang.Ignore
 
 class TypesTest extends RegressionTest {
 
@@ -23,7 +22,6 @@ class TypesTest extends RegressionTest {
         ramlModelResult.validationResults.size() == 1
     }
 
-    @Ignore
     def "unknown type in extension"() {
         when:
         writeFile(

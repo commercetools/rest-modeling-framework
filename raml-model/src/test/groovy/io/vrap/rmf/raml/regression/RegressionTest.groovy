@@ -4,13 +4,9 @@ import com.google.common.base.Charsets
 import io.vrap.rmf.raml.model.RamlModelBuilder
 import io.vrap.rmf.raml.model.RamlModelResult
 import io.vrap.rmf.raml.model.modules.Api
-import io.vrap.rmf.raml.model.resources.HttpMethod
-import io.vrap.rmf.raml.model.resources.Method
-import io.vrap.rmf.raml.model.types.Annotation
 import io.vrap.rmf.raml.model.util.StringCaseFormat
 import io.vrap.rmf.raml.persistence.ResourceFixtures
 import org.eclipse.emf.common.util.URI
-import spock.lang.Ignore
 import spock.lang.Specification
 
 import java.nio.file.Files
