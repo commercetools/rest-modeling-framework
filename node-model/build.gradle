@@ -5,7 +5,7 @@ publishing {
     publications {
         Maven(MavenPublication) {
             from components.java
-            artifactId 'functional-utils'
+            artifactId 'node-model'
 
             artifact sourceJar {
                 classifier 'sources'

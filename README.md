@@ -5,7 +5,7 @@
 The latest unstable release can be retrieved from [jcenter](https://bintray.com/vrapio/vrapio/rmf)  with:
 ```gradle
 ext {
-    rmfVersion = "0.1.0-20180304205259"
+    rmfVersion = "0.2.0-20180605152618"
 }
 
 sourceCompatibility = 1.8
