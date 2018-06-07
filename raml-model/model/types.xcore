@@ -693,6 +693,12 @@ interface Instance extends AnnotationsFacet {
 	op Object getValue()
 }
 
+class NullInstance extends Instance {
+    op Object getValue() {
+        null
+    }
+}
+
 class StringInstance extends Instance {
 	String value
 }
