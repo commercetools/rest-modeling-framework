@@ -11,6 +11,8 @@ import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
 
 import java.math.BigDecimal;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -117,7 +119,10 @@ public class InstanceValidator implements DiagnosticsCreator {
             } else if (typeIs(OBJECT_TYPE) && value.trim().startsWith("{") && value.trim().endsWith("}")) {
                 return doSwitch(InstanceHelper.parseJson(value, InstanceHelper.resourceFile(stringInstance)));
             } else if (typeInstanceOf(DateTime.class)) {
-                int I = 3;
+                final Diagnostic diagnostic = new DateValidator(stringInstance).doSwitch(types.peek());
+                if (diagnostic != null) {
+                    validationResults.add(diagnostic);
+                }
             } else if (!typeIs(ANY_TYPE) && !typeInstanceOf(DateTimeTypeFacet.class) && !typeInstanceOf(TypeTemplate.class)) {
                 validationResults.add(error(stringInstance, "Invalid type"));
             }
@@ -301,6 +306,48 @@ public class InstanceValidator implements DiagnosticsCreator {
 
         private boolean typeIs(final EClass eClass) {
             return !types.empty() && types.peek().eClass() == eClass;
+        }
+    }
+
+    private static final DateTimeFormatter rfc3339 = DateTimeFormatter.ofPattern("YYYY-MM-DD'T'HH:mm:ss.SSS'Z'");
+    private static final DateTimeFormatter rfc2616 = DateTimeFormatter.ofPattern("EEE, dd MMM yyyy HH:mm:ss zzz").withLocale(Locale.ENGLISH);
+
+    private class DateValidator extends TypesSwitch<Diagnostic> {
+        private final StringInstance value;
+
+        private DateValidator(final StringInstance value) {
+            this.value = value;
+        }
+
+        @Override
+        public Diagnostic caseDateOnlyType(final DateOnlyType dateOnlyType) {
+            return validate(DateTimeFormatter.ISO_LOCAL_DATE, dateOnlyType);
+        }
+
+        @Override
+        public Diagnostic caseDateTimeOnlyType(final DateTimeOnlyType dateTimeOnlyType) {
+            return validate(DateTimeFormatter.ISO_LOCAL_DATE_TIME, dateTimeOnlyType);
+        }
+
+        @Override
+        public Diagnostic caseTimeOnlyType(final TimeOnlyType timeOnlyType) {
+            return validate(DateTimeFormatter.ISO_LOCAL_TIME, timeOnlyType);
+        }
+
+        @Override
+        public Diagnostic caseDateTimeType(final DateTimeType dateTimeType) {
+            final DateTimeFormatter dateTimeFormatter = dateTimeType.getFormat().equals(DateTimeFormat.RFC2616)
+                    ? rfc2616 : rfc3339;
+            return validate(dateTimeFormatter, dateTimeType);
+        }
+
+        private Diagnostic validate(final DateTimeFormatter dateTimeFormatter, final DateTime type) {
+            try {
+                dateTimeFormatter.parse(value.getValue());
+                return null;
+            } catch (final DateTimeParseException e) {
+                return error(value,e.getMessage());
+            }
         }
     }
 }
