@@ -1,7 +1,6 @@
 package io.vrap.rmf.raml.validation;
 
 import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
 import io.vrap.rmf.raml.model.types.*;
 import io.vrap.rmf.raml.model.types.util.TypesSwitch;
 import io.vrap.rmf.raml.model.util.InstanceHelper;
@@ -117,6 +116,8 @@ public class InstanceValidator implements DiagnosticsCreator {
                 return doSwitch(InstanceHelper.parseJson(value, InstanceHelper.resourceFile(stringInstance)));
             } else if (typeIs(OBJECT_TYPE) && value.trim().startsWith("{") && value.trim().endsWith("}")) {
                 return doSwitch(InstanceHelper.parseJson(value, InstanceHelper.resourceFile(stringInstance)));
+            } else if (typeInstanceOf(DateTime.class)) {
+                int I = 3;
             } else if (!typeIs(ANY_TYPE) && !typeInstanceOf(DateTimeTypeFacet.class) && !typeInstanceOf(TypeTemplate.class)) {
                 validationResults.add(error(stringInstance, "Invalid type"));
             }

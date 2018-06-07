@@ -6,7 +6,6 @@ import io.vrap.rmf.raml.model.resources.HttpMethod
 import io.vrap.rmf.raml.model.types.ArrayInstance
 import io.vrap.rmf.raml.model.types.Example
 import io.vrap.rmf.raml.model.types.ObjectInstance
-import spock.lang.Ignore
 
 class ExampleTest extends RegressionTest {
     def "example" () {
@@ -206,7 +205,6 @@ class ExampleTest extends RegressionTest {
         ramlModelResult.validationResults.size() == 0
     }
 
-    @Ignore
     def "date-validation"() {
         when:
         RamlModelResult<Api> ramlModelResult = constructApi(
