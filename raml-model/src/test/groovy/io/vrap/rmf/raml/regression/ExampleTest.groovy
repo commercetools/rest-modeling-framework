@@ -6,6 +6,7 @@ import io.vrap.rmf.raml.model.resources.HttpMethod
 import io.vrap.rmf.raml.model.types.ArrayInstance
 import io.vrap.rmf.raml.model.types.Example
 import io.vrap.rmf.raml.model.types.ObjectInstance
+import spock.lang.Ignore
 
 class ExampleTest extends RegressionTest {
     def "example" () {
@@ -200,6 +201,39 @@ class ExampleTest extends RegressionTest {
                         examples:
                             valid:
                                 sort: "0.2"
+                ''')
+        then:
+        ramlModelResult.validationResults.size() == 0
+    }
+
+    @Ignore
+    def "date-validation"() {
+        when:
+        RamlModelResult<Api> ramlModelResult = constructApi(
+                '''\
+                #%RAML 1.0
+                title: Date Examples
+                
+                types:
+                    SomeObject:
+                        properties:
+                          birthday:
+                            type: date-only # no implications about time or offset
+                            example: "2015-05-23"
+                          lunchtime:
+                            type: time-only # no implications about date or offset
+                            example: "12:30:00"
+                          fireworks:
+                            type: datetime-only # no implications about offset
+                            example: "2015-07-04T21:00:00"
+                          created:
+                            type: datetime
+                            example: "2016-02-28T16:41:41.090Z"
+                            format: rfc3339 # the default, so no need to specify
+                          If-Modified-Since:
+                            type: datetime
+                            example: "Sun, 28 Feb 2016 16:41:41 GMT"
+                            format: rfc2616 # this time it's required, otherwise, the example format is invalid
                 ''')
         then:
         ramlModelResult.validationResults.size() == 0
