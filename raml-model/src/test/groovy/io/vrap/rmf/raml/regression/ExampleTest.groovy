@@ -10,7 +10,6 @@ import io.vrap.rmf.raml.model.types.ObjectInstance
 import io.vrap.rmf.raml.model.util.InstanceHelper
 import io.vrap.rmf.raml.validation.InstanceValidator
 import org.eclipse.emf.common.util.Diagnostic
-import spock.lang.Ignore
 
 class ExampleTest extends RegressionTest {
     def "example" () {
@@ -210,7 +209,6 @@ class ExampleTest extends RegressionTest {
         ramlModelResult.validationResults.size() == 0
     }
 
-    @Ignore
     def "date-validation"() {
         when:
         RamlModelResult<Api> ramlModelResult = constructApi(

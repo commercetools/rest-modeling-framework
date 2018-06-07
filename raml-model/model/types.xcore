@@ -395,27 +395,34 @@ class BooleanType extends AnyType {
 }
 
 /*
+ * Common marker interface for all date types.
+ */
+interface DateTime extends AnyType {
+
+}
+
+/*
  * The "full-date" notation of RFC3339, namely yyyy-mm-dd.
  * Does not support time or time zone-offset notation.
  */
-class DateOnlyType extends AnyType {
+class DateOnlyType extends DateTime {
 }
 
 /*
  * The "partial-time" notation of RFC3339, namely hh:mm:ss[.ff...].
  * Does not support date or time zone-offset notation.
  */
-class TimeOnlyType extends AnyType {
+class TimeOnlyType extends DateTime {
 }
 
 /*
  * Combined date-only and time-only with a separator of "T", namely yyyy-mm-ddThh:mm:ss[.ff...].
  * Does not support a time zone offset.
  */
-class DateTimeOnlyType extends AnyType {
+class DateTimeOnlyType extends DateTime {
 }
 
-class DateTimeType extends AnyType, DateTimeTypeFacet {
+class DateTimeType extends DateTime, DateTimeTypeFacet {
 }
 
 /*
