@@ -239,7 +239,6 @@ class ExampleTest extends RegressionTest {
         ramlModelResult.validationResults.size() == 0
     }
 
-    @Ignore
     def "value named property"() {
         when:
         RamlModelResult<Api> ramlModelResult = constructApi(
@@ -250,11 +249,33 @@ class ExampleTest extends RegressionTest {
                 types:
                     Foo:
                         properties:
-                          value:
-                            type: string
+                          value: string
                         example: |
                            {
                              "value": "bar"
+                           }
+                    Bar:
+                        properties:
+                           value: string
+                        example:
+                           value: {
+                             "value": "bar"
+                           }
+                    Baz:
+                        properties:
+                           value: Boz
+                        example:
+                           value: {
+                             "value": {
+                               "value": "boz"
+                             }
+                           }
+                    Boz:
+                        properties:
+                           value: string
+                        example:
+                           value: {
+                               "value": "boz"
                            }
                 ''')
         then:
