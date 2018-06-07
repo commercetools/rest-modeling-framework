@@ -116,7 +116,7 @@ public class InstanceValidator implements DiagnosticsCreator {
             } else if (typeIs(ARRAY_TYPE) && value.trim().startsWith("[") && value.trim().endsWith("]")) {
                 return doSwitch(InstanceHelper.parseJson(value, InstanceHelper.resourceFile(stringInstance)));
             } else if (typeIs(OBJECT_TYPE) && value.trim().startsWith("{") && value.trim().endsWith("}")) {
-                return doSwitch(InstanceHelper.parseJson("{\"value\": " + value + "}", InstanceHelper.resourceFile(stringInstance)));
+                return doSwitch(InstanceHelper.parseJson(value, InstanceHelper.resourceFile(stringInstance)));
             } else if (!typeIs(ANY_TYPE) && !typeInstanceOf(DateTimeTypeFacet.class) && !typeInstanceOf(TypeTemplate.class)) {
                 validationResults.add(error(stringInstance, "Invalid type"));
             }

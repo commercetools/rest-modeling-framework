@@ -5,7 +5,11 @@ import io.vrap.rmf.raml.model.modules.Api
 import io.vrap.rmf.raml.model.resources.HttpMethod
 import io.vrap.rmf.raml.model.types.ArrayInstance
 import io.vrap.rmf.raml.model.types.Example
+import io.vrap.rmf.raml.model.types.Instance
 import io.vrap.rmf.raml.model.types.ObjectInstance
+import io.vrap.rmf.raml.model.util.InstanceHelper
+import io.vrap.rmf.raml.validation.InstanceValidator
+import org.eclipse.emf.common.util.Diagnostic
 import spock.lang.Ignore
 
 class ExampleTest extends RegressionTest {
@@ -280,5 +284,34 @@ class ExampleTest extends RegressionTest {
                 ''')
         then:
         ramlModelResult.validationResults.size() == 0
+    }
+
+    def "validate value named property"() {
+        when:
+        RamlModelResult<Api> ramlModelResult = constructApi(
+                '''\
+                #%RAML 1.0
+                title: Value named property
+                
+                types:
+                    Foo:
+                        properties:
+                          prices: Price[]
+                    Price:
+                        properties:
+                           value: Money
+                    Money:
+                        properties:
+                           currencyCode: string
+                           centAmount: integer
+                ''')
+        String json = '{ "prices": [{ "value": { "currencyCode": "EUR", "centAmount": 100 } }] }'
+
+        then:
+        ramlModelResult.validationResults.size() == 0
+
+        Instance result = InstanceHelper.parseJson(json)
+        List<Diagnostic> validationResults = new InstanceValidator().validate(result, ramlModelResult.rootObject.getType("Foo"));
+        validationResults.size() == 0
     }
 }
