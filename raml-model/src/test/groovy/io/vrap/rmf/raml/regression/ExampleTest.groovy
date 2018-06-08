@@ -245,6 +245,31 @@ class ExampleTest extends RegressionTest {
         ramlModelResult.validationResults.size() == 0
     }
 
+    def "uri"() {
+        when:
+        RamlModelResult<Api> ramlModelResult = constructApi(
+                '''\
+                #%RAML 1.0
+                title: uri
+                
+                types:
+                    Foo:
+                        properties:
+                          uri: string
+                        example: |
+                           {
+                             "uri": "https://example.org"
+                           }
+                ''')
+        then:
+        ramlModelResult.validationResults.size() == 0
+
+        Instance result = InstanceHelper.parseJson('{"uri": "https:\\/\\/example.org" }')
+        List<Diagnostic> validationResults = new InstanceValidator().validate(result, ramlModelResult.rootObject.getType("Foo"));
+        validationResults.size() == 0
+
+    }
+
     def "value named property"() {
         when:
         RamlModelResult<Api> ramlModelResult = constructApi(

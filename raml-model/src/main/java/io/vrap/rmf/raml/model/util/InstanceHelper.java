@@ -57,9 +57,7 @@ public interface InstanceHelper {
 
     static Instance parseJson(final String text, final String resource) {
         final NodeModelBuilder nodeModelBuilder = new NodeModelBuilder();
-        // TODO: fix hack: why do we pass in resource at all?
-        final Node node = resource == null ?
-                nodeModelBuilder.parseYaml(text) : nodeModelBuilder.parseJson(text);
+        final Node node = nodeModelBuilder.parseJson(text);
         return new NodeToInstanceTransformation().doSwitch(node);
     }
 
