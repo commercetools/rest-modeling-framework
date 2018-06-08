@@ -3,6 +3,7 @@ package io.vrap.rmf.raml.model.util;
 import com.damnhandy.uri.template.UriTemplate;
 import com.google.common.net.MediaType;
 import io.vrap.rmf.raml.model.resources.Resource;
+import io.vrap.rmf.raml.model.resources.ResourceContainer;
 import io.vrap.rmf.raml.model.responses.Body;
 import io.vrap.rmf.raml.model.responses.BodyContainer;
 import io.vrap.rmf.raml.model.types.ObjectType;
@@ -54,10 +55,10 @@ public class ModelHelper {
         return fullUriTemplate;
     }
 
-    public static List<Resource> allContainedResources(final Resource resource) {
-        final List<Resource> allContainedResources = new ArrayList<>(resource.getResources());
+    public static List<Resource> allContainedResources(final ResourceContainer resourceContainer) {
+        final List<Resource> allContainedResources = new ArrayList<>(resourceContainer.getResources());
 
-        allContainedResources.addAll(resource.getResources().stream()
+        allContainedResources.addAll(resourceContainer.getResources().stream()
                 .flatMap(r -> allContainedResources(r).stream())
                 .collect(Collectors.toList()));
 

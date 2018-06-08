@@ -47,6 +47,14 @@ interface ResourceContainer {
 	 * The (sub-) resources that this element contains. 
 	 */
 	contains Resource[] resources
+	
+		
+	/*
+	 * @return all contained resources
+	 */
+	refers derived Resource[] allContainedResources get {
+		ModelHelper.allContainedResources(this).toEList
+	}
 }
 
 /*
@@ -116,13 +124,6 @@ class Resource extends ResourceBase, ResourceContainer, ApplyTraitsFacet {
 	 */
 	refers derived Resource parent get {
 		if (eContainer instanceof Resource) eContainer as Resource else null
-	}
-	
-	/*
-	 * @return all contained resources
-	 */
-	refers derived Resource[] allContainedResources get {
-		ModelHelper.allContainedResources(this).toEList
 	}
 }
 
