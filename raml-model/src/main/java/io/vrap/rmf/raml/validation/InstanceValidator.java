@@ -309,7 +309,7 @@ public class InstanceValidator implements DiagnosticsCreator {
         }
     }
 
-    private static final DateTimeFormatter rfc3339 = DateTimeFormatter.ofPattern("YYYY-MM-DD'T'HH:mm:ss.SSS'Z'");
+    private static final DateTimeFormatter rfc3339 = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
     private static final DateTimeFormatter rfc2616 = DateTimeFormatter.ofPattern("EEE, dd MMM yyyy HH:mm:ss zzz").withLocale(Locale.ENGLISH);
 
     private class DateValidator extends TypesSwitch<Diagnostic> {

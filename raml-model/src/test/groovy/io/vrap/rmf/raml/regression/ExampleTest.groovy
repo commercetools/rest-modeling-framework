@@ -232,6 +232,10 @@ class ExampleTest extends RegressionTest {
                             type: datetime
                             example: "2016-02-28T16:41:41.090Z"
                             format: rfc3339 # the default, so no need to specify
+                          lastUpdated:
+                            type: datetime
+                            example: "2016-02-28T16:41:41.000+00:00"
+                            format: rfc3339 # the default, so no need to specify
                           If-Modified-Since:
                             type: datetime
                             example: "Sun, 28 Feb 2016 16:41:41 GMT"
