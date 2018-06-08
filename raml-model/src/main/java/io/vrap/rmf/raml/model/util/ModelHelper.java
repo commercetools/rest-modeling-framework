@@ -4,12 +4,11 @@ import com.damnhandy.uri.template.UriTemplate;
 import com.google.common.net.MediaType;
 import io.vrap.rmf.raml.model.resources.Resource;
 import io.vrap.rmf.raml.model.resources.ResourceContainer;
+import io.vrap.rmf.raml.model.resources.ResourcesFactory;
+import io.vrap.rmf.raml.model.resources.UriParameter;
 import io.vrap.rmf.raml.model.responses.Body;
 import io.vrap.rmf.raml.model.responses.BodyContainer;
-import io.vrap.rmf.raml.model.types.ObjectType;
-import io.vrap.rmf.raml.model.types.ObjectTypeFacet;
-import io.vrap.rmf.raml.model.types.Property;
-import io.vrap.rmf.raml.model.types.TypedElement;
+import io.vrap.rmf.raml.model.types.*;
 import org.eclipse.emf.common.util.ECollections;
 import org.eclipse.emf.common.util.EList;
 
@@ -65,6 +64,32 @@ public class ModelHelper {
         return allContainedResources;
     }
 
+    /**
+     * Returns all implicitly (in the uri template) and explicitly defined {@link UriParameter}s of the
+     * given resource.
+     *  
+     * @param resource the resource
+     * @return the list of all uri parameter of the given resource
+     */
+    public static List<UriParameter> allUriParameters(final Resource resource) {
+    	final List<UriParameter> allUriParameters = new ArrayList<>();
+    	
+    	final UriTemplate fullUri = resource.getFullUri();
+    	if (fullUri != null) {
+            for (final String parameter : fullUri.getVariables()) {
+                UriParameter uriParameter = resource.getUriParameter(parameter);
+                if (uriParameter == null) {
+                    uriParameter = ResourcesFactory.eINSTANCE.createUriParameter();
+                    uriParameter.setName(parameter);
+                    uriParameter.setType(BuiltinType.STRING.getType(resource.eResource().getResourceSet()));
+                }
+                allUriParameters.add(uriParameter);
+            }
+        }
+    	
+    	return allUriParameters;
+    }
+    
     public static String resourcePath(final Resource resource) {
         final UriTemplate fullUri = resource.getFullUri();
         return fullUri != null ? fullUri.getTemplate() : "";

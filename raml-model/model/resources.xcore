@@ -67,13 +67,6 @@ interface ResourceBase extends DocumentableElement, AnnotationsFacet, SecuredByF
 	contains UriParameter[] uriParameters
 	
 	/*
-	 * Returns the uri parameter with the given name or null.
-	 */
-	op UriParameter getUriParameter(String name) {
-		uriParameters.findFirst[it.name == name]	
-	}
-	
-	/*
 	 * The methods that this resource provides.
 	 */
 	contains Method[] methods
@@ -118,12 +111,29 @@ class Resource extends ResourceBase, ResourceContainer, ApplyTraitsFacet {
 	derived String resourcePathName get {
 		ModelHelper.resourcePathName(this)	
 	}
+
+	/*
+	 * Returns the uri parameter with the given name or null.
+	 * Traverses the resource hierarchy.
+	 */
+	op UriParameter getUriParameter(String name) {
+		val uriParameter = uriParameters.findFirst[it.name == name]
+		if (uriParameter == null && parent != null) {
+			parent.getUriParameter(name)
+		} else {
+			uriParameter
+		}	
+	}
 	
 	/*
 	 * @return the parent resource or null
 	 */
 	refers derived Resource parent get {
 		if (eContainer instanceof Resource) eContainer as Resource else null
+	}
+	
+	refers derived UriParameter[] allUriParameters get {
+		ModelHelper.allUriParameters(this).toEList
 	}
 }
 
