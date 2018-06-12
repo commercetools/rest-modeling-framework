@@ -58,4 +58,7 @@ downloadAndUnzipCtpApiFile.onlyIf { project.hasProperty(apiProperty) }
 
 shadowJar {
     append 'plugin.properties'
+    baseName = 'rmf-gen'
+    classifier = null
+    version = null
 }
