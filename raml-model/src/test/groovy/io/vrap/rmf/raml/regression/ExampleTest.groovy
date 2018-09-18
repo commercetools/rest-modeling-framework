@@ -341,4 +341,28 @@ class ExampleTest extends RegressionTest {
         List<Diagnostic> validationResults = new InstanceValidator().validate(result, ramlModelResult.rootObject.getType("Foo"));
         validationResults.size() == 0
     }
+
+    def "validate numbers"() {
+        when:
+        RamlModelResult<Api> ramlModelResult = constructApi(
+                '''\
+                #%RAML 1.0
+                title: Number validation
+                
+                types:
+                    Foo:
+                        properties:
+                          centAmount:
+                            type: number
+                            format: int64
+                ''')
+        String json = '{ "centAmount" : 160158691200 }'
+
+        then:
+        ramlModelResult.validationResults.size() == 0
+
+        Instance result = InstanceHelper.parseJson(json)
+        List<Diagnostic> validationResults = new InstanceValidator().validate(result, ramlModelResult.rootObject.getType("Foo"));
+        validationResults.size() == 0
+    }
 }
