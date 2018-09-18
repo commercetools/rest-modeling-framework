@@ -87,7 +87,7 @@ public class InstanceConstructor extends AbstractScopedVisitor<Instance> {
     public Instance visitAnnotatedIntegerInstance(RAMLParser.AnnotatedIntegerInstanceContext ctx) {
         Instance instance;
         try {
-            final int value = Integer.parseInt(ctx.INT(0).getText());
+            final long value = Long.parseLong(ctx.INT(0).getText());
             final IntegerInstance integerInstance = create(INTEGER_INSTANCE, ctx);
             integerInstance.setValue(value);
             instance = integerInstance;
@@ -139,7 +139,7 @@ public class InstanceConstructor extends AbstractScopedVisitor<Instance> {
     public Instance visitIntegerInstance(final RAMLParser.IntegerInstanceContext ctx) {
         Instance instance;
         try {
-            final int value = Integer.parseInt(ctx.getText());
+            final long value = Long.parseLong(ctx.getText());
             final IntegerInstance integerInstance = create(INTEGER_INSTANCE, ctx);
             integerInstance.setValue(value);
             instance = integerInstance;

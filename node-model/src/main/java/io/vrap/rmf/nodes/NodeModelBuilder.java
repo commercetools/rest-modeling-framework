@@ -181,7 +181,7 @@ public class NodeModelBuilder {
             }
             if (ctx.INT() != null) {
                 final IntegerNode integerNode = NodesFactory.eINSTANCE.createIntegerNode();
-                integerNode.setValue(Integer.parseInt(ctx.getText()));
+                integerNode.setValue(Long.parseLong(ctx.getText()));
 
                 token = (NodeToken) ctx.INT().getSymbol();
                 integerNode.eAdapters().add(NodeParserAdapter.of(token));
