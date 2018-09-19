@@ -11,6 +11,7 @@ import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.*;
@@ -163,7 +164,7 @@ public class InstanceValidator implements DiagnosticsCreator {
         @Override
         public List<Diagnostic> caseIntegerInstance(final IntegerInstance integerInstance) {
             final List<Diagnostic> validationResults = new ArrayList<>();
-            final Long value = integerInstance.getValue();
+            final BigInteger value = integerInstance.getValue();
 
             if (typeIs(UNION_TYPE)) {
                 return validationResults;
@@ -171,7 +172,7 @@ public class InstanceValidator implements DiagnosticsCreator {
 
             if (typeInstanceOf(CommonNumberTypeFacet.class)) {
                 final CommonNumberTypeFacet commonNumberType = (CommonNumberTypeFacet) types.peek();
-                if (commonNumberType.getMultipleOf() != null && value % commonNumberType.getMultipleOf() != 0) {
+                if (commonNumberType.getMultipleOf() != null && !value.mod(BigInteger.valueOf(commonNumberType.getMultipleOf())).equals(BigInteger.ZERO)) {
                     validationResults.add(error(integerInstance, "Value {0} is not a multiple of {1}",
                             value, commonNumberType.getMultipleOf()));
                 }
@@ -179,21 +180,21 @@ public class InstanceValidator implements DiagnosticsCreator {
             }
             if (typeInstanceOf(IntegerTypeFacet.class)) {
                 final IntegerTypeFacet integerType = (IntegerTypeFacet) types.peek();
-                if (integerType.getMinimum() != null && value.compareTo(integerType.getMinimum().longValue()) < 0) {
+                if (integerType.getMinimum() != null && value.compareTo(BigInteger.valueOf(integerType.getMinimum())) < 0) {
                     validationResults.add(error(integerInstance,"Value {0} < minimum {1}",
                             value, integerType.getMinimum()));
                 }
-                if (integerType.getMaximum() != null && value.compareTo(integerType.getMaximum().longValue()) > 0) {
+                if (integerType.getMaximum() != null && value.compareTo(BigInteger.valueOf(integerType.getMaximum())) > 0) {
                     validationResults.add(error(integerInstance,"Value {0} > maximum {1}",
                             value, integerType.getMaximum()));
                 }
             } else if (typeInstanceOf(NumberTypeFacet.class)) {
                 final NumberTypeFacet numberType = (NumberTypeFacet) types.peek();
-                if (numberType.getMinimum() != null && value.compareTo(numberType.getMinimum().longValue()) < 0) {
+                if (numberType.getMinimum() != null && value.compareTo(BigInteger.valueOf(numberType.getMinimum().longValue())) < 0) {
                     validationResults.add(error(integerInstance,"Value {0} < minimum {1}",
                             value, numberType.getMinimum()));
                 }
-                if (numberType.getMaximum() != null && value.compareTo(numberType.getMaximum().longValue()) > 0) {
+                if (numberType.getMaximum() != null && value.compareTo(BigInteger.valueOf(numberType.getMaximum().longValue())) > 0) {
                     validationResults.add(error(integerInstance,"Value {0} > maximum {1}",
                             value, numberType.getMaximum()));
                 }

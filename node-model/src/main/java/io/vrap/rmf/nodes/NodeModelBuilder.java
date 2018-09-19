@@ -9,6 +9,7 @@ import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.URIConverter;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.List;
 
 /**
@@ -181,7 +182,7 @@ public class NodeModelBuilder {
             }
             if (ctx.INT() != null) {
                 final IntegerNode integerNode = NodesFactory.eINSTANCE.createIntegerNode();
-                integerNode.setValue(Long.parseLong(ctx.getText()));
+                integerNode.setValue(new BigInteger(ctx.getText()));
 
                 token = (NodeToken) ctx.INT().getSymbol();
                 integerNode.eAdapters().add(NodeParserAdapter.of(token));

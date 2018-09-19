@@ -55,7 +55,7 @@ class StringNode extends ValueNode<String> {
 
 }
 
-class IntegerNode extends ValueNode<Long> {
+class IntegerNode extends ValueNode<BigInteger> {
 
 }
 
