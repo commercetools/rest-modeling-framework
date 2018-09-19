@@ -4,6 +4,7 @@ import io.vrap.rmf.raml.model.types.*;
 import io.vrap.rmf.raml.persistence.antlr.RAMLParser;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 
 import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.*;
 
@@ -87,7 +88,7 @@ public class InstanceConstructor extends AbstractScopedVisitor<Instance> {
     public Instance visitAnnotatedIntegerInstance(RAMLParser.AnnotatedIntegerInstanceContext ctx) {
         Instance instance;
         try {
-            final long value = Long.parseLong(ctx.INT(0).getText());
+            final BigInteger value = new BigInteger(ctx.INT(0).getText());
             final IntegerInstance integerInstance = create(INTEGER_INSTANCE, ctx);
             integerInstance.setValue(value);
             instance = integerInstance;
@@ -139,7 +140,7 @@ public class InstanceConstructor extends AbstractScopedVisitor<Instance> {
     public Instance visitIntegerInstance(final RAMLParser.IntegerInstanceContext ctx) {
         Instance instance;
         try {
-            final long value = Long.parseLong(ctx.getText());
+            final BigInteger value = new BigInteger(ctx.getText());
             final IntegerInstance integerInstance = create(INTEGER_INSTANCE, ctx);
             integerInstance.setValue(value);
             instance = integerInstance;

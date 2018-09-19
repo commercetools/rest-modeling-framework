@@ -712,7 +712,7 @@ class NumberInstance extends Instance {
 }
 
 class IntegerInstance extends Instance {
-	Long value
+	BigInteger value
 }
 
 class ArrayInstance extends Instance {
