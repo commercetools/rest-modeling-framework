@@ -92,7 +92,7 @@ resourceTypeApplication:
 resourceFacet:
     relativeUri=RELATIVE_URI
     (
-        SCALAR |
+        empty=id |
         (
             MAP_START
                 ( resourceBaseFacet | resourceFacet)*
@@ -104,7 +104,7 @@ resourceFacet:
 resourceTypeDeclarationFacet:
     name=id
     (
-        SCALAR |
+        empty=id |
         (
             MAP_START
                 resourceBaseFacet*
