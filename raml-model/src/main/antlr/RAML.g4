@@ -41,7 +41,7 @@ extension:
     MAP_END;
 
 extendsFacet:
-    'extends' uri=SCALAR
+    'extends' uri=id
     ;
 
 documentationFacet:
