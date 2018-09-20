@@ -272,8 +272,9 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
             body = create(BODY, bodyContentType);
             scope.setValue(body, bodyContentType.getStart());
         }
-        if (bodyContentType.contentType != null) {
-            body.setContentType(bodyContentType.contentType.getText());
+        final String contentTypeText = bodyContentType.contentType.getText();
+        if (!Strings.isNullOrEmpty(contentTypeText)) {
+            body.setContentType(contentTypeText);
         }
         return body;
     }

@@ -189,7 +189,7 @@ argument:
 bodyFacet:
     'body'
         (
-            SCALAR
+            empty=id
             |   (
                     MAP_START
                     (bodyContentTypeFacet+ | bodyFacets)
@@ -228,7 +228,7 @@ bodyFacets:
 responsesFacet:
     'responses'
             (
-                SCALAR
+                empty=id
                 |   (
                         MAP_START
                         ( responseFacet )*
@@ -240,7 +240,7 @@ responsesFacet:
 responseFacet:
     statusCode=INT
             (
-                SCALAR
+                empty=id
                 |   (
                         MAP_START
                         (
@@ -262,7 +262,7 @@ httpMethod:
 headersFacet:
     'headers'
         (
-            SCALAR
+            empty=id
             |   (
                     MAP_START
                     ( headerFacets+=typedElementFacet )*
@@ -274,7 +274,7 @@ headersFacet:
 queryParametersFacet:
     'queryParameters'
         (
-            SCALAR
+            empty=id
             |   (
                     MAP_START
                     ( queryParameters+=typedElementFacet )*
@@ -286,7 +286,7 @@ queryParametersFacet:
 uriParametersFacet:
     'uriParameters'
         (
-            SCALAR
+            empty=id
             |   (
                     MAP_START
                     ( uriParameterFacets+=typedElementFacet )*
@@ -302,7 +302,7 @@ baseUriFacet:
 baseUriParametersFacet:
     'baseUriParameters'
         (
-            SCALAR
+            empty=id
             |   (
                     MAP_START
                     ( uriParameterFacets+=typedElementFacet )*
@@ -337,7 +337,7 @@ securitySchemeFacet:
 describedByFacet:
     'describedBy'
         (
-            SCALAR
+            empty=id
             |   (
                     MAP_START
                     (queryParametersFacet | headersFacet | responsesFacet )*
@@ -365,7 +365,7 @@ securitySchemeTypeFacet:
 securitySchemeSettingsFacet:
     'settings'
         (
-            SCALAR
+            empty=id
             |   (
                     MAP_START
                     securitySchemeSettingsFacets+=attributeFacet*
@@ -557,7 +557,7 @@ example:
 examplesFacet:
     'examples'
         (
-            SCALAR
+            empty=id
             |   (
                     MAP_START
                     namedExample*
@@ -573,7 +573,7 @@ namedExample:
 propertiesFacet:
     facet='properties'
         (
-            SCALAR
+            empty=id
             |   (
                     MAP_START
                     ( propertyFacets+=typedElementFacet )*
@@ -593,7 +593,7 @@ typedElementTuple:
 typedElementMap:
     name=id
         (
-            SCALAR
+            empty=id
             |   (
                     MAP_START
                     (
