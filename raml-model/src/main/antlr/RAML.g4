@@ -78,7 +78,7 @@ resourceTypeApplication:
         MAP_START
             type=id
             (
-                SCALAR |
+                empty=id |
                 (
                     MAP_START
                     argument*
@@ -171,7 +171,7 @@ traitApplication:
         MAP_START
             trait=id
             (
-                SCALAR |
+                empty=id |
                 (
                     MAP_START
                     argument*
@@ -437,7 +437,7 @@ usesFacet:
     ;
 
 libraryUse:
-    name=id libraryUri=SCALAR
+    name=id libraryUri=id
     ;
 
 typesFacet:
@@ -459,10 +459,10 @@ typeDeclarationFacet:
     ;
 
 typeDeclarationTuple:
-    name=SCALAR typeExpression=SCALAR;
+    name=id typeExpression=id;
 
 typeDeclarationMap:
-    name=SCALAR
+    name=id
         MAP_START
         (
             attributeFacet
@@ -506,13 +506,13 @@ typeDeclarationFragment:
     ;
 
 typeFacet:
-    'type' typeExpression=SCALAR
+    'type' typeExpression=id
     ;
 
 itemsFacet:
     'items'
     (
-        typeExpression=SCALAR |
+        typeExpression=id |
         (
             MAP_START
             (
@@ -587,7 +587,7 @@ typedElementFacet:
     ;
 
 typedElementTuple:
-    name=id type=SCALAR
+    name=id type=id
     ;
 
 typedElementMap:

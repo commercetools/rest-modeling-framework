@@ -73,8 +73,8 @@ public class DeclarationResolver {
         if (unresolvedTypeDeclarations.size() > 0) {
             unresolvedTypeDeclarations.keySet().forEach(typeDeclarationFacet -> {
                 final Token nameToken = typeDeclarationFacet.typeDeclarationTuple() == null ?
-                        Optional.ofNullable(typeDeclarationFacet.typeDeclarationMap()).map(t -> t.name).orElse(null) :
-                        Optional.ofNullable(typeDeclarationFacet.typeDeclarationTuple()).map(t -> t.name).orElse(null);
+                        Optional.ofNullable(typeDeclarationFacet.typeDeclarationMap()).map(t -> t.name.start).orElse(null) :
+                        Optional.ofNullable(typeDeclarationFacet.typeDeclarationTuple()).map(t -> t.name.start).orElse(null);
 
                 if (nameToken == null) {
                     unresolvedTypeDeclarations.get(typeDeclarationFacet)
@@ -152,7 +152,7 @@ public class DeclarationResolver {
                 libraryUse.setLibrary(library);
             }
 
-            scope.with(TYPE_CONTAINER__USES).setValue(libraryUse, libraryUseFacet.id().getStart());
+            scope.with(TYPE_CONTAINER__USES).setValue(libraryUse, libraryUseFacet.name.getStart());
 
             return libraryUse;
         }
@@ -349,7 +349,7 @@ public class DeclarationResolver {
 
         final EObject resolved = typeExpressionResolver.resolve(typeExpression, scope);
         if (resolved != null && !resolved.eIsProxy()) {
-            setTypeName(resolved, typeDeclarationMap.name);
+            setTypeName(resolved, typeDeclarationMap.name.start);
             setType(resolved, typeExpression, typeDeclarationMap.getStart(), scope);
         }
 
@@ -357,14 +357,14 @@ public class DeclarationResolver {
     }
 
     private EObject getType(final RAMLParser.TypeDeclarationTupleContext typeDeclarationTuple, final Scope scope) {
-        final Token typeExpressionToken = typeDeclarationTuple.typeExpression;
+        final Token typeExpressionToken = typeDeclarationTuple.typeExpression.start;
         final String typeExpression = typeExpressionToken.getText().isEmpty() ?
                 BuiltinType.STRING.getName() :
                 typeExpressionToken.getText();
 
         final EObject resolved = typeExpressionResolver.resolve(typeExpression, scope);
         if (resolved != null && !resolved.eIsProxy()) {
-            setTypeName(resolved, typeDeclarationTuple.name);
+            setTypeName(resolved, typeDeclarationTuple.name.start);
             setType(resolved, typeExpression, typeExpressionToken, scope);
         }
 
