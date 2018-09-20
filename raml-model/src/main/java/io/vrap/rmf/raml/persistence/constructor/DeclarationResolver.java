@@ -121,8 +121,7 @@ public class DeclarationResolver {
 
         @Override
         public Object visitMediaTypeFacet(final RAMLParser.MediaTypeFacetContext ctx) {
-            final List<String> mediaTypes = ctx.types.isEmpty() ?
-                    Collections.singletonList(ctx.SCALAR().getText()) :
+            final List<String> mediaTypes =
                     ctx.types.stream().map(RAMLParser.IdContext::getText).collect(Collectors.toList());
 
             scope.setValue(API_BASE__MEDIA_TYPE, mediaTypes, ctx.start);

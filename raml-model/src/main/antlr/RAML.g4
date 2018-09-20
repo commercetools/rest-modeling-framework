@@ -29,7 +29,7 @@ apiFacets:
 mediaTypeFacet:
     'mediaType'
     (
-        SCALAR |
+        types += id |
         LIST_START
             types +=id*
         LIST_END
