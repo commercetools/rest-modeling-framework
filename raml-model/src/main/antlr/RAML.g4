@@ -201,7 +201,7 @@ bodyFacet:
 bodyContentTypeFacet:
     contentType=SCALAR
         (
-            SCALAR
+            empty=id
             |   (
                     MAP_START
                         bodyFacets
@@ -359,7 +359,7 @@ strictFacet:
     ;
 
 securitySchemeTypeFacet:
-    'type' type=SCALAR
+    'type' type=id
     ;
 
 securitySchemeSettingsFacet:
@@ -382,10 +382,9 @@ securedByFacet:
     ;
 
 securedBy:
-    name=SCALAR |
+    name=id |
         (   MAP_START
-                name=SCALAR?
-                ( SCALAR | parameters=objectInstance)?
+                ( empty=id | parameters=objectInstance)?
             MAP_END
         )
     ;
