@@ -58,7 +58,7 @@ document:
 traitsFacet:
     'traits'
         (
-            SCALAR
+            empty=id
             |   (
                     MAP_START
                     ( traitFacet )*
@@ -128,7 +128,7 @@ resourceBaseFacet:
 methodFacet:
     httpMethod
     (
-        SCALAR |
+        empty=id |
         (
             MAP_START
                 methodBaseFacet*
@@ -137,9 +137,9 @@ methodFacet:
     );
 
 traitFacet:
-    name=SCALAR
+    name=id
     (
-        SCALAR |
+        empty=id |
         (
             MAP_START
                 methodBaseFacet*
