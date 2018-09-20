@@ -384,6 +384,7 @@ securedByFacet:
 securedBy:
     name=id |
         (   MAP_START
+                name=id?
                 ( empty=id | parameters=objectInstance)?
             MAP_END
         )
