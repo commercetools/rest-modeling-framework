@@ -36,4 +36,34 @@ class ReservedWordTest extends RegressionTest {
         ramlModelResult.validationResults.size() == 0
         ramlModelResult.rootObject.getUses().size() == 1
     }
+
+    def "type-name-with-reserved-name"() {
+        when:
+        RamlModelResult<Api> ramlModelResult = constructApi(
+                '''\
+                #%RAML 1.0
+                title: My API
+
+                annotationTypes:
+                    type:
+                        description: This annotation type use a reserved name as name.
+                traits:
+                    type:
+                        description: This trait use a reserved name as name.
+                        
+                types:
+                    type:
+                        description: This type use a reserved name as name.
+                
+                resourceTypes:
+                    type:
+                        description: This resource type use a reserved name as name.
+        ''')
+        then:
+        ramlModelResult.validationResults.size() == 0
+        ramlModelResult.rootObject.getAnnotationType("type") != null
+        ramlModelResult.rootObject.getTrait("type") != null
+        ramlModelResult.rootObject.getType("type") != null
+        ramlModelResult.rootObject.getResourceType("type") != null
+    }
 }

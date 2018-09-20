@@ -165,7 +165,7 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
     public Object visitTraitApplication(RAMLParser.TraitApplicationContext ctx) {
         final TraitApplication traitApplication = create(TRAIT_APPLICATION, ctx);
         scope.setValue(traitApplication, ctx.getStart());
-        final String traitName = ctx.id().getText();
+        final String traitName = ctx.trait.getText();
         final Trait trait = (Trait) scope.with(TRAIT_APPLICATION__TRAIT).getEObjectByName(traitName);
         traitApplication.setTrait(trait);
 
@@ -272,8 +272,9 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
             body = create(BODY, bodyContentType);
             scope.setValue(body, bodyContentType.getStart());
         }
-        if (bodyContentType.contentType != null) {
-            body.setContentType(bodyContentType.contentType.getText());
+        final String contentTypeText = bodyContentType.contentType.getText();
+        if (!Strings.isNullOrEmpty(contentTypeText)) {
+            body.setContentType(contentTypeText);
         }
         return body;
     }
@@ -420,7 +421,7 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
      */
     @Override
     public Object visitTypeFacet(final RAMLParser.TypeFacetContext ctx) {
-        final String typeExpression = ctx.SCALAR().getText();
+        final String typeExpression = ctx.typeExpression.getText();
 
         final EObject parsedTypeExpression = typeExpressionResolver.resolve(typeExpression, scope);
         return parsedTypeExpression;
@@ -508,7 +509,7 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
 
     @Override
     public Object visitTypedElementTuple(RAMLParser.TypedElementTupleContext typedeElementTuple) {
-        final Token type = typedeElementTuple.type;
+        final Token type = typedeElementTuple.type.start;
         final String name = typedeElementTuple.name.getText();
 
         final EObject propertyType = Strings.isNullOrEmpty(type.getText()) ?
