@@ -437,7 +437,7 @@ usesFacet:
     ;
 
 libraryUse:
-    name=SCALAR libraryUri=SCALAR
+    name=id libraryUri=SCALAR
     ;
 
 typesFacet:

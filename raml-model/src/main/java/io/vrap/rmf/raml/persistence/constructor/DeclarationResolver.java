@@ -153,7 +153,7 @@ public class DeclarationResolver {
                 libraryUse.setLibrary(library);
             }
 
-            scope.with(TYPE_CONTAINER__USES).setValue(libraryUse, libraryUseFacet.name);
+            scope.with(TYPE_CONTAINER__USES).setValue(libraryUse, libraryUseFacet.id().getStart());
 
             return libraryUse;
         }
