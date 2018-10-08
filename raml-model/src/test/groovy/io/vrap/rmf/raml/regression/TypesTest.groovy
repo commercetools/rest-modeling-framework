@@ -2,6 +2,7 @@ package io.vrap.rmf.raml.regression
 
 import io.vrap.rmf.raml.model.RamlModelResult
 import io.vrap.rmf.raml.model.modules.Api
+import spock.lang.Ignore
 
 class TypesTest extends RegressionTest {
 
@@ -65,6 +66,32 @@ class TypesTest extends RegressionTest {
                     type: SomeType |
                           SomeType[]
                     
+                '''
+        )
+        then:
+        ramlModelResult.validationResults.size() == 0
+    }
+
+    @Ignore
+    def "multi inheritance type"() {
+        when:
+
+        RamlModelResult<Api> ramlModelResult = constructApi(
+                '''\
+                #%RAML 1.0
+                title: Example API
+                version: v1
+                types:
+                  Person:
+                    type: object
+                    properties:
+                      name: string
+                  Employee:
+                    type: object
+                    properties:
+                      employeeNr: integer
+                  Teacher:
+                    type: [ Person, Employee ]
                 '''
         )
         then:
