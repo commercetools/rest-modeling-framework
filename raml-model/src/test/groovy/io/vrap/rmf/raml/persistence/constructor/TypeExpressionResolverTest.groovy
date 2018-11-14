@@ -66,6 +66,19 @@ class TypeExpressionResolverTest extends Specification implements ResourceFixtur
         unionType.oneOf[2].name == 'boolean'
     }
 
+    def "IntersectionType"() {
+        when:
+        IntersectionType intersectionType = resolve('[string,number,boolean]')
+        then:
+        intersectionType.allOf.size() == 3
+        intersectionType.allOf[0] instanceof StringType
+        intersectionType.allOf[0].name == 'string'
+        intersectionType.allOf[1] instanceof NumberType
+        intersectionType.allOf[1].name == 'number'
+        intersectionType.allOf[2] instanceof BooleanType
+        intersectionType.allOf[2].name == 'boolean'
+    }
+
     def "TypeTemplate"() {
         when:
         TypeTemplate typeTemplate = resolve('<<resourcePath>>Draft')
