@@ -2,7 +2,8 @@ package io.vrap.rmf.raml.regression
 
 import io.vrap.rmf.raml.model.RamlModelResult
 import io.vrap.rmf.raml.model.modules.Api
-import spock.lang.Ignore
+import io.vrap.rmf.raml.model.types.IntersectionType
+import io.vrap.rmf.raml.model.types.ObjectType
 
 class TypesTest extends RegressionTest {
 
@@ -72,7 +73,6 @@ class TypesTest extends RegressionTest {
         ramlModelResult.validationResults.size() == 0
     }
 
-    @Ignore
     def "multi inheritance type"() {
         when:
 
@@ -92,6 +92,31 @@ class TypesTest extends RegressionTest {
                       employeeNr: integer
                   Teacher:
                     type: [ Person, Employee ]
+                '''
+        )
+        then:
+        ramlModelResult.validationResults.size() == 0
+        with(ramlModelResult.rootObject) {
+            types.size() == 3
+            types[2] instanceof ObjectType
+            types[2].type instanceof IntersectionType
+            IntersectionType intersectionType = types[2].type
+            intersectionType.allOf[0] == types[0]
+            intersectionType.allOf[1] == types[1]
+        }
+    }
+
+    def "multi inheritance type with primitive types"() {
+        when:
+
+        RamlModelResult<Api> ramlModelResult = constructApi(
+                '''\
+                #%RAML 1.0
+                title: Example API
+                version: v1
+                types:
+                  Teacher:
+                    type: [ number, string ]
                 '''
         )
         then:

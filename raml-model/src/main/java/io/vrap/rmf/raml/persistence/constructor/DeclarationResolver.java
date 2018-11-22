@@ -15,6 +15,7 @@ import io.vrap.rmf.raml.model.types.BuiltinType;
 import io.vrap.rmf.raml.model.types.UnionType;
 import io.vrap.rmf.raml.model.types.util.TypesSwitch;
 import io.vrap.rmf.raml.persistence.antlr.RAMLParser;
+import io.vrap.rmf.raml.persistence.antlr.TypeExpressionBaseVisitor;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.eclipse.emf.common.util.EList;
@@ -25,6 +26,7 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
 import static io.vrap.rmf.raml.model.elements.ElementsPackage.Literals.NAMED_ELEMENT__NAME;
@@ -339,7 +341,7 @@ public class DeclarationResolver {
         final String typeExpression;
         if (typeDeclarationMap.typeFacet().size() == 1) {
             final RAMLParser.TypeFacetContext typeFacet = typeDeclarationMap.typeFacet().get(0);
-            typeExpression = typeFacet.typeExpression.getText();
+            typeExpression = getTypeExpression(typeFacet.typeExpression());
         } else if (typeDeclarationMap.propertiesFacet().size() == 1) {
             typeExpression = BuiltinType.OBJECT.getName();
 
@@ -356,8 +358,21 @@ public class DeclarationResolver {
         return resolved;
     }
 
+    private String getTypeExpression(final RAMLParser.TypeExpressionContext typeExpressionContext) {
+        final List<RAMLParser.IdContext> expressions = typeExpressionContext.id();
+        final String typeExpression;
+        if (expressions.size() > 1) {
+            final StringJoiner stringJoiner = new StringJoiner(",", "[", "]");
+            expressions.forEach(e -> stringJoiner.add(e.getText()));
+            typeExpression = stringJoiner.toString();
+        } else {
+            typeExpression = expressions.isEmpty() ? null : expressions.get(0).getText();
+        }
+        return typeExpression;
+    }
+
     private EObject getType(final RAMLParser.TypeDeclarationTupleContext typeDeclarationTuple, final Scope scope) {
-        final Token typeExpressionToken = typeDeclarationTuple.typeExpression.start;
+        final Token typeExpressionToken = typeDeclarationTuple.typeExpression().start;
         final String typeExpression = typeExpressionToken.getText().isEmpty() ?
                 BuiltinType.STRING.getName() :
                 typeExpressionToken.getText();

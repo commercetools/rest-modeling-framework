@@ -167,7 +167,7 @@ public class ModelHelper {
 
     private static Map<String, Property> getAllPropertiesAsMapInternal(final ObjectType objectType, final Predicate<Property> filter) {
         final Map<String, Property> allPropertiesAsMap = new LinkedHashMap<>();
-        if (objectType.getType() != null) {
+        if (objectType.getType() instanceof ObjectType) {
             final ObjectType parent = (ObjectType) objectType.getType();
             allPropertiesAsMap.putAll(getAllPropertiesAsMapInternal(parent, filter));
         }

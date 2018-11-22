@@ -459,7 +459,7 @@ typeDeclarationFacet:
     ;
 
 typeDeclarationTuple:
-    name=id typeExpression=id;
+    name=id typeExpression;
 
 typeDeclarationMap:
     name=id
@@ -506,13 +506,17 @@ typeDeclarationFragment:
     ;
 
 typeFacet:
-    'type' typeExpression=id
+    'type' typeExpression
+    ;
+
+typeExpression:
+    exprs+=id | (LIST_START exprs+=id+ LIST_END)
     ;
 
 itemsFacet:
     'items'
     (
-        typeExpression=id |
+        typeExpression |
         (
             MAP_START
             (

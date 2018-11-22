@@ -9,10 +9,13 @@ import io.vrap.rmf.raml.persistence.antlr.TypeExpressionParser;
 import org.antlr.v4.runtime.*;
 import org.eclipse.emf.common.util.ECollections;
 import org.eclipse.emf.common.util.EList;
+import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -155,6 +158,11 @@ public class TypeExpressionResolver {
         }
 
         @Override
+        public EObject visitIntersectionType(final TypeExpressionParser.IntersectionTypeContext ctx) {
+            return EcoreUtil.create(scope.getEObjectByName("object").eClass());
+        }
+
+        @Override
         public EObject visitUnionType(final TypeExpressionParser.UnionTypeContext ctx) {
             final EObject unionType = EcoreUtil.create(UNION_TYPE);
             scope.addValue(INLINE_TYPE_CONTAINER__INLINE_TYPES, unionType);
@@ -257,9 +265,11 @@ public class TypeExpressionResolver {
      */
     private final static class AnyTypeTypeResolver extends TypeExpressionBaseVisitor<EObject> {
         private final Scope scope;
+        private boolean nestedTypes;
 
         public AnyTypeTypeResolver(final Scope scope) {
             this.scope = scope;
+            this.nestedTypes = false;
         }
 
         @Override
@@ -268,10 +278,24 @@ public class TypeExpressionResolver {
         }
 
         @Override
+        public EObject visitIntersectionType(final TypeExpressionParser.IntersectionTypeContext ctx) {
+            final EObject intersectionType = EcoreUtil.create(INTERSECTION_TYPE);
+            scope.addValue(INLINE_TYPE_CONTAINER__INLINE_TYPES, intersectionType);
+            nestedTypes = true;
+            final Stream<ParserRuleContext> allExprs = Streams.concat(ctx.primary_type_expr().stream(), ctx.union_type_expr().stream());
+            final List<EObject> collect = allExprs.map(this::visit).collect(Collectors.toList());
+            final EList<EObject> allOfTypes = ECollections.asEList(collect);
+            nestedTypes = false;
+            intersectionType.eSet(INTERSECTION_TYPE__ALL_OF, allOfTypes);
+
+            return intersectionType;
+        }
+
+        @Override
         public EObject visitTypeReference(final TypeExpressionParser.TypeReferenceContext ctx) {
             final String typeName = ctx.getText();
 
-            return BuiltinType.of(typeName).isPresent() ?
+            return !nestedTypes && BuiltinType.of(typeName).isPresent() ?
                     null :
                     scope.getEObjectByName(typeName);
         }
