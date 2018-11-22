@@ -3,7 +3,9 @@ package io.vrap.rmf.raml.regression
 import io.vrap.rmf.raml.model.RamlModelResult
 import io.vrap.rmf.raml.model.modules.Api
 import io.vrap.rmf.raml.model.types.IntersectionType
+import io.vrap.rmf.raml.model.types.NumberType
 import io.vrap.rmf.raml.model.types.ObjectType
+import io.vrap.rmf.raml.model.types.StringType
 
 class TypesTest extends RegressionTest {
 
@@ -75,7 +77,6 @@ class TypesTest extends RegressionTest {
 
     def "multi inheritance type"() {
         when:
-
         RamlModelResult<Api> ramlModelResult = constructApi(
                 '''\
                 #%RAML 1.0
@@ -108,7 +109,6 @@ class TypesTest extends RegressionTest {
 
     def "multi inheritance type with primitive types"() {
         when:
-
         RamlModelResult<Api> ramlModelResult = constructApi(
                 '''\
                 #%RAML 1.0
@@ -121,5 +121,14 @@ class TypesTest extends RegressionTest {
         )
         then:
         ramlModelResult.validationResults.size() == 0
+        with(ramlModelResult.rootObject) {
+            types.size() == 1
+            types[0] instanceof NumberType
+            types[0].type instanceof IntersectionType
+            IntersectionType intersectionType = types[0].type
+            intersectionType.allOf.size() == 2
+            intersectionType.allOf[0] instanceof NumberType
+            intersectionType.allOf[1] instanceof StringType
+        }
     }
 }

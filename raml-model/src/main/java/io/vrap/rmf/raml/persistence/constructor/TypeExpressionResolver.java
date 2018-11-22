@@ -16,6 +16,7 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -159,7 +160,13 @@ public class TypeExpressionResolver {
 
         @Override
         public EObject visitIntersectionType(final TypeExpressionParser.IntersectionTypeContext ctx) {
-            return EcoreUtil.create(scope.getEObjectByName("object").eClass());
+            final EClass type;
+            if (ctx.primary_type_expr().isEmpty()) {
+                type = scope.getEObjectByName("object").eClass();
+            } else {
+                type = scope.getEObjectByName(ctx.primary_type_expr(0).getText()).eClass();
+            }
+            return EcoreUtil.create(type);
         }
 
         @Override
