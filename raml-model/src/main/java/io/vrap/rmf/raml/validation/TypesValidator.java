@@ -1,5 +1,6 @@
 package io.vrap.rmf.raml.validation;
 
+import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
 import io.vrap.rmf.raml.model.types.*;
 import io.vrap.rmf.raml.model.types.util.TypesSwitch;
@@ -18,7 +19,8 @@ class TypesValidator extends AbstractRamlValidator {
             new AnnotationValidator(),
             new EnumFacetValidator(),
             new DefaultFacetValidator(),
-            new ExamplesValidator());
+            new ExamplesValidator(),
+            new AnyTypeFacetValidator());
 
     @Override
     public boolean validate(final EClass eClass, final EObject eObject, final DiagnosticChain diagnostics, final Map<Object, Object> context) {
@@ -246,6 +248,30 @@ class TypesValidator extends AbstractRamlValidator {
                     .map(value -> instanceValidator.validate(value, anyAnnotationType))
                     .orElse(Collections.emptyList());
 
+            return validationResults;
+        }
+    }
+
+    private class AnyTypeFacetValidator extends ValidatingTypesSwitch {
+        @Override
+        public List<Diagnostic> caseAnyTypeFacet(final AnyTypeFacet anyTypeFacet) {
+            final List<Diagnostic> validationResults;
+            if (anyTypeFacet.getType() instanceof IntersectionType) {
+                final IntersectionType intersectionType = (IntersectionType) anyTypeFacet.getType();
+                final Set<String> primitiveTypes = intersectionType.getAllOf().stream()
+                        .map(EObject::eClass).map(BuiltinType::of)
+                        .filter(Optional::isPresent).map(Optional::get).map(BuiltinType::getName)
+                        .collect(Collectors.toSet());
+                if (primitiveTypes.size() > 1) {
+                    validationResults = new ArrayList<>();
+                    final String primitiveTypesAsString = Joiner.on(",").join(primitiveTypes);
+                    validationResults.add(error(anyTypeFacet, "Intersection type has different primitive type [{0}]", primitiveTypesAsString));
+                } else {
+                    validationResults = Collections.emptyList();
+                }
+            } else {
+                validationResults = Collections.emptyList();
+            }
             return validationResults;
         }
     }

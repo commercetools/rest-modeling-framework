@@ -98,4 +98,17 @@ class ObjectTypeValidationTest extends BaseValidatorTest implements TypeFixtures
         'WithDefaultDiscriminatorValue' || false
         'Base'                          || false
     }
+
+    def "validate intersection type"() {
+        when:
+        Library library = constructLibrary(
+                """\
+            usage: A type hierarchy
+            types:
+                WithIntersectionType:
+                    type: [string, number]
+        """)
+        then:
+        validate(library) == false
+    }
 }

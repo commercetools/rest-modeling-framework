@@ -65,4 +65,11 @@ public enum BuiltinType {
                 .filter(builtinMetaType -> builtinMetaType.getName().equals(name))
                 .findFirst();
     }
+
+    public static Optional<BuiltinType> of(final EClass eClass) {
+        return Stream.of(BuiltinType.values())
+                .filter(builtinMetaType -> builtinMetaType.typeDeclarationType == eClass || builtinMetaType.annotationTypeDeclarationType == eClass)
+                .findFirst();
+    }
+
 }

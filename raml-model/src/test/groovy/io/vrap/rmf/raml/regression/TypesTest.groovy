@@ -2,6 +2,7 @@ package io.vrap.rmf.raml.regression
 
 import io.vrap.rmf.raml.model.RamlModelResult
 import io.vrap.rmf.raml.model.modules.Api
+import io.vrap.rmf.raml.model.types.IntegerType
 import io.vrap.rmf.raml.model.types.IntersectionType
 import io.vrap.rmf.raml.model.types.NumberType
 import io.vrap.rmf.raml.model.types.ObjectType
@@ -115,20 +116,24 @@ class TypesTest extends RegressionTest {
                 title: Example API
                 version: v1
                 types:
+                  PositiveInt:
+                    type: integer
+                    minimum: 0
                   Teacher:
-                    type: [ number, string ]
+                    type: [ integer, PositiveInt ]
                 '''
         )
         then:
         ramlModelResult.validationResults.size() == 0
         with(ramlModelResult.rootObject) {
-            types.size() == 1
-            types[0] instanceof NumberType
-            types[0].type instanceof IntersectionType
-            IntersectionType intersectionType = types[0].type
+            types.size() == 2
+            types[0] instanceof IntegerType
+            types[1] instanceof IntegerType
+            types[1].type instanceof IntersectionType
+            IntersectionType intersectionType = types[1].type
             intersectionType.allOf.size() == 2
-            intersectionType.allOf[0] instanceof NumberType
-            intersectionType.allOf[1] instanceof StringType
+            intersectionType.allOf[0] instanceof IntegerType
+            intersectionType.allOf[1] == types[0]
         }
     }
 }
