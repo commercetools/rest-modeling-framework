@@ -1,21 +1,24 @@
 package io.vrap.rmf.raml.persistence.constructor;
 
+import com.google.common.collect.Streams;
 import io.vrap.rmf.raml.model.types.*;
 import io.vrap.rmf.raml.persistence.antlr.ParserErrorCollector;
 import io.vrap.rmf.raml.persistence.antlr.TypeExpressionBaseVisitor;
 import io.vrap.rmf.raml.persistence.antlr.TypeExpressionLexer;
 import io.vrap.rmf.raml.persistence.antlr.TypeExpressionParser;
-import org.antlr.v4.runtime.CharStream;
-import org.antlr.v4.runtime.CharStreams;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.TokenStream;
+import org.antlr.v4.runtime.*;
 import org.eclipse.emf.common.util.ECollections;
 import org.eclipse.emf.common.util.EList;
+import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static io.vrap.rmf.raml.model.modules.ModulesPackage.Literals.TYPE_CONTAINER__ANNOTATION_TYPES;
 import static io.vrap.rmf.raml.model.modules.ModulesPackage.Literals.TYPE_CONTAINER__TYPES;
@@ -62,6 +65,10 @@ public class TypeExpressionResolver {
         return resolvedElement;
     }
 
+    /**
+     *  This visitor resolves the type of a typed element (e.g. a {@link Property}.
+     *  It will create inline types for {@link ArrayType}, {@link UnionType} and {@link IntersectionType}s.
+     */
     private final static class TypedElementTypeResolver extends TypeExpressionBaseVisitor<EObject> {
         private final Scope scope;
 
@@ -82,6 +89,17 @@ public class TypeExpressionResolver {
             arrayType.eSet(ARRAY_TYPE_FACET__ITEMS, itemsType);
 
             return arrayType;
+        }
+
+        @Override
+        public EObject visitIntersectionType(final TypeExpressionParser.IntersectionTypeContext ctx) {
+            final EObject intersectionType = EcoreUtil.create(INTERSECTION_TYPE);
+            scope.addValue(INLINE_TYPE_CONTAINER__INLINE_TYPES, intersectionType);
+            final Stream<ParserRuleContext> typeExprs = Streams
+                    .concat(ctx.primary_type_expr().stream(), ctx.union_type_expr().stream());
+            final EList<EObject> allOfTypes = ECollections.asEList(typeExprs.map(this::visit).collect(Collectors.toList()));
+            intersectionType.eSet(INTERSECTION_TYPE__ALL_OF, allOfTypes);
+            return intersectionType;
         }
 
         @Override
@@ -138,6 +156,17 @@ public class TypeExpressionResolver {
             arrayType.eSet(ARRAY_TYPE_FACET__ITEMS, itemsType);
 
             return arrayType;
+        }
+
+        @Override
+        public EObject visitIntersectionType(final TypeExpressionParser.IntersectionTypeContext ctx) {
+            final EClass type;
+            if (ctx.primary_type_expr().isEmpty()) {
+                type = scope.getEObjectByName("object").eClass();
+            } else {
+                type = scope.getEObjectByName(ctx.primary_type_expr(0).getText()).eClass();
+            }
+            return EcoreUtil.create(type);
         }
 
         @Override
@@ -238,11 +267,16 @@ public class TypeExpressionResolver {
         }
     }
 
+    /**
+     * This visitor is used to resolve the type of a type {@link AnyType#getType()}.
+     */
     private final static class AnyTypeTypeResolver extends TypeExpressionBaseVisitor<EObject> {
         private final Scope scope;
+        private boolean nestedTypes;
 
         public AnyTypeTypeResolver(final Scope scope) {
             this.scope = scope;
+            this.nestedTypes = false;
         }
 
         @Override
@@ -251,10 +285,24 @@ public class TypeExpressionResolver {
         }
 
         @Override
+        public EObject visitIntersectionType(final TypeExpressionParser.IntersectionTypeContext ctx) {
+            final EObject intersectionType = EcoreUtil.create(INTERSECTION_TYPE);
+            scope.addValue(INLINE_TYPE_CONTAINER__INLINE_TYPES, intersectionType);
+            nestedTypes = true;
+            final Stream<ParserRuleContext> allExprs = Streams.concat(ctx.primary_type_expr().stream(), ctx.union_type_expr().stream());
+            final List<EObject> collect = allExprs.map(this::visit).collect(Collectors.toList());
+            final EList<EObject> allOfTypes = ECollections.asEList(collect);
+            nestedTypes = false;
+            intersectionType.eSet(INTERSECTION_TYPE__ALL_OF, allOfTypes);
+
+            return intersectionType;
+        }
+
+        @Override
         public EObject visitTypeReference(final TypeExpressionParser.TypeReferenceContext ctx) {
             final String typeName = ctx.getText();
 
-            return BuiltinType.of(typeName).isPresent() ?
+            return !nestedTypes && BuiltinType.of(typeName).isPresent() ?
                     null :
                     scope.getEObjectByName(typeName);
         }

@@ -421,7 +421,7 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
      */
     @Override
     public Object visitTypeFacet(final RAMLParser.TypeFacetContext ctx) {
-        final String typeExpression = ctx.typeExpression.getText();
+        final String typeExpression = ctx.typeExpression().getText();
 
         final EObject parsedTypeExpression = typeExpressionResolver.resolve(typeExpression, scope);
         return parsedTypeExpression;
@@ -431,8 +431,8 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
     public Object visitItemsFacet(RAMLParser.ItemsFacetContext itemsFacet) {
         return withinScope(scope.with(ARRAY_TYPE_FACET__ITEMS), itemsScope -> {
             final EObject itemsType;
-            if (itemsFacet.typeExpression != null) {
-                final String typeExpression = itemsFacet.typeExpression.getText();
+            if (itemsFacet.typeExpression() != null) {
+                final String typeExpression = itemsFacet.typeExpression().getText();
                 itemsType = typeExpressionResolver.resolve(typeExpression, scope);
             } else {
                 EObject typedElementType;

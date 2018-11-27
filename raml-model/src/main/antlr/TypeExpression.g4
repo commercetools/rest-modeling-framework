@@ -7,13 +7,17 @@ package io.vrap.rmf.raml.persistence.antlr;
 type_expr:
     primary_type_expr
     | union_type_expr
+    | intersection_type_expr
     ;
 
+
+intersection_type_expr:
+    '[' (primary_type_expr | union_type_expr) (',' (primary_type_expr | union_type_expr))+ ']' # IntersectionType
+    ;
 
 union_type_expr:
     primary_type_expr ('|' primary_type_expr)+ # UnionType
     ;
-
 
 primary_type_expr:
     qualified_name              # TypeReference
