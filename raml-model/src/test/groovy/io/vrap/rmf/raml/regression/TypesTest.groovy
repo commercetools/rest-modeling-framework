@@ -2,11 +2,12 @@ package io.vrap.rmf.raml.regression
 
 import io.vrap.rmf.raml.model.RamlModelResult
 import io.vrap.rmf.raml.model.modules.Api
+import io.vrap.rmf.raml.model.types.AnyType
 import io.vrap.rmf.raml.model.types.IntegerType
 import io.vrap.rmf.raml.model.types.IntersectionType
-import io.vrap.rmf.raml.model.types.NumberType
 import io.vrap.rmf.raml.model.types.ObjectType
-import io.vrap.rmf.raml.model.types.StringType
+import io.vrap.rmf.raml.model.types.Property
+import spock.lang.Ignore
 
 class TypesTest extends RegressionTest {
 
@@ -135,5 +136,46 @@ class TypesTest extends RegressionTest {
             intersectionType.allOf[0] instanceof IntegerType
             intersectionType.allOf[1] == types[0]
         }
+    }
+
+    @Ignore
+    def "multi inheritance discriminator resolve order"() {
+        when:
+        RamlModelResult<Api> ramlModelResult = constructApi(
+                '''\
+                #%RAML 1.0
+                title: Example API
+                version: v1
+                types:
+                  Resource:
+                    type: object
+                    properties:
+                      id: string
+                  CategoryCreatedMessage:
+                    type: [Message, CategoryCreatedMessagePayload]
+                    discriminatorValue: CategoryCreated
+                  Message:
+                    type: Resource
+                    discriminator: type
+                    properties:
+                      type: string
+                      sequenceNumber: number
+                  MessagePayload:
+                    type: object
+                    discriminator: type
+                    properties:
+                      type: string
+                  CategoryCreatedMessagePayload:
+                    type: MessagePayload
+                    discriminatorValue: CategoryCreated
+                    properties:
+                      category: object
+                '''
+        )
+        then:
+        ramlModelResult.validationResults.size() == 0
+//        AnyType ccMessage = ramlModelResult.rootObject.types[1];
+//        List<Property> properties = ccMessage.type.getAllProperties()
+//        ccMessage != null
     }
 }
