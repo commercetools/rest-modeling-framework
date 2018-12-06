@@ -2,12 +2,9 @@ package io.vrap.rmf.raml.regression
 
 import io.vrap.rmf.raml.model.RamlModelResult
 import io.vrap.rmf.raml.model.modules.Api
-import io.vrap.rmf.raml.model.types.AnyType
 import io.vrap.rmf.raml.model.types.IntegerType
 import io.vrap.rmf.raml.model.types.IntersectionType
 import io.vrap.rmf.raml.model.types.ObjectType
-import io.vrap.rmf.raml.model.types.Property
-import spock.lang.Ignore
 
 class TypesTest extends RegressionTest {
 
@@ -138,7 +135,6 @@ class TypesTest extends RegressionTest {
         }
     }
 
-    @Ignore
     def "multi inheritance discriminator resolve order"() {
         when:
         RamlModelResult<Api> ramlModelResult = constructApi(
@@ -174,8 +170,11 @@ class TypesTest extends RegressionTest {
         )
         then:
         ramlModelResult.validationResults.size() == 0
-//        AnyType ccMessage = ramlModelResult.rootObject.types[1];
-//        List<Property> properties = ccMessage.type.getAllProperties()
-//        ccMessage != null
+        ramlModelResult.rootObject.getType('CategoryCreatedMessage') instanceof ObjectType
+        ObjectType categoryCreatedMessageType = ramlModelResult.rootObject.getType('CategoryCreatedMessage')
+        categoryCreatedMessageType.discriminatorValue == 'CategoryCreated'
+        categoryCreatedMessageType.getType() instanceof IntersectionType
+        IntersectionType intersectionType = categoryCreatedMessageType.getType()
+        intersectionType.allOf.size() == 2
     }
 }

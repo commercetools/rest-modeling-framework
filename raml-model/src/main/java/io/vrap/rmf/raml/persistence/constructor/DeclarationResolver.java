@@ -9,13 +9,9 @@ import io.vrap.rmf.raml.model.modules.LibraryUse;
 import io.vrap.rmf.raml.model.resources.ResourceType;
 import io.vrap.rmf.raml.model.resources.Trait;
 import io.vrap.rmf.raml.model.security.SecurityScheme;
-import io.vrap.rmf.raml.model.types.AnyType;
-import io.vrap.rmf.raml.model.types.ArrayType;
-import io.vrap.rmf.raml.model.types.BuiltinType;
-import io.vrap.rmf.raml.model.types.UnionType;
+import io.vrap.rmf.raml.model.types.*;
 import io.vrap.rmf.raml.model.types.util.TypesSwitch;
 import io.vrap.rmf.raml.persistence.antlr.RAMLParser;
-import io.vrap.rmf.raml.persistence.antlr.TypeExpressionBaseVisitor;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.eclipse.emf.common.util.EList;
@@ -280,9 +276,18 @@ public class DeclarationResolver {
                     Collections.singletonList(eObject) : Collections.emptyList();
         }
 
+
         @Override
         public List<EObject> caseArrayType(final ArrayType arrayType) {
             return doSwitch(arrayType.getItems());
+        }
+
+        @Override
+        public List<EObject> caseIntersectionType(final IntersectionType intersectionType) {
+            return intersectionType.getAllOf().stream()
+                    .map(this::doSwitch)
+                    .flatMap(List::stream)
+                    .collect(Collectors.toList());
         }
 
         @Override

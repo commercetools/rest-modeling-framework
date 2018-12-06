@@ -9,14 +9,11 @@ import io.vrap.rmf.raml.persistence.antlr.TypeExpressionParser;
 import org.antlr.v4.runtime.*;
 import org.eclipse.emf.common.util.ECollections;
 import org.eclipse.emf.common.util.EList;
-import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -160,13 +157,13 @@ public class TypeExpressionResolver {
 
         @Override
         public EObject visitIntersectionType(final TypeExpressionParser.IntersectionTypeContext ctx) {
-            final EClass type;
+            final EObject type;
             if (ctx.primary_type_expr().isEmpty()) {
-                type = scope.getEObjectByName("object").eClass();
+                type = scope.getEObjectByName("object");
             } else {
-                type = scope.getEObjectByName(ctx.primary_type_expr(0).getText()).eClass();
+                type = scope.getEObjectByName(ctx.primary_type_expr(0).getText());
             }
-            return EcoreUtil.create(type);
+            return type.eIsProxy() ? type : EcoreUtil.create(type.eClass());
         }
 
         @Override
