@@ -118,7 +118,7 @@ class Resource extends ResourceBase, ResourceContainer, ApplyTraitsFacet {
 	 */
 	op UriParameter getUriParameter(String name) {
 		val uriParameter = uriParameters.findFirst[it.name == name]
-		if (uriParameter == null && parent != null) {
+		if (uriParameter === null && parent !== null) {
 			parent.getUriParameter(name)
 		} else {
 			uriParameter
