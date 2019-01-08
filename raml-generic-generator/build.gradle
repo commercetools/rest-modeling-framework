@@ -19,22 +19,27 @@ sourceSets {
 }
 
 dependencies {
-    testCompile group: 'junit', name: 'junit', version: '4.12'
-    testCompile 'org.assertj:assertj-core:3.8.0'
-    testCompile "org.spockframework:spock-core:${versions.spock}"
-
     compile project(':functional-utils')
     compile project(':raml-model')
 
-    compile 'com.squareup:javapoet:1.9.0'
-    compile 'commons-cli:commons-cli:1.4'
-    compile 'commons-io:commons-io:2.5'
-    compile 'org.antlr:stringtemplate:4.0.2'
-    compile 'com.google.guava:guava:22.0'
-    compile 'org.apache.commons:commons-lang3:3.4'
-    compile 'com.fasterxml.jackson.core:jackson-annotations:2.8.9'
-    compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.0'
-    compile 'com.hypertino:inflector_2.12:1.0.7'
+    compile _antlr.stringtemplate
+    compile google.guava
+
+    compile commons.lang3
+    compile commons.cli
+    compile commons.io
+
+    compile squareup.javapoet
+
+    compile jackson_core.annotations
+    compile jackson_core.databind
+
+    compile hypertino.inflector
+
+    testCompile junit.junit
+    testCompile assertj.core
+
+    testCompile spockframework.spock_core
 }
 
 mainClassName = "io.vrap.rmf.raml.generic.generator.CodeGenerator"
