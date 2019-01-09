@@ -1,0 +1,68 @@
+ext {
+    xtextVersion = '2.15.0'
+    spockVersion = "1.1-groovy-2.4"
+    jvmSdkVersion = "1.21.0"
+    
+    yaml = [
+            snakeyaml: 'org.yaml:snakeyaml:1.18'
+    ]
+
+    google = [
+            guava: 'com.google.guava:guava:23.3-jre'
+    ]
+
+    commons = [
+            lang3: 'org.apache.commons:commons-lang3:3.4',
+            cli: 'commons-cli:commons-cli:1.4',
+            io: 'commons-io:commons-io:2.5'
+    ]
+
+    commercetools = [
+            sdk_base: "com.commercetools.sdk.jvm.core:commercetools-sdk-base:$jvmSdkVersion",
+            java_client_core: "com.commercetools.sdk.jvm.core:commercetools-java-client-core:$jvmSdkVersion",
+            sdk_http: "com.commercetools.sdk.jvm.core:sdk-http:$jvmSdkVersion"
+    ]
+
+    _antlr = [
+            antrl: 'org.antlr:antlr4:4.7',
+            stringtemplate: 'org.antlr:stringtemplate:4.0.2'
+    ]
+
+    jackson_core = [
+            annotations: 'com.fasterxml.jackson.core:jackson-annotations:2.8.9',
+            core: 'com.fasterxml.jackson.core:jackson-core:2.9.1',
+            databind: 'com.fasterxml.jackson.core:jackson-databind:2.9.1',
+            dataformat_yaml: 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.9.1'
+    ]
+
+    emf = [
+            common: 'org.eclipse.emf:org.eclipse.emf.common:2.11+',
+            ecore: 'org.eclipse.emf:org.eclipse.emf.ecore:2.11+',
+            ecore_xcore_lib: 'org.eclipse.emf:org.eclipse.emf.ecore.xcore.lib:1.1.100'
+    ]
+
+    hypertino = [
+            inflector: 'com.hypertino:inflector_2.12:1.0.7'
+    ]
+
+    damnhandy = [
+            handy_uri_templates: 'com.damnhandy:handy-uri-templates:2.1.6'
+    ]
+
+    squareup = [
+            javapoet: 'com.squareup:javapoet:1.9.0'
+    ]
+
+    spockframework = [
+            spock_core: "org.spockframework:spock-core:${spockVersion}"
+    ]
+
+    assertj = [
+            core: 'org.assertj:assertj-core:3.8.0'
+    ]
+
+    junit = [
+            junit: 'junit:junit:4.11',
+            dataprovider: 'com.tngtech.java:junit-dataprovider:1.12.0'
+    ]
+}
