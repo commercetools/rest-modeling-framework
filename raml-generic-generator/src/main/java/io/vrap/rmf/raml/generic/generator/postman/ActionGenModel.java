@@ -25,9 +25,15 @@ public class ActionGenModel extends ItemGenModel{
         super(resource, template, method);
         this.type = type;
         String example = null;
+        Instance instance = null;
 
-        if (type.getExamples().size() > 0) {
-            final Instance instance = type.getExamples().get(0).getValue();
+        if (type.getAnnotation("postman-example") != null){
+            instance = type.getAnnotation("postman-example").getValue();
+        } else if (type.getExamples().size() > 0) {
+            instance = type.getExamples().get(0).getValue();
+        }
+
+        if (instance != null) {
             example = Helper.toJson(instance);
             try {
                 ObjectMapper mapper = new ObjectMapper();
