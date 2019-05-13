@@ -20,6 +20,17 @@ class ValidationTest extends Specification implements ResourceFixtures {
         then:
         result.validationResults.size() == 1
         RamlDiagnostic diagnostic = result.validationResults[0]
-        diagnostic.message == "Value v3 is not defined in enum facet"
+        diagnostic.message == "Value 'v3' is not defined in enum facet '[v1,v2]'"
+    }
+
+    def "/api/api-with-duplicate-resource.raml"() {
+        when:
+        URI uri = uriFromClasspath("/api/api-with-duplicate-resource.raml")
+        RamlModelResult<Api> result =  new RamlModelBuilder().buildApi(uri)
+
+        then:
+        result.validationResults.size() == 1
+        RamlDiagnostic diagnostic = result.validationResults[0]
+        diagnostic.message == "Duplicate resource '/project/test'"
     }
 }

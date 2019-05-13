@@ -55,7 +55,7 @@ class ResourcesValidator extends AbstractRamlValidator {
                     .collect(Collectors.toList());
 
             return optionalMethods.stream()
-                    .map(method -> error(resource, "Optional method {0} not allowed", method.getMethod()))
+                    .map(method -> error(resource, "Optional method ''{0}'' not allowed", method.getMethod()))
                     .collect(Collectors.toList());
         }
     }

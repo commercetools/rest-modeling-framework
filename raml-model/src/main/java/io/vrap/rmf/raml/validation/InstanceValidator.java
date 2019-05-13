@@ -31,19 +31,8 @@ public class InstanceValidator implements DiagnosticsCreator {
      * @param type     the type to validate the instance against
      * @return the validation diagnostics
      */
-    public List<Diagnostic> validate(final Instance instance, final AnyType type) {
+    public List<Diagnostic> validate(final Instance instance, final AnyTypeFacet type) {
         return validateInternal(instance, type);
-    }
-
-    /**
-     * Validates the given instance against the given annotation type.
-     *
-     * @param instance       the instance to validate
-     * @param annotationType the annotation type to validate the instance against
-     * @return the validation diagnostics
-     */
-    public List<Diagnostic> validate(final Instance instance, final AnyAnnotationType annotationType) {
-        return validateInternal(instance, annotationType);
     }
 
     /**
@@ -71,7 +60,11 @@ public class InstanceValidator implements DiagnosticsCreator {
                     .filter(enumValue -> enumValue.getValue().equals(value))
                     .findFirst();
             if (anyTypeFacet.getEnum().size() > 0 && !enumInstance.isPresent()) {
-                validationResults.add(error(anyTypeFacet,"Value {0} is not defined in enum facet", value));
+                final String enumValues = anyTypeFacet.getEnum().stream()
+                        .map(e -> e.getValue().toString())
+                        .collect(Collectors.joining(",", "[", "]"));
+                validationResults.add(error(anyTypeFacet,"Value ''{0}'' is not defined in enum facet ''{1}''",
+                        value, enumValues));
             }
             return validationResults;
         }
@@ -101,15 +94,15 @@ public class InstanceValidator implements DiagnosticsCreator {
             if (typeInstanceOf(StringTypeFacet.class)) {
                 final StringTypeFacet stringType = (StringTypeFacet) types.peek();
                 if (stringType.getMinLength() != null && value.length() < stringType.getMinLength()) {
-                    validationResults.add(error(stringInstance, "Value length {0} < minLength {1}",
+                    validationResults.add(error(stringInstance, "Value length ''{0}'' < minLength ''{1}''",
                             value.length(), stringType.getMinLength()));
                 }
                 if (stringType.getMaxLength() != null && value.length() > stringType.getMaxLength()) {
-                    validationResults.add(error(stringInstance, "Value length {0} > maxLength {1}",
+                    validationResults.add(error(stringInstance, "Value length ''{0}'' > maxLength ''{1}''",
                             value.length(), stringType.getMaxLength()));
                 }
                 if (stringType.getPattern() != null && !stringType.getPattern().test(value)) {
-                    validationResults.add(error(stringInstance, "Value {0} doesn't match pattern {1}",
+                    validationResults.add(error(stringInstance, "Value ''{0}'' doesn't match pattern ''{1}''",
                             value, stringType.getPattern()));
                 }
 
@@ -146,15 +139,15 @@ public class InstanceValidator implements DiagnosticsCreator {
                 final NumberTypeFacet numberType = (NumberTypeFacet) types.peek();
                 final BigDecimal value = numberInstance.getValue();
                 if (numberType.getMinimum() != null && value.compareTo(numberType.getMinimum()) < 0) {
-                    validationResults.add(error(numberInstance, "Value {0} < minimum {1}",
+                    validationResults.add(error(numberInstance, "Value ''{0}'' < minimum ''{1}''",
                             numberInstance.getValue(), numberType.getMinimum()));
                 }
                 if (numberType.getMaximum() != null && value.compareTo(numberType.getMaximum()) > 0) {
-                    validationResults.add(error(numberInstance, "Value {0} > maximum {0}",
+                    validationResults.add(error(numberInstance, "Value ''{0}'' > maximum ''{1}''",
                             numberInstance.getValue(), numberType.getMaximum()));
                 }
                 if (numberType.getMultipleOf() != null && value.remainder(BigDecimal.valueOf(numberType.getMultipleOf())).compareTo(BigDecimal.ZERO) != 0) {
-                    validationResults.add(error(numberInstance, "Value {0} is not a multiple of {1}",
+                    validationResults.add(error(numberInstance, "Value ''{0}'' is not a multiple of ''{1}''",
                             value, numberType.getMultipleOf()));
                 }
 
@@ -177,7 +170,7 @@ public class InstanceValidator implements DiagnosticsCreator {
             if (typeInstanceOf(CommonNumberTypeFacet.class)) {
                 final CommonNumberTypeFacet commonNumberType = (CommonNumberTypeFacet) types.peek();
                 if (commonNumberType.getMultipleOf() != null && !value.mod(BigInteger.valueOf(commonNumberType.getMultipleOf())).equals(BigInteger.ZERO)) {
-                    validationResults.add(error(integerInstance, "Value {0} is not a multiple of {1}",
+                    validationResults.add(error(integerInstance, "Value ''{0}'' is not a multiple of ''{1}''",
                             value, commonNumberType.getMultipleOf()));
                 }
                 validationResults.addAll(validateEnumFacet(commonNumberType, value));
@@ -185,21 +178,21 @@ public class InstanceValidator implements DiagnosticsCreator {
             if (typeInstanceOf(IntegerTypeFacet.class)) {
                 final IntegerTypeFacet integerType = (IntegerTypeFacet) types.peek();
                 if (integerType.getMinimum() != null && value.compareTo(BigInteger.valueOf(integerType.getMinimum())) < 0) {
-                    validationResults.add(error(integerInstance,"Value {0} < minimum {1}",
+                    validationResults.add(error(integerInstance,"Value ''{0}'' < minimum ''{1}''",
                             value, integerType.getMinimum()));
                 }
                 if (integerType.getMaximum() != null && value.compareTo(BigInteger.valueOf(integerType.getMaximum())) > 0) {
-                    validationResults.add(error(integerInstance,"Value {0} > maximum {1}",
+                    validationResults.add(error(integerInstance,"Value ''{0}'' > maximum ''{1}''",
                             value, integerType.getMaximum()));
                 }
             } else if (typeInstanceOf(NumberTypeFacet.class)) {
                 final NumberTypeFacet numberType = (NumberTypeFacet) types.peek();
                 if (numberType.getMinimum() != null && value.compareTo(BigInteger.valueOf(numberType.getMinimum().longValue())) < 0) {
-                    validationResults.add(error(integerInstance,"Value {0} < minimum {1}",
+                    validationResults.add(error(integerInstance,"Value ''{0}'' < minimum ''{1}''",
                             value, numberType.getMinimum()));
                 }
                 if (numberType.getMaximum() != null && value.compareTo(BigInteger.valueOf(numberType.getMaximum().longValue())) > 0) {
-                    validationResults.add(error(integerInstance,"Value {0} > maximum {1}",
+                    validationResults.add(error(integerInstance,"Value ''{0}'' > maximum ''{1}''",
                             value, numberType.getMaximum()));
                 }
             } else if (!typeIs(ANY_TYPE)) {
@@ -219,11 +212,11 @@ public class InstanceValidator implements DiagnosticsCreator {
                 final ArrayTypeFacet arrayType = (ArrayTypeFacet) types.peek();
                 final EList<Instance> values = arrayInstance.getValue();
                 if (arrayType.getMinItems() != null && values.size() < arrayType.getMinItems()) {
-                    validationResults.add(error(arrayInstance, "Array size {0} < minItems {1}",
+                    validationResults.add(error(arrayInstance, "Array size ''{0}'' < minItems ''{1}''",
                             values.size(), arrayType.getMinItems()));
                 }
                 if (arrayType.getMaxItems() != null && values.size() > arrayType.getMaxItems()) {
-                    validationResults.add(error(arrayInstance, "Array size  {0} > maxItems {1}",
+                    validationResults.add(error(arrayInstance, "Array size  ''{0}'' > maxItems ''{1}''",
                             values.size(), arrayType.getMaxItems()));
                 }
                 if (arrayType.getUniqueItems() != null && arrayType.getUniqueItems()) {
@@ -290,7 +283,7 @@ public class InstanceValidator implements DiagnosticsCreator {
                             types.pop();
                         }
                     } else if (objectTypeFacet.additionalPropertiesInherited() == Boolean.FALSE) {
-                        validationResults.add(error(objectInstance,"Property {0} not defined", name));
+                        validationResults.add(error(objectInstance,"Property ''{0}'' not defined", name));
                     }
                 }
 
@@ -298,7 +291,7 @@ public class InstanceValidator implements DiagnosticsCreator {
                 final List<Diagnostic> missingRequiredPropertyErrors = allProperties.values().stream()
                         .filter(property -> property.getRequired() != null && property.getRequired())
                         .filter(property -> objectInstance.getValue(property.getName()) == null)
-                        .map(property -> error(objectInstance, "Required property {0} is missing",  property.getName()))
+                        .map(property -> error(objectInstance, "Required property ''{0}'' is missing",  property.getName()))
                         .collect(Collectors.toList());
                 validationResults.addAll(missingRequiredPropertyErrors);
             }

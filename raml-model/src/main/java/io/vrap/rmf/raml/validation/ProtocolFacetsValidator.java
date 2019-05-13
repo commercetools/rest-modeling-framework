@@ -17,7 +17,7 @@ class ProtocolFacetsValidator implements DiagnosticsCreator {
                 .filter(VALID_PROTOCOL.negate())
                 .collect(Collectors.toList());
         return invalidProtocols.stream()
-                .map(invalidProtocol -> error(protocolsFacet, "Invalid protocol {0}", invalidProtocol))
+                .map(invalidProtocol -> error(protocolsFacet, "Invalid protocol ''{0}''", invalidProtocol))
                 .collect(Collectors.toList());
     }
 }

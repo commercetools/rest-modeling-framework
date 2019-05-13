@@ -17,7 +17,7 @@ public class RamlDiagnostic implements Resource.Diagnostic {
 
     private RamlDiagnostic(final String message, final String location, final int line, final int column) {
         this.message = message;
-        this.location = location;
+        this.location = location == null ? "<unkown-location>" : location;
         this.line = line;
         this.column = column;
     }
@@ -44,12 +44,7 @@ public class RamlDiagnostic implements Resource.Diagnostic {
 
     @Override
     public String toString() {
-        return "RamlDiagnostic{" +
-                "message='" + message + '\'' +
-                ", location='" + location + '\'' +
-                ", line=" + line +
-                ", column=" + column +
-                '}';
+        return String.format("%s (%s,%d,%d)", message, location, line, column);
     }
 
     public static RamlDiagnostic of(final String message, final String location, final int line, final int column) {

@@ -22,7 +22,6 @@ class ModulesValidator extends AbstractRamlValidator {
         final List<Diagnostic> validationErrors = new ArrayList<>();
 
         validationErrors.addAll(visitor.doSwitch(eObject));
-
         validationErrors.forEach(diagnostics::add);
 
         return validationErrors.isEmpty();
@@ -62,7 +61,7 @@ class ModulesValidator extends AbstractRamlValidator {
                         final String resourcePath = r.getResourcePath();
                         return resourcePath.length() > 0 && !resourcePaths.add(resourcePath);
                     })
-                    .map(r -> error(r,"Duplicate resource {0}", r.getFullUri().getTemplate()))
+                    .map(r -> error(r,"Duplicate resource ''{0}''", r.getFullUri().getTemplate()))
                     .collect(Collectors.toList());
         }
     }
