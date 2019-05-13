@@ -58,6 +58,27 @@ class InstanceValidatorTest extends Specification implements InstanceFixtures {
         "123" | 0         | 2         | null    | 1
     }
 
+    def "validateEnumStringInstance"() {
+        when:
+        String validEnumValue = "valid-enum-value"
+
+        StringInstance enumValue = TypesFactory.eINSTANCE.createStringInstance();
+        enumValue.value = validEnumValue
+
+        StringType enumStringType = TypesFactory.eINSTANCE.createStringType()
+        enumStringType.enum.add(enumValue)
+
+        StringInstance validStringInstance = TypesFactory.eINSTANCE.createStringInstance();
+        validStringInstance.value = value
+        then:
+        List<Diagnostic> validationResults = instanceValidator.validate(validStringInstance, enumStringType)
+        validationResults.size() == numErrors
+        where:
+        value              | numErrors
+        "123"              | 1
+        "valid-enum-value" | 0
+    }
+
     def "validateNumberInstance"() {
         when:
         NumberInstance numberInstance = TypesFactory.eINSTANCE.createNumberInstance()

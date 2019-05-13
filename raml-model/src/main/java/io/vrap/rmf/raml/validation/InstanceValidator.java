@@ -64,13 +64,17 @@ public class InstanceValidator implements DiagnosticsCreator {
 
     private List<Diagnostic> validateEnumFacet(final AnyTypeFacet anyTypeFacet, final Object value) {
         final List<Diagnostic> validationResults = new ArrayList<>();
-        final Optional<Instance> enumInstance = anyTypeFacet.getEnum().stream()
-                .filter(enumValue -> enumValue.getValue().equals(value))
-                .findFirst();
-        if (anyTypeFacet.getEnum().size() > 0 && !enumInstance.isPresent()) {
-            validationResults.add(error(anyTypeFacet,"Value {0} is not defined in enum facet", value));
+        if (anyTypeFacet.getEnum().isEmpty() && anyTypeFacet.getType() != null) {
+            return validateEnumFacet(anyTypeFacet.getType(), value);
+        } else {
+            final Optional<Instance> enumInstance = anyTypeFacet.getEnum().stream()
+                    .filter(enumValue -> enumValue.getValue().equals(value))
+                    .findFirst();
+            if (anyTypeFacet.getEnum().size() > 0 && !enumInstance.isPresent()) {
+                validationResults.add(error(anyTypeFacet,"Value {0} is not defined in enum facet", value));
+            }
+            return validationResults;
         }
-        return validationResults;
     }
 
     private class InstanceValidatingVisitor extends TypesSwitch<List<Diagnostic>> {

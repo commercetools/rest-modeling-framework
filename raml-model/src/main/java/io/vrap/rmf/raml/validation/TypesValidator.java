@@ -116,14 +116,7 @@ class TypesValidator extends AbstractRamlValidator {
         public List<Diagnostic> caseObjectType(final ObjectType objectType) {
             final List<Diagnostic> validationResults = new ArrayList<>();
             final String discriminator = objectType.getDiscriminator();
-            if (objectType.isInlineType()) {
-                if (discriminator != null) {
-                    validationResults.add(error(objectType,"Facet 'discriminator' can't be defined for an inline type"));
-                }
-                if (objectType.getDiscriminatorValue() != null) {
-                    validationResults.add(error(objectType, "Facet 'discriminator' can't be defined for an inline type"));
-                }
-            } else if (discriminator != null) {
+            if (discriminator != null) {
                 final Property discriminatorProperty = objectType.getProperty(discriminator);
                 if (discriminatorProperty == null) {
                     validationResults.add(error(objectType,"Type with discriminator {0} has to define a property for it", discriminator));
@@ -142,6 +135,7 @@ class TypesValidator extends AbstractRamlValidator {
             final List<ObjectType> properSubTypes = objectType.getSubTypes().stream()
                     .filter(ObjectType.class::isInstance)
                     .map(ObjectType.class::cast)
+                    .filter(o -> !o.isInlineType())
                     .collect(Collectors.toList());
             for (final ObjectType subType : properSubTypes) {
                 final String discriminatorValue = subType.discriminatorValueOrDefault();
