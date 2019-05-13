@@ -1,0 +1,25 @@
+package io.vrap.rmf.raml.persistence
+
+import io.vrap.rmf.raml.model.RamlDiagnostic
+import io.vrap.rmf.raml.model.RamlModelBuilder
+import io.vrap.rmf.raml.model.RamlModelResult
+import io.vrap.rmf.raml.model.modules.Api
+import org.eclipse.emf.common.util.URI
+import spock.lang.Specification
+
+/**
+ * Test for validation on raml files with libraries.
+ */
+class ValidationTest extends Specification implements ResourceFixtures {
+
+    def "/api/api-using-library-with-errors.raml"() {
+        when:
+        URI uri = uriFromClasspath("/api/api-using-library-with-errors.raml")
+        RamlModelResult<Api> result =  new RamlModelBuilder().buildApi(uri)
+
+        then:
+        result.validationResults.size() == 1
+        RamlDiagnostic diagnostic = result.validationResults[0]
+        diagnostic.message == "Value v3 is not defined in enum facet"
+    }
+}

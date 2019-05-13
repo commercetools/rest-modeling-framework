@@ -1,0 +1,17 @@
+#%RAML 1.0 Library
+
+usage: Test
+
+types:
+  Package:
+    properties:
+      version: Version
+    examples:
+      invalid:
+        version: v3
+  Version:
+    type: string
+    enum:
+    - v1
+    - v2
+
