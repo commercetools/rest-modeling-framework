@@ -454,7 +454,7 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
                                 itemsFacet.descriptionFacet().size() > 0 || itemsFacet.displayNameFacet().size() > 0 ||
                                 itemsFacet.itemsFacet().size() > 0;
                 if (isInlineTypeDeclaration) {
-                    typedElementType = EcoreUtil.create(typedElementType.eClass());
+                    typedElementType = create(typedElementType.eClass(), itemsFacet);
                     scope.addValue(INLINE_TYPE_CONTAINER__INLINE_TYPES, typedElementType);
                     withinScope(scope.with(typedElementType),
                             inlineTypeDeclarationScope -> super.visitItemsFacet(itemsFacet));
