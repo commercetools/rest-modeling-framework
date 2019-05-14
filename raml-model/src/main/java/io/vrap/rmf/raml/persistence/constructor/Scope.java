@@ -1,13 +1,11 @@
 package io.vrap.rmf.raml.persistence.constructor;
 
-import io.vrap.rmf.nodes.antlr.NodeToken;
 import io.vrap.rmf.raml.model.RamlDiagnostic;
 import io.vrap.rmf.raml.model.modules.ApiExtension;
 import io.vrap.rmf.raml.model.modules.Library;
 import io.vrap.rmf.raml.model.modules.LibraryUse;
 import io.vrap.rmf.raml.model.modules.TypeContainer;
 import io.vrap.rmf.raml.model.types.BuiltinType;
-import org.antlr.v4.runtime.CommonToken;
 import org.antlr.v4.runtime.Token;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.URI;
@@ -26,7 +24,6 @@ import java.util.stream.Stream;
 import static io.vrap.rmf.raml.model.modules.ModulesPackage.Literals.*;
 import static io.vrap.rmf.raml.model.resources.ResourcesPackage.Literals.RESOURCE_TYPE;
 import static io.vrap.rmf.raml.model.resources.ResourcesPackage.Literals.TRAIT;
-import static io.vrap.rmf.raml.model.security.SecurityPackage.Literals.SECURED_BY;
 import static io.vrap.rmf.raml.model.security.SecurityPackage.Literals.SECURITY_SCHEME;
 import static io.vrap.rmf.raml.model.security.SecurityPackage.Literals.SECURITY_SCHEME_CONTAINER__SECURITY_SCHEMES;
 import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.ANY_ANNOTATION_TYPE;
@@ -119,7 +116,8 @@ public class Scope {
             final String libraryName = segments[0];
             final Library usedLibrary = getUsedLibrary(libraryName);
             if (usedLibrary == null) {
-                addError("Library use {0} doesn't exist in {1}", libraryName, resource.getURI());
+                addError("Library named ''{0}'' doesn't exist in ''{1}''",
+                        libraryName, resource.getURI());
                 resolvedType = null;
             } else {
                 final String resolvedId = segments[1];
@@ -127,7 +125,7 @@ public class Scope {
                 resolvedType = usedLibraryScope.getEObjectByName(resolvedId);
             }
         } else {
-            addError("Uses has invalid format {0}", name);
+            addError("Name has invalid format ''{0}''", name);
             resolvedType = null;
         }
         return resolvedType;
@@ -230,8 +228,8 @@ public class Scope {
                             if (eType.isInstance(item)) {
                                 addValue(feature, item);
                             } else {
-                                addError("Invalid value {0} for feature {1} of {2} at {3}",
-                                        value, feature.getName(), eObject.eClass().getName(), token);
+                                addErrorWithLocation("Invalid value ''{0}'' for feature ''{1}'' of type ''{2}''",
+                                        token, value, feature.getName(), eObject.eClass().getName());
                             }
                         }
                     }
@@ -241,12 +239,12 @@ public class Scope {
             } else if (eType.isInstance(value)) {
                 eObject.eSet(feature, value);
             } else {
-                addError("Invalid value {0} for feature {1} of {2} at {3}",
-                        value, feature.getName(), eObject.eClass().getName(), token);
+                addErrorWithLocation("Invalid value ''{0}'' for feature ''{1}'' of type ''{2}''",
+                        token, value, feature.getName(), eObject.eClass().getName());
             }
         } else {
-            addError("Invalid value {0} for feature {1} of {2} at {3}",
-                    value, feature.getName(), eObject.eClass().getName(), token);
+            addErrorWithLocation("Invalid value ''{0}'' for feature ''{1}'' of type ''{2}''",
+                    token, value, feature.getName(), eObject.eClass().getName());
         }
         return value;
     }
@@ -260,19 +258,18 @@ public class Scope {
     }
 
     public void addError(final String messagePattern, final Object... arguments) {
+        addErrorWithLocation(messagePattern, null, arguments);
+    }
+
+
+    public void addErrorWithLocation(final String messagePattern, final Token at, final Object... arguments) {
         final String message = MessageFormat.format(messagePattern, arguments);
 
-        final Optional<NodeToken> optionalToken = Stream.of(arguments)
-                .filter(NodeToken.class::isInstance)
-                .map(NodeToken.class::cast)
-                .findFirst();
-
-        final int line = optionalToken.map(CommonToken::getLine).orElse(-1);
-        final int column = optionalToken.map(CommonToken::getCharPositionInLine).orElse(-1);
-        final String location = optionalToken.map(NodeToken::getLocation).orElse("<UNKNOWN>");
+        final int line = at != null ? at.getLine() : -1;
+        final int column = at != null ? at.getCharPositionInLine() : -1;
 
         resource.getErrors()
-                .add(RamlDiagnostic.of(message, location, line, column));
+                .add(RamlDiagnostic.of(message, at.getTokenSource().getSourceName(), line, column));
     }
 
     /**

@@ -182,7 +182,7 @@ public class TypeExpressionResolver {
 
         @Override
         public EObject visitTypeTemplate(final TypeExpressionParser.TypeTemplateContext ctx) {
-            scope.addError("Type template not allowed here.");
+            scope.addErrorWithLocation("Type template not allowed here.", ctx.getStart());
             return null;
         }
 
@@ -243,7 +243,7 @@ public class TypeExpressionResolver {
 
         @Override
         public EObject visitTypeTemplate(final TypeExpressionParser.TypeTemplateContext ctx) {
-            scope.addError("Type template not allowed here.");
+            scope.addErrorWithLocation("Type template not allowed here.", ctx.getStart());
             return null;
         }
 

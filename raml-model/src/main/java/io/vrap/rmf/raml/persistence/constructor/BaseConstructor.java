@@ -214,8 +214,8 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
                     break;
                 default:
                     if (securitySchemeFacet.securitySchemeSettingsFacet().size() > 0) {
-                        scope.addError("Settings not supported for type {0} at {0}",
-                                securityScheme.getType(), securitySchemeFacet.getStart());
+                        scope.addErrorWithLocation("Settings not supported for type ''{0}''",
+                                securitySchemeFacet.getStart(), securityScheme.getType());
                     }
             }
             if (securitySchemeSettings != null) {
@@ -362,7 +362,8 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
             scope.setValue(securitySchemeType, securitySchemeTypeFacet.getStart());
             return securitySchemeType;
         } catch (IllegalArgumentException e) {
-            scope.addError("{0} at {1}", e.getMessage(), securitySchemeTypeFacet.getStart());
+            scope.addErrorWithLocation(e.getMessage(),
+                    securitySchemeTypeFacet.getStart());
             return null;
         }
     }
@@ -659,7 +660,8 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
 
         final Object value;
         if (eAttribute == null) {
-            scope.addError("Unknown attribute {0} at {1}", attributeName, attributeFacet.getStart());
+            scope.addErrorWithLocation("Unknown attribute ''{0}''",
+                    attributeFacet.getStart(), attributeName);
             value = null;
         } else {
             value = attributeFacet.facetValue().value == null ?
@@ -683,11 +685,12 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
 
             eObject.eSet(eAttribute, values);
         } else {
-            final String messagePattern = "Trying to set attribute {0} with many values";
+            final String messagePattern = "Trying to set attribute ''{0}'' with multiple  values";
             if (valueTokens.isEmpty()) {
                 scope.addError(messagePattern, eAttribute);
             } else {
-                scope.addError(messagePattern + " at {1}", eAttribute, valueTokens.get(0).getStart());
+                scope.addErrorWithLocation(messagePattern,
+                        valueTokens.get(0).getStart(), eAttribute);
             }
         }
     }
@@ -707,7 +710,7 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
         try {
             return EcoreUtil.createFromString(eAttribute.getEAttributeType(), anyValueContext.getText());
         } catch (IllegalArgumentException e) {
-            scope.addError("{0} at {1}", e.getMessage(), anyValueContext.getStart());
+            scope.addErrorWithLocation(e.getMessage(), anyValueContext.getStart());
             return null;
         }
     }
