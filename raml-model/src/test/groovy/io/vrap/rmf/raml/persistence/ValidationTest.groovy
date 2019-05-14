@@ -33,4 +33,14 @@ class ValidationTest extends Specification implements ResourceFixtures {
         RamlDiagnostic diagnostic = result.validationResults[0]
         diagnostic.message == "Duplicate resource '/project/test'"
     }
+
+
+    def "/api.raml"() {
+        when:
+        URI uri = URI.createFileURI("/Users/mkoester/Development/commercetools-api-reference/api.raml")
+        RamlModelResult<Api> result =  new RamlModelBuilder().buildApi(uri)
+        then:
+        result.validationResults.size() == 0
+    }
+
 }
