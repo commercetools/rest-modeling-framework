@@ -48,55 +48,55 @@ class TypesValidator extends AbstractRamlValidator {
                     || arrayType.getMaxItems() == null
                     || arrayType.getMinItems() <= arrayType.getMaxItems();
             if (!rangeIsValid) {
-                validationResults.add(error(arrayType, "Facet 'minItems' must be <= 'maxItems'"));
-            }
-            return validationResults;
-        }
-
-        @Override
-        public List<Diagnostic> caseStringTypeFacet(final StringTypeFacet stringType) {
-            final List<Diagnostic> validationResults = new ArrayList<>();
-            final boolean rangeIsValid = stringType.getMinLength() == null
-                    || stringType.getMaxLength() == null
-                    || stringType.getMinLength() <= stringType.getMaxLength();
-            if (!rangeIsValid) {
-                validationResults.add(error(stringType,"Facet 'minLength' must be <= 'maxLength'"));
+                validationResults.add(error(arrayType,
+                        "Facet 'minItems' ''{0}'' must be <= 'maxItems' ''{1}''",
+                        arrayType.getMinItems(), arrayType.getMaxItems()));
             }
             return validationResults;
         }
 
         @Override
         public List<Diagnostic> caseNumberTypeFacet(final NumberTypeFacet numberType) {
-            final List<Diagnostic> validationResults = new ArrayList<>();
-            final boolean rangeIsValid = numberType.getMinimum() == null
-                    || numberType.getMaximum() == null
-                    || numberType.getMinimum().compareTo(numberType.getMaximum()) <= 0;
-            if (!rangeIsValid) {
-                validationResults.add(error(numberType, "Facet 'minimum' must be <= 'maximum'"));
-            }
-            return validationResults;
+            return validateRange(numberType, numberType.getMinimum(), numberType.getMaximum());
         }
 
         @Override
         public List<Diagnostic> caseIntegerTypeFacet(final IntegerTypeFacet integerType) {
+            return validateRange(integerType, integerType.getMinimum(), integerType.getMaximum());
+        }
+
+        private <T> List<Diagnostic> validateRange(final AnyTypeFacet typeFacet, final Comparable<T> minimum, final T maximum) {
             final List<Diagnostic> validationResults = new ArrayList<>();
-            final boolean rangeIsValid = integerType.getMinimum() == null
-                    || integerType.getMaximum() == null
-                    || integerType.getMinimum().compareTo(integerType.getMaximum()) <= 0;
+            final boolean rangeIsValid = minimum == null
+                    || maximum == null
+                    || minimum.compareTo(maximum) <= 0;
             if (!rangeIsValid) {
-                validationResults.add(error(integerType, "Facet 'minimum' must be <= 'maximum'"));
+                validationResults.add(error(typeFacet,
+                        "Facet 'minimum' ''{0}'' must be <= 'maximum' ''{1}''",
+                        minimum, maximum));
             }
             return validationResults;
         }
 
         @Override
+        public List<Diagnostic> caseStringTypeFacet(final StringTypeFacet stringType) {
+            return validateLengthRange(stringType, stringType.getMinLength(), stringType.getMaxLength());
+        }
+
+        @Override
         public List<Diagnostic> caseFileTypeFacet(final FileTypeFacet fileType) {
+            return validateLengthRange(fileType, fileType.getMinLength(), fileType.getMaxLength());
+        }
+
+        private List<Diagnostic> validateLengthRange(final AnyTypeFacet typeFacet, final Integer minLength, final Integer maxLength) {
             final List<Diagnostic> validationResults = new ArrayList<>();
-            final boolean rangeIsValid = fileType.getMinLength() == null
-                    || fileType.getMaxLength() == null
-                    || fileType.getMinLength() <= fileType.getMaxLength();
+            final boolean rangeIsValid = minLength == null
+                    || maxLength == null
+                    || minLength <= maxLength;
             if (!rangeIsValid) {
-                validationResults.add(error(fileType, "Facet 'minLength' must be <= 'maxLength'"));
+                validationResults.add(error(typeFacet,
+                        "Facet 'minLength' ''{0}'' must be <= 'maxLength' ''{1}''",
+                        minLength, maxLength));
             }
             return validationResults;
         }
@@ -116,19 +116,12 @@ class TypesValidator extends AbstractRamlValidator {
         public List<Diagnostic> caseObjectType(final ObjectType objectType) {
             final List<Diagnostic> validationResults = new ArrayList<>();
             final String discriminator = objectType.getDiscriminator();
-            if (objectType.isInlineType()) {
-                if (discriminator != null) {
-                    validationResults.add(error(objectType,"Facet 'discriminator' can't be defined for an inline type"));
-                }
-                if (objectType.getDiscriminatorValue() != null) {
-                    validationResults.add(error(objectType, "Facet 'discriminator' can't be defined for an inline type"));
-                }
-            } else if (discriminator != null) {
+            if (discriminator != null) {
                 final Property discriminatorProperty = objectType.getProperty(discriminator);
                 if (discriminatorProperty == null) {
-                    validationResults.add(error(objectType,"Type with discriminator {0} has to define a property for it", discriminator));
+                    validationResults.add(error(objectType,"Type with discriminator ''{0}'' has to define a property for it", discriminator));
                 } else if (!(discriminatorProperty.getType() instanceof StringType)) {
-                    validationResults.add(error(objectType, "Discriminator property {0} must be of type 'string'", discriminator));
+                    validationResults.add(error(objectType, "Discriminator property ''{0}'' must be of type 'string'", discriminator));
                 } else {
                     final Set<String> discriminatorValues = new HashSet<>();
                     discriminatorValues.add(objectType.discriminatorValueOrDefault());
@@ -142,11 +135,12 @@ class TypesValidator extends AbstractRamlValidator {
             final List<ObjectType> properSubTypes = objectType.getSubTypes().stream()
                     .filter(ObjectType.class::isInstance)
                     .map(ObjectType.class::cast)
+                    .filter(o -> !o.isInlineType())
                     .collect(Collectors.toList());
             for (final ObjectType subType : properSubTypes) {
                 final String discriminatorValue = subType.discriminatorValueOrDefault();
                 if (discriminatorValues.contains(discriminatorValue)) {
-                    validationResults.add(error(subType, "Duplicate discriminator value {0} found", discriminatorValue));
+                    validationResults.add(error(subType, "Duplicate discriminator value ''{0}'' found", discriminatorValue));
                 } else {
                     discriminatorValues.add(discriminatorValue);
                 }
@@ -191,39 +185,28 @@ class TypesValidator extends AbstractRamlValidator {
 
         @Override
         public List<Diagnostic> caseAnyType(final AnyType anyType) {
-            final List<Diagnostic> validationResults = new ArrayList<>();
-            validationResults.addAll(anyType.getEnum().stream()
-                    .flatMap(value -> instanceValidator.validate(value, anyType).stream())
-                    .collect(Collectors.toList()));
-
-            if (validationResults.isEmpty()) {
-                final Set<Object> uniqueItems = new HashSet<>();
-                // TODO this only works for primitive values, we should extend it for object instance and array instance
-                final Set<Instance> duplicateValues = anyType.getEnum().stream()
-                        .filter(value -> !uniqueItems.add(value.getValue()))
-                        .collect(Collectors.toSet());
-                if (duplicateValues.size() > 0) {
-                    validationResults.add(error(anyType,"Enum facet contains duplicate values"));
-                }
-            }
-            return validationResults;
+            return validateEnum(anyType);
         }
 
         @Override
         public List<Diagnostic> caseAnyAnnotationType(final AnyAnnotationType anyAnnotationType) {
+            return validateEnum(anyAnnotationType);
+        }
+
+        private List<Diagnostic> validateEnum(final AnyTypeFacet typeFacet) {
             final List<Diagnostic> validationResults = new ArrayList<>();
-            validationResults.addAll(anyAnnotationType.getEnum().stream()
-                    .flatMap(value -> instanceValidator.validate(value, anyAnnotationType).stream())
+            validationResults.addAll(typeFacet.getEnum().stream()
+                    .flatMap(value -> instanceValidator.validate(value, typeFacet).stream())
                     .collect(Collectors.toList()));
 
             if (validationResults.isEmpty()) {
                 final Set<Object> uniqueItems = new HashSet<>();
                 // TODO this only works for primitive values, we should extend it for object instance and array instance
-                final Set<Instance> duplicateValues = anyAnnotationType.getEnum().stream()
+                final Set<Instance> duplicateValues = typeFacet.getEnum().stream()
                         .filter(value -> !uniqueItems.add(value.getValue()))
                         .collect(Collectors.toSet());
                 if (duplicateValues.size() > 0) {
-                    validationResults.add(error(anyAnnotationType, "Enum facet contains duplicate values"));
+                    validationResults.add(error(typeFacet, "Enum facet contains duplicate values"));
                 }
             }
             return validationResults;
@@ -235,17 +218,17 @@ class TypesValidator extends AbstractRamlValidator {
 
         @Override
         public List<Diagnostic> caseAnyType(final AnyType anyType) {
-            final List<Diagnostic> validationResults = Optional.ofNullable(anyType.getDefault())
-                    .map(value -> instanceValidator.validate(value, anyType))
-                    .orElse(Collections.emptyList());
-
-            return validationResults;
+            return validateDefault(anyType);
         }
 
         @Override
         public List<Diagnostic> caseAnyAnnotationType(final AnyAnnotationType anyAnnotationType) {
-            final List<Diagnostic> validationResults = Optional.ofNullable(anyAnnotationType.getDefault())
-                    .map(value -> instanceValidator.validate(value, anyAnnotationType))
+            return validateDefault(anyAnnotationType);
+        }
+
+        private List<Diagnostic> validateDefault(final AnyTypeFacet typeFacet) {
+            final List<Diagnostic> validationResults = Optional.ofNullable(typeFacet.getDefault())
+                    .map(value -> instanceValidator.validate(value, typeFacet))
                     .orElse(Collections.emptyList());
 
             return validationResults;

@@ -96,11 +96,12 @@ public class RamlResource extends ResourceImpl {
 
     private Optional<BaseConstructor> getRootConstructor(final InputStream inputStream) throws IOException {
         inputStream.mark(1024);
-        @SuppressWarnings("resource")        final String header = new Scanner(inputStream).useDelimiter("\\n").next();
+        @SuppressWarnings("resource")
+        final String header = new Scanner(inputStream).useDelimiter("\\n").next();
         inputStream.reset();
         final RamlFragmentKind fragmentKind = RamlFragmentKind.fromHeader(header).orElse(null);
         if (fragmentKind == null) {
-            resourceScope.addError("Unknown fragment kind {0}", header);
+            resourceScope.addError("Unknown fragment kind ''{0}''", header);
             return Optional.empty();
         }
         switch (fragmentKind) {
@@ -110,7 +111,7 @@ public class RamlResource extends ResourceImpl {
             case DATA_TYPE: return Optional.of(new TypeDeclarationFragmentConstructor(TYPE_CONTAINER__TYPES));
             case ANNOTATION_TYPE_DECLARATION: return Optional.of(new TypeDeclarationFragmentConstructor(TYPE_CONTAINER__ANNOTATION_TYPES));
             default:
-                resourceScope.addError("Not yet implemented fragment kind {0}", fragmentKind);
+                resourceScope.addError("Not yet implemented fragment kind ''{0}''", fragmentKind);
                 return Optional.empty();
         }
     }

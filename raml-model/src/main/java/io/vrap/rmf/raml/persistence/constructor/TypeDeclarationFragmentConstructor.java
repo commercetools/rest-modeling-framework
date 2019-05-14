@@ -6,7 +6,6 @@ import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
-import org.eclipse.emf.ecore.util.EcoreUtil;
 
 import static io.vrap.rmf.raml.model.types.TypesPackage.Literals.ANY_TYPE;
 
@@ -43,7 +42,7 @@ public class TypeDeclarationFragmentConstructor extends BaseConstructor {
         }
 
         final EClass eClass = superType.eClass();
-        final EObject declaredType = EcoreUtil.create(eClass);
+        final EObject declaredType = create(eClass, typeDeclarationFragment);
         scope.getResource().getContents().add(declaredType);
 
         withinScope(scope.with(declaredType), typeScope -> {

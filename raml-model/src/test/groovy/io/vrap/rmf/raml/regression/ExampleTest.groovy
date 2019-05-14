@@ -313,6 +313,53 @@ class ExampleTest extends RegressionTest {
         ramlModelResult.validationResults.size() == 0
     }
 
+    def "enum value example"() {
+        when:
+        RamlModelResult<Api> ramlModelResult = constructApi(
+                '''\
+                #%RAML 1.0
+                title: Value named property
+                
+                types:
+                    Enum:
+                        type: string
+                        enum: [ "val1", "val2" ]
+                    Foo:
+                        properties:
+                          value: Enum
+                        example: |
+                           {
+                             "value": "bar"
+                           }
+                ''')
+        then:
+        ramlModelResult.validationResults.size() == 1
+    }
+
+    def "enum value examples"() {
+        when:
+        RamlModelResult<Api> ramlModelResult = constructApi(
+                '''\
+                #%RAML 1.0
+                title: Value named property
+                
+                types:
+                    Enum:
+                        type: string
+                        enum: [ "val1", "val2" ]
+                    Foo:
+                        properties:
+                          value: Enum
+                        examples:
+                            one: |
+                                {
+                                    "value": "bar"
+                                }
+                ''')
+        then:
+        ramlModelResult.validationResults.size() == 1
+    }
+
     def "validate value named property"() {
         when:
         RamlModelResult<Api> ramlModelResult = constructApi(

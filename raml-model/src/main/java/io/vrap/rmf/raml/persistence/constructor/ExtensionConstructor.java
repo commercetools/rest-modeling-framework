@@ -29,7 +29,7 @@ public class ExtensionConstructor extends ApiConstructor {
 
         return withinScope(scope.with(rootObject), rootScope -> {
             if (ctx.extendsFacet().isEmpty()) {
-                scope.addError("Required extends missing");
+                scope.addError("Required 'extends' facet missing");
             } else {
                 ctx.extendsFacet().forEach(this::visitExtendsFacet);
             }
@@ -60,14 +60,15 @@ public class ExtensionConstructor extends ApiConstructor {
         if (errors.isEmpty()) {
             final EList<EObject> contents = extendsResource.getContents();
             if (contents.size() != 1) {
-                scope.addError("Extended api definition is invalid at {0}", extendsFacet);
+                scope.addErrorWithLocation("Extended api definition is invalid",
+                        extendsFacet.getStart());
             } else {
                 final EObject extendsEObject = contents.get(0);
                 if (extendsEObject instanceof Api || extendsEObject instanceof ApiExtension) {
                     scope.setValue(ModulesPackage.Literals.API_EXTENSION__EXTENDS, extendsEObject, extendsFacet.uri.getStart());
                 } else {
-                    scope.addError("Extended api definition has invalid type {0} at {1}",
-                            extendsEObject.eClass().getName(), extendsFacet);
+                    scope.addErrorWithLocation("Extended api definition has invalid type ''{0}''",
+                            extendsFacet.getStart(), extendsEObject.eClass().getName());
                 }
             }
         } else {

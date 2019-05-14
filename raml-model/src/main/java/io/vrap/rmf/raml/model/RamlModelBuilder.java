@@ -71,7 +71,10 @@ public class RamlModelBuilder {
             final EObject resolved = rootObject instanceof ApiBase ?
                     resolveToApi(rootObject) :
                     rootObject;
-            final List<Resource.Diagnostic> errors = resolved.eResource().getErrors();
+            final List<Resource.Diagnostic> errors = resolved.eResource().getResourceSet()
+                    .getResources().stream()
+                    .flatMap(r -> r.getErrors().stream())
+                    .collect(Collectors.toList());
             return RamlModelResult.of(errors, resolved);
         } else {
             return RamlModelResult.of(resource.getErrors(), rootObject);

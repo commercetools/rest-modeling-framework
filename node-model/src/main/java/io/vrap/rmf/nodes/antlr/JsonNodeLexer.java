@@ -96,12 +96,12 @@ class JsonNodeLexer implements TokenSource {
 
     @Override
     public int getLine() {
-        return parser.getCurrentLocation().getLineNr();
+        return parser.getTokenLocation().getLineNr();
     }
 
     @Override
     public int getCharPositionInLine() {
-        return parser.getCurrentLocation().getColumnNr();
+        return parser.getTokenLocation().getColumnNr();
     }
 
     @Override

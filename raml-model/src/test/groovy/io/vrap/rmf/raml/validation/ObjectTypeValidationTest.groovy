@@ -18,22 +18,6 @@ class ObjectTypeValidationTest extends BaseValidatorTest implements TypeFixtures
         api = ModulesFactory.eINSTANCE.createApi()
     }
 
-    def "Neither discriminator nor discriminatorValue can be defined for any inline type"() {
-        when:
-        if (inlineType) {
-            api.inlineTypes.add(objectType)
-        }
-        objectType.discriminator = discriminator
-        objectType.discriminatorValue = discriminatorValue
-        then:
-        validate(objectType) == valid
-        where:
-        discriminator   | discriminatorValue   | inlineType || valid
-        null            | null                 | true       || true
-        'discriminator' | null                 | true       || false
-        null            | 'discriminatorValue' | true       || false
-    }
-
     def "strict example validation"() {
         when:
         ObjectType objectTypeWithExample = constructType(

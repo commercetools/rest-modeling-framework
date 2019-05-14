@@ -1,0 +1,16 @@
+#%RAML 1.0 Library
+
+usage: Test
+
+types:
+  Package:
+    properties:
+      version: Version
+    examples:
+      invalid: !include ../includes/invalid-package.json
+  Version:
+    type: string
+    enum:
+    - v1
+    - v2
+

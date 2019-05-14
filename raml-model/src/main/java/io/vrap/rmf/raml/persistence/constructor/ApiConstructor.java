@@ -13,7 +13,6 @@ import org.eclipse.emf.common.util.ECollections;
 import org.eclipse.emf.ecore.EObject;
 
 import java.util.List;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static io.vrap.rmf.raml.model.modules.ModulesPackage.Literals.*;
@@ -73,7 +72,7 @@ public class ApiConstructor extends BaseConstructor {
             annotatedUriTemplate.setValue(uriTemplate);
             scope.with(API_BASE__BASE_URI).setValue(annotatedUriTemplate, ctx.getStart());
         } catch (final MalformedUriTemplateException uriTemplateException) {
-            scope.addError(uriTemplateException.getMessage(), ctx);
+            scope.addErrorWithLocation(uriTemplateException.getMessage(), ctx.getStart());
             return null;
         }
         return withinScope(scope.with(annotatedUriTemplate), annotatedUriTemplateScope -> {
