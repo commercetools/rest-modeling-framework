@@ -32,6 +32,7 @@ clean {
 
 dependencies {
     compile project(':functional-utils')
+    compile project(':antlr-utils')
     compile project(':node-model')
     
     compile yaml.snakeyaml

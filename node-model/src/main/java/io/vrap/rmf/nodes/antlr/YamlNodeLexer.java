@@ -21,6 +21,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static io.vrap.antlr.utils.AntlrUtils.literalToTokenType;
+
 /**
  * A node lexer that can tokenize yaml.
  */
@@ -28,13 +30,14 @@ class YamlNodeLexer implements TokenSource {
     private static final String INCLUDE_TAG = "!include";
     private static final Set<Event.ID> RELEVANT_EVENT_IDS =
             ImmutableSet.of(Event.ID.MappingEnd, Event.ID.MappingStart, Event.ID.SequenceEnd, Event.ID.SequenceStart, Event.ID.Scalar);
+    private static Map<String, Integer> literalTokenTypes = literalToTokenType(NodeParser.VOCABULARY);
+
     public static final Mark EMPTY_FILE_MARK = new Mark(null, 0, 0, 0, "", 0);
     public static final ScalarEvent EMPTY_SCALAR_EVENT = new ScalarEvent(null, null, null, "", EMPTY_FILE_MARK, EMPTY_FILE_MARK, null);
 
     private static final Resolver IMPLICIT_TAG_RESOLVER = new Resolver();
     private final Yaml yaml = new Yaml();
     private Iterator<Event> eventIterator;
-    private Map<String, Integer> literalTokenTypes = new HashMap<>();
     private final TypeSwitch<Event, Token> eventSwitch;
     private final Map<Tag, Integer> scalarTagTokenTypes = new HashMap<>();
     private NodeTokenFactory factory;
@@ -76,14 +79,6 @@ class YamlNodeLexer implements TokenSource {
     }
 
     private void initTokens() {
-        final Vocabulary vocabulary = NodeParser.VOCABULARY;
-        for (int tokenType = 0; tokenType <= vocabulary.getMaxTokenType(); tokenType++) {
-            final String literalName = vocabulary.getLiteralName(tokenType);
-            if (literalName != null) {
-                final String literalText = literalName.substring(1, literalName.length() - 1);
-                literalTokenTypes.put(literalText, tokenType);
-            }
-        }
         scalarTagTokenTypes.put(Tag.FLOAT, NodeParser.FLOAT);
         scalarTagTokenTypes.put(Tag.INT, NodeParser.INT);
         scalarTagTokenTypes.put(Tag.BOOL, NodeParser.BOOL);
