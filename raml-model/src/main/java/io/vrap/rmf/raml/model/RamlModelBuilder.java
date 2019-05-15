@@ -298,37 +298,46 @@ public class RamlModelBuilder {
 
         @Override
         public PropertyNode caseResourceType(final ResourceType resourceType) {
-            final PropertyNode resourceTypeNode = copy(getPropertyContainer(resourceType));
-            final ObjectNode resourceTypeValueNode = (ObjectNode) resourceTypeNode.getValue();
+            final MergedNodeProvider mergedNodeProvider =
+                    (MergedNodeProvider) EcoreUtil.getExistingAdapter(resourceType, MergedNodeProvider.class);
 
-            for (final Method method : resourceType.getMethods()) {
-                PropertyNode methodNode = doSwitch(method);
-                Node methodValueNode = methodNode.getValue();
-                for (final TraitApplication traitApplication : resourceType.getIs()) {
-                    final PropertyNode traitApplicationNode = doSwitch(traitApplication);
-                    final Node traitApplicationValueNode = traitApplicationNode.getValue();
-                    if (traitApplicationValueNode != null) {
-                        methodValueNode = resourceTypeNodeMerger.merge(traitApplicationValueNode, methodValueNode);
-                        final StringTemplateResolver stringTemplateResolver = getStringTemplateResolver(traitApplication, method);
-                        final TreeIterator<EObject> allProperContents = EcoreUtil.getAllProperContents(methodValueNode, false);
-                        allProperContents.forEachRemaining(stringTemplateResolver::resolve);
+            if (mergedNodeProvider == null) {
+                final PropertyNode resourceTypeNode = copy(getPropertyContainer(resourceType));
+                final ObjectNode resourceTypeValueNode = (ObjectNode) resourceTypeNode.getValue();
+
+                for (final Method method : resourceType.getMethods()) {
+                    PropertyNode methodNode = doSwitch(method);
+                    Node methodValueNode = methodNode.getValue();
+                    for (final TraitApplication traitApplication : resourceType.getIs()) {
+                        final PropertyNode traitApplicationNode = doSwitch(traitApplication);
+                        final Node traitApplicationValueNode = traitApplicationNode.getValue();
+                        if (traitApplicationValueNode != null) {
+                            methodValueNode = resourceTypeNodeMerger.merge(traitApplicationValueNode, methodValueNode);
+                            final StringTemplateResolver stringTemplateResolver = getStringTemplateResolver(traitApplication, method);
+                            final TreeIterator<EObject> allProperContents = EcoreUtil.getAllProperContents(methodValueNode, false);
+                            allProperContents.forEachRemaining(stringTemplateResolver::resolve);
+                        }
                     }
+                    methodNode.setValue(methodValueNode);
+                    replacePropertyNode(method, methodNode, resourceTypeValueNode);
                 }
-                methodNode.setValue(methodValueNode);
-                replacePropertyNode(method, methodNode, resourceTypeValueNode);
+
+                if (resourceType.getType() != null) {
+                    final PropertyNode typeNode = doSwitch(resourceType.getType());
+                    final Node typeValueNode = typeNode.getValue();
+
+                    final Node mergedTypeValueNode = resourceTypeNodeMerger.merge(typeValueNode, resourceTypeValueNode);
+                    resourceTypeNode.setValue(mergedTypeValueNode);
+                }
+
+                removeUsagePropertyNode(resourceTypeNode.getValue());
+
+                final MergedNodeProviderAdapter mergedNodeProviderAdapter = MergedNodeProviderAdapter.of(resourceTypeNode);
+                resourceType.eAdapters().add(mergedNodeProviderAdapter);
+                return mergedNodeProviderAdapter.getMergedNode();
+            } else {
+                return mergedNodeProvider.getMergedNode();
             }
-
-            if (resourceType.getType() != null) {
-                final PropertyNode typeNode = doSwitch(resourceType.getType());
-                final Node typeValueNode = typeNode.getValue();
-
-                final Node mergedTypeValueNode = resourceTypeNodeMerger.merge(typeValueNode, resourceTypeValueNode);
-                resourceTypeNode.setValue(mergedTypeValueNode);
-            }
-
-            removeUsagePropertyNode(resourceTypeNode.getValue());
-
-            return resourceTypeNode;
         }
 
         /**
