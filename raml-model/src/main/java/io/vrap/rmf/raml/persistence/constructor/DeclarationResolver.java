@@ -86,7 +86,7 @@ public class DeclarationResolver {
     }
 
     /**
-     * This visitor creates declrations and potentially unresolved types.
+     * This visitor creates declarations and potentially unresolved types.
      */
     private class DeclarationConstructingVisitor extends AbstractScopedVisitor<Object> {
         private final UnresolvedTypesCollector unresolvedTypesCollector = new UnresolvedTypesCollector();
@@ -358,6 +358,8 @@ public class DeclarationResolver {
         if (resolved != null && !resolved.eIsProxy()) {
             setTypeName(resolved, typeDeclarationMap.name.start);
             setType(resolved, typeExpression, typeDeclarationMap.getStart(), scope);
+            final RAMLParserAdapter adapter = RAMLParserAdapter.of(typeDeclarationMap);
+            resolved.eAdapters().add(adapter);
         }
 
         return resolved;

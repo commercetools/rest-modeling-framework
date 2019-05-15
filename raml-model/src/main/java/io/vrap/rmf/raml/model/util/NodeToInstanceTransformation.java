@@ -3,6 +3,7 @@ package io.vrap.rmf.raml.model.util;
 import io.vrap.rmf.nodes.*;
 import io.vrap.rmf.nodes.util.NodesSwitch;
 import io.vrap.rmf.raml.model.types.*;
+import org.eclipse.emf.ecore.EObject;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -15,21 +16,21 @@ class NodeToInstanceTransformation extends NodesSwitch<Instance> {
     public Instance caseStringNode(final StringNode stringNode) {
         final StringInstance stringInstance = TypesFactory.eINSTANCE.createStringInstance();
         stringInstance.setValue(stringNode.getValue());
-        return stringInstance;
+        return copyAdapters(stringNode, stringInstance);
     }
 
     @Override
     public Instance caseBooleanNode(final BooleanNode booleanNode) {
         final BooleanInstance booleanInstance = TypesFactory.eINSTANCE.createBooleanInstance();
         booleanInstance.setValue(booleanNode.getValue());
-        return booleanInstance;
+        return copyAdapters(booleanNode, booleanInstance);
     }
 
     @Override
     public Instance caseIntegerNode(final IntegerNode integerNode) {
         final IntegerInstance integerInstance = TypesFactory.eINSTANCE.createIntegerInstance();
         integerInstance.setValue(integerNode.getValue());
-        return integerInstance;
+        return copyAdapters(integerNode, integerInstance);
     }
 
     @Override
@@ -41,7 +42,7 @@ class NodeToInstanceTransformation extends NodesSwitch<Instance> {
     public Instance caseNumberNode(final NumberNode numberNode) {
         final NumberInstance numberInstance = TypesFactory.eINSTANCE.createNumberInstance();
         numberInstance.setValue(numberNode.getValue());
-        return numberInstance;
+        return copyAdapters(numberNode, numberInstance);
     }
 
     @Override
@@ -51,7 +52,7 @@ class NodeToInstanceTransformation extends NodesSwitch<Instance> {
                 .map(this::doSwitch)
                 .collect(Collectors.toList());
         arrayInstance.getValue().addAll(elements);
-        return arrayInstance;
+        return copyAdapters(arrayNode, arrayInstance);
     }
 
     @Override
@@ -61,7 +62,7 @@ class NodeToInstanceTransformation extends NodesSwitch<Instance> {
                 .map(this::transform)
                 .collect(Collectors.toList());
         objectInstance.getValue().addAll(propertyValues);
-        return objectInstance;
+        return copyAdapters(objectNode, objectInstance);
     }
 
     private PropertyValue transform(final PropertyNode propertyNode) {
@@ -69,6 +70,11 @@ class NodeToInstanceTransformation extends NodesSwitch<Instance> {
         propertyValue.setName(propertyNode.getKey().getValue().toString());
         propertyValue.setValue(doSwitch(propertyNode.getValue()));
 
-        return propertyValue;
+        return copyAdapters(propertyNode, propertyValue);
+    }
+
+    private <T extends EObject> T copyAdapters(final EObject source, final T target) {
+        source.eAdapters().forEach(a -> target.eAdapters().add(a));
+        return target;
     }
 }

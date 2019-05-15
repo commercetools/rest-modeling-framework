@@ -4,6 +4,8 @@ import org.antlr.v4.runtime.*;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.URIConverter;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Stack;
 
 /**
@@ -48,7 +50,13 @@ public class NodeLexer implements TokenSource {
     private URI resolve(final String relativePath) {
         final String[] segments = URI.createURI(relativePath).segments();
         final URI baseUri = getBaseUri();
-        return baseUri.appendSegments(segments);
+        final URI resolved = baseUri.appendSegments(segments);
+        if (resolved.isFile()) {
+            final Path normalized = Paths.get(resolved.path()).normalize();
+            final URI fileURI = URI.createFileURI(normalized.toString());
+            return fileURI;
+        }
+        return resolved;
     }
 
     private URI getBaseUri() {
