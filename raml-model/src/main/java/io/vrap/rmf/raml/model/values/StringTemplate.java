@@ -74,13 +74,24 @@ public class StringTemplate {
         return new StringTemplate(parts);
     }
 
-    public static StringTemplate of(final String template) {
-        final StringTemplateLexer lexer = new StringTemplateLexer(CharStreams.fromString(template));
-        final CommonTokenStream tokenStream = new CommonTokenStream(lexer);
-        final StringTemplateParser.StringTemplateContext stringTemplateContext =
-                new StringTemplateParser(tokenStream).stringTemplate();
-        final List<StringTemplate.Part> parts = new StringTemplateVisitor().visitStringTemplate(stringTemplateContext);
-        return of(parts);
+    /**
+     * Returns a parsed string template if the given template has template parameters.
+     * Returns null otherwise.
+     *
+     * @param value the value to parse as a string template
+     * @return the parsed string template or null
+     */
+    public static StringTemplate of(final String value) {
+        if (value.contains("<<")) {
+            final StringTemplateLexer lexer = new StringTemplateLexer(CharStreams.fromString(value));
+            final CommonTokenStream tokenStream = new CommonTokenStream(lexer);
+            final StringTemplateParser.StringTemplateContext stringTemplateContext =
+                    new StringTemplateParser(tokenStream).stringTemplate();
+            final List<StringTemplate.Part> parts = new StringTemplateVisitor().visitStringTemplate(stringTemplateContext);
+            return parts.stream().anyMatch(Expression.class::isInstance) ? of(parts) : null;
+        } else {
+            return null;
+        }
     }
 
     private interface Part {

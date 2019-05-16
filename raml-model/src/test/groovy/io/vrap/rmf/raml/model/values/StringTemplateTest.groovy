@@ -7,13 +7,28 @@ import spock.lang.Specification
  */
 class StringTemplateTest extends Specification {
 
+
+    def "StringTemplate.of(String) returns null for non string template"() {
+        when:
+        StringTemplate stringTemplate = StringTemplate.of(template)
+        then:
+        boolean isStringTemplate = stringTemplate != null
+        isStringTemplate == result
+        where:
+        template   || result
+        "<<"       || false
+        "<<>>"     || false
+        "<<A>>"    || true
+        "<<A>>N"   || true
+    }
+
     def "toString() should return parsed string template"() {
         when:
         StringTemplate stringTemplate = StringTemplate.of(template);
         then:
         stringTemplate.toString() == template
         where:
-        template << [ '', '<<resourcePathName>>Draft', 'Name<<name>>', 'Name<<name>>Impl', '<<t>><<fff', '<<<<t>>', '201<<t>>' ]
+        template << [ '<<resourcePathName>>Draft', 'Name<<name>>', 'Name<<name>>Impl', '<<t>><<fff', '<<<<t>>', '201<<t>>' ]
     }
 
     def "render(Map<String, String>)"() {

@@ -469,7 +469,7 @@ public class RamlModelBuilder {
         @Override
         public EObject caseStringNode(final StringNode stringNode) {
             final StringTemplate stringTemplate = StringTemplate.of(stringNode.getValue());
-            if (stringTemplate.getParameters().size() > 0) {
+            if (stringTemplate != null && stringTemplate.getParameters().size() > 0) {
                 final String render = stringTemplate.render(parameters);
                 stringNode.setValue(render);
                 final NodeTokenProvider existingAdapter =
