@@ -8,7 +8,7 @@ import java.util.Map;
 public interface AntlrUtils {
 
     /**
-     * Creates a map from the literal token names of the given vocabulyry to token types.
+     * Creates a map from the literal token names of the given vocabulary to token types.
      *
      * @param vocabulary the vocabulary
      * @return a map from literal token names to token types
