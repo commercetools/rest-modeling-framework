@@ -1,0 +1,17 @@
+publishing {
+    publications {
+        Maven(MavenPublication) {
+            from components.java
+            artifactId 'antlr-utils'
+
+            artifact sourceJar {
+                classifier 'sources'
+            }
+        }
+    }
+}
+
+dependencies {
+    compile 'org.antlr:antlr4:4.7'
+}
+

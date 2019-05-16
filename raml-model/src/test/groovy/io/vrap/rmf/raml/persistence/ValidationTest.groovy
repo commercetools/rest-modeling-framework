@@ -21,6 +21,7 @@ class ValidationTest extends Specification implements ResourceFixtures {
         result.validationResults.size() == 1
         RamlDiagnostic diagnostic = result.validationResults[0]
         diagnostic.message == "Value 'v3' is not defined in enum facet '[v1,v2]'"
+        diagnostic.location.contains(".json") == true
     }
 
     def "/api/api-with-duplicate-resource.raml"() {

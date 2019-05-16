@@ -51,10 +51,11 @@ public class InstanceValidator implements DiagnosticsCreator {
         return validationResults;
     }
 
-    private List<Diagnostic> validateEnumFacet(final AnyTypeFacet anyTypeFacet, final Object value) {
+    private List<Diagnostic> validateEnumFacet(final AnyTypeFacet anyTypeFacet, final Instance instance) {
+        final Object value = instance.getValue();
         final List<Diagnostic> validationResults = new ArrayList<>();
         if (anyTypeFacet.getEnum().isEmpty() && anyTypeFacet.getType() != null) {
-            return validateEnumFacet(anyTypeFacet.getType(), value);
+            return validateEnumFacet(anyTypeFacet.getType(), instance);
         } else {
             final Optional<Instance> enumInstance = anyTypeFacet.getEnum().stream()
                     .filter(enumValue -> enumValue.getValue().equals(value))
@@ -63,7 +64,7 @@ public class InstanceValidator implements DiagnosticsCreator {
                 final String enumValues = anyTypeFacet.getEnum().stream()
                         .map(e -> e.getValue().toString())
                         .collect(Collectors.joining(",", "[", "]"));
-                validationResults.add(error(anyTypeFacet,"Value ''{0}'' is not defined in enum facet ''{1}''",
+                validationResults.add(error(instance,"Value ''{0}'' is not defined in enum facet ''{1}''",
                         value, enumValues));
             }
             return validationResults;
@@ -106,7 +107,7 @@ public class InstanceValidator implements DiagnosticsCreator {
                             value, stringType.getPattern()));
                 }
 
-                validationResults.addAll(validateEnumFacet(stringType, value));
+                validationResults.addAll(validateEnumFacet(stringType, stringInstance));
             } else if (typeInstanceOf(NilType.class)) {
                 if (!Strings.isNullOrEmpty(value)) {
                     validationResults.add(error(stringInstance, "Value must be empty"));
@@ -151,7 +152,7 @@ public class InstanceValidator implements DiagnosticsCreator {
                             value, numberType.getMultipleOf()));
                 }
 
-                validationResults.addAll(validateEnumFacet(numberType, value));
+                validationResults.addAll(validateEnumFacet(numberType, numberInstance));
             } else if (!typeIs(ANY_TYPE)) {
                 validationResults.add(error(numberInstance, "Invalid type"));
             }
@@ -173,7 +174,7 @@ public class InstanceValidator implements DiagnosticsCreator {
                     validationResults.add(error(integerInstance, "Value ''{0}'' is not a multiple of ''{1}''",
                             value, commonNumberType.getMultipleOf()));
                 }
-                validationResults.addAll(validateEnumFacet(commonNumberType, value));
+                validationResults.addAll(validateEnumFacet(commonNumberType, integerInstance));
             }
             if (typeInstanceOf(IntegerTypeFacet.class)) {
                 final IntegerTypeFacet integerType = (IntegerTypeFacet) types.peek();

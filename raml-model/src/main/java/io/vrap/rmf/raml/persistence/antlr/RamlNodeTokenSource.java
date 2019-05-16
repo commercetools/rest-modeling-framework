@@ -8,12 +8,13 @@ import org.antlr.v4.runtime.*;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.URIConverter;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
+import static io.vrap.antlr.utils.AntlrUtils.literalToTokenType;
 
 /**
  * This class acts as a bridge between the {@link NodeParser}s token types and the {@link RAMLParser}s token types.
@@ -22,15 +23,14 @@ import java.util.stream.Collectors;
 public class RamlNodeTokenSource implements TokenSource {
     private static final Pattern ANNOTATION_TYPE_REF_PATTERN = Pattern.compile("\\(([^\\)]*)\\)");
     private static final NodeModelBuilder NODE_MODEL_BUILDER = new NodeModelBuilder();
+    private static Map<String, Integer> LITERAL_TO_TOKEN_TYPE = literalToTokenType(RAMLParser.VOCABULARY);
 
     private final URI uri;
     private final List<NodeToken> tokens;
     private int index;
 
-    private Map<String, Integer> literalTokenTypes = new HashMap<>();
 
     public RamlNodeTokenSource(final URI uri, final Node node) {
-        initTokens();
         this.uri = uri;
         tokens = NODE_MODEL_BUILDER.asTokens(node)
                 .stream()
@@ -46,18 +46,6 @@ public class RamlNodeTokenSource implements TokenSource {
         this(uri, NODE_MODEL_BUILDER.parse(input, uri, uriConverter));
     }
 
-
-    private void initTokens() {
-        final Vocabulary vocabulary = RAMLParser.VOCABULARY;
-        for (int tokenType = 0; tokenType <= vocabulary.getMaxTokenType(); tokenType++) {
-            final String literalName = vocabulary.getLiteralName(tokenType);
-            if (literalName != null) {
-                final String literalText = literalName.substring(1, literalName.length() - 1);
-                literalTokenTypes.put(literalText, tokenType);
-            }
-        }
-    }
-
     /**
      * This method maps the {@link NodeParser} token types to the {@link RAMLParser} token types.
      */
@@ -66,8 +54,8 @@ public class RamlNodeTokenSource implements TokenSource {
         String text = nodeToken.getText();
         if (nodeToken.getType() == NodeParser.STRING) {
             final Matcher matcher = ANNOTATION_TYPE_REF_PATTERN.matcher(text);
-            if (literalTokenTypes.containsKey(text)) {
-                type = literalTokenTypes.get(text);
+            if (LITERAL_TO_TOKEN_TYPE.containsKey(text)) {
+                type = LITERAL_TO_TOKEN_TYPE.get(text);
             } else if (text.startsWith("/") && !text.endsWith("/")) {
                 type = RAMLParser.RELATIVE_URI;
             } else if (matcher.matches()) {

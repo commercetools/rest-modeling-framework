@@ -6,6 +6,8 @@ import org.eclipse.emf.ecore.resource.URIConverter;
 
 import java.util.Stack;
 
+import static io.vrap.emf.utils.URIUtils.normalize;
+
 /**
  * An antlr lexer that delegates to {@link JsonNodeLexer} or {@link YamlNodeLexer}
  * depending on the file/content type.
@@ -48,7 +50,8 @@ public class NodeLexer implements TokenSource {
     private URI resolve(final String relativePath) {
         final String[] segments = URI.createURI(relativePath).segments();
         final URI baseUri = getBaseUri();
-        return baseUri.appendSegments(segments);
+        final URI resolved = baseUri.appendSegments(segments);
+        return normalize(resolved);
     }
 
     private URI getBaseUri() {
