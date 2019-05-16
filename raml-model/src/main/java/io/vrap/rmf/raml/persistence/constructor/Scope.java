@@ -21,6 +21,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static io.vrap.emf.utils.URIUtils.normalize;
 import static io.vrap.rmf.raml.model.modules.ModulesPackage.Literals.*;
 import static io.vrap.rmf.raml.model.resources.ResourcesPackage.Literals.RESOURCE_TYPE;
 import static io.vrap.rmf.raml.model.resources.ResourcesPackage.Literals.TRAIT;
@@ -74,7 +75,8 @@ public class Scope {
 
     private URI resolve(final String relativePath) {
         final String[] segments = URI.createURI(relativePath).segments();
-        return getBaseUri().appendSegments(segments);
+        final URI resolved = getBaseUri().appendSegments(segments);
+        return normalize(resolved);
     }
 
     public EObject getEObjectByName(final String name) {

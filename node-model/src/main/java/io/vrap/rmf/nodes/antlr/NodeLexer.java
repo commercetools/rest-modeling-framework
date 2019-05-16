@@ -4,9 +4,9 @@ import org.antlr.v4.runtime.*;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.URIConverter;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Stack;
+
+import static io.vrap.emf.utils.URIUtils.normalize;
 
 /**
  * An antlr lexer that delegates to {@link JsonNodeLexer} or {@link YamlNodeLexer}
@@ -51,12 +51,7 @@ public class NodeLexer implements TokenSource {
         final String[] segments = URI.createURI(relativePath).segments();
         final URI baseUri = getBaseUri();
         final URI resolved = baseUri.appendSegments(segments);
-        if (resolved.isFile()) {
-            final Path normalized = Paths.get(resolved.path()).normalize();
-            final URI fileURI = URI.createFileURI(normalized.toString());
-            return fileURI;
-        }
-        return resolved;
+        return normalize(resolved);
     }
 
     private URI getBaseUri() {

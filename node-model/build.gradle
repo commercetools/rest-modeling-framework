@@ -18,6 +18,7 @@ generateGrammarSource {
 
 dependencies {
     compile project(':functional-utils')
+    compile project(':emf-utils')
     compile project(':antlr-utils')
     
     compile jackson_core.core
