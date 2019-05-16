@@ -2,7 +2,7 @@ publishing {
     publications {
         Maven(MavenPublication) {
             from components.java
-            artifactId 'antlr-utils'
+            artifactId 'emf-utils'
 
             artifact sourceJar {
                 classifier 'sources'
