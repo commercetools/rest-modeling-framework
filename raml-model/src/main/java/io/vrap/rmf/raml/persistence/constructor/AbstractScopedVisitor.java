@@ -34,7 +34,7 @@ abstract class AbstractScopedVisitor<T> extends RAMLBaseVisitor<T> {
 
     protected <T extends EObject> T create(final EClass eClass, final ParserRuleContext ruleContext) {
         final T newEObject = (T) EcoreUtil.create(eClass);
-        final RAMLParserAdapter adapter = RAMLParserAdapter.of(ruleContext);
+        final RamlParserAdapter adapter = RamlParserAdapter.of(ruleContext);
         newEObject.eAdapters().add(adapter);
         return newEObject;
     }
