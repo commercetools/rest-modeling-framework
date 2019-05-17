@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/vrapio/rest-modeling-framework.svg?branch=master)](https://travis-ci.org/vrapio/rest-modeling-framework)
+[![Build Status](https://travis-ci.com/vrapio/rest-modeling-framework.svg?branch=master)](https://travis-ci.com/vrapio/rest-modeling-framework)
 
 The rest modeling framework provides an EMF based model for RAML api definition files.
 
