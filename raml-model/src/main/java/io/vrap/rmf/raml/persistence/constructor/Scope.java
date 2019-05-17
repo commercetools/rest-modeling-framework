@@ -269,9 +269,10 @@ public class Scope {
 
         final int line = at != null ? at.getLine() : -1;
         final int column = at != null ? at.getCharPositionInLine() : -1;
+        final String sourceName = at != null ? at.getTokenSource().getSourceName() : null;
 
         resource.getErrors()
-                .add(RamlDiagnostic.of(message, at.getTokenSource().getSourceName(), line, column));
+                .add(RamlDiagnostic.of(message, sourceName, line, column));
     }
 
     /**
