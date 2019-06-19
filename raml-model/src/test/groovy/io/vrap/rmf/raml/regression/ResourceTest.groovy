@@ -6,7 +6,6 @@ import io.vrap.rmf.raml.model.resources.HttpMethod
 import spock.lang.Ignore
 
 class ResourceTest extends RegressionTest {
-    @Ignore
     def "test-response-type"() {
         when:
         RamlModelResult<Api> ramlModelResult = constructApi(
