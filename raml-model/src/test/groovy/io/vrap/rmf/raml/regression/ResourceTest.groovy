@@ -3,7 +3,6 @@ package io.vrap.rmf.raml.regression
 import io.vrap.rmf.raml.model.RamlModelResult
 import io.vrap.rmf.raml.model.modules.Api
 import io.vrap.rmf.raml.model.resources.HttpMethod
-import spock.lang.Ignore
 
 class ResourceTest extends RegressionTest {
     def "test-response-type"() {
@@ -44,7 +43,6 @@ class ResourceTest extends RegressionTest {
         ramlModelResult.rootObject.resources[0].resources[1].getMethod(HttpMethod.GET).responses[0].getBody("application/json").type.name == "Category"
     }
 
-    @Ignore
     def "test-base-resource"() {
         when:
         RamlModelResult<Api> ramlModelResult = constructApi(
@@ -58,9 +56,29 @@ class ResourceTest extends RegressionTest {
         ''')
         then:
         ramlModelResult.validationResults.size() == 0
+        ramlModelResult.rootObject.resources.size() == 1
+        ramlModelResult.rootObject.resources[0].relativeUri.template == '/'
     }
 
-    @Ignore
+    def "test-resource-list-sub"() {
+        when:
+        RamlModelResult<Api> ramlModelResult = constructApi(
+                '''\
+        #%RAML 1.0
+        title: Test
+        baseUri: http://example.com
+        mediaType: application/json
+        /:
+            get:
+            /categories:
+                get:
+            /cart:
+                get:
+        ''')
+        then:
+        ramlModelResult.validationResults.size() == 0
+    }
+
     def "test-resource-list"() {
         when:
         RamlModelResult<Api> ramlModelResult = constructApi(

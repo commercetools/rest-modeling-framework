@@ -115,7 +115,7 @@ public class RamlModelBuilder {
             final ResourceResolver resourceResolver = new ResourceResolver();
             final BodyContentTypeResolver bodyContentTypeResolver = new BodyContentTypeResolver(api.getMediaType());
 
-            resolvedApi.getResources().forEach(resourceResolver::doSwitch);
+            new ArrayList<>(resolvedApi.getResources()).forEach(resourceResolver::doSwitch);
 
             resolvedApi.eAllContents().forEachRemaining(bodyContentTypeResolver::doSwitch);
 
