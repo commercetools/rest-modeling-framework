@@ -4,7 +4,6 @@ import io.vrap.rmf.raml.model.RamlModelResult
 import io.vrap.rmf.raml.model.modules.Api
 import io.vrap.rmf.raml.model.resources.HttpMethod
 import io.vrap.rmf.raml.model.resources.Method
-import spock.lang.Ignore
 
 class AnnotationTest extends RegressionTest {
     def "validation-of-annotation-value"() {
@@ -28,7 +27,6 @@ class AnnotationTest extends RegressionTest {
         ramlModelResult.validationResults[0].message == "Value 'product' is not defined in enum facet '[category]'"
     }
 
-    @Ignore
     def "annotate-query-param"() {
         when:
         RamlModelResult<Api> ramlModelResult = constructApi(
@@ -49,12 +47,12 @@ class AnnotationTest extends RegressionTest {
                     fuzzy:
                         type: string
                     test:
+                        type: string
+                        required: false
                         (placeholderParam):
                             paramName: searchKeywords
                             template: searchKeywords.<locale>
                             placeholder: locale
-                        type: string
-                        required: false
                 ''')
         then:
         ramlModelResult.validationResults.size() == 0

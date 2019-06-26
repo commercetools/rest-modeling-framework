@@ -576,10 +576,12 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
         if (isInlineTypeDeclaration) {
             typedElementType = inlineTypeDeclaration(typedElementType, scope, typedElementMap);
             scope.addValue(INLINE_TYPE_CONTAINER__INLINE_TYPES, typedElementType);
+            withinScope(scope.with(typedElementType),
+                    inlineTypeDeclarationScope -> super.visitTypedElementMap(typedElementMap));
+        } else {
+            super.visitTypedElementMap(typedElementMap);
         }
 
-        withinScope(scope.with(typedElementType),
-                inlineTypeDeclarationScope -> super.visitTypedElementMap(typedElementMap));
         scope.setValue(TYPED_ELEMENT__TYPE, typedElementType, typedElementMap.getStart());
 
         return scope.getEObject();
