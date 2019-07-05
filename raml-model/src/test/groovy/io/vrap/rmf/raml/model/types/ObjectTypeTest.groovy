@@ -34,6 +34,24 @@ class ObjectTypeTest extends Specification {
         'discriminator'    || 'discriminator'
     }
 
+    def "getType finds nothing"() {
+        when:
+        StringType stringType = TypesFactory.eINSTANCE.createStringType()
+
+        ObjectType baseType = TypesFactory.eINSTANCE.createObjectType()
+        Property property = TypesFactory.eINSTANCE.createProperty()
+        property.name = 'kind'
+        property.type = stringType
+        baseType.properties.add(property)
+        baseType.discriminator = 'kind'
+
+        ObjectType subType = TypesFactory.eINSTANCE.createObjectType()
+        subType.setType(baseType)
+        subType.discriminatorValue = "known"
+        then:
+        baseType.getType("unknown") == null
+    }
+
     def "additionalPropertiesInherited"() {
         when:
         ObjectType baseType = TypesFactory.eINSTANCE.createObjectType()

@@ -9,6 +9,7 @@ import io.vrap.rmf.raml.model.types.StringInstance
 import io.vrap.rmf.raml.model.types.TypesFactory
 import io.vrap.rmf.raml.model.util.InstanceHelper
 import io.vrap.rmf.raml.validation.InstanceValidator
+import org.eclipse.emf.common.util.Diagnostic
 
 class DiscriminatorTest extends RegressionTest {
     def "nested-discriminator-example-validation"() {
@@ -64,5 +65,39 @@ class DiscriminatorTest extends RegressionTest {
                         }
                     }''')
         new InstanceValidator().validate(instance, type).size() == 0
+    }
+
+    def "unknown-discriminator-example-validation"() {
+        when:
+        RamlModelResult<Api> ramlModelResult = constructApi(
+                '''\
+        #%RAML 1.0
+        title: Some API
+        types:
+            UpdateAction:
+                type: object
+                discriminator: action
+                properties:
+                    action:
+                        type: string
+            CartDiscountChangeTargetAction:
+                type: UpdateAction
+                discriminatorValue: changeTarget
+        ''')
+        then:
+        ramlModelResult.validationResults.size() == 0
+        AnyType type = ramlModelResult.rootObject.getType('UpdateAction')
+
+        Instance instance = InstanceHelper.parseJson('''\
+                    {
+                        "action": "addLineItem",
+                        "target": {
+                            "type": "lineItems",
+                            "predicate": "sku = \\"mySKU\\""
+                        }
+                    }''')
+        List< Diagnostic> result = new InstanceValidator().validate(instance, type)
+        result.find { it.severity == Diagnostic.WARNING }.iterator().size() == 1
+        result.find { it.severity == Diagnostic.ERROR }.iterator().size() == 0
     }
 }
