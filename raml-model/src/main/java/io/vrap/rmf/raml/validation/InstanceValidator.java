@@ -265,6 +265,9 @@ public class InstanceValidator implements DiagnosticsCreator {
                     if (discriminatorValueInstance instanceof StringInstance) {
                         final String discriminatorValue = ((StringInstance) discriminatorValueInstance).getValue();
                         final ObjectType subType = objectTypeFacet.getType(discriminatorValue);
+                        if (subType == null) {
+                            validationResults.add(warning(objectInstance, "Type for discriminator ''{0}'' not found", discriminatorValue));
+                        }
                         actualObjectTypeFacet = subType == null ? objectTypeFacet : subType;
                     } else {
                         actualObjectTypeFacet = objectTypeFacet;
