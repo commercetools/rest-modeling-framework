@@ -1,5 +1,6 @@
 package io.vrap.rmf.raml.regression
 
+import io.vrap.rmf.raml.model.RamlModelBuilder
 import io.vrap.rmf.raml.model.RamlModelResult
 import io.vrap.rmf.raml.model.modules.Api
 import io.vrap.rmf.raml.model.resources.HttpMethod
@@ -8,8 +9,10 @@ import io.vrap.rmf.raml.model.types.Instance
 import io.vrap.rmf.raml.model.types.StringInstance
 import io.vrap.rmf.raml.model.types.TypesFactory
 import io.vrap.rmf.raml.model.util.InstanceHelper
+import io.vrap.rmf.raml.model.util.StringCaseFormat
 import io.vrap.rmf.raml.validation.InstanceValidator
 import org.eclipse.emf.common.util.Diagnostic
+import org.eclipse.emf.common.util.URI
 
 class DiscriminatorTest extends RegressionTest {
     def "nested-discriminator-example-validation"() {
@@ -97,7 +100,52 @@ class DiscriminatorTest extends RegressionTest {
                         }
                     }''')
         List< Diagnostic> result = new InstanceValidator().validate(instance, type)
-        result.find { it.severity == Diagnostic.WARNING }.iterator().size() == 1
-        result.find { it.severity == Diagnostic.ERROR }.iterator().size() == 0
+        result.find { it.severity == Diagnostic.ERROR }.iterator().size() == 1
+    }
+
+    def "optional-discriminator-example-validation"() {
+        when:
+        RamlModelResult<Api> ramlModelResult = constructApi(
+                '''\
+        #%RAML 1.0
+        title: Some API
+        types:
+            Reference:
+                type: object
+                discriminator: typeId
+                properties:
+                    typeId?:
+                        type: string
+                    id?:
+                        type: string
+            TypeReference:
+                type: Reference
+                discriminatorValue: type
+            CategoryReference:
+                type: Reference
+                discriminatorValue: category
+            ReferenceTypeId:
+                type: string
+                enum:
+                    - type
+                    - category
+            CustomFields:
+                type: object
+                properties:
+                    type:
+                        type: TypeReference
+        ''')
+        then:
+        ramlModelResult.validationResults.size() == 0
+        AnyType type = ramlModelResult.rootObject.getType('CustomFields')
+
+        Instance instance = InstanceHelper.parseJson(input)
+        List< Diagnostic> result = new InstanceValidator().validate(instance, type)
+        result.find { it.severity == Diagnostic.ERROR }.iterator().size() == errors
+        where:
+        input                                                   | errors
+        '{ "type": { "id": "test" } }'                          | 0
+        '{ "type": { "id": "test", "typeId": "type" } }'        | 0
+        '{ "type": { "id": "test", "typeId": "category" } }'    | 1
     }
 }
