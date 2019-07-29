@@ -3,6 +3,11 @@ package io.vrap.rmf.raml.regression
 import io.vrap.rmf.raml.model.RamlModelResult
 import io.vrap.rmf.raml.model.modules.Api
 import io.vrap.rmf.raml.model.resources.HttpMethod
+import io.vrap.rmf.raml.model.types.AnyType
+import io.vrap.rmf.raml.model.types.ObjectInstance
+import io.vrap.rmf.raml.model.types.PropertyValue
+import io.vrap.rmf.raml.model.types.impl.PropertyValueImpl
+import spock.lang.Ignore
 
 class ResourceTest extends RegressionTest {
     def "test-response-type"() {
@@ -94,5 +99,91 @@ class ResourceTest extends RegressionTest {
         ''')
         then:
         ramlModelResult.validationResults.size() == 0
+    }
+
+    def "test-examples"() {
+        when:
+        writeFile(
+                "example.json",
+                '''{ "foo": "bar" }''')
+        RamlModelResult<Api> ramlModelResult = constructApi(
+                Arrays.asList("example.json"),
+                '''\
+        #%RAML 1.0
+        title: Test
+        types:
+            Cart: object
+        baseUri: http://example.com/
+        mediaType: application/json
+        /{test}:
+            get:
+            /carts:
+                post:
+                    body:
+                        application/json:
+                            type: Cart
+                            example: !include example.json
+        ''')
+        then:
+        ramlModelResult.validationResults.size() == 0
+        ramlModelResult.rootObject.resources[0].resources[0].relativeUri.template == "/carts"
+        AnyType cart = ramlModelResult.rootObject.resources[0].resources[0].getMethod(HttpMethod.POST).getBody("application/json").type
+        cart.name == "Cart"
+        ObjectInstance example = cart.examples[0].value
+        example.getValue("foo").value == "bar"
+    }
+
+    @Ignore
+    def "test-resource-examples"() {
+        when:
+        writeFile(
+                "example.json",
+                '''{ "foo": "bar" }''')
+        RamlModelResult<Api> ramlModelResult = constructApi(
+                Arrays.asList("example.json"),
+                '''\
+        #%RAML 1.0
+        title: Test
+        types:
+            Cart: object
+            Category: object
+        baseUri: http://example.com/
+        mediaType: application/json
+        resourceTypes:
+            base:
+                post:
+                    body:
+                        application/json:
+                            example: <<resourceExample>>
+                            type: <<resourceType>>
+        /{test}:
+            get:
+            /carts:
+                type:
+                    base:
+                        resourceType: Cart
+                        resourceExample: !include example.json
+            /categories:
+                type:
+                    base:
+                        resourceType: Category
+                        resourceExample: !include example.json
+        ''')
+        then:
+        ramlModelResult.validationResults.size() == 0
+        ramlModelResult.rootObject.resources[0].resources[0].relativeUri.template == "/carts"
+        AnyType cart = ramlModelResult.rootObject.resources[0].resources[0].getMethod(HttpMethod.POST).getBody("application/json").type
+        cart.name == "Cart"
+
+        ObjectInstance cartExample = cart.examples[0].value
+        cartExample.getValue("foo").value == "bar"
+
+
+        ramlModelResult.rootObject.resources[0].resources[1].relativeUri.template == "/categories"
+        AnyType category = ramlModelResult.rootObject.resources[0].resources[0].getMethod(HttpMethod.POST).getBody("application/json").type
+        category.name == "Category"
+
+        ObjectInstance categoryExample = category.examples[0].value
+        categoryExample.getValue("foo").value == "bar"
     }
 }
