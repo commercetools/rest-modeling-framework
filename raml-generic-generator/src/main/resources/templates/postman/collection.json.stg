@@ -131,7 +131,7 @@ create(oauth, item) ::=<<
         ],
         "body": {
             "mode": "raw",
-            "raw": ""
+            "raw": "<if (item.example)><item.example><endif>"
         },
         "url": {
             "raw": "{{host}}/{{projectKey}}<item.resource.relativeUri.template>",
