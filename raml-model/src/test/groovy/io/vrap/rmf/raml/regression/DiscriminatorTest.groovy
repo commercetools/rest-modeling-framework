@@ -13,6 +13,7 @@ import io.vrap.rmf.raml.model.util.StringCaseFormat
 import io.vrap.rmf.raml.validation.InstanceValidator
 import org.eclipse.emf.common.util.Diagnostic
 import org.eclipse.emf.common.util.URI
+import spock.lang.Ignore
 
 class DiscriminatorTest extends RegressionTest {
     def "nested-discriminator-example-validation"() {
@@ -147,5 +148,46 @@ class DiscriminatorTest extends RegressionTest {
         '{ "type": { "id": "test" } }'                          | 0
         '{ "type": { "id": "test", "typeId": "type" } }'        | 0
         '{ "type": { "id": "test", "typeId": "category" } }'    | 1
+    }
+
+    @Ignore
+    def "discriminator-property-description"() {
+        when:
+        RamlModelResult<Api> ramlModelResult = constructApi(
+                '''
+                #%RAML 1.0
+                title: Import sink types.
+                                
+                types:
+                  ImportSink:
+                    properties:
+                      skipPredicate?:
+                        description: |
+                          The optional skip predicate is evaluated against the current state of the corresponding CTP resource.
+                          If it evaluates to true, the import will be skipped.
+                        type: Predicate
+                    examples:
+                      with-skip-predicate: |
+                        {
+                          "skipPredicate": {
+                            "type": "javascript",
+                            "expression": "!attributes.new"
+                          }
+                        }
+                  Predicate:
+                    discriminator: type
+                    type: object
+                    properties:
+                      type:
+                        type: string
+                  JavascriptPredicate:
+                    type: Predicate
+                    discriminatorValue: javascript
+                    properties:
+                      expression:
+                        type: string
+                ''')
+        then:
+        ramlModelResult.validationResults.size() == 0
     }
 }
