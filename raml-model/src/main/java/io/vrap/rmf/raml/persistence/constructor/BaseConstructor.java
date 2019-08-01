@@ -10,9 +10,7 @@ import io.vrap.rmf.raml.model.values.RegExp;
 import io.vrap.rmf.raml.persistence.antlr.RAMLParser;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
-import org.eclipse.emf.ecore.EAttribute;
-import org.eclipse.emf.ecore.EClass;
-import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.*;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
 import java.util.Collections;
@@ -332,6 +330,9 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
         final EObject newEObject = create(eClass, ruleContext);
         final Consumer<EAttribute> copyAttribute = attribute -> newEObject.eSet(attribute, eObject.eGet(attribute));
         eClass.getEAllAttributes().forEach(copyAttribute);
+        // copy subType references
+        final EStructuralFeature feature = eClass.getEStructuralFeature(ANY_TYPE__SUB_TYPES.getFeatureID());
+        newEObject.eSet(feature, eObject.eGet(feature));
 
         return newEObject;
     }

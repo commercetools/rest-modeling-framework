@@ -150,7 +150,6 @@ class DiscriminatorTest extends RegressionTest {
         '{ "type": { "id": "test", "typeId": "category" } }'    | 1
     }
 
-    @Ignore
     def "discriminator-property-description"() {
         when:
         RamlModelResult<Api> ramlModelResult = constructApi(
