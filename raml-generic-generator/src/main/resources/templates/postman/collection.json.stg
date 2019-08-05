@@ -50,11 +50,11 @@ query(oauth, item) ::=<<
                     "tests[\"Status code is 200\"] = responseCode.code === 200;",
                     "var data = JSON.parse(responseBody);",
                     "if(data.results && data.results[0] && data.results[0].id && data.results[0].version){",
-                    "    postman.setEnvironmentVariable(\"<item.resource.resourcePathName; format="singularize">-id\", data.results[0].id); ",
-                    "    postman.setEnvironmentVariable(\"<item.resource.resourcePathName; format="singularize">-version\", data.results[0].version);",
+                    "    pm.environment.set(\"<item.resource.resourcePathName; format="singularize">-id\", data.results[0].id); ",
+                    "    pm.environment.set(\"<item.resource.resourcePathName; format="singularize">-version\", data.results[0].version);",
                     "}",
                     "if(data.results && data.results[0] && data.results[0].key){",
-                    "    postman.setEnvironmentVariable(\"<item.resource.resourcePathName; format="singularize">-key\", data.results[0].key); ",
+                    "    pm.environment.set(\"<item.resource.resourcePathName; format="singularize">-key\", data.results[0].key); ",
                     "}"
                 ]
             }
@@ -555,17 +555,17 @@ test(item, param) ::=<<
 "tests[\"Status code \" + responseCode.code] = responseCode.code === 200 || responseCode.code === 201;",
 "var data = JSON.parse(responseBody);",
 "if(data.version){",
-"    postman.setEnvironmentVariable(\"<item.resourcePathName; format="singularize">-version\", data.version);",
+"    pm.environment.set(\"<item.resourcePathName; format="singularize">-version\", data.version);",
 "}",
 "if(data.id){",
-"    postman.setEnvironmentVariable(\"<item.resourcePathName; format="singularize">-id\", data.id); ",
+"    pm.environment.set(\"<item.resourcePathName; format="singularize">-id\", data.id); ",
 "}",
 "if(data.key){",
-"    postman.setEnvironmentVariable(\"<item.resourcePathName; format="singularize">-key\", data.key); ",
+"    pm.environment.set(\"<item.resourcePathName; format="singularize">-key\", data.key); ",
 "}",
 <if (param)>
 "if(data.<param>){",
-"    postman.setEnvironmentVariable(\"<item.resourcePathName; format="singularize">-<param>\", data.<param>); ",
+"    pm.environment.set(\"<item.resourcePathName; format="singularize">-<param>\", data.<param>); ",
 "}",
 <endif>
 <if (item.testScript)>
@@ -603,14 +603,14 @@ authorization(oauth) ::=<<
                             "tests[\"Status code is 200\"] = responseCode.code === 200;",
                             "var data = JSON.parse(responseBody);",
                             "if(data.access_token){",
-                            "    postman.setEnvironmentVariable(\"ctp_access_token\", data.access_token);",
+                            "    pm.environment.set(\"ctp_access_token\", data.access_token);",
                             "}",
                             "if (data.scope) {",
                             "    parts = data.scope.split(\" \");",
                             "    if (parts.length > 0) {",
                             "        scopeParts = parts[0].split(\":\");",
                             "        if (scopeParts.length >= 2) {",
-                            "            postman.setEnvironmentVariable(\"projectKey\", scopeParts[1]);",
+                            "            pm.environment.set(\"projectKey\", scopeParts[1]);",
                             "        }",
                             "    }",
                             "}"
