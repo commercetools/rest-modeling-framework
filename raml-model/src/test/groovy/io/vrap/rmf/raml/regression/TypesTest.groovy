@@ -25,6 +25,26 @@ class TypesTest extends RegressionTest {
         ramlModelResult.validationResults.size() == 1
     }
 
+    def "maxItems type"() {
+        when:
+        RamlModelResult<Api> ramlModelResult = constructApi(
+                '''\
+                #%RAML 1.0
+                title: Example API
+                version: v1
+                types:
+                  User:
+                    properties:
+                      names:
+                        description: Lorem ipsum
+                        type: string[]
+                        maxItems: 20
+        ''')
+        then:
+        ramlModelResult.validationResults.size() == 0
+    }
+
+
     def "unknown type in extension"() {
         when:
         writeFile(
