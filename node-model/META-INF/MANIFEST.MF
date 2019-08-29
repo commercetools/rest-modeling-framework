@@ -2,12 +2,14 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: node-model;singleton:=true
+Automatic-Module-Name: node-model
 Bundle-Version: 1.0.0.qualifier
 Bundle-ClassPath: .
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Export-Package: io.vrap.rmf.nodes,
+ io.vrap.rmf.nodes.impl,
  io.vrap.rmf.nodes.antlr,
  io.vrap.rmf.nodes.util
 Require-Bundle: org.eclipse.core.runtime,
