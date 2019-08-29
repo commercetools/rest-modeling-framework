@@ -256,6 +256,7 @@ public class InstanceValidator implements DiagnosticsCreator {
 
             if (typeInstanceOf(ObjectTypeFacet.class)) {
                 final ObjectTypeFacet objectTypeFacet = (ObjectTypeFacet) types.peek();
+
                 final ObjectTypeFacet actualObjectTypeFacet;
                 final String discriminator = objectTypeFacet.discriminator();
                 if (Strings.isNullOrEmpty(discriminator)) {

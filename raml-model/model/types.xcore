@@ -24,6 +24,14 @@ interface AnyTypeFacet extends AnnotationsFacet, DocumentableElement, NamedEleme
 	 * A default value for this element.
 	 */
 	contains Instance ^default	
+	
+	
+    /*
+     * Returns true iff. this type is declared inline.
+     */
+    op boolean isInlineType() {
+        eContainmentFeature == TypesPackage.Literals.INLINE_TYPE_CONTAINER__INLINE_TYPES
+    }
 }
 
 interface ObjectTypeFacet extends AnyTypeFacet {
@@ -239,13 +247,6 @@ class AnyType extends AnyTypeFacet {
     contains Example[] examples
 
     /*
-     * Returns true iff. this type is declared inline.
-     */
-    op boolean isInlineType() {
-        eContainmentFeature == TypesPackage.Literals.INLINE_TYPE_CONTAINER__INLINE_TYPES
-    }
-
-    /*
      * If {@code inheritAnnotation} is true, this method traverses the inheritance chain to
      * find the specified annotation. Otherwise this method only tries to find the annotation
      * in this type.
@@ -354,14 +355,18 @@ class ObjectType extends AnyType, ObjectTypeFacet {
     	if (discriminatorValueOrDefault() == discriminatorValue) {
     		this
     	} else {
-    		val ObjectType subType = subTypes.filter(ObjectType).findFirst[it.discriminatorValueOrDefault() == discriminatorValue]
+    		if (isInlineType && ^type instanceof ObjectType) {
+    			(^type as ObjectType).getType(discriminatorValue)  
+    		} else {
+    			val ObjectType subType = subTypes.filter(ObjectType).findFirst[it.discriminatorValueOrDefault() == discriminatorValue]
     	
-    		if (subType === null) 
-    			subTypes.filter(ObjectType).findFirst[it.getType(discriminatorValue) !== null]
-    		else
-    			subType
+    			if (subType === null) 
+    				subTypes.filter(ObjectType).findFirst[it.getType(discriminatorValue) !== null]
+    			else
+    				subType
     		}
     	}
+    }
 }
 
 /*
