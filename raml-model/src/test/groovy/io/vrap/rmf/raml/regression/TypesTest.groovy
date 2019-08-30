@@ -2,9 +2,11 @@ package io.vrap.rmf.raml.regression
 
 import io.vrap.rmf.raml.model.RamlModelResult
 import io.vrap.rmf.raml.model.modules.Api
+import io.vrap.rmf.raml.model.types.ArrayType
 import io.vrap.rmf.raml.model.types.IntegerType
 import io.vrap.rmf.raml.model.types.IntersectionType
 import io.vrap.rmf.raml.model.types.ObjectType
+import io.vrap.rmf.raml.model.types.Property
 
 class TypesTest extends RegressionTest {
 
@@ -24,6 +26,35 @@ class TypesTest extends RegressionTest {
         then:
         ramlModelResult.validationResults.size() == 1
     }
+
+    def "maxItems type"() {
+        when:
+        RamlModelResult<Api> ramlModelResult = constructApi(
+                '''\
+                #%RAML 1.0
+                title: Example API
+                version: v1
+                types:
+                  User:
+                    properties:
+                      firstNames:
+                        description: Lorem ipsum
+                        type: string[]
+                        maxItems: 20
+                      lastNames:
+                        description: Lorem ipsum
+                        type: string[]
+        ''')
+        then:
+        ramlModelResult.validationResults.size() == 0
+        Api api = ramlModelResult.rootObject;
+        ObjectType user = (ObjectType)api.getType("User")
+        Property firstNames = user.getProperty("firstNames")
+        ((ArrayType)firstNames.type).maxItems == 20
+        Property lastNames = user.getProperty("lastNames")
+        ((ArrayType)lastNames.type).maxItems == null
+    }
+
 
     def "unknown type in extension"() {
         when:
