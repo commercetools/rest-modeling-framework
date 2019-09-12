@@ -4,8 +4,10 @@ import io.vrap.rmf.raml.model.RamlModelResult
 import io.vrap.rmf.raml.model.modules.Api
 import io.vrap.rmf.raml.model.resources.HttpMethod
 import io.vrap.rmf.raml.model.types.AnyType
+import io.vrap.rmf.raml.model.types.NumberType
 import io.vrap.rmf.raml.model.types.ObjectInstance
 import io.vrap.rmf.raml.model.types.PropertyValue
+import io.vrap.rmf.raml.model.types.StringType
 import io.vrap.rmf.raml.model.types.impl.PropertyValueImpl
 import spock.lang.Ignore
 
@@ -63,6 +65,34 @@ class ResourceTest extends RegressionTest {
         ramlModelResult.validationResults.size() == 0
         ramlModelResult.rootObject.resources.size() == 1
         ramlModelResult.rootObject.resources[0].relativeUri.template == '/'
+    }
+
+    @Ignore
+    def "test-default-uri-parameter"() {
+        when:
+        RamlModelResult<Api> ramlModelResult = constructApi(
+                '''\
+        #%RAML 1.0
+        title: Test
+        baseUri: http://example.com
+        mediaType: application/json
+        /api-{projectKey}-{number}:
+            uriParameters:
+                number:
+                    type: number
+            get:
+        /import-{projectKey}:
+            get:
+        ''')
+        then:
+        ramlModelResult.validationResults.size() == 0
+        ramlModelResult.rootObject.resources.size() == 2
+        ramlModelResult.rootObject.resources.find { it.relativeUri.template.startsWith("/api") }.uriParameters.size() == 2
+        ramlModelResult.rootObject.resources.find { it.relativeUri.template.startsWith("/api") }.uriParameters.find { it.name == "number" }.type instanceof NumberType
+        ramlModelResult.rootObject.resources.find { it.relativeUri.template.startsWith("/api") }.uriParameters.find { it.name == "projectKey" }.type instanceof StringType
+
+        ramlModelResult.rootObject.resources.find { it.relativeUri.template.startsWith("/import") }.uriParameters.size() == 1
+        ramlModelResult.rootObject.resources.find { it.relativeUri.template.startsWith("/import") }.uriParameters.find { it.name == "projectKey" }.type instanceof StringType
     }
 
     def "test-resource-list-sub"() {
