@@ -67,7 +67,6 @@ class ResourceTest extends RegressionTest {
         ramlModelResult.rootObject.resources[0].relativeUri.template == '/'
     }
 
-    @Ignore
     def "test-default-uri-parameter"() {
         when:
         RamlModelResult<Api> ramlModelResult = constructApi(
@@ -87,12 +86,12 @@ class ResourceTest extends RegressionTest {
         then:
         ramlModelResult.validationResults.size() == 0
         ramlModelResult.rootObject.resources.size() == 2
-        ramlModelResult.rootObject.resources.find { it.relativeUri.template.startsWith("/api") }.uriParameters.size() == 2
-        ramlModelResult.rootObject.resources.find { it.relativeUri.template.startsWith("/api") }.uriParameters.find { it.name == "number" }.type instanceof NumberType
-        ramlModelResult.rootObject.resources.find { it.relativeUri.template.startsWith("/api") }.uriParameters.find { it.name == "projectKey" }.type instanceof StringType
+        ramlModelResult.rootObject.resources.find { it.relativeUri.template.startsWith("/api") }.relativeUriParameters.size() == 2
+        ramlModelResult.rootObject.resources.find { it.relativeUri.template.startsWith("/api") }.relativeUriParameters.find { it.name == "number" }.type instanceof NumberType
+        ramlModelResult.rootObject.resources.find { it.relativeUri.template.startsWith("/api") }.relativeUriParameters.find { it.name == "projectKey" }.type instanceof StringType
 
-        ramlModelResult.rootObject.resources.find { it.relativeUri.template.startsWith("/import") }.uriParameters.size() == 1
-        ramlModelResult.rootObject.resources.find { it.relativeUri.template.startsWith("/import") }.uriParameters.find { it.name == "projectKey" }.type instanceof StringType
+        ramlModelResult.rootObject.resources.find { it.relativeUri.template.startsWith("/import") }.relativeUriParameters.size() == 1
+        ramlModelResult.rootObject.resources.find { it.relativeUri.template.startsWith("/import") }.relativeUriParameters.find { it.name == "projectKey" }.type instanceof StringType
     }
 
     def "test-resource-list-sub"() {
