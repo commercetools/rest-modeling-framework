@@ -89,6 +89,32 @@ public class ModelHelper {
     	
     	return allUriParameters;
     }
+
+    /**
+     * Returns implicitly (in the uri template) and explicitly defined {@link UriParameter}s of the
+     * given resource.
+     *
+     * @param resource the resource
+     * @return the list of all uri parameter of the given resource
+     */
+    public static List<UriParameter> uriParameters(final Resource resource) {
+        final List<UriParameter> uriParameters = new ArrayList<>();
+
+        final UriTemplate relativeUri = resource.getRelativeUri();
+        if (relativeUri != null) {
+            for (final String parameter : relativeUri.getVariables()) {
+                UriParameter uriParameter = resource.getUriParameter(parameter);
+                if (uriParameter == null) {
+                    uriParameter = ResourcesFactory.eINSTANCE.createUriParameter();
+                    uriParameter.setName(parameter);
+                    uriParameter.setType(BuiltinType.STRING.getType(resource.eResource().getResourceSet()));
+                }
+                uriParameters.add(uriParameter);
+            }
+        }
+
+        return uriParameters;
+    }
     
     public static String resourcePath(final Resource resource) {
         final UriTemplate fullUri = resource.getFullUri();

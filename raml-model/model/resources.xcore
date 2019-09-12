@@ -135,6 +135,10 @@ class Resource extends ResourceBase, ResourceContainer, ApplyTraitsFacet {
 	refers derived UriParameter[] allUriParameters get {
 		ModelHelper.allUriParameters(this).toEList
 	}
+
+	refers derived UriParameter[] UriParametersList get {
+		ModelHelper.uriParameters(this).toEList
+	}
 }
 
 class ResourceType extends ResourceBase, NamedElement {
