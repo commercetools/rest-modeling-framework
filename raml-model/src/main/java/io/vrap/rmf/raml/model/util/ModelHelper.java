@@ -71,7 +71,7 @@ public class ModelHelper {
      * @param resource the resource
      * @return the list of all uri parameter of the given resource
      */
-    public static List<UriParameter> allUriParameters(final Resource resource) {
+    public static List<UriParameter> fullUriParameters(final Resource resource) {
     	final List<UriParameter> allUriParameters = new ArrayList<>();
     	
     	final UriTemplate fullUri = resource.getFullUri();
@@ -97,7 +97,7 @@ public class ModelHelper {
      * @param resource the resource
      * @return the list of all uri parameter of the given resource
      */
-    public static List<UriParameter> uriParameters(final Resource resource) {
+    public static List<UriParameter> relativeUriParameters(final Resource resource) {
         final List<UriParameter> uriParameters = new ArrayList<>();
 
         final UriTemplate relativeUri = resource.getRelativeUri();

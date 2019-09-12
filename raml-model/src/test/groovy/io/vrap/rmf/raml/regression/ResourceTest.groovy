@@ -86,12 +86,12 @@ class ResourceTest extends RegressionTest {
         then:
         ramlModelResult.validationResults.size() == 0
         ramlModelResult.rootObject.resources.size() == 2
-        ramlModelResult.rootObject.resources.find { it.relativeUri.template.startsWith("/api") }.uriParametersList.size() == 2
-        ramlModelResult.rootObject.resources.find { it.relativeUri.template.startsWith("/api") }.uriParametersList.find { it.name == "number" }.type instanceof NumberType
-        ramlModelResult.rootObject.resources.find { it.relativeUri.template.startsWith("/api") }.uriParametersList.find { it.name == "projectKey" }.type instanceof StringType
+        ramlModelResult.rootObject.resources.find { it.relativeUri.template.startsWith("/api") }.relativeUriParameters.size() == 2
+        ramlModelResult.rootObject.resources.find { it.relativeUri.template.startsWith("/api") }.relativeUriParameters.find { it.name == "number" }.type instanceof NumberType
+        ramlModelResult.rootObject.resources.find { it.relativeUri.template.startsWith("/api") }.relativeUriParameters.find { it.name == "projectKey" }.type instanceof StringType
 
-        ramlModelResult.rootObject.resources.find { it.relativeUri.template.startsWith("/import") }.uriParametersList.size() == 1
-        ramlModelResult.rootObject.resources.find { it.relativeUri.template.startsWith("/import") }.uriParametersList.find { it.name == "projectKey" }.type instanceof StringType
+        ramlModelResult.rootObject.resources.find { it.relativeUri.template.startsWith("/import") }.relativeUriParameters.size() == 1
+        ramlModelResult.rootObject.resources.find { it.relativeUri.template.startsWith("/import") }.relativeUriParameters.find { it.name == "projectKey" }.type instanceof StringType
     }
 
     def "test-resource-list-sub"() {

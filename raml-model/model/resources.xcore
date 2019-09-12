@@ -132,12 +132,12 @@ class Resource extends ResourceBase, ResourceContainer, ApplyTraitsFacet {
 		if (eContainer instanceof Resource) eContainer as Resource else null
 	}
 	
-	refers derived UriParameter[] allUriParameters get {
-		ModelHelper.allUriParameters(this).toEList
+	refers derived UriParameter[] fullUriParameters get {
+		ModelHelper.fullUriParameters(this).toEList
 	}
 
-	refers derived UriParameter[] UriParametersList get {
-		ModelHelper.uriParameters(this).toEList
+	refers derived UriParameter[] relativeUriParameters get {
+		ModelHelper.relativeUriParameters(this).toEList
 	}
 }
 
