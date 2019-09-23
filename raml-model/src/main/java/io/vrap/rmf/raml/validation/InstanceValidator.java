@@ -32,7 +32,11 @@ public class InstanceValidator implements DiagnosticsCreator {
      * @return the validation diagnostics
      */
     public List<Diagnostic> validate(final Instance instance, final AnyTypeFacet type) {
-        return validateInternal(instance, type);
+        return validateInternal(instance, type, false);
+    }
+
+    public List<Diagnostic> validate(final Instance instance, final AnyTypeFacet type, final Boolean strict) {
+        return validateInternal(instance, type, strict);
     }
 
     /**
@@ -42,11 +46,11 @@ public class InstanceValidator implements DiagnosticsCreator {
      * @return the validation diagnostics
      */
     public List<Diagnostic> validate(final Annotation annotation) {
-        return validateInternal(annotation.getValue(), annotation.getType());
+        return validateInternal(annotation.getValue(), annotation.getType(), false);
     }
 
-    private List<Diagnostic> validateInternal(final Instance instance, final EObject type) {
-        final InstanceValidatingVisitor validatingVisitor = new InstanceValidatingVisitor(type);
+    private List<Diagnostic> validateInternal(final Instance instance, final EObject type, final Boolean strict) {
+        final InstanceValidatingVisitor validatingVisitor = new InstanceValidatingVisitor(type, strict);
         final List<Diagnostic> validationResults = validatingVisitor.doSwitch(instance);
         return validationResults;
     }
@@ -72,10 +76,13 @@ public class InstanceValidator implements DiagnosticsCreator {
     }
 
     private class InstanceValidatingVisitor extends TypesSwitch<List<Diagnostic>> {
+
+        private final Boolean strictMode;
         private final Stack<EObject> types = new Stack<>();
 
-        public InstanceValidatingVisitor(final EObject type) {
+        public InstanceValidatingVisitor(final EObject type, final Boolean strictMode) {
             types.push(type);
+            this.strictMode = strictMode;
         }
 
         @Override
@@ -287,7 +294,7 @@ public class InstanceValidator implements DiagnosticsCreator {
                         } finally {
                             types.pop();
                         }
-                    } else if (objectTypeFacet.additionalPropertiesInherited() == Boolean.FALSE) {
+                    } else if (objectTypeFacet.additionalPropertiesInherited() == Boolean.FALSE || strictMode == Boolean.TRUE) {
                         validationResults.add(error(objectInstance,"Property ''{0}'' not defined", name));
                     }
                 }
