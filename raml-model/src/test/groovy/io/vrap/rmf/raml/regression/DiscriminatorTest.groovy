@@ -203,6 +203,10 @@ class DiscriminatorTest extends RegressionTest {
                     name: string
                     age: number
                     test?: object
+                    test2?:
+                        properties:
+                            foo: string
+                            baz: object 
         ''')
         then:
         ramlModelResult.validationResults.size() == 0
@@ -221,5 +225,7 @@ class DiscriminatorTest extends RegressionTest {
         '{ "name": "Hans", "age": 13, "foo": "bar", "test": { "foo": "bar" } }'     | 0      | false
         '{ "name": "Hans", "age": 13, "test": { "foo": "bar" } }'                   | 0      | true
         '{ "name": "Hans", "age": 13, "test": { "foo": "bar" } }'                   | 0      | false
+        '{ "name": "Hans", "age": 13, "test2": { "foo": "foo", "bar": { "foo": "bar" }, "baz": { "foo": "bar" } } }'    | 1      | true
+        '{ "name": "Hans", "age": 13, "test2": { "foo": "foo", "bar": { "foo": "bar" }, "baz": { "foo": "bar" } } }'    | 0      | false
     }
 }

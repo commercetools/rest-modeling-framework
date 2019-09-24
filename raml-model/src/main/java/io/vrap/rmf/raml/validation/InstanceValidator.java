@@ -282,7 +282,7 @@ public class InstanceValidator implements DiagnosticsCreator {
                     }
                 }
 
-                if (BuiltinType.OBJECT.getName().equals(actualObjectTypeFacet.getName())) {
+                if (BuiltinType.OBJECT.getName().equals(actualObjectTypeFacet.getName()) && actualObjectTypeFacet.getProperties().size() == 0) {
                     return validationResults;
                 }
 
