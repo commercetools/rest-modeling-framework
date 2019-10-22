@@ -43,7 +43,7 @@ public class ModelHelper {
             final UriTemplate fullParentUri = resourceParent != null ? fullUri(resourceParent) : null;
 
             final StringBuffer stringBuffer = new StringBuffer();
-            if (fullParentUri != null) {
+            if (fullParentUri != null && !fullParentUri.getTemplate().equals("/")) {
                 stringBuffer.append(fullParentUri.getTemplate());
             }
             stringBuffer.append(relativeUri.getTemplate());

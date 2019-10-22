@@ -67,6 +67,46 @@ class ResourceTest extends RegressionTest {
         ramlModelResult.rootObject.resources[0].relativeUri.template == '/'
     }
 
+    def "test-base-resource-fullUri"() {
+        when:
+        RamlModelResult<Api> ramlModelResult = constructApi(
+                '''\
+        #%RAML 1.0
+        title: Test
+        baseUri: http://example.com
+        mediaType: application/json
+        /:
+            get:
+            /categories:
+                get:
+        ''')
+        then:
+        ramlModelResult.validationResults.size() == 0
+        ramlModelResult.rootObject.resources.size() == 1
+        ramlModelResult.rootObject.resources[0].fullUri.template == '/'
+        ramlModelResult.rootObject.resources[0].resources[0].fullUri.template == '/categories'
+    }
+
+    def "test-base-resource-fullUri-collapse"() {
+        when:
+        RamlModelResult<Api> ramlModelResult = constructApi(
+                '''\
+        #%RAML 1.0
+        title: Test
+        mediaType: application/json
+        baseUri: //api.test.com//common//
+        /:
+            /users/:
+                /groups//:
+        ''')
+        then:
+        ramlModelResult.validationResults.size() == 0
+        ramlModelResult.rootObject.resources.size() == 1
+        ramlModelResult.rootObject.resources[0].fullUri.template == '/'
+        ramlModelResult.rootObject.resources[0].resources[0].fullUri.template == '/users/'
+        ramlModelResult.rootObject.resources[0].resources[0].resources[0].fullUri.template == '/users//groups//'
+    }
+
     def "test-default-uri-parameter"() {
         when:
         RamlModelResult<Api> ramlModelResult = constructApi(

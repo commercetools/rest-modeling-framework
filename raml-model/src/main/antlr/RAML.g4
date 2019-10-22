@@ -759,6 +759,7 @@ id:
     |   'traits'
     |   'value'
     |   'strict' | 'displayName' | 'description'
+    |   RELATIVE_URI
     |   SCALAR
     ;
 
