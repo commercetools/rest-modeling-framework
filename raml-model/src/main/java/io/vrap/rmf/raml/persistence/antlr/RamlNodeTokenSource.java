@@ -56,7 +56,7 @@ public class RamlNodeTokenSource implements TokenSource {
             final Matcher matcher = ANNOTATION_TYPE_REF_PATTERN.matcher(text);
             if (LITERAL_TO_TOKEN_TYPE.containsKey(text)) {
                 type = LITERAL_TO_TOKEN_TYPE.get(text);
-            } else if (text.startsWith("/") && (text.length() == 1 || !text.endsWith("/"))) {
+            } else if (text.startsWith("/")) {
                 type = RAMLParser.RELATIVE_URI;
             } else if (matcher.matches()) {
                 type = RAMLParser.ANNOTATION_TYPE_REF;
