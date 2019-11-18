@@ -8,6 +8,7 @@ import io.vrap.rmf.raml.model.types.IntersectionType
 import io.vrap.rmf.raml.model.types.NumberType
 import io.vrap.rmf.raml.model.types.ObjectType
 import io.vrap.rmf.raml.model.types.Property
+import io.vrap.rmf.raml.model.types.StringType
 import spock.lang.Ignore
 
 class TypesTest extends RegressionTest {
@@ -139,8 +140,8 @@ class TypesTest extends RegressionTest {
         }
     }
 
-    @Ignore
     def "description inheritance type"() {
+        // ToDo: add validation for incompatible types
         when:
         RamlModelResult<Api> ramlModelResult = constructApi(
                 '''\
@@ -165,9 +166,10 @@ class TypesTest extends RegressionTest {
         ramlModelResult.validationResults.size() == 0
         with(ramlModelResult.rootObject) {
             types.size() == 2
+            def person = types[0] as ObjectType
+            person.getProperty("version").type instanceof NumberType
             def employee = types[1] as ObjectType
-            employee.getProperty("version").type.description.value == "Lorem ipsum"
-            employee.getProperty("version").type instanceof NumberType
+            employee.getProperty("version").type instanceof StringType
         }
     }
 
