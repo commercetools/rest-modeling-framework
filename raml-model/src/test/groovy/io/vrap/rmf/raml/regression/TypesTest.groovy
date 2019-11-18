@@ -5,8 +5,10 @@ import io.vrap.rmf.raml.model.modules.Api
 import io.vrap.rmf.raml.model.types.ArrayType
 import io.vrap.rmf.raml.model.types.IntegerType
 import io.vrap.rmf.raml.model.types.IntersectionType
+import io.vrap.rmf.raml.model.types.NumberType
 import io.vrap.rmf.raml.model.types.ObjectType
 import io.vrap.rmf.raml.model.types.Property
+import spock.lang.Ignore
 
 class TypesTest extends RegressionTest {
 
@@ -134,6 +136,38 @@ class TypesTest extends RegressionTest {
             IntersectionType intersectionType = types[2].type
             intersectionType.allOf[0] == types[0]
             intersectionType.allOf[1] == types[1]
+        }
+    }
+
+    @Ignore
+    def "description inheritance type"() {
+        when:
+        RamlModelResult<Api> ramlModelResult = constructApi(
+                '''\
+                #%RAML 1.0
+                title: Example API
+                version: v1
+                types:
+                  Person:
+                    type: object
+                    properties:
+                      version:
+                        type: number
+                        format: int64
+                  Employee:
+                    type: Person
+                    properties:
+                      version:
+                        description: Lorem ipsum
+                '''
+        )
+        then:
+        ramlModelResult.validationResults.size() == 0
+        with(ramlModelResult.rootObject) {
+            types.size() == 2
+            def employee = types[1] as ObjectType
+            employee.getProperty("version").type.description.value == "Lorem ipsum"
+            employee.getProperty("version").type instanceof NumberType
         }
     }
 
