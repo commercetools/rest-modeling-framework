@@ -64,4 +64,26 @@ class AnnotationTest extends RegressionTest {
         method.queryParameters[1].annotations.size() == 1
         method.queryParameters[1].getAnnotation("placeholderParam") != null
     }
+
+    def "read-uri-annotation-value"() {
+        when:
+        RamlModelResult<Api> ramlModelResult = constructApi(
+                '''
+        #%RAML 1.0
+        title: Test
+        annotationTypes:
+            testUri:
+                type: string
+        /{projectKey}:
+            (testUri): /whatever
+            uriParameters:
+               projectKey:
+                 type: string
+            get:
+        ''')
+        then:
+        ramlModelResult.validationResults.size() == 0
+        ramlModelResult.rootObject.resources[0].getAnnotation("testUri").value.value == "/whatever"
+        ramlModelResult.rootObject.resources[0].getUriParameter("projectKey") != null
+    }
 }
