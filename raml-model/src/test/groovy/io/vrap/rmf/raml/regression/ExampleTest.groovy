@@ -10,6 +10,7 @@ import io.vrap.rmf.raml.model.types.ObjectInstance
 import io.vrap.rmf.raml.model.util.InstanceHelper
 import io.vrap.rmf.raml.validation.InstanceValidator
 import org.eclipse.emf.common.util.Diagnostic
+import spock.lang.Ignore
 
 class ExampleTest extends RegressionTest {
     def "example" () {
@@ -204,6 +205,45 @@ class ExampleTest extends RegressionTest {
                         examples:
                             valid:
                                 sort: "0.2"
+                ''')
+        then:
+        ramlModelResult.validationResults.size() == 0
+    }
+
+    @Ignore
+    def "number-array-example-raml-object-valid"() {
+        when:
+        writeFile(
+                "example.json",
+                '''
+                {
+                    "number": 48.3,
+                    "coordinates" : [
+                        48.12,
+                        11.55
+                    ]
+                }
+                ''')
+        RamlModelResult<Api> ramlModelResult = constructApi(
+                Arrays.asList("example.json"),
+                '''\
+                #%RAML 1.0
+                title: Annotating Examples
+                
+                types:
+                    TestType:
+                        examples:
+                            valid: !include example.json   
+                            validToo:
+                                strict: false
+                                value: !include example.json
+                        type: object
+                        properties:
+                            number:
+                                type: number
+                            coordinates:
+                                type: array
+                                items: number
                 ''')
         then:
         ramlModelResult.validationResults.size() == 0
