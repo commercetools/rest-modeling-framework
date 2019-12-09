@@ -206,7 +206,14 @@ public class ModelHelper {
         if (objectType != null) {
             final Map<String, Property> filteredProperties = objectType.getProperties().stream()
                     .filter(filter)
-                    .collect(Collectors.toMap(Property::getName, Function.identity()));
+                    .collect(Collectors.toMap(
+                            Property::getName,
+                            Function.identity(),
+                            (u, v) -> {
+                                throw new IllegalStateException(String.format("Duplicate key %s", u));
+                            },
+                            LinkedHashMap::new
+                    ));
             allPropertiesAsMap.putAll(filteredProperties);
         }
         return allPropertiesAsMap;

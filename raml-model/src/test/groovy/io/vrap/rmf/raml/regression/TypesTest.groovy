@@ -244,4 +244,56 @@ class TypesTest extends RegressionTest {
         IntersectionType intersectionType = categoryCreatedMessageType.getType()
         intersectionType.allOf.size() == 2
     }
+
+    def "preserve property order"() {
+        when:
+        RamlModelResult<Api> ramlModelResult = constructApi(
+                '''\
+                #%RAML 1.0
+                title: Example API
+                version: v1
+                types:
+                  PagedQueryResponse:
+                    properties:
+                      limit:
+                        type: number
+                        format: int64
+                      count:
+                        type: number
+                        format: int64
+                      total?:
+                        type: number
+                        format: int64
+                      offset:
+                        type: number
+                        format: int64
+                      results:
+                        type: object
+                      facets?:
+                        type: object
+                      meta?:
+                        type: object
+                '''
+        )
+        then:
+        ramlModelResult.validationResults.size() == 0
+        ObjectType t = ramlModelResult.rootObject.getType('PagedQueryResponse') as ObjectType
+        List<Property> properties = t.properties
+        properties[0].name == 'limit'
+        properties[1].name == 'count'
+        properties[2].name == 'total'
+        properties[3].name == 'offset'
+        properties[4].name == 'results'
+        properties[5].name == 'facets'
+        properties[6].name == 'meta'
+
+        List<Property> allProperties = t.allProperties
+        allProperties[0].name == 'limit'
+        allProperties[1].name == 'count'
+        allProperties[2].name == 'total'
+        allProperties[3].name == 'offset'
+        allProperties[4].name == 'results'
+        allProperties[5].name == 'facets'
+        allProperties[6].name == 'meta'
+    }
 }
