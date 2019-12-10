@@ -4,10 +4,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-/**
- * This class provides an interface to a javascript regular expression hosted in a
- * javascript engine context.
- */
 public class JavaRegExp implements RegExp {
     private final Pattern compiledPattern;
     private final String pattern;
