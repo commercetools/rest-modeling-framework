@@ -10,11 +10,9 @@ import io.vrap.rmf.raml.generic.generator.PackageGenModel;
 import io.vrap.rmf.raml.generic.generator.TypeGenModel;
 import io.vrap.rmf.raml.model.modules.Api;
 import io.vrap.rmf.raml.model.resources.HttpMethod;
-import io.vrap.rmf.raml.model.resources.Parameter;
 import io.vrap.rmf.raml.model.resources.Resource;
 import io.vrap.rmf.raml.model.resources.UriParameter;
 import io.vrap.rmf.raml.model.types.Annotation;
-import io.vrap.rmf.raml.model.types.BooleanInstance;
 import io.vrap.rmf.raml.model.types.StringInstance;
 import org.eclipse.emf.ecore.EObject;
 

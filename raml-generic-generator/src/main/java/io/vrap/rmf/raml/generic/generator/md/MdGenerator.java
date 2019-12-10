@@ -3,7 +3,6 @@ package io.vrap.rmf.raml.generic.generator.md;
 import io.vrap.rmf.raml.generic.generator.Generator;
 import io.vrap.rmf.raml.model.modules.Api;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.apache.commons.io.filefilter.TrueFileFilter;
 
 import java.io.File;

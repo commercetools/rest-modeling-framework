@@ -15,7 +15,7 @@ import org.stringtemplate.v4.STGroupFile;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.*;
+import java.util.List;
 
 public class StaticGenerator extends AbstractTemplateGenerator {
     private final String vendorName;

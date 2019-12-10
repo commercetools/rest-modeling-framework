@@ -2,10 +2,6 @@ package io.vrap.rmf.raml.regression
 
 import io.vrap.rmf.raml.model.RamlModelResult
 import io.vrap.rmf.raml.model.modules.Api
-import io.vrap.rmf.raml.model.types.AnyType
-import io.vrap.rmf.raml.model.types.Instance
-import io.vrap.rmf.raml.model.util.InstanceHelper
-import io.vrap.rmf.raml.validation.InstanceValidator
 
 class ReservedWordTest extends RegressionTest {
     def "uses-traits-library"() {

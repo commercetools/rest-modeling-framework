@@ -2,7 +2,6 @@ package io.vrap.functional.utils;
 
 import java.util.Collection;
 import java.util.Optional;
-import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 public final class Classes {

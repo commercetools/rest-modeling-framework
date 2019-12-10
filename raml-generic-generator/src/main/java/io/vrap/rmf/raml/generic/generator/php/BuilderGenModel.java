@@ -4,11 +4,7 @@ import com.google.common.collect.Lists;
 import io.vrap.rmf.raml.generic.generator.ImportGenModel;
 import io.vrap.rmf.raml.generic.generator.PackageGenModel;
 import io.vrap.rmf.raml.generic.generator.TypeGenModel;
-import io.vrap.rmf.raml.generic.generator.postman.ActionGenModel;
 import io.vrap.rmf.raml.model.resources.HttpMethod;
-import io.vrap.rmf.raml.model.resources.Method;
-import io.vrap.rmf.raml.model.resources.Resource;
-import io.vrap.rmf.raml.model.responses.Body;
 import io.vrap.rmf.raml.model.types.*;
 
 import java.util.Comparator;

@@ -2,14 +2,7 @@ package io.vrap.rmf.raml.regression
 
 import io.vrap.rmf.raml.model.RamlModelResult
 import io.vrap.rmf.raml.model.modules.Api
-import io.vrap.rmf.raml.model.types.ArrayType
-import io.vrap.rmf.raml.model.types.IntegerType
-import io.vrap.rmf.raml.model.types.IntersectionType
-import io.vrap.rmf.raml.model.types.NumberType
-import io.vrap.rmf.raml.model.types.ObjectType
-import io.vrap.rmf.raml.model.types.Property
-import io.vrap.rmf.raml.model.types.StringType
-import spock.lang.Ignore
+import io.vrap.rmf.raml.model.types.*
 
 class TypesTest extends RegressionTest {
 

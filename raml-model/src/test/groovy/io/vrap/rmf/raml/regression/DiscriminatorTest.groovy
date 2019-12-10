@@ -1,19 +1,13 @@
 package io.vrap.rmf.raml.regression
 
-import io.vrap.rmf.raml.model.RamlModelBuilder
+
 import io.vrap.rmf.raml.model.RamlModelResult
 import io.vrap.rmf.raml.model.modules.Api
-import io.vrap.rmf.raml.model.resources.HttpMethod
 import io.vrap.rmf.raml.model.types.AnyType
 import io.vrap.rmf.raml.model.types.Instance
-import io.vrap.rmf.raml.model.types.StringInstance
-import io.vrap.rmf.raml.model.types.TypesFactory
 import io.vrap.rmf.raml.model.util.InstanceHelper
-import io.vrap.rmf.raml.model.util.StringCaseFormat
 import io.vrap.rmf.raml.validation.InstanceValidator
 import org.eclipse.emf.common.util.Diagnostic
-import org.eclipse.emf.common.util.URI
-import spock.lang.Ignore
 
 class DiscriminatorTest extends RegressionTest {
     def "nested-discriminator-example-validation"() {

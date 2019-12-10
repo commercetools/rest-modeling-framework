@@ -1,7 +1,6 @@
 package io.vrap.rmf.raml.generic.generator.md;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
 import io.vrap.rmf.raml.generic.generator.AbstractTemplateGenerator;
 import io.vrap.rmf.raml.model.types.*;
@@ -13,8 +12,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 public class TypesGenerator extends AbstractTemplateGenerator {
 

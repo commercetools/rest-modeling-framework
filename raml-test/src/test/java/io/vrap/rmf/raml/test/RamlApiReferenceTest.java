@@ -4,6 +4,7 @@ import org.eclipse.emf.ecore.resource.Resource;
 import org.junit.Test;
 
 import java.io.IOException;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class RamlApiReferenceTest implements ResourceFixtures {

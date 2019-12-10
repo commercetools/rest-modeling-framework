@@ -8,10 +8,8 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import com.google.common.collect.Lists;
 import io.vrap.rmf.raml.generic.generator.postman.CollectionGenerator;
-import io.vrap.rmf.raml.generic.generator.postman.ItemGenModel;
 import io.vrap.rmf.raml.model.types.*;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.apache.commons.io.filefilter.TrueFileFilter;
 
 import java.io.File;

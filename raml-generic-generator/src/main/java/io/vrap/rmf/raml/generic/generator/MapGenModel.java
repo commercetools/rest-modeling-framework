@@ -1,6 +1,7 @@
 package io.vrap.rmf.raml.generic.generator;
 
 import io.vrap.rmf.raml.model.types.*;
+
 import javax.annotation.Nullable;
 import java.util.Optional;
 

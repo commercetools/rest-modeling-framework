@@ -7,9 +7,7 @@ import io.vrap.rmf.raml.model.resources.Method;
 import io.vrap.rmf.raml.model.resources.Resource;
 import io.vrap.rmf.raml.model.responses.Body;
 import io.vrap.rmf.raml.model.types.*;
-import io.vrap.rmf.raml.model.util.InstanceHelper;
 import io.vrap.rmf.raml.model.util.StringCaseFormat;
-import io.vrap.rmf.raml.persistence.constructor.InstanceConstructor;
 import org.apache.commons.lang3.StringEscapeUtils;
 
 import java.util.Comparator;

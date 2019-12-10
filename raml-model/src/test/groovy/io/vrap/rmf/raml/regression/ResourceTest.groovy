@@ -6,9 +6,7 @@ import io.vrap.rmf.raml.model.resources.HttpMethod
 import io.vrap.rmf.raml.model.types.AnyType
 import io.vrap.rmf.raml.model.types.NumberType
 import io.vrap.rmf.raml.model.types.ObjectInstance
-import io.vrap.rmf.raml.model.types.PropertyValue
 import io.vrap.rmf.raml.model.types.StringType
-import io.vrap.rmf.raml.model.types.impl.PropertyValueImpl
 import spock.lang.Ignore
 
 class ResourceTest extends RegressionTest {

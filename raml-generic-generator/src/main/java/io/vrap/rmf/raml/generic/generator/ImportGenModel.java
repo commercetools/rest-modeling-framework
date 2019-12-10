@@ -2,7 +2,6 @@ package io.vrap.rmf.raml.generic.generator;
 
 import com.google.common.collect.Lists;
 
-import javax.annotation.Nullable;
 import java.util.List;
 
 public class ImportGenModel {

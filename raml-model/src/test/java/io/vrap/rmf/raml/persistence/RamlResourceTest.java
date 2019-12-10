@@ -1,6 +1,5 @@
 package io.vrap.rmf.raml.persistence;
 
-import io.vrap.rmf.raml.model.modules.Api;
 import io.vrap.rmf.raml.model.modules.Library;
 import io.vrap.rmf.raml.model.modules.LibraryUse;
 import io.vrap.rmf.raml.model.types.*;
@@ -11,14 +10,9 @@ import org.eclipse.emf.ecore.resource.Resource;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.URL;
-import java.util.List;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assume.assumeTrue;
 
 public class RamlResourceTest implements ResourceFixtures {
     @Test

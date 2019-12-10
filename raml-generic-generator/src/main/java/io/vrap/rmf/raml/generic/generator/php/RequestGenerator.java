@@ -1,8 +1,5 @@
 package io.vrap.rmf.raml.generic.generator.php;
 
-import com.damnhandy.uri.template.Expression;
-import com.damnhandy.uri.template.UriTemplate;
-import com.damnhandy.uri.template.impl.VarSpec;
 import com.google.common.base.CaseFormat;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
@@ -10,7 +7,6 @@ import com.google.common.io.Resources;
 import io.vrap.rmf.raml.generic.generator.AbstractTemplateGenerator;
 import io.vrap.rmf.raml.generic.generator.GeneratorHelper;
 import io.vrap.rmf.raml.generic.generator.ImportGenModel;
-import io.vrap.rmf.raml.generic.generator.TypeGenModel;
 import io.vrap.rmf.raml.model.resources.HttpMethod;
 import io.vrap.rmf.raml.model.resources.Method;
 import io.vrap.rmf.raml.model.resources.Resource;
@@ -23,7 +19,8 @@ import org.stringtemplate.v4.STGroupFile;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.*;
+import java.util.Comparator;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.capitalize;

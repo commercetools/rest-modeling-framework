@@ -1,7 +1,5 @@
 package io.vrap.rmf.raml.generic.generator;
 
-import io.vrap.rmf.raml.generic.generator.PropertyGenModel;
-
 public class SerializerGenModel {
     final private PropertyGenModel property;
     final private String serializer;

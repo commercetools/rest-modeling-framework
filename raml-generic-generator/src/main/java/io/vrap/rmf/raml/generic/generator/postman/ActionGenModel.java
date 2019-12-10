@@ -1,13 +1,14 @@
 package io.vrap.rmf.raml.generic.generator.postman;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.vrap.rmf.raml.generic.generator.Helper;
 import io.vrap.rmf.raml.model.resources.Method;
 import io.vrap.rmf.raml.model.resources.Resource;
-import io.vrap.rmf.raml.model.types.*;
+import io.vrap.rmf.raml.model.types.Annotation;
+import io.vrap.rmf.raml.model.types.Instance;
+import io.vrap.rmf.raml.model.types.ObjectType;
+import io.vrap.rmf.raml.model.types.StringInstance;
 import org.apache.commons.lang3.StringEscapeUtils;
 
 import java.io.IOException;
