@@ -1,10 +1,5 @@
 package io.vrap.rmf.raml.model.values;
 
-/**
- * This class provides an interface to a javascript regular expression hosted in a
- * javascript engine context.
- */
-
 public interface RegExp {
     class RegExpConfig {
         private boolean useJavaScriptRegExp = false;

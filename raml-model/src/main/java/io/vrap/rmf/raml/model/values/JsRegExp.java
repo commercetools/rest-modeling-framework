@@ -5,6 +5,10 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
+/**
+ * This class provides an interface to a javascript regular expression hosted in a
+ * javascript engine context.
+ */
 public class JsRegExp implements RegExp {
     private final String pattern;
     private final ScriptEngine jsEngine;
