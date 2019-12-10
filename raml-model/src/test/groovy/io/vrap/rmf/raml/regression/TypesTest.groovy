@@ -3,6 +3,9 @@ package io.vrap.rmf.raml.regression
 import io.vrap.rmf.raml.model.RamlModelResult
 import io.vrap.rmf.raml.model.modules.Api
 import io.vrap.rmf.raml.model.types.*
+import io.vrap.rmf.raml.model.values.JavaRegExp
+import io.vrap.rmf.raml.model.values.JsRegExp
+import io.vrap.rmf.raml.model.values.RegExp
 
 class TypesTest extends RegressionTest {
 
@@ -21,6 +24,68 @@ class TypesTest extends RegressionTest {
         ''')
         then:
         ramlModelResult.validationResults.size() == 1
+    }
+
+    def "java regex type"() {
+        when:
+        RamlModelResult<Api> ramlModelResult = constructApi(
+                '''\
+                #%RAML 1.0
+                title: Example API
+                version: v1
+                types:
+                  TestType:
+                    properties:
+                      patternProp:
+                        type: string
+                        pattern: ^[a-z]+$
+                      /[a-z]+/:
+                        type: string
+                    example: |
+                      {
+                        "patternProp": "foo",
+                        "bar": "baz"
+                      }
+        ''')
+        then:
+        ramlModelResult.validationResults.size() == 0
+        Api t = ramlModelResult.rootObject
+        RegExp r = ((t.getType("TestType") as ObjectType).getProperty("patternProp").type as StringType).pattern
+        r instanceof JavaRegExp
+        Property p = (t.getType("TestType") as ObjectType).getProperty("bar")
+        p.pattern instanceof JavaRegExp
+    }
+
+    def "javascript regex type"() {
+        when:
+        RegExp.config.useJavaScriptRegExp = true
+        RamlModelResult<Api> ramlModelResult = constructApi(
+                '''\
+                #%RAML 1.0
+                title: Example API
+                version: v1
+                types:
+                  TestType:
+                    properties:
+                      patternProp:
+                        type: string
+                        pattern: ^[a-z]+$
+                      /[a-z]+/:
+                        type: string
+                    example: |
+                      {
+                        "patternProp": "foo",
+                        "bar": "baz"
+                      }
+        ''')
+        RegExp.config.useJavaScriptRegExp = false
+        then:
+        ramlModelResult.validationResults.size() == 0
+        Api t = ramlModelResult.rootObject
+        RegExp r = ((t.getType("TestType") as ObjectType).getProperty("patternProp").type as StringType).pattern
+        r instanceof JsRegExp
+        Property p = (t.getType("TestType") as ObjectType).getProperty("bar")
+        p.pattern instanceof JsRegExp
     }
 
     def "maxItems type"() {
