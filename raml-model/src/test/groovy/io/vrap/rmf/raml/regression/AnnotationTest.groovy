@@ -4,6 +4,9 @@ import io.vrap.rmf.raml.model.RamlModelResult
 import io.vrap.rmf.raml.model.modules.Api
 import io.vrap.rmf.raml.model.resources.HttpMethod
 import io.vrap.rmf.raml.model.resources.Method
+import io.vrap.rmf.raml.model.types.ArrayInstance
+import io.vrap.rmf.raml.model.types.ObjectInstance
+import io.vrap.rmf.raml.model.types.StringInstance
 
 class AnnotationTest extends RegressionTest {
     def "validation-of-annotation-value"() {
@@ -85,5 +88,49 @@ class AnnotationTest extends RegressionTest {
         ramlModelResult.validationResults.size() == 0
         ramlModelResult.rootObject.resources[0].getAnnotation("testUri").value.value == "/whatever"
         ramlModelResult.rootObject.resources[0].getUriParameter("projectKey") != null
+    }
+
+    def "include string annotation"() {
+        when:
+        writeFile(
+                "example.json",
+                '''
+                {
+                    "prices": [
+                        {
+                            "value" : {
+                                "currencyCode": "EUR"
+                            }
+                        }
+                    ]
+                }
+                ''')
+
+        RamlModelResult<Api> ramlModelResult = constructApi(
+                Arrays.asList("example.json"),
+                '''
+        #%RAML 1.0
+        title: Test
+        annotationTypes:
+            postman:
+                type: string
+        types:
+            TestType:
+                type: any
+                (postman): |
+                   { "foo": "bar" }
+            TestType2:
+                type: any
+                (postman): !include example.json
+                ''')
+        then:
+        ramlModelResult.validationResults.size() == 0
+        ramlModelResult.rootObject.getType("TestType").getAnnotation("postman").value instanceof StringInstance
+        ramlModelResult.rootObject.getType("TestType2").getAnnotation("postman").value instanceof ObjectInstance
+        ObjectInstance e = ramlModelResult.rootObject.getType("TestType2").getAnnotation("postman").value as ObjectInstance
+        ArrayInstance prices = e.getValue("prices") as ArrayInstance
+        ObjectInstance price = prices.value[0] as ObjectInstance
+        ObjectInstance money = price.getValue("value") as ObjectInstance
+        money.getValue("currencyCode").value == "EUR"
     }
 }

@@ -725,7 +725,7 @@ numberInstance:
 
 arrayInstance:
     LIST_START
-    ( instance )*
+    ( baseInstance )*
     LIST_END
     ;
 
