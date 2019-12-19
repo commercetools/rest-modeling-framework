@@ -354,4 +354,25 @@ class TypesTest extends RegressionTest {
         allProperties[5].name == 'facets'
         allProperties[6].name == 'meta'
     }
+
+    def "number type default format"() {
+        when:
+        RamlModelResult<Api> ramlModelResult = constructApi(
+                '''\
+                #%RAML 1.0
+                title: Example API
+                version: v1
+                types:
+                  NumberType:
+                    type: number
+                  IntegerType:
+                    type: integer
+        ''')
+        then:
+        ramlModelResult.validationResults.size() == 0
+        NumberType numberType = ramlModelResult.rootObject.getType("NumberType") as NumberType
+        numberType.format == NumberFormat.FLOAT
+        IntegerType integerType = ramlModelResult.rootObject.getType("IntegerType") as IntegerType
+        integerType.format == NumberFormat.INT
+    }
 }
