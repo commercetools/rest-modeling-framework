@@ -188,7 +188,7 @@ public class InstanceConstructor extends AbstractScopedVisitor<Instance> {
         scope.setValue(arrayInstance, ctx.getStart());
 
         return withinScope(scope.with(arrayInstance, ARRAY_INSTANCE__VALUE), arrayInstanceScope -> {
-            ctx.instance().forEach(this::visitInstance);
+            ctx.baseInstance().forEach(this::visitBaseInstance);
 
             return arrayInstance;
         });
