@@ -24,6 +24,7 @@ dependencies {
     compile jackson_core.core
     compile jackson_core.databind
     compile jackson_core.dataformat_yaml
+    compile commons.io
 
     compile yaml.snakeyaml
     compile google.guava

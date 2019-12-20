@@ -42,8 +42,10 @@ public class NodeLexer implements TokenSource {
         switch (uri.fileExtension()) {
             case "json":
                 return new JsonNodeLexer(uri, uriConverter);
-            default:
+            case "raml":
                 return new YamlNodeLexer(uri, uriConverter);
+            default:
+                return new TextNodeLexer(uri, uriConverter);
         }
     }
 

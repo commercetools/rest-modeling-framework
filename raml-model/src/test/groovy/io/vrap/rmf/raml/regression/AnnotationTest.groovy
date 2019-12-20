@@ -113,7 +113,7 @@ class AnnotationTest extends RegressionTest {
         title: Test
         annotationTypes:
             postman:
-                type: string
+                type: any
         types:
             TestType:
                 type: any
@@ -132,5 +132,39 @@ class AnnotationTest extends RegressionTest {
         ObjectInstance price = prices.value[0] as ObjectInstance
         ObjectInstance money = price.getValue("value") as ObjectInstance
         money.getValue("currencyCode").value == "EUR"
+    }
+
+    def "include text file"() {
+        when:
+        writeFile(
+                "example.txt",
+                '''
+                {
+                    "prices": [
+                        {
+                            "value" : {
+                                "currencyCode": "EUR"
+                            }
+                        }
+                    ]
+                }
+                ''')
+
+        RamlModelResult<Api> ramlModelResult = constructApi(
+                Arrays.asList("example.txt"),
+                '''
+        #%RAML 1.0
+        title: Test
+        annotationTypes:
+            postman:
+                type: string
+        types:
+            TestType:
+                type: any
+                (postman): !include example.txt
+                ''')
+        then:
+        ramlModelResult.validationResults.size() == 0
+        ramlModelResult.rootObject.getType("TestType").getAnnotation("postman").value instanceof StringInstance
     }
 }
