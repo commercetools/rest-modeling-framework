@@ -129,7 +129,7 @@ public class InstanceValidator implements DiagnosticsCreator {
                 if (diagnostic != null) {
                     validationResults.add(diagnostic);
                 }
-            } else if (!typeIs(ANY_TYPE) && !typeInstanceOf(DateTimeTypeFacet.class) && !typeInstanceOf(TypeTemplate.class)) {
+            } else if (!typeIs(ANY_TYPE) && !typeInstanceOf(DateTimeTypeFacet.class) && !typeInstanceOf(TypeTemplate.class) && !typeInstanceOf(AnyAnnotationType.class)) {
                 validationResults.add(error(stringInstance, "Invalid type"));
             }
             return validationResults;
