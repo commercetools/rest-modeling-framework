@@ -3,6 +3,7 @@ package io.vrap.rmf.nodes.antlr;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
+import com.google.common.io.Closeables;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.misc.Pair;
 import org.apache.commons.io.IOUtils;
@@ -50,17 +51,18 @@ class TextNodeLexer implements TokenSource {
 
     @Override
     public Token nextToken() {
-        try {
-            if (!inputClosed) {
+        if (!inputClosed) {
+            try {
                 IOUtils.copy(input, writer, encoding);
-                input.close();
                 inputClosed = true;
                 return createToken(writer.toString());
-            } else {
-                return factory.create(IntStream.EOF, null);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            } finally {
+                IOUtils.closeQuietly(input);
             }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        } else {
+            return factory.create(IntStream.EOF, null);
         }
     }
 

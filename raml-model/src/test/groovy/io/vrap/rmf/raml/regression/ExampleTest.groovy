@@ -210,7 +210,6 @@ class ExampleTest extends RegressionTest {
         ramlModelResult.validationResults.size() == 0
     }
 
-    @Ignore
     def "number-array-example-raml-object-valid"() {
         when:
         writeFile(
@@ -450,6 +449,67 @@ class ExampleTest extends RegressionTest {
 
         Instance result = InstanceHelper.parseJson(json)
         List<Diagnostic> validationResults = new InstanceValidator().validate(result, ramlModelResult.rootObject.getType("Foo"));
+        validationResults.size() == 0
+    }
+
+    def "validate float array"() {
+        when:
+        writeFile(
+                "example.json",
+                '''
+                    {
+                      "action" : "setGeoLocation",
+                      "geoLocation" : {
+                        "type" : "Point",
+                        "coordinates" : [ 48.163569, 11.558663 ]
+                      }
+                    }
+                ''')
+
+        RamlModelResult<Api> ramlModelResult = constructApi(
+                Arrays.asList("example.json"),
+                '''\
+                #%RAML 1.0
+                title: Value named property
+                
+                types:
+                  SetGeoLocationAction:
+                    examples:
+                      default:
+                        strict: true
+                        value: !include example.json
+                    properties:
+                      action:
+                        type: string
+                        enum:
+                        - setGeoLocation
+                        required: true
+                      geoLocation:
+                        type: GeoJson
+                        required: false
+                  GeoJson:
+                    discriminator: type
+                    properties:
+                      type:
+                        enum:
+                        - Point
+                        type: string
+                  GeoJsonPoint:
+                    type: GeoJson
+                    discriminatorValue: Point
+                    properties:
+                      coordinates:
+                        type: array
+                        items:
+                          type: number
+                ''')
+        String json = '{ "type": "Point", "coordinates": [ 13.5, 14.5 ] }'
+
+        then:
+        ramlModelResult.validationResults.size() == 0
+
+        Instance result = InstanceHelper.parseJson(json)
+        List<Diagnostic> validationResults = new InstanceValidator().validate(result, ramlModelResult.rootObject.getType("GeoJson"));
         validationResults.size() == 0
     }
 }
