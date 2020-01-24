@@ -1,16 +1,17 @@
 package io.vrap.rmf.raml.test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.tngtech.java.junit.dataprovider.DataProvider;
-import com.tngtech.java.junit.dataprovider.DataProviderRunner;
-import com.tngtech.java.junit.dataprovider.UseDataProvider;
+import com.tngtech.junit.dataprovider.DataProvider;
+import com.tngtech.junit.dataprovider.DataProviderExtension;
+import com.tngtech.junit.dataprovider.UseDataProvider;
+import com.tngtech.junit.dataprovider.UseDataProviderExtension;
 import io.vrap.rmf.raml.model.RamlModelBuilder;
 import io.vrap.rmf.raml.model.RamlModelResult;
 import org.assertj.core.util.Lists;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.TestTemplate;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,7 +24,8 @@ import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@RunWith(DataProviderRunner.class)
+@ExtendWith(UseDataProviderExtension.class)
+@ExtendWith(DataProviderExtension.class)
 public class RamlTck2Test {
     private class TckParseException extends Exception {
         public TckParseException(String message, Throwable cause) {
@@ -32,37 +34,37 @@ public class RamlTck2Test {
     }
     private final static URL tckURL = RamlTck2Test.class.getResource("/raml-tck-wip-2.0.0/tests");
 
-    @Test
+    @TestTemplate
     @UseDataProvider("tckValidSemanticFiles")
     public void validSemantic(final File f, final Boolean valid, final String description) throws IOException, TckParseException {
         tckParse(f, valid, description);
     }
 
-    @Test
+    @TestTemplate
     @UseDataProvider("tckValidSpecExampleFiles")
     public void validSpecExamples(final File f, final Boolean valid, final String description) throws IOException, TckParseException {
         tckParse(f, valid, description);
     }
 
-    @Test
+    @TestTemplate
     @UseDataProvider("tckValidSyntaxFiles")
     public void validSyntax(final File f, final Boolean valid, final String description) throws IOException, TckParseException {
         tckParse(f, valid, description);
     }
 
-    @Test
+    @TestTemplate
     @UseDataProvider("tckInvalidSemanticFiles")
     public void invalidSemantic(final File f, final Boolean valid, final String description) throws IOException, TckParseException {
         tckParse(f, valid, description);
     }
 
-    @Test
+    @TestTemplate
     @UseDataProvider("tckInvalidSpecExampleFiles")
     public void invalidSpecExamples(final File f, final Boolean valid, final String description) throws IOException, TckParseException {
         tckParse(f, valid, description);
     }
 
-    @Test
+    @TestTemplate
     @UseDataProvider("tckInvalidSyntaxFiles")
     public void invalidSyntax(final File f, final Boolean valid, final String description) throws IOException, TckParseException {
         tckParse(f, valid, description);

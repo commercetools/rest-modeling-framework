@@ -1,1 +1,1 @@
-include 'functional-utils', 'raml-model', 'demo', 'raml-test', 'node-model', 'antlr-utils', 'emf-utils'
+include 'functional-utils', 'raml-model', 'raml-test', 'node-model', 'antlr-utils', 'emf-utils'

@@ -1,14 +1,15 @@
 package io.vrap.rmf.raml.test;
 
-import com.tngtech.java.junit.dataprovider.DataProvider;
-import com.tngtech.java.junit.dataprovider.DataProviderRunner;
-import com.tngtech.java.junit.dataprovider.UseDataProvider;
+import com.tngtech.junit.dataprovider.DataProvider;
+import com.tngtech.junit.dataprovider.DataProviderExtension;
+import com.tngtech.junit.dataprovider.UseDataProvider;
+import com.tngtech.junit.dataprovider.UseDataProviderExtension;
 import io.vrap.rmf.raml.model.RamlModelBuilder;
 import io.vrap.rmf.raml.model.RamlModelResult;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.TestTemplate;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,7 +23,8 @@ import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@RunWith(DataProviderRunner.class)
+@ExtendWith(UseDataProviderExtension.class)
+@ExtendWith(DataProviderExtension.class)
 public class RamlTckTest implements ResourceFixtures {
     private class TckParseException extends Exception {
         public TckParseException(String message, Throwable cause) {
@@ -34,26 +36,26 @@ public class RamlTckTest implements ResourceFixtures {
     private static final String RAML_TCK_VERSION = Optional.ofNullable(System.getenv("RAML_TCK_VERSION")).orElse(TCK_VERSION);
     private final static URL tckURL = RamlTckTest.class.getResource("/raml-tck-" + RAML_TCK_VERSION + "/tests/raml-" + RAML_VERSION);
 
-    @Test
+    @TestTemplate
     @UseDataProvider("allTckRamlFiles")
     public void tckFilesParse(final File f) throws TckParseException {
         tckParse(f);
     }
 
-    @Test
+    @TestTemplate
     @UseDataProvider("allTckInvalidRamlFiles")
     public void tckInvalidRaml(final File f) throws TckParseException  {
         tckParse(f, false);
     }
 
 
-    @Test
+    @TestTemplate
     @UseDataProvider("allTckValidRamlFiles")
     public void tckValidRaml(final File f) throws TckParseException  {
         tckParse(f, true);
     }
 
-    @Test
+    @TestTemplate
     @UseDataProvider("allTckApiRamlFiles")
     public void tckTest(final File f) throws TckParseException  {
         tckParse(f);
