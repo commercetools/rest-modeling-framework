@@ -19,9 +19,9 @@ plugins {
     id 'java-library' // needed to make sure that transitive deps have 'compile' scope
     id 'groovy'
 
-    id 'de.undercouch.download' version '3.4.3'
+    id 'de.undercouch.download' version '4.0.2'
     id 'com.jfrog.bintray' version '1.8.0'
-    id 'com.github.johnrengelman.shadow' version '2.0.4' apply false
+    id 'com.github.johnrengelman.shadow' version '4.0.4' apply false
 
     id 'org.xtext.builder' version '1.0.18' apply false
 }
@@ -126,7 +126,7 @@ subprojects { project ->
             compile emf.ecore_xcore_lib
             compile "org.eclipse.xtext:org.eclipse.xtext.xbase.lib:$xtextVersion"
 
-            xtextLanguages 'org.eclipse.jdt:org.eclipse.jdt.core:3.10.0'
+            xtextLanguages 'org.eclipse.jdt:org.eclipse.jdt.core:3.20.0'
             xtextLanguages 'org.eclipse.text:org.eclipse.text:3.5.101'
             xtextLanguages 'org.eclipse.core:org.eclipse.core.resources:3.7.100'
             xtextLanguages "org.eclipse.xtext:org.eclipse.xtext.ecore:$xtextVersion"
