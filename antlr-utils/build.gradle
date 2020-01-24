@@ -12,6 +12,6 @@ publishing {
 }
 
 dependencies {
-    compile 'org.antlr:antlr4:4.7'
+    compile _antlr.antlr
 }
 

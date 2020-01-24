@@ -23,7 +23,7 @@ plugins {
     id 'com.jfrog.bintray' version '1.8.0'
     id 'com.github.johnrengelman.shadow' version '5.2.0' apply false
 
-    id 'org.xtext.builder' version '2.0.8' apply false
+    id 'org.xtext.builder' version '2.0.7' apply false
 }
 
 
