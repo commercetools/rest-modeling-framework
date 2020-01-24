@@ -4,28 +4,21 @@ ext {
     jvmSdkVersion = "1.21.0"
     
     yaml = [
-            snakeyaml: 'org.yaml:snakeyaml:1.18'
+            snakeyaml: 'org.yaml:snakeyaml:1.25'
     ]
 
     google = [
-            guava: 'com.google.guava:guava:23.3-jre'
+            guava: 'com.google.guava:guava:28.2-jre'
     ]
 
     commons = [
-            lang3: 'org.apache.commons:commons-lang3:3.4',
+            lang3: 'org.apache.commons:commons-lang3:3.9',
             cli: 'commons-cli:commons-cli:1.4',
-            io: 'commons-io:commons-io:2.5'
-    ]
-
-    commercetools = [
-            sdk_base: "com.commercetools.sdk.jvm.core:commercetools-sdk-base:$jvmSdkVersion",
-            java_client_core: "com.commercetools.sdk.jvm.core:commercetools-java-client-core:$jvmSdkVersion",
-            sdk_http: "com.commercetools.sdk.jvm.core:sdk-http:$jvmSdkVersion"
+            io: 'commons-io:commons-io:2.6'
     ]
 
     _antlr = [
-            antrl: 'org.antlr:antlr4:4.7',
-            stringtemplate: 'org.antlr:stringtemplate:4.0.2'
+            antrl: 'org.antlr:antlr4:4.8'
     ]
 
     jackson_core = [
@@ -42,15 +35,11 @@ ext {
     ]
 
     hypertino = [
-            inflector: 'com.hypertino:inflector_2.12:1.0.7'
+            inflector: 'com.hypertino:inflector_2.13:1.0.13'
     ]
 
     damnhandy = [
-            handy_uri_templates: 'com.damnhandy:handy-uri-templates:2.1.6'
-    ]
-
-    squareup = [
-            javapoet: 'com.squareup:javapoet:1.9.0'
+            handy_uri_templates: 'com.damnhandy:handy-uri-templates:2.1.8'
     ]
 
     spockframework = [
@@ -58,11 +47,11 @@ ext {
     ]
 
     assertj = [
-            core: 'org.assertj:assertj-core:3.8.0'
+            core: 'org.assertj:assertj-core:3.14.0'
     ]
 
     junit = [
-            junit: 'junit:junit:4.11',
-            dataprovider: 'com.tngtech.java:junit-dataprovider:1.12.0'
+            junit: 'org.junit.jupiter:junit-jupiter:5.6.0',
+            dataprovider: 'com.tngtech.junit.dataprovider:junit-jupiter-dataprovider:2.6'
     ]
 }

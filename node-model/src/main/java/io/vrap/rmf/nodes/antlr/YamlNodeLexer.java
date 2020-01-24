@@ -6,6 +6,7 @@ import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.misc.Pair;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.URIConverter;
+import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.error.Mark;
 import org.yaml.snakeyaml.events.*;
@@ -33,7 +34,7 @@ class YamlNodeLexer implements TokenSource {
     private static Map<String, Integer> literalTokenTypes = literalToTokenType(NodeParser.VOCABULARY);
 
     public static final Mark EMPTY_FILE_MARK = new Mark(null, 0, 0, 0, "", 0);
-    public static final ScalarEvent EMPTY_SCALAR_EVENT = new ScalarEvent(null, null, null, "", EMPTY_FILE_MARK, EMPTY_FILE_MARK, null);
+    public static final ScalarEvent EMPTY_SCALAR_EVENT = new ScalarEvent(null, null, null, "", EMPTY_FILE_MARK, EMPTY_FILE_MARK, DumperOptions.ScalarStyle.PLAIN);
 
     private static final Resolver IMPLICIT_TAG_RESOLVER = new Resolver();
     private final Yaml yaml = new Yaml();
