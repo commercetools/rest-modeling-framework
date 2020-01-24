@@ -20,7 +20,7 @@ plugins {
     id 'groovy'
 
     id 'de.undercouch.download' version '4.0.2'
-    id 'com.jfrog.bintray' version '1.8.0'
+    id 'com.jfrog.bintray' version '1.8.4'
     id 'com.github.johnrengelman.shadow' version '5.2.0' apply false
 
     id 'org.xtext.builder' version '2.0.7' apply false
@@ -72,7 +72,6 @@ subprojects { project ->
     apply plugin: 'eclipse'
 
     apply plugin: 'maven'
-    apply plugin: 'maven-publish'
 
     apply plugin: 'java'
     apply plugin: 'java-library' // needed to make sure that transitive deps have 'compile' scope
