@@ -260,6 +260,73 @@ class ApiConstructorTest extends Specification implements ApiFixtures {
         scope.value == 'manage'
     }
 
+    def "annotated security scheme setting"() {
+        when:
+        Api api = constructApi(
+                '''\
+        annotationTypes:
+            foo:
+                type: string
+        securitySchemes:
+            oauth_2_0:
+                description: OAuth 2.0 security scheme
+                type: OAuth 2.0
+                settings:
+                    (foo): "bar"
+                    accessTokenUri: https://api.example.com/1/oauth2/token
+                    authorizationGrants: [ authorization_code, implicit ]
+                    authorizationUri: https://www.example.com/1/oauth2/authorize
+                    scopes:
+                        - manage
+                        - update
+                describedBy:
+                    headers:
+                        Authorization:
+                            type: string
+                    responses:
+                        401:
+                            description: Unauthorized
+        securedBy: [ oauth_2_0: { scopes: [ manage ] } ]
+        ''')
+
+        then:
+        api.securitySchemes.size() == 1
+        api.securitySchemes[0].name == 'oauth_2_0'
+        api.securitySchemes[0].description.value == 'OAuth 2.0 security scheme'
+        api.securitySchemes[0].type.literal == 'OAuth 2.0'
+
+        api.securitySchemes[0].describedBy != null
+        api.securitySchemes[0].describedBy.headers.size() == 1
+        api.securitySchemes[0].describedBy.headers[0].name == 'Authorization'
+        api.securitySchemes[0].describedBy.headers[0].type instanceof StringType
+        api.securitySchemes[0].describedBy.responses.size() == 1
+        api.securitySchemes[0].describedBy.responses[0].statusCode == '401'
+        api.securitySchemes[0].describedBy.responses[0].description.value == 'Unauthorized'
+
+        api.securitySchemes[0].settings instanceof OAuth20Settings
+        OAuth20Settings oauth20Settings = api.securitySchemes[0].settings
+        oauth20Settings.accessTokenUri == 'https://api.example.com/1/oauth2/token'
+        oauth20Settings.authorizationGrants == ['authorization_code', 'implicit']
+        oauth20Settings.authorizationUri == 'https://www.example.com/1/oauth2/authorize'
+        oauth20Settings.scopes == [ 'manage', 'update' ]
+
+        oauth20Settings.annotations.size() == 1
+        oauth20Settings.getAnnotation("foo").value instanceof StringInstance
+        oauth20Settings.getAnnotation("foo").value.value == "bar"
+
+
+        api.securedBy.size() == 1
+        api.securedBy[0].scheme == api.securitySchemes[0]
+        api.securedBy[0].parameters.value.size() == 1
+        api.securedBy[0].parameters.value[0].name == 'scopes'
+        api.securedBy[0].parameters.value[0].value instanceof ArrayInstance
+        ArrayInstance scopes = api.securedBy[0].parameters.value[0].value
+        scopes.value.size() == 1
+        scopes.value[0] instanceof StringInstance
+        StringInstance scope = scopes.value[0]
+        scope.value == 'manage'
+    }
+
     def "traits"() {
         when:
         Api api = constructApi(
