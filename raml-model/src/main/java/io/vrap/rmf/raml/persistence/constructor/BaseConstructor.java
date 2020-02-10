@@ -351,6 +351,7 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
     @Override
     public Object visitSecuritySchemeSettingsFacet(RAMLParser.SecuritySchemeSettingsFacetContext securitySchemeSettingsFacet) {
         securitySchemeSettingsFacet.attributeFacet().forEach(this::visitAttributeFacet);
+        securitySchemeSettingsFacet.annotationFacet().forEach(this::visitAnnotationFacet);
         return scope.getEObject();
     }
 

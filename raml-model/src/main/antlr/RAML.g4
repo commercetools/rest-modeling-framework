@@ -368,7 +368,7 @@ securitySchemeSettingsFacet:
             empty=id
             |   (
                     MAP_START
-                    securitySchemeSettingsFacets+=attributeFacet*
+                    (securitySchemeSettingsFacets+=attributeFacet | securitySchemeSettingAnnotations+=annotationFacet)*
                     MAP_END
                 )
         )

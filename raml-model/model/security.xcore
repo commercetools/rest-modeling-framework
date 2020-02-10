@@ -8,6 +8,7 @@ package io.vrap.rmf.raml.model.security
 import io.vrap.rmf.raml.model.types.DocumentableElement
 import io.vrap.rmf.raml.model.elements.NamedElement
 
+import io.vrap.rmf.raml.model.types.AnnotationsFacet
 import io.vrap.rmf.raml.model.types.HeadersFacet
 import io.vrap.rmf.raml.model.types.QueryParametersFacet
 
@@ -63,7 +64,7 @@ class SecuritySchemeDescription extends HeadersFacet, QueryParametersFacet, Resp
 	
 }
 
-interface SecuritySchemeSettings {
+interface SecuritySchemeSettings extends AnnotationsFacet {
 	
 }
 
