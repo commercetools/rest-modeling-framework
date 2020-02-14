@@ -308,6 +308,26 @@ interface TypedElement extends NamedElement, InlineTypeContainer, AnnotationsFac
     op boolean matches(String name) {
         if (pattern !== null) ModelHelper.testPattern(this, name) else this.name == name
     }
+
+    /*
+     * If {@code inheritAnnotation} is true, this method traverses the inheritance chain to
+     * find the specified annotation. Otherwise this method only tries to find the annotation
+     * in this type.
+     */
+    op Annotation getAnnotation(AnyAnnotationType annotationType, boolean inheritAnnotation) {
+        val Annotation anno = getAnnotation(annotationType)
+        if (inheritAnnotation && anno === null && ^type !== null) ^type.getAnnotation(annotationType, inheritAnnotation) else anno
+    }
+
+    /*
+     * If {@code inheritAnnotation} is true, this method traverses the inheritance chain to
+     * find the specified annotation. Otherwise this method only tries to find the annotation
+     * in this type.
+     */
+    op Annotation getAnnotation(String name, boolean inheritAnnotation) {
+        val Annotation anno = getAnnotation(name)
+        if (inheritAnnotation && anno === null && ^type !== null) ^type.getAnnotation(name, inheritAnnotation) else anno
+    }
 }
 
 /*
