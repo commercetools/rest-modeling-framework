@@ -10,7 +10,6 @@ plugins {
 
     id 'idea'
     id 'eclipse'
-    id 'antlr'
 
     id 'maven'
     id 'maven-publish'
