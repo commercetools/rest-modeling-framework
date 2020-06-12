@@ -7,7 +7,7 @@ The rest modeling framework provides an EMF based model for RAML api definition 
 The latest unstable release can be retrieved from [jcenter](https://bintray.com/vrapio/vrapio/rmf)  with:
 ```gradle
 ext {
-    rmfVersion = "0.2.0-20200214142457"
+    rmfVersion = "0.2.0-20200612091815"
 }
 
 sourceCompatibility = 1.8
