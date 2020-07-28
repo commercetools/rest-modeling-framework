@@ -89,4 +89,21 @@ class RamlModelBuilderTest extends Specification implements ResourceFixtures {
         api.resources[0].methods[0].bodies[0].type != null
         api.resources[0].methods[0].bodies[0].type.name == 'ProjectUpdate'
     }
+
+    def "load overlay and merge it"() {
+        when:
+        URI uri = uriFromClasspath("/extensions/overlay.raml")
+        RamlModelResult<Api> ramlModelResult = modelBuilder.buildApi(uri)
+        then:
+        ramlModelResult.validationResults.empty == true
+        Api api = ramlModelResult.rootObject
+        api.resources.size() == 1
+        api.resources[0].methods.size() == 1
+        api.resources[0].methods[0].method == HttpMethod.POST
+        api.resources[0].methods[0].displayName.value == "overlay update project"
+        api.resources[0].methods[0].bodies.size() == 1
+        api.resources[0].methods[0].bodies[0].type != null
+        api.resources[0].methods[0].bodies[0].type.name == 'Update'
+        api.resources[0].methods[0].bodies[0].type.displayName.value == 'overlay body update'
+    }
 }

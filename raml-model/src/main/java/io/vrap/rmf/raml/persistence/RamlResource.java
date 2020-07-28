@@ -106,6 +106,7 @@ public class RamlResource extends ResourceImpl {
         }
         switch (fragmentKind) {
             case API: return Optional.of(new ApiConstructor());
+            case OVERLAY: return Optional.of(new ExtensionConstructor());
             case EXTENSION: return Optional.of(new ExtensionConstructor());
             case LIBRARY: return Optional.of(new LibraryConstructor());
             case DATA_TYPE: return Optional.of(new TypeDeclarationFragmentConstructor(TYPE_CONTAINER__TYPES));

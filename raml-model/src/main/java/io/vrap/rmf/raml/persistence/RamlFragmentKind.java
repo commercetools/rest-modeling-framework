@@ -28,6 +28,11 @@ enum RamlFragmentKind {
     EXTENSION("Extension", Literals.EXTENSION),
 
     /**
+     * An overlay file.
+     */
+    OVERLAY("Overlay", Literals.OVERLAY),
+
+    /**
      * A RAML library.
      */
     LIBRARY("Library", Literals.LIBRARY),
