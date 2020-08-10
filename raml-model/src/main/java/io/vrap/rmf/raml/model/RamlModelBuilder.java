@@ -17,6 +17,7 @@ import io.vrap.rmf.raml.model.types.BuiltinType;
 import io.vrap.rmf.raml.model.types.StringInstance;
 import io.vrap.rmf.raml.model.util.UriFragmentBuilder;
 import io.vrap.rmf.raml.model.values.StringTemplate;
+import io.vrap.rmf.raml.persistence.RamlResource;
 import io.vrap.rmf.raml.persistence.RamlResourceSet;
 import io.vrap.rmf.raml.persistence.antlr.RAMLParser;
 import io.vrap.rmf.raml.persistence.antlr.RamlNodeTokenSource;
@@ -24,6 +25,7 @@ import io.vrap.rmf.raml.persistence.constructor.ApiConstructor;
 import io.vrap.rmf.raml.persistence.constructor.Scope;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.TokenStream;
+import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EAttribute;
@@ -68,14 +70,18 @@ public class RamlModelBuilder {
                 null :
                 resource.getContents().get(0);
         if (resource.getErrors().isEmpty()) {
-            final EObject resolved = rootObject instanceof ApiBase ?
-                    resolveToApi(rootObject) :
-                    rootObject;
-            final List<Resource.Diagnostic> errors = resolved.eResource().getResourceSet()
-                    .getResources().stream()
-                    .flatMap(r -> r.getErrors().stream())
-                    .collect(Collectors.toList());
-            return RamlModelResult.of(errors, resolved);
+            final RamlResourceSet resourceSet = (RamlResourceSet) rootObject.eResource().getResourceSet();
+            final List<Resource.Diagnostic> errors = resourceSet.validate();
+
+            if (errors.isEmpty()) {
+                final EObject resolved = rootObject instanceof ApiBase ?
+                        resolveToApi(rootObject) :
+                        rootObject;
+
+                return RamlModelResult.of(errors, resolved);
+            } else {
+                return RamlModelResult.of(errors, rootObject);
+            }
         } else {
             return RamlModelResult.of(resource.getErrors(), rootObject);
         }

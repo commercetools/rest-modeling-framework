@@ -64,4 +64,20 @@ public class RamlResourceSet extends ResourceSetImpl {
             return new RamlResource(uri);
         }
     }
+
+    /**
+     * Validates all resources and returns the errors.
+     * @return the errors
+     */
+    public List<Resource.Diagnostic> validate() {
+        getResources().stream()
+                .filter(RamlResource.class::isInstance).map(RamlResource.class::cast)
+                .forEach(RamlResource::validate);
+
+        final List<Resource.Diagnostic> errors = getResources().stream()
+                .flatMap(r -> r.getErrors().stream())
+                .collect(Collectors.toList());
+
+        return errors;
+    }
 }
