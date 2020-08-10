@@ -54,7 +54,6 @@ public class RamlResource extends ResourceImpl {
 
             try {
                 rootConstructor.construct(parser, resourceScope);
-                validate();
             } catch (final Exception e) {
                 getErrors().addAll(errorCollector.getErrors());
                 throw e;
@@ -62,7 +61,7 @@ public class RamlResource extends ResourceImpl {
         }
     }
 
-    protected void validate() {
+    void validate() {
         for (final EObject eObject : getContents()) {
             org.eclipse.emf.common.util.Diagnostic diagnostic = Diagnostician.INSTANCE.validate(eObject);
             if (diagnostic.getSeverity() != org.eclipse.emf.common.util.Diagnostic.OK) {
