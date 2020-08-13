@@ -16,6 +16,7 @@ class TypesValidator extends AbstractRamlValidator {
     private final TypeAndAnnoationTypeValidator typeAndAnnoationTypeValidator = new TypeAndAnnoationTypeValidator();
 
     private final List<ValidatingTypesSwitch> validators = Arrays.asList(
+            new TypeResolutionValidator(),
             new AnnotationValidator(),
             new EnumFacetValidator(),
             new DefaultFacetValidator(),
@@ -232,6 +233,80 @@ class TypesValidator extends AbstractRamlValidator {
                     .orElse(Collections.emptyList());
 
             return validationResults;
+        }
+    }
+
+    /**
+     * This validator checks that all types are resolved properply.
+     */
+    private class TypeResolutionValidator extends ValidatingTypesSwitch {
+
+        @Override
+        public List<Diagnostic> caseAnyType(final AnyType anyType) {
+            return validateTypeResolved(anyType);
+        }
+
+        @Override
+        public List<Diagnostic> caseArrayType(final ArrayType arrayType) {
+            final List<Diagnostic> results = new ArrayList<>();
+            results.addAll(validateTypeResolved(arrayType));
+
+            if (arrayType.getItems() != null && arrayType.getItems().eIsProxy()) {
+                results.add(error(arrayType, "Items type {0} can''t be resolved",
+                        getNameFromProxy(arrayType.getItems())));
+            }
+            return results;
+        }
+
+        @Override
+        public List<Diagnostic> caseTypedElement(final TypedElement typedElement) {
+            return validateTypeResolved(typedElement);
+        }
+
+        @Override
+        public List<Diagnostic> caseUnionType(final UnionType unionType) {
+            final List<Diagnostic> results = new ArrayList<>();
+            results.addAll(validateTypeResolved(unionType));
+
+            for (final AnyType oneOf : unionType.getOneOf()) {
+                if (oneOf.eIsProxy()) {
+                    results.add(error(unionType, "Type ''{0}'' can''t be resolved",
+                            getNameFromProxy(oneOf)));
+                }
+            }
+            return results;
+        }
+
+        @Override
+        public List<Diagnostic> caseIntersectionType(final IntersectionType intersectionType) {
+            final List<Diagnostic> results = new ArrayList<>();
+            results.addAll(validateTypeResolved(intersectionType));
+
+            for (final AnyType allOf : intersectionType.getAllOf()) {
+                if (allOf.eIsProxy()) {
+                    results.add(error(intersectionType, "Type ''{0}'' can''t be resolved",
+                            getNameFromProxy(allOf)));
+                }
+            }
+            return results;
+        }
+
+        private List<Diagnostic> validateTypeResolved(final AnyTypeFacet anyType) {
+            if (anyType.getType() != null && anyType.getType().eIsProxy()) {
+                return Collections.singletonList(error(anyType, "Type ''{0}'' can''t be resolved",
+                        getNameFromProxy(anyType.getType())));
+            } else {
+                return Collections.emptyList();
+            }
+        }
+
+        private List<Diagnostic> validateTypeResolved(final TypedElement typedElement) {
+            if (typedElement.getType() != null && typedElement.getType().eIsProxy()) {
+                return Collections.singletonList(error(typedElement, "Type ''{0}'' can''t be resolved",
+                        getNameFromProxy(typedElement.getType())));
+            } else {
+                return Collections.emptyList();
+            }
         }
     }
 

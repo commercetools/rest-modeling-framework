@@ -68,21 +68,6 @@ public class DeclarationResolver {
             }
             newUnresolvedTypes = unresolvedTypeDeclarations.size();
         }
-        if (unresolvedTypeDeclarations.size() > 0) {
-            unresolvedTypeDeclarations.keySet().forEach(typeDeclarationFacet -> {
-                final Token nameToken = typeDeclarationFacet.typeDeclarationTuple() == null ?
-                        Optional.ofNullable(typeDeclarationFacet.typeDeclarationMap()).map(t -> t.name.start).orElse(null) :
-                        Optional.ofNullable(typeDeclarationFacet.typeDeclarationTuple()).map(t -> t.name.start).orElse(null);
-
-                if (nameToken == null) {
-                    unresolvedTypeDeclarations.get(typeDeclarationFacet)
-                            .forEach(eObject -> scope.addError("Type ''{0}'' couldn't be resolved", eObject));
-                } else {
-                    scope.addErrorWithLocation("Type ''{0}'' couldn't be resolved",
-                            nameToken, nameToken.getText());
-                }
-            });
-        }
     }
 
     /**

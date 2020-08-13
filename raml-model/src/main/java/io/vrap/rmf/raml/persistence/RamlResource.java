@@ -1,12 +1,14 @@
 package io.vrap.rmf.raml.persistence;
 
 import io.vrap.rmf.raml.model.RamlDiagnostic;
+import io.vrap.rmf.raml.model.types.AnyType;
 import io.vrap.rmf.raml.persistence.antlr.ParserErrorCollector;
 import io.vrap.rmf.raml.persistence.antlr.RAMLParser;
 import io.vrap.rmf.raml.persistence.antlr.RamlNodeTokenSource;
 import io.vrap.rmf.raml.persistence.constructor.*;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.TokenStream;
+import org.eclipse.emf.common.util.Diagnostic;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EClass;
@@ -14,14 +16,13 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.resource.impl.ResourceImpl;
 import org.eclipse.emf.ecore.util.Diagnostician;
+import org.eclipse.emf.ecore.util.EObjectValidator;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Scanner;
+import java.text.MessageFormat;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static io.vrap.rmf.raml.model.elements.ElementsPackage.Literals.NAMED_ELEMENT;
@@ -65,7 +66,9 @@ public class RamlResource extends ResourceImpl {
         for (final EObject eObject : getContents()) {
             org.eclipse.emf.common.util.Diagnostic diagnostic = Diagnostician.INSTANCE.validate(eObject);
             if (diagnostic.getSeverity() != org.eclipse.emf.common.util.Diagnostic.OK) {
-                diagnostic.getChildren().stream().map(RamlDiagnostic::of).forEach(getErrors()::add);
+                diagnostic.getChildren().stream()
+                        .map(RamlDiagnostic::of)
+                        .forEach(getErrors()::add);
             }
         }
     }
