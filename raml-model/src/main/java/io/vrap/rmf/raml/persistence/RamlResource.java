@@ -67,20 +67,10 @@ public class RamlResource extends ResourceImpl {
             org.eclipse.emf.common.util.Diagnostic diagnostic = Diagnostician.INSTANCE.validate(eObject);
             if (diagnostic.getSeverity() != org.eclipse.emf.common.util.Diagnostic.OK) {
                 diagnostic.getChildren().stream()
-                        .map(this::transformAndFilterDiagnostic)
-                        .filter(Objects::nonNull)
+                        .map(RamlDiagnostic::of)
                         .forEach(getErrors()::add);
             }
         }
-    }
-
-    private RamlDiagnostic transformAndFilterDiagnostic(final org.eclipse.emf.common.util.Diagnostic diagnostic) {
-        if (diagnostic.getSource() == EObjectValidator.DIAGNOSTIC_SOURCE
-                && diagnostic.getCode() == EObjectValidator.EOBJECT__EVERY_BIDIRECTIONAL_REFERENCE_IS_PAIRED
-                && !diagnostic.getData().isEmpty() && diagnostic.getData().get(0) instanceof AnyType) {
-            return null;
-        }
-        return RamlDiagnostic.of(diagnostic);
     }
 
     @Override

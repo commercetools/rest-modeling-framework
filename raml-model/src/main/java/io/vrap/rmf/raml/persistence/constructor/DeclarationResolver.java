@@ -76,9 +76,9 @@ public class DeclarationResolver {
 
                 if (nameToken == null) {
                     unresolvedTypeDeclarations.get(typeDeclarationFacet)
-                            .forEach(eObject -> scope.addError("Type ''{0}'' couldn't be resolved", eObject));
+                            .forEach(eObject -> scope.addError("Type ''{0}'' can''t be resolved", eObject));
                 } else {
-                    scope.addErrorWithLocation("Type ''{0}'' couldn't be resolved",
+                    scope.addErrorWithLocation("Type ''{0}'' can''t be resolved",
                             nameToken, nameToken.getText());
                 }
             });
