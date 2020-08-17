@@ -13,8 +13,8 @@ import io.vrap.rmf.raml.model.resources.*;
 import io.vrap.rmf.raml.model.resources.util.ResourcesSwitch;
 import io.vrap.rmf.raml.model.responses.Body;
 import io.vrap.rmf.raml.model.responses.util.ResponsesSwitch;
-import io.vrap.rmf.raml.model.types.BuiltinType;
-import io.vrap.rmf.raml.model.types.StringInstance;
+import io.vrap.rmf.raml.model.types.*;
+import io.vrap.rmf.raml.model.types.util.TypesSwitch;
 import io.vrap.rmf.raml.model.util.UriFragmentBuilder;
 import io.vrap.rmf.raml.model.values.StringTemplate;
 import io.vrap.rmf.raml.persistence.RamlResource;
@@ -29,6 +29,7 @@ import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EAttribute;
+import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.resource.Resource;
@@ -71,6 +72,11 @@ public class RamlModelBuilder {
                 resource.getContents().get(0);
         if (resource.getErrors().isEmpty()) {
             final RamlResourceSet resourceSet = (RamlResourceSet) rootObject.eResource().getResourceSet();
+
+            final List<Object> allContents = Lists.newArrayList(EcoreUtil.getAllContents(resourceSet, true));
+            final SuperTypeFixer superTypeFixer = new SuperTypeFixer();
+            allContents.stream().filter(EObject.class::isInstance).map(EObject.class::cast).forEach(e -> superTypeFixer.doSwitch(e));
+
             final List<Resource.Diagnostic> errors = resourceSet.validate();
 
             if (errors.isEmpty()) {
@@ -86,6 +92,36 @@ public class RamlModelBuilder {
             return RamlModelResult.of(resource.getErrors(), rootObject);
         }
     }
+
+    /**
+     * This is a quick fix for issues we experience when parsing cyclic dependencies.
+     * This can lead to inconsistencies between inline types an their super type.
+     * @see io.vrap.rmf.raml.validation.TypesValidator.TypeConsistencyCheck
+     */
+    private static class SuperTypeFixer extends TypesSwitch<Boolean> {
+
+        @Override
+        public Boolean caseAnyType(final AnyType anyType) {
+            final AnyType superType = anyType.getType();
+            if (anyType.isInlineType() && superType != null && anyType.eContainer() instanceof Property) {
+                final EClass eClass = anyType.eClass();
+                if (eClass != superType.eClass()) {
+                    final AnyType newInlineType = (AnyType) EcoreUtil.create(superType.eClass());
+                    for (EAttribute attribute : eClass.getEAllAttributes()) {
+                        final Object value = anyType.eGet(attribute);
+                        newInlineType.eSet(attribute, value);
+                    }
+                    newInlineType.eSet(eClass.getEStructuralFeature("type"), superType);
+                    final Property property = (Property) anyType.eContainer();
+                    property.setType(newInlineType);
+                    EcoreUtil.replace(anyType, newInlineType);
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+
 
     private Resource load(final URI uri) {
         final RamlResourceSet resourceSet = new RamlResourceSet();
