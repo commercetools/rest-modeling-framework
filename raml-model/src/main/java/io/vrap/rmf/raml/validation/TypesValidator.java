@@ -17,6 +17,7 @@ class TypesValidator extends AbstractRamlValidator {
 
     private final List<ValidatingTypesSwitch> validators = Arrays.asList(
             new TypeResolutionValidator(),
+            new TypeConsistencyCheck(),
             new AnnotationValidator(),
             new EnumFacetValidator(),
             new DefaultFacetValidator(),
@@ -233,6 +234,21 @@ class TypesValidator extends AbstractRamlValidator {
                     .orElse(Collections.emptyList());
 
             return validationResults;
+        }
+    }
+
+    private class TypeConsistencyCheck extends ValidatingTypesSwitch {
+
+        @Override
+        public List<Diagnostic> caseAnyTypeFacet(final AnyTypeFacet anyTypeFacet) {
+            final AnyType superType = anyTypeFacet.getType();
+            if (superType != null && anyTypeFacet.eClass() != superType.eClass()) {
+                return Collections.singletonList(error(anyTypeFacet,
+                        "Inconsistent types: Type ''{0}'' has eClass ''{1}'' while super type ''{2}'' has eClass ''{3}''",
+                        anyTypeFacet.getName(), anyTypeFacet.eClass().getName(),
+                        superType.getName(), superType.eClass().getName()));
+            }
+            return Collections.emptyList();
         }
     }
 
