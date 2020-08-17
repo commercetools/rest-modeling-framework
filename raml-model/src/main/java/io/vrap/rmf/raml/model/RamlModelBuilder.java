@@ -107,11 +107,13 @@ public class RamlModelBuilder {
                 final EClass eClass = anyType.eClass();
                 if (eClass != superType.eClass()) {
                     final AnyType newInlineType = (AnyType) EcoreUtil.create(superType.eClass());
-                    for (EAttribute attribute : eClass.getEAllAttributes()) {
-                        final Object value = anyType.eGet(attribute);
-                        newInlineType.eSet(attribute, value);
-                    }
-                    newInlineType.eSet(eClass.getEStructuralFeature("type"), superType);
+                    final String name = anyType.getName() == null ? superType.getName() : anyType.getName();
+                    newInlineType.setName(name);
+                    newInlineType.setDefault(anyType.getDefault());
+                    newInlineType.setDescription(anyType.getDescription());
+                    newInlineType.getExamples().addAll(anyType.getExamples());
+                    newInlineType.getAnnotations().addAll(anyType.getAnnotations());
+                    newInlineType.setType(superType);
                     final Property property = (Property) anyType.eContainer();
                     property.setType(newInlineType);
                     EcoreUtil.replace(anyType, newInlineType);
