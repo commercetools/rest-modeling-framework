@@ -62,6 +62,14 @@ class Version {
 
 apply from: 'dependencies.gradle'
 
+tasks.register("writeVersionToReadme") {
+    doLast {
+        ant.replaceregexp(match: 'rmfVersion = \"[^\\s]+\"', replace: "rmfVersion = \"${globalVersion}\"", flags:'g', byline:true) {
+            fileset(dir: projectDir, includes: 'README.md')
+        }
+    }
+}
+
 subprojects { project ->
     repositories {
         mavenCentral()
