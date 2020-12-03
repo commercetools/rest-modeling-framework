@@ -58,6 +58,8 @@ class RamlModelBuilderTest extends Specification implements ResourceFixtures {
         Resource singleUserResource = userResource.resources[0]
         singleUserResource.uriParameters.size() == 1
         singleUserResource.uriParameters[0].name == 'ID'
+        singleUserResource.methods.size() == 1
+        singleUserResource.getMethod(HttpMethod.GET) != null
     }
 
     def "union resource type"() {
