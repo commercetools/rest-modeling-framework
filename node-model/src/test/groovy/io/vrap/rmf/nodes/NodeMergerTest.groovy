@@ -6,7 +6,7 @@ import spock.lang.Specification
 
 class NodeMergerTest extends Specification {
     @Shared
-    NodeMerger merger = new NodeMerger(true)
+    NodeMerger merger = new NodeMerger()
 
     def "simple merge"() {
         when:
