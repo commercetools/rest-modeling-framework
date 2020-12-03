@@ -11,9 +11,6 @@ import static io.vrap.rmf.nodes.NodeCopier.copy;
  */
 public class NodeMerger {
 
-    public NodeMerger() {
-    }
-
     public Node merge(final Node source, final Node target) {
         return merge(source, target, false);
     }
@@ -27,7 +24,7 @@ public class NodeMerger {
      *                           will be merged into mandatory nodes
      * @return the merged node
      */
-    public Node merge(final Node source, final Node target, boolean mergeOptionalToMandatoryTarget) {
+    public Node merge(final Node source, final Node target, final boolean mergeOptionalToMandatoryTarget) {
         if (source.eClass() != target.eClass()) {
             if (target instanceof NullNode || (target instanceof ValueNode && source instanceof ContainerNode)) {
                 return copy(source);
