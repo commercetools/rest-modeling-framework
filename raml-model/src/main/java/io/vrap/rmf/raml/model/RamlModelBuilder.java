@@ -296,8 +296,8 @@ public class RamlModelBuilder {
     }
 
     private static class ResourceNodeMerge extends ResourcesSwitch<PropertyNode> {
-        private final NodeMerger nodeMerger = new NodeMerger(true);
-        private final NodeMerger resourceTypeNodeMerger = new NodeMerger(false);
+        private final NodeMerger nodeMerger = new NodeMerger();
+        private final NodeMerger resourceTypeNodeMerger = new NodeMerger();
         private final io.vrap.rmf.raml.model.resources.Resource resource;
 
         public ResourceNodeMerge(final io.vrap.rmf.raml.model.resources.Resource resource) {
@@ -322,7 +322,7 @@ public class RamlModelBuilder {
                 Node resourceValueNode = resourcePropertyNode.getValue();
                 final PropertyNode resourceTypeNode = doSwitch(resource.getType());
                 final Node resourceTypeValueNode = resourceTypeNode.getValue();
-                resourceValueNode = nodeMerger.merge(resourceTypeValueNode, resourceValueNode);
+                resourceValueNode = nodeMerger.merge(resourceTypeValueNode, resourceValueNode, true);
                 resourcePropertyNode.setValue(resourceValueNode);
             }
 

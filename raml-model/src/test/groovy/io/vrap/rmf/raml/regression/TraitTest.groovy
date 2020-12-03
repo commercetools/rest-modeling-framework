@@ -44,7 +44,7 @@ class TraitTest extends RegressionTest {
         method.responses.find {it.statusCode == "201"}.description.value == 'Post created, returns the created post.'
     }
 
-    @Ignore
+//    @Ignore
     def "queryparameter"() {
         when:
         RamlModelResult<Api> ramlModelResult = constructApi(
