@@ -150,4 +150,35 @@ class ExtendTest extends RegressionTest {
         ramlModelResult.rootObject.resources[0].getMethod(HttpMethod.POST).description.value == "Extended API"
         ramlModelResult.rootObject.resources[0].getMethod(HttpMethod.DELETE).description.value == "Final API"
     }
+
+
+    def "unique-status-code"() {
+        when:
+        RamlModelResult<Api> ramlModelResult = constructApi(
+                "api.raml",
+                '''\
+                #%RAML 1.0
+                title: Some API
+                resourceTypes:
+                  base:
+                    post?:
+                      responses:
+                        201:
+                          body:
+                            application/json:
+                              type: object
+                /category:
+                  type: base
+                  post:
+                    responses:
+                      201:
+                        body:
+                          application/json:
+                            example: |
+                              {}
+                ''')
+        then:
+        ramlModelResult.validationResults.size() == 0
+        ramlModelResult.rootObject.resources[0].getMethod(HttpMethod.POST).responses.size() == 1
+    }
 }

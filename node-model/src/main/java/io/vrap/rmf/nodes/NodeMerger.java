@@ -84,7 +84,7 @@ public class NodeMerger {
 
             final boolean isOptionalNode = keyValue.endsWith("?");
 
-            PropertyNode targetProperty = merged.getProperty(keyValue);
+            PropertyNode targetProperty = merged.getProperty(key);
             if (targetProperty == null && isOptionalNode) {
                 final Object targetValue = keyValue.substring(0, keyValue.length() - 1);
                 targetProperty = merged.getProperty(targetValue);
