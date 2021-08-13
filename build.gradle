@@ -188,6 +188,12 @@ subprojects { project ->
         }
     }
 
+    javadoc {
+        failOnError false
+        options.tags = ["generated", "ordered", "model"]
+        options.addStringOption('Xdoclint:none', '-quiet')
+    }
+
     task sourcesJar(type: Jar) {
         from sourceSets.main.allSource
         archiveClassifier = 'sources'
@@ -267,7 +273,9 @@ def exportedProjects= [
         ":node-model",
         ":raml-model",
 ]
+
 task alljavadoc(type: Javadoc) {
+    failOnError false
     source exportedProjects.collect { project(it).sourceSets.main.allJava }
     classpath = files(exportedProjects.collect { project(it).sourceSets.main.compileClasspath })
     destinationDir = file("${buildDir}/docs/javadoc")
