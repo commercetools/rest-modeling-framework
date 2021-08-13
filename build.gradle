@@ -1,7 +1,6 @@
 buildscript {
     repositories {
         mavenCentral()
-        jcenter()
     }
 }
 
@@ -22,7 +21,7 @@ plugins {
     id 'com.jfrog.bintray' version '1.8.3'
     id 'com.github.johnrengelman.shadow' version '5.2.0' apply false
 
-    id 'org.xtext.builder' version '2.0.7' apply false
+    id 'org.xtext.builder' version '2.0.8' apply false
 }
 
 
@@ -171,4 +170,13 @@ subprojects { project ->
     }
 
     sourceCompatibility = 1.8
+}
+
+configurations.all {
+    if (name.contains("Tooling")) {
+        dependencies {
+            add(name, "org.eclipse.xtend:org.eclipse.xtend.core:$xtextVersion")
+            add(name, platform("org.eclipse.xtext:xtext-dev-bom:$xtextVersion"))
+        }
+    }
 }

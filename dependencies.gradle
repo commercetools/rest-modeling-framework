@@ -1,5 +1,5 @@
 ext {
-    xtextVersion = '2.15.0'
+    xtextVersion = '2.17.0'
     spockVersion = "1.3-groovy-2.5"
     jacksonVersion = "2.10.2"
     yaml = [

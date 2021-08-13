@@ -35,7 +35,7 @@ dependencies {
     compile project(':functional-utils')
     compile project(':antlr-utils')
     compile project(':node-model')
-    
+
     compile yaml.snakeyaml
     compile google.guava
 
@@ -52,4 +52,13 @@ dependencies {
 
 shadowJar {
     append 'plugin.properties'
+}
+
+configurations.all {
+    if (name.contains("Tooling")) {
+        dependencies {
+            add(name, "org.eclipse.xtend:org.eclipse.xtend.core:$xtextVersion")
+            add(name, platform("org.eclipse.xtext:xtext-dev-bom:$xtextVersion"))
+        }
+    }
 }

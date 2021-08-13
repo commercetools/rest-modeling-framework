@@ -22,7 +22,7 @@ dependencies {
     compile project(':functional-utils')
     compile project(':emf-utils')
     compile project(':antlr-utils')
-    
+
     compile jackson_core.core
     compile jackson_core.databind
     compile jackson_core.dataformat_yaml
@@ -30,7 +30,15 @@ dependencies {
 
     compile yaml.snakeyaml
     compile google.guava
-    
+
     testCompile spockframework.spock_core
 }
 
+configurations.all {
+    if (name.contains("Tooling")) {
+        dependencies {
+            add(name, "org.eclipse.xtend:org.eclipse.xtend.core:$xtextVersion")
+            add(name, platform("org.eclipse.xtext:xtext-dev-bom:$xtextVersion"))
+        }
+    }
+}
