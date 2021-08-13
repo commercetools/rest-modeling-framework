@@ -12,13 +12,13 @@ sourceSets {
 }
 
 dependencies {
-    compile project(':raml-model')
+    api project(':raml-model')
 
-    testCompile junit.junit
-    testCompile junit.dataprovider
-    testCompile assertj.core
-    
-    testCompile spockframework.spock_core
+    testImplementation junit.junit
+    testImplementation junit.dataprovider
+    testImplementation assertj.core
+
+    testImplementation spockframework.spock_core
 }
 
 task downloadTck1ZipFile(type: Download) {

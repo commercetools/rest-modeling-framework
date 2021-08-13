@@ -32,22 +32,22 @@ clean {
 }
 
 dependencies {
-    compile project(':functional-utils')
-    compile project(':antlr-utils')
-    compile project(':node-model')
+    api project(':functional-utils')
+    api project(':antlr-utils')
+    api project(':node-model')
 
-    compile yaml.snakeyaml
-    compile google.guava
+    api yaml.snakeyaml
+    api google.guava
 
-    compile jackson_core.core
-    compile hypertino.inflector
-    compile damnhandy.handy_uri_templates
+    api jackson_core.core
+    api hypertino.inflector
+    api damnhandy.handy_uri_templates
 
-    testCompile junit.junit
-    testCompile junit.dataprovider
-    testCompile assertj.core
+    testImplementation junit.junit
+    testImplementation junit.dataprovider
+    testImplementation assertj.core
 
-    testCompile spockframework.spock_core
+    testImplementation spockframework.spock_core
 }
 
 shadowJar {

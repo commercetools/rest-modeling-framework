@@ -14,5 +14,5 @@ publishing {
 }
 
 dependencies {
-    testCompile junit.junit
+    testImplementation junit.junit
 }

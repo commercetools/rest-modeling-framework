@@ -10,7 +10,6 @@ plugins {
     id 'idea'
     id 'eclipse'
 
-    id 'maven'
     id 'maven-publish'
 
     id 'java'
@@ -78,8 +77,6 @@ subprojects { project ->
     apply plugin: 'idea'
     apply plugin: 'eclipse'
 
-    apply plugin: 'maven'
-
     apply plugin: 'java'
     apply plugin: 'java-library' // needed to make sure that transitive deps have 'compile' scope
     apply plugin: 'groovy'
@@ -126,11 +123,11 @@ subprojects { project ->
         }
 
         dependencies {
-            compile 'org.eclipse.platform:org.eclipse.equinox.common:3.8.0'
-            compile emf.common
-            compile emf.ecore
-            compile emf.ecore_xcore_lib
-            compile "org.eclipse.xtext:org.eclipse.xtext.xbase.lib:$xtextVersion"
+            api 'org.eclipse.platform:org.eclipse.equinox.common:3.8.0'
+            api emf.common
+            api emf.ecore
+            api emf.ecore_xcore_lib
+            api "org.eclipse.xtext:org.eclipse.xtext.xbase.lib:$xtextVersion"
 
             xtextLanguages 'org.eclipse.jdt:org.eclipse.jdt.core:3.20.0'
             xtextLanguages 'org.eclipse.text:org.eclipse.text:3.5.101'
@@ -153,21 +150,21 @@ subprojects { project ->
         classifier = 'sources'
     }
 
-    bintray {
-        user = System.getenv('BINTRAY_USER')
-        key = System.getenv('BINTRAY_KEY')
-        publications = [ 'Maven' ]
-
-        publish = true
-
-        pkg {
-            repo = 'vrapio'
-            name = 'rmf'
-            userOrg = 'vrapio'
-            licenses = ['MIT']
-            vcsUrl = 'https://github.com/vrapio/rest-modeling-framework'
-        }
-    }
+//    bintray {
+//        user = System.getenv('BINTRAY_USER')
+//        key = System.getenv('BINTRAY_KEY')
+//        publications = [ 'Maven' ]
+//
+//        publish = true
+//
+//        pkg {
+//            repo = 'vrapio'
+//            name = 'rmf'
+//            userOrg = 'vrapio'
+//            licenses = ['MIT']
+//            vcsUrl = 'https://github.com/vrapio/rest-modeling-framework'
+//        }
+//    }
 
     sourceCompatibility = 1.8
 }

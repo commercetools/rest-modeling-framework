@@ -19,19 +19,19 @@ generateGrammarSource {
 }
 
 dependencies {
-    compile project(':functional-utils')
-    compile project(':emf-utils')
-    compile project(':antlr-utils')
+    api project(':functional-utils')
+    api project(':emf-utils')
+    api project(':antlr-utils')
 
-    compile jackson_core.core
-    compile jackson_core.databind
-    compile jackson_core.dataformat_yaml
-    compile commons.io
+    api jackson_core.core
+    api jackson_core.databind
+    api jackson_core.dataformat_yaml
+    api commons.io
 
-    compile yaml.snakeyaml
-    compile google.guava
+    api yaml.snakeyaml
+    api google.guava
 
-    testCompile spockframework.spock_core
+    testImplementation spockframework.spock_core
 }
 
 configurations.all {

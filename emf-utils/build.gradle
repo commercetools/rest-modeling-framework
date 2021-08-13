@@ -14,6 +14,6 @@ publishing {
 }
 
 dependencies {
-    compile emf.common
+    api emf.common
 }
 
