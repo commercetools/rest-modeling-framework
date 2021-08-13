@@ -1,7 +1,7 @@
 on:
   - workflow_dispatch
 
-name: Release
+name: Release to Maven Central
 
 jobs:
   release:
@@ -14,21 +14,27 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Setup Java
-        uses: actions/setup-java@v1
+        uses: actions/setup-java@v2
         with:
-          java-version: '8'
+          java-version: "8"
+          distribution: 'adopt'
 
-      - name: Build and Test
-        run: ./gradlew --build-cache clean check
-
-      - name: Release
-        run: ./gradlew --build-cache bintrayUpload writeVersionToReadme --info --stacktrace
+      - run: scripts/setup-signing-key.sh
         env:
-          BINTRAY_USER: ${{ secrets.BINTRAY_USER }}
-          BINTRAY_KEY: ${{ secrets.BINTRAY_KEY }}
+          DECRYPTER: ${{ secrets.DECRYPTER }}
+          SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
+          PASSPHRASE: ${{ secrets.PASSPHRASE }}
 
-      - uses: stefanzweifel/git-auto-commit-action@v4
+      - name: Build and Release
+        run: export VERSION="0.2.0-`date '+%Y%m%d%H%M%S'`"; ./gradlew -Pversion=$VERSION clean check publishMavenPublicationToSonatype closeSonatypeStagingRepository writeVersionToReadme
+        env:
+          CTP_OSS_USER: ${{ secrets.OSS_USER }}
+          CTP_OSS_SECRET: ${{ secrets.OSS_SECRET }}
+
+
+      - uses: stefanzweifel/git-auto-commit-action@v4.6.0
         with:
+          file_pattern: "README.md"
           commit_message: "TASK: Updating version in README"
           commit_user_name: Auto Mation
           commit_user_email: automation@commercetools.com

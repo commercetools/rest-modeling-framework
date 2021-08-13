@@ -1,17 +1,3 @@
-apply plugin: 'maven-publish'
-
-publishing {
-    publications {
-        Maven(MavenPublication) {
-            from components.java
-            artifactId 'emf-utils'
-
-            artifact sourceJar {
-                classifier 'sources'
-            }
-        }
-    }
-}
 
 dependencies {
     api emf.common

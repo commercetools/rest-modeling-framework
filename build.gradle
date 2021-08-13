@@ -11,6 +11,7 @@ plugins {
     id 'eclipse'
 
     id 'maven-publish'
+    id 'signing'
 
     id 'java'
     id 'java-library' // needed to make sure that transitive deps have 'compile' scope
@@ -21,12 +22,13 @@ plugins {
     id 'com.github.johnrengelman.shadow' version '5.2.0' apply false
 
     id 'org.xtext.builder' version '2.0.8' apply false
+    id 'io.github.gradle-nexus.publish-plugin' version '1.1.0'
 }
 
 
 import java.text.SimpleDateFormat
 
-def globalVersion = new Version(currentVersion)
+def globalVersion = new Version(version)
 
 class Version {
     String originalVersion
@@ -37,9 +39,9 @@ class Version {
     Version(String versionValue) {
         buildTime = new Date()
         originalVersion = versionValue
+        thisVersion = versionValue
         if (originalVersion.endsWith('-SNAPSHOT')) {
             status = 'integration'
-            thisVersion = originalVersion.substring(0, originalVersion.length() - 'SNAPSHOT'.length()) + getTimestamp()
         } else {
             status = 'release'
             thisVersion = versionValue
@@ -49,7 +51,7 @@ class Version {
     String getTimestamp() {
         // Convert local file timestamp to UTC
         def format = new SimpleDateFormat('yyyyMMddHHmmss')
-        format.setCalendar(Calendar.getInstance(TimeZone.getTimeZone('UTC')));
+        format.setCalendar(Calendar.getInstance(TimeZone.getTimeZone('UTC')))
         return format.format(buildTime)
     }
 
@@ -68,12 +70,52 @@ tasks.register("writeVersionToReadme") {
     }
 }
 
+ext {
+    scmProjectName = rootProject.name
+    scmRepo = 'github.com'
+    scmProjectPath = "commercetools/rest-modeling-framework.git"  // github relative path with .git extension
+    scmProjectUrl = "https://$scmRepo/$scmProjectPath"      // just as web-page
+    scmHttpsUrl = "https://$scmRepo/$scmProjectPath"        // common VCS read access
+    scmSshUrl = "git@$scmRepo:$scmProjectPath"              // developers VCS read-write repo
+    SNAPSHOT_SUFFIX = "-SNAPSHOT"
+    versionWIP = "development$SNAPSHOT_SUFFIX"
+}
+
+// maven-specific publishing settings
+def pomConfig = {
+    licenses {
+        license {
+            name "The Apache Software License, Version 2.0"
+            url "http://www.apache.org/licenses/LICENSE-2.0.txt"
+            distribution "repo"
+        }
+    }
+    scm {
+        connection "scm:git:$scmHttpsUrl"
+        developerConnection "scm:git:$scmSshUrl"
+        url "$scmProjectUrl"
+    }
+}
+
+group='com.commercetools.rmf'
+
+nexusPublishing {
+    repositories {
+        sonatype {
+            username = System.getenv('CTP_OSS_USER')
+            password = System.getenv('CTP_OSS_SECRET')
+        }
+    }
+}
+
 subprojects { project ->
     repositories {
         mavenCentral()
     }
 
-    apply plugin: 'publishing'
+    apply plugin: 'maven-publish'
+    apply plugin: 'signing'
+
     apply plugin: 'idea'
     apply plugin: 'eclipse'
 
@@ -82,10 +124,10 @@ subprojects { project ->
     apply plugin: 'groovy'
 
     apply plugin: 'de.undercouch.download'
-    apply plugin: 'com.jfrog.bintray'
 
-    group='io.vrap.rmf'
-    version=globalVersion
+    group='com.commercetools.rmf'
+
+    version = globalVersion
 
     if (project.file('src/main/antlr').exists()) {
         apply plugin: 'antlr'
@@ -94,6 +136,7 @@ subprojects { project ->
             antlr _antlr.antlr
         }
     }
+
     if (project.file('model').exists()) {
         apply plugin: 'org.xtext.builder'
 
@@ -145,28 +188,90 @@ subprojects { project ->
         }
     }
 
-    task sourceJar(type: Jar) {
+    task sourcesJar(type: Jar) {
         from sourceSets.main.allSource
-        classifier = 'sources'
+        archiveClassifier = 'sources'
     }
 
-//    bintray {
-//        user = System.getenv('BINTRAY_USER')
-//        key = System.getenv('BINTRAY_KEY')
-//        publications = [ 'Maven' ]
-//
-//        publish = true
-//
-//        pkg {
-//            repo = 'vrapio'
-//            name = 'rmf'
-//            userOrg = 'vrapio'
-//            licenses = ['MIT']
-//            vcsUrl = 'https://github.com/vrapio/rest-modeling-framework'
-//        }
-//    }
+    task javadocJar(type: Jar) {
+        group 'build'
+        classifier 'javadoc'
+        from javadoc
+    }
+
+    artifacts {
+        archives javadocJar, sourcesJar
+    }
+
+
+    def excludeProject= [
+        'raml-test',
+    ]
+
+    if (project.file("build.gradle").exists() && !excludeProject.contains(project.name)) {
+
+        publishing {
+            repositories {
+                maven {
+                    name = "GitHubPackages"
+                    url = uri("https://maven.pkg.github.com/commercetools/rest-modeling-framework")
+                    credentials {
+                        username = System.getenv("GITHUB_ACTOR")
+                        password = System.getenv("GITHUB_TOKEN")
+                    }
+                }
+            }
+            publications {
+                Maven(MavenPublication) {
+                    from components.java
+                    artifact sourcesJar
+                    artifact javadocJar
+                    groupId group
+                    artifactId project.name
+                    version version
+
+                    pom {
+                        name = project.name
+                        description = project.description
+                        developers {
+                            developer {
+                                id = "jenschude"
+                                name = "Jens Schulze"
+                                email = "jens.schulze@commercetools.com"
+                            }
+                        }
+                        url = scmHttpsUrl
+                    }
+                    pom.withXml {
+                        def root = asNode()
+                        root.children().last() + pomConfig
+                    }
+                }
+            }
+        }
+
+        signing {
+            useGpgCmd()
+            sign publishing.publications.Maven
+        }
+    }
 
     sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+}
+
+def exportedProjects= [
+        ":antlr-utils",
+        ":emf-utils",
+        ":functional-utils",
+        ":node-model",
+        ":raml-model",
+]
+task alljavadoc(type: Javadoc) {
+    source exportedProjects.collect { project(it).sourceSets.main.allJava }
+    classpath = files(exportedProjects.collect { project(it).sourceSets.main.compileClasspath })
+    destinationDir = file("${buildDir}/docs/javadoc")
+    options.noTimestamp = true
 }
 
 configurations.all {

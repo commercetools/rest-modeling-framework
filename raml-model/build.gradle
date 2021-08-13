@@ -1,18 +1,4 @@
 apply plugin: 'com.github.johnrengelman.shadow'
-apply plugin: 'maven-publish'
-
-publishing {
-    publications {
-        Maven(MavenPublication) {
-            from components.java
-            artifactId 'raml-model'
-
-            artifact sourceJar {
-                classifier 'sources'
-            }
-        }
-    }
-}
 
 sourceSets {
     test {
