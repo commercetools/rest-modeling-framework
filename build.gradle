@@ -197,6 +197,7 @@ subprojects { project ->
     task sourcesJar(type: Jar) {
         from sourceSets.main.allSource
         archiveClassifier = 'sources'
+        dependsOn 'compileJava'
     }
 
     task javadocJar(type: Jar) {
