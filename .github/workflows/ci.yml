@@ -22,4 +22,4 @@ jobs:
           distribution: 'adopt'
 
       - name: Build and Test
-        run: ./gradlew --build-cache clean check
+        run: ./gradlew --build-cache --stacktrace clean check

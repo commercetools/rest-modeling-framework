@@ -4,6 +4,7 @@ import io.vrap.rmf.raml.model.RamlModelResult
 import io.vrap.rmf.raml.model.modules.Api
 import io.vrap.rmf.raml.model.modules.util.ModulesSwitch
 import io.vrap.rmf.raml.validation.AbstractRamlValidator
+import io.vrap.rmf.raml.validation.RamlValidationSetup
 import io.vrap.rmf.raml.validation.RamlValidator
 import org.eclipse.emf.common.util.Diagnostic
 import org.eclipse.emf.common.util.DiagnosticChain
@@ -45,6 +46,7 @@ class CustomValidatorTest extends RegressionTest {
         title: Some API
                 ''', Arrays.asList(new MyApiValidator())
         )
+        RamlValidationSetup.setup()
         then:
         ramlModelResult.validationResults.size() == 1
         ramlModelResult.validationResults[0].message == "invalid: Some API"
