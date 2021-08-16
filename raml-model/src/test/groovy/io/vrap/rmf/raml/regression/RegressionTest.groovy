@@ -6,6 +6,7 @@ import io.vrap.rmf.raml.model.RamlModelResult
 import io.vrap.rmf.raml.model.modules.Api
 import io.vrap.rmf.raml.model.util.StringCaseFormat
 import io.vrap.rmf.raml.persistence.ResourceFixtures
+import io.vrap.rmf.raml.validation.RamlValidator
 import org.eclipse.emf.common.util.URI
 import spock.lang.Specification
 
@@ -42,6 +43,23 @@ abstract class RegressionTest extends Specification implements ResourceFixtures 
     RamlModelResult<Api> constructApi(String fileName, List<String> usesFiles, String input) {
         URI i = writeFile(fileName, usesFiles, input)
         return new RamlModelBuilder().buildApi(i)
+    }
+
+    RamlModelResult<Api> constructApi(String input, List<RamlValidator> validators) {
+        constructApi('api.raml', input, validators)
+    }
+
+    RamlModelResult<Api> constructApi(String fileName, String input, List<RamlValidator> validators) {
+        constructApi(fileName, null, input, validators)
+    }
+
+    RamlModelResult<Api> constructApi(List<String> usesFiles, String input, List<RamlValidator> validators) {
+        constructApi('api.raml', usesFiles, input, validators)
+    }
+
+    RamlModelResult<Api> constructApi(String fileName, List<String> usesFiles, String input, List<RamlValidator> validators) {
+        URI i = writeFile(fileName, usesFiles, input)
+        return new RamlModelBuilder().buildApi(i, validators)
     }
 
     URI writeFile(String fileName, String input) {

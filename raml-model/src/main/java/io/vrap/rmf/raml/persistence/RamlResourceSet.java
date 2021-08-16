@@ -2,6 +2,7 @@ package io.vrap.rmf.raml.persistence;
 
 import io.vrap.rmf.raml.model.types.BuiltinType;
 import io.vrap.rmf.raml.validation.RamlValidationSetup;
+import io.vrap.rmf.raml.validation.RamlValidator;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.ContentHandler;
 import org.eclipse.emf.ecore.resource.Resource;
@@ -49,6 +50,13 @@ public class RamlResourceSet extends ResourceSetImpl {
                     .put(contentType, resourceFactory);
         }
         addBuiltinTypes();
+    }
+
+    public RamlResourceSet(List<RamlValidator> validators) {
+        this();
+        if (validators.size() > 0) {
+            RamlValidationSetup.setup(validators);
+        }
     }
 
     private void addBuiltinTypes() {
