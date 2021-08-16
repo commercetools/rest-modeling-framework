@@ -37,18 +37,18 @@ class CustomValidatorTest extends RegressionTest {
         }
     }
 
-    @Ignore
-    def "custom-validation"() {
-        when:
-        RamlModelResult<Api> ramlModelResult = constructApi(
-                '''
-        #%RAML 1.0
-        title: Some API
-                ''', Arrays.asList(new MyApiValidator())
-        )
-        RamlValidationSetup.setup()
-        then:
-        ramlModelResult.validationResults.size() == 1
-        ramlModelResult.validationResults[0].message == "invalid: Some API"
-    }
+//    @Ignore
+//    def "custom-validation"() {
+//        when:
+//        RamlModelResult<Api> ramlModelResult = constructApi(
+//                '''
+//        #%RAML 1.0
+//        title: Some API
+//                ''', Arrays.asList(new MyApiValidator())
+//        )
+//        RamlValidationSetup.setup()
+//        then:
+//        ramlModelResult.validationResults.size() == 1
+//        ramlModelResult.validationResults[0].message == "invalid: Some API"
+//    }
 }
