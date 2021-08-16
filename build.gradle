@@ -108,6 +108,10 @@ nexusPublishing {
     }
 }
 
+allprojects {
+    description = "REST Modeling Framework. https://github.com/commercetools/rest-modeling-framework"
+}
+
 subprojects { project ->
     repositories {
         mavenCentral()
@@ -178,13 +182,13 @@ subprojects { project ->
             xtextLanguages "org.eclipse.xtext:org.eclipse.xtext.ecore:$xtextVersion"
             xtextLanguages 'org.eclipse.emf:org.eclipse.emf.mwe2.runtime:2.8.3'
             xtextLanguages 'org.eclipse.emf:org.eclipse.emf.codegen.ecore.xtext:1.2.0'
-            xtextLanguages 'org.eclipse.emf:org.eclipse.emf.common:2.11+'
-            xtextLanguages 'org.eclipse.emf:org.eclipse.emf.ecore:2.11+'
-            xtextLanguages 'org.eclipse.emf:org.eclipse.emf.ecore.xmi:2.11+'
+            xtextLanguages 'org.eclipse.emf:org.eclipse.emf.common:2.11.0'
+            xtextLanguages 'org.eclipse.emf:org.eclipse.emf.ecore:2.11.0'
+            xtextLanguages 'org.eclipse.emf:org.eclipse.emf.ecore.xmi:2.11.0'
             xtextLanguages 'org.eclipse.emf:org.eclipse.emf.ecore.xcore:1.3.1'
             xtextLanguages 'org.eclipse.emf:org.eclipse.emf.ecore.xcore.lib:1.1.100'
-            xtextLanguages 'org.eclipse.emf:org.eclipse.emf.codegen:2.11+'
-            xtextLanguages 'org.eclipse.emf:org.eclipse.emf.codegen.ecore:2.11+'
+            xtextLanguages 'org.eclipse.emf:org.eclipse.emf.codegen:2.11.0'
+            xtextLanguages 'org.eclipse.emf:org.eclipse.emf.codegen.ecore:2.11.0'
         }
     }
 
