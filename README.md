@@ -1,10 +1,8 @@
-[![Build Status](https://travis-ci.com/vrapio/rest-modeling-framework.svg?branch=master)](https://travis-ci.com/vrapio/rest-modeling-framework)
-
 The rest modeling framework provides an EMF based model for RAML api definition files.
 
 ### Using in your own project
 
-The latest unstable release can be retrieved from [jcenter](https://bintray.com/vrapio/vrapio/rmf)  with:
+The latest unstable release can be retrieved from [Maven](https://search.maven.org/artifact/com.commercetools.rmf/rest-modeling-framework)  with:
 ```gradle
 ext {
     rmfVersion = "0.2.0-20210816072901"
@@ -17,7 +15,7 @@ repositories {
 }
 
 dependencies {
-    compile "io.vrap.rmf:raml-model:${rmfVersion}"
+    compile "com.commercetools.rmf:raml-model:${rmfVersion}"
 }
 ```
 
