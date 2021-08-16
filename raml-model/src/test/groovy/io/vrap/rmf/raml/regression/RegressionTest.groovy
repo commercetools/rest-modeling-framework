@@ -46,15 +46,7 @@ abstract class RegressionTest extends Specification implements ResourceFixtures 
     }
 
     RamlModelResult<Api> constructApi(String input, List<RamlValidator> validators) {
-        constructApi('api.raml', input, validators)
-    }
-
-    RamlModelResult<Api> constructApi(String fileName, String input, List<RamlValidator> validators) {
-        constructApi(fileName, null, input, validators)
-    }
-
-    RamlModelResult<Api> constructApi(List<String> usesFiles, String input, List<RamlValidator> validators) {
-        constructApi('api.raml', usesFiles, input, validators)
+        constructApi('api.raml', null, input, validators)
     }
 
     RamlModelResult<Api> constructApi(String fileName, List<String> usesFiles, String input, List<RamlValidator> validators) {
