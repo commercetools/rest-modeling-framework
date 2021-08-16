@@ -27,26 +27,29 @@ public interface RamlValidationSetup {
      * Registers validators.
      */
     static void setup(List<RamlValidator> customValidators) {
-        final EValidator.Registry registry = EValidator.Registry.INSTANCE;
-        final List<EValidator> eValidators = customValidators.stream().map(ramlValidator -> (EValidator)ramlValidator).collect(Collectors.toList());
+        synchronized (RamlValidationSetup.class) {
+            final EValidator.Registry registry = EValidator.Registry.INSTANCE;
+            PACKAGES.forEach(registry::remove);
+            final List<EValidator> eValidators = customValidators.stream().map(ramlValidator -> (EValidator)ramlValidator).collect(Collectors.toList());
 
-        registry.put(TypesPackage.eINSTANCE, new TypesValidator());
-        registry.put(ModulesPackage.eINSTANCE, new ModulesValidator());
-        registry.put(ResourcesPackage.eINSTANCE, new ResourcesValidator());
-        registry.put(ResponsesPackage.eINSTANCE, new ResponsesValidator());
+            registry.put(TypesPackage.eINSTANCE, new TypesValidator());
+            registry.put(ModulesPackage.eINSTANCE, new ModulesValidator());
+            registry.put(ResourcesPackage.eINSTANCE, new ResourcesValidator());
+            registry.put(ResponsesPackage.eINSTANCE, new ResponsesValidator());
 
-        final RamlObjectValidator ramlObjectValidator = new RamlObjectValidator();
-        for (final EPackage ePackage : PACKAGES) {
-            final CompositeValidator compositeValidator = new CompositeValidator();
-            compositeValidator.add(ramlObjectValidator);
-            final EValidator validator = registry.getEValidator(ePackage);
-            if (validator != null) {
-                compositeValidator.add(validator);
+            final RamlObjectValidator ramlObjectValidator = new RamlObjectValidator();
+            for (final EPackage ePackage : PACKAGES) {
+                final CompositeValidator compositeValidator = new CompositeValidator();
+                compositeValidator.add(ramlObjectValidator);
+                final EValidator validator = registry.getEValidator(ePackage);
+                if (validator != null) {
+                    compositeValidator.add(validator);
+                }
+                if (eValidators.size() > 0) {
+                    compositeValidator.addAll(eValidators);
+                }
+                registry.put(ePackage, compositeValidator);
             }
-            if (eValidators.size() > 0) {
-                compositeValidator.addAll(eValidators);
-            }
-            registry.put(ePackage, compositeValidator);
         }
     }
 

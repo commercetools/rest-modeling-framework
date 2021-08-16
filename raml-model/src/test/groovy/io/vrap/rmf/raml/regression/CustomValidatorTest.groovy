@@ -11,6 +11,8 @@ import org.eclipse.emf.common.util.DiagnosticChain
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EObject
 import org.junit.Ignore
+import org.junit.jupiter.api.parallel.Execution
+import org.junit.jupiter.api.parallel.ExecutionMode
 
 class CustomValidatorTest extends RegressionTest {
     class MyApiValidator extends AbstractRamlValidator implements RamlValidator {
@@ -37,18 +39,18 @@ class CustomValidatorTest extends RegressionTest {
         }
     }
 
-//    @Ignore
-//    def "custom-validation"() {
-//        when:
-//        RamlModelResult<Api> ramlModelResult = constructApi(
-//                '''
-//        #%RAML 1.0
-//        title: Some API
-//                ''', Arrays.asList(new MyApiValidator())
-//        )
-//        RamlValidationSetup.setup()
-//        then:
-//        ramlModelResult.validationResults.size() == 1
-//        ramlModelResult.validationResults[0].message == "invalid: Some API"
-//    }
+    @Execution(ExecutionMode.SAME_THREAD)
+    def "custom-validation"() {
+        when:
+        RamlModelResult<Api> ramlModelResult = constructApi(
+                '''
+        #%RAML 1.0
+        title: Some API
+                ''', Arrays.asList(new MyApiValidator())
+        )
+        RamlValidationSetup.setup()
+        then:
+        ramlModelResult.validationResults.size() == 1
+        ramlModelResult.validationResults[0].message == "invalid: Some API"
+    }
 }
