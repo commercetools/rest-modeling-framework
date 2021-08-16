@@ -28,8 +28,8 @@ ext {
     ]
 
     emf = [
-            common: 'org.eclipse.emf:org.eclipse.emf.common:2.11+',
-            ecore: 'org.eclipse.emf:org.eclipse.emf.ecore:2.11+',
+            common: 'org.eclipse.emf:org.eclipse.emf.common:2.11.0',
+            ecore: 'org.eclipse.emf:org.eclipse.emf.ecore:2.11.0',
             ecore_xcore_lib: 'org.eclipse.emf:org.eclipse.emf.ecore.xcore.lib:1.4.0'
     ]
 
