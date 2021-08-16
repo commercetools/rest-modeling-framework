@@ -9,6 +9,7 @@ import org.eclipse.emf.common.util.Diagnostic
 import org.eclipse.emf.common.util.DiagnosticChain
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EObject
+import org.junit.Ignore
 
 class CustomValidatorTest extends RegressionTest {
     class MyApiValidator extends AbstractRamlValidator implements RamlValidator {
@@ -35,6 +36,7 @@ class CustomValidatorTest extends RegressionTest {
         }
     }
 
+    @Ignore
     def "custom-validation"() {
         when:
         RamlModelResult<Api> ramlModelResult = constructApi(
