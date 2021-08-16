@@ -11,7 +11,7 @@ import java.util.Map;
 /**
  * Abstract base class for validators.
  */
-abstract class AbstractRamlValidator implements EValidator, DiagnosticsCreator {
+abstract class AbstractRamlValidator implements RamlValidator {
 
     @Override
     public final boolean validate(final EObject eObject, final DiagnosticChain diagnostics, final Map<Object, Object> context) {

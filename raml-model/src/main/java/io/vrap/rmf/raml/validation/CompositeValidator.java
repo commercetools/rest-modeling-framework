@@ -21,6 +21,10 @@ class CompositeValidator implements EValidator {
         validators.add(validator);
     }
 
+    public void addAll(final List<EValidator> validators) {
+        this.validators.addAll(validators);
+    }
+
     @Override
     public boolean validate(final EObject eObject, final DiagnosticChain diagnostics, final Map<Object, Object> context) {
         final boolean isValid = validators.stream()

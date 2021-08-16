@@ -1,5 +1,6 @@
 package io.vrap.rmf.raml.validation;
 
+import com.google.common.collect.Lists;
 import io.vrap.rmf.raml.model.elements.ElementsPackage;
 import io.vrap.rmf.raml.model.modules.ModulesPackage;
 import io.vrap.rmf.raml.model.resources.ResourcesPackage;
@@ -12,6 +13,7 @@ import org.eclipse.emf.ecore.EValidator;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * This interface provides methods to setup the RAML metamodel.
@@ -24,8 +26,9 @@ public interface RamlValidationSetup {
     /**
      * Registers validators.
      */
-    static void setup() {
+    static void setup(List<RamlValidator> customValidators) {
         final EValidator.Registry registry = EValidator.Registry.INSTANCE;
+        final List<EValidator> eValidators = customValidators.stream().map(ramlValidator -> (EValidator)ramlValidator).collect(Collectors.toList());
 
         registry.put(TypesPackage.eINSTANCE, new TypesValidator());
         registry.put(ModulesPackage.eINSTANCE, new ModulesValidator());
@@ -40,7 +43,14 @@ public interface RamlValidationSetup {
             if (validator != null) {
                 compositeValidator.add(validator);
             }
+            if (eValidators.size() > 0) {
+                compositeValidator.addAll(eValidators);
+            }
             registry.put(ePackage, compositeValidator);
         }
+    }
+
+    static void setup() {
+        setup(Lists.newArrayList());
     }
 }

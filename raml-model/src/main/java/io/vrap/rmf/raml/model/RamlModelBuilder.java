@@ -17,15 +17,14 @@ import io.vrap.rmf.raml.model.types.*;
 import io.vrap.rmf.raml.model.types.util.TypesSwitch;
 import io.vrap.rmf.raml.model.util.UriFragmentBuilder;
 import io.vrap.rmf.raml.model.values.StringTemplate;
-import io.vrap.rmf.raml.persistence.RamlResource;
 import io.vrap.rmf.raml.persistence.RamlResourceSet;
 import io.vrap.rmf.raml.persistence.antlr.RAMLParser;
 import io.vrap.rmf.raml.persistence.antlr.RamlNodeTokenSource;
 import io.vrap.rmf.raml.persistence.constructor.ApiConstructor;
 import io.vrap.rmf.raml.persistence.constructor.Scope;
+import io.vrap.rmf.raml.validation.RamlValidator;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.TokenStream;
-import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EAttribute;
@@ -59,14 +58,18 @@ public class RamlModelBuilder {
         return build(uri);
     }
 
-    /**
-     * Builds a root object from the RAML file given by the uri.
-     *
-     * @param uri the uri to build the api from
-     * @return a model result
-     */
-    public <T extends EObject> RamlModelResult<T> build(final URI uri) {
-        final Resource resource = load(uri);
+    public RamlModelResult<Api> buildApi(final URI uri, List<RamlValidator> validators) {
+        return build(uri, validators);
+    }
+
+    public <T extends EObject> RamlModelResult<T> build(final URI uri, List<RamlValidator> validators) {
+        final Resource resource;
+        if (validators.size() > 0) {
+            resource = load(uri, validators);
+        } else {
+            resource = load(uri);
+        }
+
         final EObject rootObject = resource.getContents().isEmpty() ?
                 null :
                 resource.getContents().get(0);
@@ -91,6 +94,15 @@ public class RamlModelBuilder {
         } else {
             return RamlModelResult.of(resource.getErrors(), rootObject);
         }
+    }
+    /**
+     * Builds a root object from the RAML file given by the uri.
+     *
+     * @param uri the uri to build the api from
+     * @return a model result
+     */
+    public <T extends EObject> RamlModelResult<T> build(final URI uri) {
+        return build(uri, Lists.newArrayList());
     }
 
     /**
@@ -124,6 +136,12 @@ public class RamlModelBuilder {
         }
     }
 
+
+    private Resource load(final URI uri, List<RamlValidator> validators) {
+        final RamlResourceSet resourceSet = new RamlResourceSet(validators);
+        final Resource resource = resourceSet.getResource(uri, true);
+        return resource;
+    }
 
     private Resource load(final URI uri) {
         final RamlResourceSet resourceSet = new RamlResourceSet();
