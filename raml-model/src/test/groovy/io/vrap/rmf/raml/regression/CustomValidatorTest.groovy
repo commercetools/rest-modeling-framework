@@ -4,12 +4,15 @@ import io.vrap.rmf.raml.model.RamlModelResult
 import io.vrap.rmf.raml.model.modules.Api
 import io.vrap.rmf.raml.model.modules.util.ModulesSwitch
 import io.vrap.rmf.raml.validation.AbstractRamlValidator
+import io.vrap.rmf.raml.validation.RamlValidationSetup
 import io.vrap.rmf.raml.validation.RamlValidator
 import org.eclipse.emf.common.util.Diagnostic
 import org.eclipse.emf.common.util.DiagnosticChain
 import org.eclipse.emf.ecore.EClass
 import org.eclipse.emf.ecore.EObject
 import org.junit.Ignore
+import org.junit.jupiter.api.parallel.Execution
+import org.junit.jupiter.api.parallel.ExecutionMode
 
 class CustomValidatorTest extends RegressionTest {
     class MyApiValidator extends AbstractRamlValidator implements RamlValidator {
@@ -36,7 +39,7 @@ class CustomValidatorTest extends RegressionTest {
         }
     }
 
-    @Ignore
+    @Execution(ExecutionMode.SAME_THREAD)
     def "custom-validation"() {
         when:
         RamlModelResult<Api> ramlModelResult = constructApi(
@@ -45,6 +48,7 @@ class CustomValidatorTest extends RegressionTest {
         title: Some API
                 ''', Arrays.asList(new MyApiValidator())
         )
+        RamlValidationSetup.setup()
         then:
         ramlModelResult.validationResults.size() == 1
         ramlModelResult.validationResults[0].message == "invalid: Some API"
