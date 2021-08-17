@@ -11,6 +11,11 @@ sourceSets {
 generateGrammarSource {
     outputDirectory = file('src/main/java-gen/io/vrap/rmf/raml/persistence/antlr')
     arguments += ['-visitor']
+    outputs.upToDateWhen { false }
+}
+
+generateXtext {
+    outputs.upToDateWhen { false }
 }
 
 clean {

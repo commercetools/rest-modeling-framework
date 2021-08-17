@@ -2,6 +2,15 @@
 generateGrammarSource {
     outputDirectory = file('src/main/java-gen/io/vrap/rmf/nodes/antlr')
     arguments += ['-visitor']
+    outputs.upToDateWhen { false }
+}
+
+generateXtext {
+    outputs.upToDateWhen { false }
+}
+
+clean {
+    delete 'src/main/java-gen'
 }
 
 dependencies {
