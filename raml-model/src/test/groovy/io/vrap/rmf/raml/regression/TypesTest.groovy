@@ -167,7 +167,6 @@ class TypesTest extends RegressionTest {
         ramlModelResult.validationResults.size() == 0
     }
 
-    @Ignore("This tests reports an error because we don't fully support InterSection types")
     def "multi inheritance type"() {
         when:
         RamlModelResult<Api> ramlModelResult = constructApi(
@@ -198,6 +197,87 @@ class TypesTest extends RegressionTest {
             intersectionType.allOf[0] == types[0]
             intersectionType.allOf[1] == types[1]
         }
+    }
+
+    def "simple intersection type"() {
+        when:
+        RamlModelResult<Api> ramlModelResult = constructApi(
+                '''\
+                #%RAML 1.0
+                title: Example API
+                version: v1
+                types:
+                  A:
+                    type: object
+                    properties:
+                      a: string
+                  B:
+                    type: object
+                    properties:
+                      b: object
+                  C:
+                    type: [ A, B ]
+                '''
+        )
+        then:
+        ramlModelResult.validationResults.size() == 0
+        with(ramlModelResult.rootObject) {
+            types.size() == 3
+            types[2] instanceof ObjectType
+            types[2].type instanceof IntersectionType
+            IntersectionType intersectionType = types[2].type
+            intersectionType.allOf[0] == types[0]
+            intersectionType.allOf[1] == types[1]
+            (intersectionType.allOf[0] as ObjectType).getProperty("a").type instanceof StringType
+            (intersectionType.allOf[1] as ObjectType).getProperty("b").type instanceof ObjectType
+        }
+    }
+
+    def "invalid intersection type"() {
+        when:
+        RamlModelResult<Api> ramlModelResult = constructApi(
+                '''\
+                #%RAML 1.0
+                title: Example API
+                version: v1
+                types:
+                  A:
+                    type: object
+                    properties:
+                      a: string
+                  B:
+                    type: string
+                  C:
+                    type: [ A, B ]
+                '''
+        )
+        then:
+        ramlModelResult.validationResults.size() == 1
+        ramlModelResult.validationResults[0].message == "Intersection type has different primitive type [string,object]"
+    }
+
+    def "intersection object type with different property type"() {
+        when:
+        RamlModelResult<Api> ramlModelResult = constructApi(
+                '''\
+                #%RAML 1.0
+                title: Example API
+                version: v1
+                types:
+                  A:
+                    type: object
+                    properties:
+                      a: string
+                  B:
+                    type: object
+                    properties:
+                      a: number
+                  C:
+                    type: [ A, B ]
+                '''
+        )
+        then:
+        ramlModelResult.validationResults.size() == 0
     }
 
     def "description inheritance type"() {
@@ -233,7 +313,6 @@ class TypesTest extends RegressionTest {
         }
     }
 
-    @Ignore("This tests reports an error because we don't fully support InterSection types")
     def "multi inheritance type with primitive types"() {
         when:
         RamlModelResult<Api> ramlModelResult = constructApi(
@@ -263,7 +342,6 @@ class TypesTest extends RegressionTest {
         }
     }
 
-    @Ignore("This tests reports an error because we don't fully support InterSection types")
     def "multi inheritance discriminator resolve order"() {
         when:
         RamlModelResult<Api> ramlModelResult = constructApi(

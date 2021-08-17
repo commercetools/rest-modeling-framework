@@ -243,6 +243,9 @@ class TypesValidator extends AbstractRamlValidator {
         public List<Diagnostic> caseAnyTypeFacet(final AnyTypeFacet anyTypeFacet) {
             final AnyType superType = anyTypeFacet.getType();
             if (superType != null && anyTypeFacet.eClass() != superType.eClass()) {
+                if (superType instanceof IntersectionType) {
+                    return Collections.emptyList();
+                }
                 return Collections.singletonList(error(anyTypeFacet,
                         "Inconsistent types: Type ''{0}'' has eClass ''{1}'' while super type ''{2}'' has eClass ''{3}''",
                         anyTypeFacet.getName(), anyTypeFacet.eClass().getName(),
