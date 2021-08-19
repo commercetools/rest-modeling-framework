@@ -8,7 +8,7 @@ import org.eclipse.emf.common.notify.impl.AdapterImpl;
 /**
  * EMF adapter for {@link io.vrap.rmf.nodes.antlr.NodeTokenProvider}.
  */
-class RamlParserAdapter extends AdapterImpl implements NodeTokenProvider {
+public class RamlParserAdapter extends AdapterImpl implements NodeTokenProvider {
     private final ParserRuleContext parserRuleContext;
 
     private RamlParserAdapter(final ParserRuleContext parserRuleContext) {
@@ -38,5 +38,9 @@ class RamlParserAdapter extends AdapterImpl implements NodeTokenProvider {
     @Override
     public NodeTokenProvider copy() {
         return null;
+    }
+
+    public ParserRuleContext getParserRuleContext() {
+        return parserRuleContext;
     }
 }

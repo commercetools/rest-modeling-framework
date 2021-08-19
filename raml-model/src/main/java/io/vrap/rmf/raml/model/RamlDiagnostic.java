@@ -34,7 +34,7 @@ public class RamlDiagnostic implements Resource.Diagnostic {
 
     @Override
     public int getLine() {
-        return line;
+        return line >=0 ? line + 1 : line;
     }
 
     @Override
@@ -44,7 +44,7 @@ public class RamlDiagnostic implements Resource.Diagnostic {
 
     @Override
     public String toString() {
-        return String.format("%s (%s,%d,%d)", message, location, line, column);
+        return String.format("%s (%s,%d,%d)", message, location, getLine(), column);
     }
 
     public static RamlDiagnostic of(final String message, final String location, final int line, final int column) {
