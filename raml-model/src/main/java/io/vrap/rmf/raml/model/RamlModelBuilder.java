@@ -49,7 +49,7 @@ import static io.vrap.rmf.nodes.NodeCopier.copy;
  */
 public class RamlModelBuilder {
 
-    static void setup(List<RamlValidator> customValidators) {
+    public static void setup(List<RamlValidator> customValidators) {
         RamlResourceSet.setup(customValidators);
     }
 
