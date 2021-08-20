@@ -22,7 +22,15 @@ public class RamlResourceSet extends ResourceSetImpl {
             .collect(Collectors.joining(", "));
 
     static {
-        RamlValidationSetup.setup(); //  TODO put setup somewhere else
+        setup();
+    }
+
+    public static void setup() {
+        RamlValidationSetup.setup();
+    }
+
+    public static void setup(List<RamlValidator> customValidators) {
+        RamlValidationSetup.setup(customValidators);
     }
 
     public RamlResourceSet() {
@@ -55,7 +63,7 @@ public class RamlResourceSet extends ResourceSetImpl {
     public RamlResourceSet(List<RamlValidator> validators) {
         this();
         if (validators.size() > 0) {
-            RamlValidationSetup.setup(validators);
+            setup(validators);
         }
     }
 

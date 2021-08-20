@@ -22,6 +22,7 @@ import io.vrap.rmf.raml.persistence.antlr.RAMLParser;
 import io.vrap.rmf.raml.persistence.antlr.RamlNodeTokenSource;
 import io.vrap.rmf.raml.persistence.constructor.ApiConstructor;
 import io.vrap.rmf.raml.persistence.constructor.Scope;
+import io.vrap.rmf.raml.validation.RamlValidationSetup;
 import io.vrap.rmf.raml.validation.RamlValidator;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.TokenStream;
@@ -47,6 +48,10 @@ import static io.vrap.rmf.nodes.NodeCopier.copy;
  * This class is the main interface for accessing RAML models.
  */
 public class RamlModelBuilder {
+
+    static void setup(List<RamlValidator> customValidators) {
+        RamlResourceSet.setup(customValidators);
+    }
 
     /**
      * Builds a resolved api from the RAML file given by the uri.
