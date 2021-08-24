@@ -27,9 +27,8 @@ public interface RamlValidationSetup {
     /**
      * Registers validators.
      */
-    static Diagnostician setup(List<RamlValidator> customValidators) {
+    static Diagnostician setupCustom(List<RamlValidator> customValidators) {
         final EValidator.Registry registry = new EValidatorRegistryImpl();
-        PACKAGES.forEach(registry::remove);
         final List<EValidator> eValidators = customValidators.stream().map(ramlValidator -> (EValidator)ramlValidator).collect(Collectors.toList());
 
         registry.put(TypesPackage.eINSTANCE, new TypesValidator());
@@ -41,6 +40,24 @@ public interface RamlValidationSetup {
         for (final EPackage ePackage : PACKAGES) {
             final CompositeValidator compositeValidator = new CompositeValidator();
             compositeValidator.add(ramlObjectValidator);
+            final EValidator validator = registry.getEValidator(ePackage);
+            if (validator != null) {
+                compositeValidator.add(validator);
+            }
+            if (eValidators.size() > 0) {
+                compositeValidator.addAll(eValidators);
+            }
+            registry.put(ePackage, compositeValidator);
+        }
+        return new Diagnostician(registry);
+    }
+
+    static Diagnostician setupCustomOnly(List<RamlValidator> customValidators) {
+        final EValidator.Registry registry = new EValidatorRegistryImpl();
+        final List<EValidator> eValidators = customValidators.stream().map(ramlValidator -> (EValidator)ramlValidator).collect(Collectors.toList());
+
+        for (final EPackage ePackage : PACKAGES) {
+            final CompositeValidator compositeValidator = new CompositeValidator();
             final EValidator validator = registry.getEValidator(ePackage);
             if (validator != null) {
                 compositeValidator.add(validator);

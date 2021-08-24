@@ -8,6 +8,7 @@ import io.vrap.rmf.raml.persistence.constructor.*;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.TokenStream;
 import org.eclipse.emf.common.util.EList;
+import org.eclipse.emf.common.util.TreeIterator;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
@@ -69,7 +70,7 @@ public class RamlResource extends ResourceImpl {
         }
     }
 
-    public void validate(Diagnostician diagnostician) {
+    public EList<Diagnostic> validate(Diagnostician diagnostician) {
         for (final EObject eObject : getContents()) {
             org.eclipse.emf.common.util.Diagnostic diagnostic = diagnostician.validate(eObject);
             if (diagnostic.getSeverity() != org.eclipse.emf.common.util.Diagnostic.OK) {
@@ -78,6 +79,8 @@ public class RamlResource extends ResourceImpl {
                           .forEach(getErrors()::add);
             }
         }
+
+        return getErrors();
     }
 
     @Override

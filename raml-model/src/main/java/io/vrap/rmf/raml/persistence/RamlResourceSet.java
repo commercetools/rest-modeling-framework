@@ -2,7 +2,6 @@ package io.vrap.rmf.raml.persistence;
 
 import io.vrap.rmf.raml.model.types.BuiltinType;
 import io.vrap.rmf.raml.validation.RamlValidationSetup;
-import io.vrap.rmf.raml.validation.RamlValidator;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.ContentHandler;
 import org.eclipse.emf.ecore.resource.Resource;
@@ -83,6 +82,22 @@ public class RamlResourceSet extends ResourceSetImpl {
         final List<Resource.Diagnostic> errors = getResources().stream()
                 .flatMap(r -> r.getErrors().stream())
                 .collect(Collectors.toList());
+
+        return errors;
+    }
+
+    /**
+     * Validates all resources and returns the errors.
+     * @return the errors
+     */
+    public List<Resource.Diagnostic> validate(Diagnostician diagnostician) {
+        getResources().stream()
+                      .filter(RamlResource.class::isInstance).map(RamlResource.class::cast)
+                      .forEach(ramlResource -> ramlResource.validate(diagnostician != null ? diagnostician : Diagnostician.INSTANCE ));
+
+        final List<Resource.Diagnostic> errors = getResources().stream()
+                                                               .flatMap(r -> r.getErrors().stream())
+                                                               .collect(Collectors.toList());
 
         return errors;
     }

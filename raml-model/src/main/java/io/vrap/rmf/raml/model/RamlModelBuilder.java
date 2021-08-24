@@ -25,6 +25,7 @@ import io.vrap.rmf.raml.persistence.constructor.ApiConstructor;
 import io.vrap.rmf.raml.persistence.constructor.Scope;
 import io.vrap.rmf.raml.validation.RamlValidationSetup;
 import io.vrap.rmf.raml.validation.RamlValidator;
+import io.vrap.rmf.raml.validation.ResolvedRamlValidator;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.TokenStream;
 import org.eclipse.emf.common.util.TreeIterator;
@@ -51,18 +52,17 @@ import static io.vrap.rmf.nodes.NodeCopier.copy;
  */
 public class RamlModelBuilder {
 
-    private final Diagnostician diagnostician;
+    private final Diagnostician customDiagnostician;
+    private final Diagnostician resolvedCustomDiagnostician;
 
     public RamlModelBuilder() {
-        diagnostician = null;
-    }
-
-    public RamlModelBuilder(Diagnostician diagnostician) {
-        this.diagnostician = diagnostician;
+        customDiagnostician = null;
+        resolvedCustomDiagnostician = null;
     }
 
     public RamlModelBuilder(List<RamlValidator> customValidators) {
-        this(RamlValidationSetup.setup(customValidators));
+        customDiagnostician = RamlValidationSetup.setupCustom(customValidators.stream().filter(ramlValidator -> !(ramlValidator instanceof ResolvedRamlValidator)).collect(Collectors.toList()));
+        resolvedCustomDiagnostician = RamlValidationSetup.setupCustomOnly(customValidators.stream().filter(ramlValidator -> ramlValidator instanceof ResolvedRamlValidator).collect(Collectors.toList()));
     }
 
     /**
@@ -88,18 +88,17 @@ public class RamlModelBuilder {
             final SuperTypeFixer superTypeFixer = new SuperTypeFixer();
             allContents.stream().filter(EObject.class::isInstance).map(EObject.class::cast).forEach(e -> superTypeFixer.doSwitch(e));
 
-            final List<Resource.Diagnostic> errors = resourceSet.validate();
+            final List<Resource.Diagnostic> errors = customDiagnostician == null ? resourceSet.validate() : resourceSet.validate(customDiagnostician);
 
             if (errors.isEmpty()) {
-
                 final EObject resolved = rootObject instanceof ApiBase ?
                         resolveToApi(rootObject) :
                         rootObject;
 
-                if (diagnostician != null) {
-                    ((RamlResource)resolved.eResource()).validate(diagnostician);
+                if (resolvedCustomDiagnostician != null) {
+                    errors.addAll(((RamlResource)resolved.eResource()).validate(resolvedCustomDiagnostician));
                 }
-                return RamlModelResult.of(resolved.eResource().getErrors(), resolved);
+                return RamlModelResult.of(errors, resolved);
             } else {
                 return RamlModelResult.of(errors, rootObject);
             }

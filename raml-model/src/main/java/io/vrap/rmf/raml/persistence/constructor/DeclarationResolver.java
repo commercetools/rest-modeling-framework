@@ -373,6 +373,8 @@ public class DeclarationResolver {
         if (resolved != null && !resolved.eIsProxy()) {
             setTypeName(resolved, typeDeclarationTuple.name.start);
             setType(resolved, typeExpression, typeExpressionToken, scope);
+            final RamlParserAdapter adapter = RamlParserAdapter.of(typeDeclarationTuple);
+            resolved.eAdapters().add(adapter);
         }
 
         return resolved;
