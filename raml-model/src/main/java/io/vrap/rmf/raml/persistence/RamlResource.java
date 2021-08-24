@@ -58,13 +58,24 @@ public class RamlResource extends ResourceImpl {
         }
     }
 
-    void validate() {
+    public void validate() {
         for (final EObject eObject : getContents()) {
             org.eclipse.emf.common.util.Diagnostic diagnostic = Diagnostician.INSTANCE.validate(eObject);
             if (diagnostic.getSeverity() != org.eclipse.emf.common.util.Diagnostic.OK) {
                 diagnostic.getChildren().stream()
                         .map(RamlDiagnostic::of)
                         .forEach(getErrors()::add);
+            }
+        }
+    }
+
+    public void validate(Diagnostician diagnostician) {
+        for (final EObject eObject : getContents()) {
+            org.eclipse.emf.common.util.Diagnostic diagnostic = diagnostician.validate(eObject);
+            if (diagnostic.getSeverity() != org.eclipse.emf.common.util.Diagnostic.OK) {
+                diagnostic.getChildren().stream()
+                          .map(RamlDiagnostic::of)
+                          .forEach(getErrors()::add);
             }
         }
     }

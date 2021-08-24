@@ -17,6 +17,7 @@ import io.vrap.rmf.raml.model.types.*;
 import io.vrap.rmf.raml.model.types.util.TypesSwitch;
 import io.vrap.rmf.raml.model.util.UriFragmentBuilder;
 import io.vrap.rmf.raml.model.values.StringTemplate;
+import io.vrap.rmf.raml.persistence.RamlResource;
 import io.vrap.rmf.raml.persistence.RamlResourceSet;
 import io.vrap.rmf.raml.persistence.antlr.RAMLParser;
 import io.vrap.rmf.raml.persistence.antlr.RamlNodeTokenSource;
@@ -34,6 +35,7 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
+import org.eclipse.emf.ecore.util.Diagnostician;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
 import java.util.ArrayList;
@@ -49,8 +51,18 @@ import static io.vrap.rmf.nodes.NodeCopier.copy;
  */
 public class RamlModelBuilder {
 
-    public static void setup(List<RamlValidator> customValidators) {
-        RamlResourceSet.setup(customValidators);
+    private final Diagnostician diagnostician;
+
+    public RamlModelBuilder() {
+        diagnostician = null;
+    }
+
+    public RamlModelBuilder(Diagnostician diagnostician) {
+        this.diagnostician = diagnostician;
+    }
+
+    public RamlModelBuilder(List<RamlValidator> customValidators) {
+        this(RamlValidationSetup.setup(customValidators));
     }
 
     /**
@@ -63,17 +75,8 @@ public class RamlModelBuilder {
         return build(uri);
     }
 
-    public RamlModelResult<Api> buildApi(final URI uri, List<RamlValidator> validators) {
-        return build(uri, validators);
-    }
-
-    public <T extends EObject> RamlModelResult<T> build(final URI uri, List<RamlValidator> validators) {
-        final Resource resource;
-        if (validators.size() > 0) {
-            resource = load(uri, validators);
-        } else {
-            resource = load(uri);
-        }
+    public <T extends EObject> RamlModelResult<T> build(final URI uri) {
+        final Resource resource = load(uri);
 
         final EObject rootObject = resource.getContents().isEmpty() ?
                 null :
@@ -88,26 +91,21 @@ public class RamlModelBuilder {
             final List<Resource.Diagnostic> errors = resourceSet.validate();
 
             if (errors.isEmpty()) {
+
                 final EObject resolved = rootObject instanceof ApiBase ?
                         resolveToApi(rootObject) :
                         rootObject;
 
-                return RamlModelResult.of(errors, resolved);
+                if (diagnostician != null) {
+                    ((RamlResource)resolved.eResource()).validate(diagnostician);
+                }
+                return RamlModelResult.of(resolved.eResource().getErrors(), resolved);
             } else {
                 return RamlModelResult.of(errors, rootObject);
             }
         } else {
             return RamlModelResult.of(resource.getErrors(), rootObject);
         }
-    }
-    /**
-     * Builds a root object from the RAML file given by the uri.
-     *
-     * @param uri the uri to build the api from
-     * @return a model result
-     */
-    public <T extends EObject> RamlModelResult<T> build(final URI uri) {
-        return build(uri, Lists.newArrayList());
     }
 
     /**
@@ -139,13 +137,6 @@ public class RamlModelBuilder {
             }
             return false;
         }
-    }
-
-
-    private Resource load(final URI uri, List<RamlValidator> validators) {
-        final RamlResourceSet resourceSet = new RamlResourceSet(validators);
-        final Resource resource = resourceSet.getResource(uri, true);
-        return resource;
     }
 
     private Resource load(final URI uri) {

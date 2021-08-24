@@ -273,4 +273,36 @@ class ResourceTest extends RegressionTest {
         ObjectInstance categoryExample = category.examples[0].value
         categoryExample.getValue("foo").value == "bar"
     }
+
+    def "test-resource-type-uri-parameters"() {
+        when:
+        RamlModelResult<Api> ramlModelResult = constructApi(
+                '''\
+        #%RAML 1.0
+        title: Test
+        resourceTypes:
+            base:
+                uriParameters:
+                    <<uriParameterName>>:
+                        type: string
+                get:
+        /{test}:
+            type:
+                base:
+                    uriParameterName: test
+            get:
+            /categories:
+                /{id}:
+                    type:
+                        base:
+                            uriParameterName: id
+                    get:
+        ''')
+        then:
+        ramlModelResult.validationResults.size() == 0
+        ramlModelResult.rootObject.resources[0].uriParameters.size == 1
+        ramlModelResult.rootObject.resources[0].uriParameters[0].name == "test"
+        ramlModelResult.rootObject.resources[0].resources[0].resources[0].uriParameters.size == 1
+        ramlModelResult.rootObject.resources[0].resources[0].resources[0].uriParameters[0].name == "id"
+    }
 }

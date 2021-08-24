@@ -68,7 +68,6 @@ class NodeMergerTest extends Specification {
         ''')
         Node merged = merger.merge(source, target)
         then:
-        then:
         Node expected = parse('''\
         get:
             description: override the description

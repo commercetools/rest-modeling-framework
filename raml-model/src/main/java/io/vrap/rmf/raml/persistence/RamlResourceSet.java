@@ -8,6 +8,7 @@ import org.eclipse.emf.ecore.resource.ContentHandler;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.URIHandler;
 import org.eclipse.emf.ecore.resource.impl.*;
+import org.eclipse.emf.ecore.util.Diagnostician;
 
 import java.net.URL;
 import java.util.Arrays;
@@ -27,10 +28,6 @@ public class RamlResourceSet extends ResourceSetImpl {
 
     public static void setup() {
         RamlValidationSetup.setup();
-    }
-
-    public static void setup(List<RamlValidator> customValidators) {
-        RamlValidationSetup.setup(customValidators);
     }
 
     public RamlResourceSet() {
@@ -58,13 +55,6 @@ public class RamlResourceSet extends ResourceSetImpl {
                     .put(contentType, resourceFactory);
         }
         addBuiltinTypes();
-    }
-
-    public RamlResourceSet(List<RamlValidator> validators) {
-        this();
-        if (validators.size() > 0) {
-            setup(validators);
-        }
     }
 
     private void addBuiltinTypes() {

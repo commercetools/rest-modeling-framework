@@ -51,7 +51,7 @@ abstract class RegressionTest extends Specification implements ResourceFixtures 
 
     RamlModelResult<Api> constructApi(String fileName, List<String> usesFiles, String input, List<RamlValidator> validators) {
         URI i = writeFile(fileName, usesFiles, input)
-        return new RamlModelBuilder().buildApi(i, validators)
+        return new RamlModelBuilder(validators).buildApi(i)
     }
 
     URI writeFile(String fileName, String input) {

@@ -10,9 +10,10 @@ import io.vrap.rmf.raml.model.types.TypesPackage;
 import io.vrap.rmf.raml.model.values.ValuesPackage;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EValidator;
+import org.eclipse.emf.ecore.impl.EValidatorRegistryImpl;
+import org.eclipse.emf.ecore.util.Diagnostician;
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -26,34 +27,49 @@ public interface RamlValidationSetup {
     /**
      * Registers validators.
      */
-    static void setup(List<RamlValidator> customValidators) {
-        synchronized (RamlValidationSetup.class) {
-            final EValidator.Registry registry = EValidator.Registry.INSTANCE;
-            PACKAGES.forEach(registry::remove);
-            final List<EValidator> eValidators = customValidators.stream().map(ramlValidator -> (EValidator)ramlValidator).collect(Collectors.toList());
+    static Diagnostician setup(List<RamlValidator> customValidators) {
+        final EValidator.Registry registry = new EValidatorRegistryImpl();
+        PACKAGES.forEach(registry::remove);
+        final List<EValidator> eValidators = customValidators.stream().map(ramlValidator -> (EValidator)ramlValidator).collect(Collectors.toList());
 
-            registry.put(TypesPackage.eINSTANCE, new TypesValidator());
-            registry.put(ModulesPackage.eINSTANCE, new ModulesValidator());
-            registry.put(ResourcesPackage.eINSTANCE, new ResourcesValidator());
-            registry.put(ResponsesPackage.eINSTANCE, new ResponsesValidator());
+        registry.put(TypesPackage.eINSTANCE, new TypesValidator());
+        registry.put(ModulesPackage.eINSTANCE, new ModulesValidator());
+        registry.put(ResourcesPackage.eINSTANCE, new ResourcesValidator());
+        registry.put(ResponsesPackage.eINSTANCE, new ResponsesValidator());
 
-            final RamlObjectValidator ramlObjectValidator = new RamlObjectValidator();
-            for (final EPackage ePackage : PACKAGES) {
-                final CompositeValidator compositeValidator = new CompositeValidator();
-                compositeValidator.add(ramlObjectValidator);
-                final EValidator validator = registry.getEValidator(ePackage);
-                if (validator != null) {
-                    compositeValidator.add(validator);
-                }
-                if (eValidators.size() > 0) {
-                    compositeValidator.addAll(eValidators);
-                }
-                registry.put(ePackage, compositeValidator);
+        final RamlObjectValidator ramlObjectValidator = new RamlObjectValidator();
+        for (final EPackage ePackage : PACKAGES) {
+            final CompositeValidator compositeValidator = new CompositeValidator();
+            compositeValidator.add(ramlObjectValidator);
+            final EValidator validator = registry.getEValidator(ePackage);
+            if (validator != null) {
+                compositeValidator.add(validator);
             }
+            if (eValidators.size() > 0) {
+                compositeValidator.addAll(eValidators);
+            }
+            registry.put(ePackage, compositeValidator);
         }
+        return new Diagnostician(registry);
     }
 
     static void setup() {
-        setup(Lists.newArrayList());
+        final EValidator.Registry registry = EValidator.Registry.INSTANCE;
+        PACKAGES.forEach(registry::remove);
+        registry.put(TypesPackage.eINSTANCE, new TypesValidator());
+        registry.put(ModulesPackage.eINSTANCE, new ModulesValidator());
+        registry.put(ResourcesPackage.eINSTANCE, new ResourcesValidator());
+        registry.put(ResponsesPackage.eINSTANCE, new ResponsesValidator());
+
+        final RamlObjectValidator ramlObjectValidator = new RamlObjectValidator();
+        for (final EPackage ePackage : PACKAGES) {
+            final CompositeValidator compositeValidator = new CompositeValidator();
+            compositeValidator.add(ramlObjectValidator);
+            final EValidator validator = registry.getEValidator(ePackage);
+            if (validator != null) {
+                compositeValidator.add(validator);
+            }
+            registry.put(ePackage, compositeValidator);
+        }
     }
 }
