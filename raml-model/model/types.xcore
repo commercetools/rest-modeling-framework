@@ -19,13 +19,13 @@ interface AnyTypeFacet extends AnnotationsFacet, DocumentableElement, NamedEleme
      * An instance of this type MUST be equal to one of these values.
      */
     contains Instance[] ^enum
-	
+
 	/*
 	 * A default value for this element.
 	 */
-	contains Instance ^default	
-	
-	
+	contains Instance ^default
+
+
     /*
      * Returns true iff. this type is declared inline.
      */
@@ -49,9 +49,9 @@ interface ObjectTypeFacet extends AnyTypeFacet {
 	 * Boolean that indicates if an object instance has additional properties.
 	 */
 	Boolean additionalProperties
-	
+
 	/**
-	 * Retrieves the explicitly or inherited set additional properties facet. 
+	 * Retrieves the explicitly or inherited set additional properties facet.
 	 */
 	op Boolean additionalPropertiesInherited() {
 		additionalProperties
@@ -66,7 +66,7 @@ interface ObjectTypeFacet extends AnyTypeFacet {
 	 * properties.
 	 */
 	String discriminator
-	
+
 	/*
 	 * Identifies the declaring type. Requires including a discriminator facet in the type declaration.
 	 * A valid value is an actual value that might identify the type of an individual object and is
@@ -74,7 +74,7 @@ interface ObjectTypeFacet extends AnyTypeFacet {
 	 * Inline type declarations are not supported.
 	 */
 	String discriminatorValue
-	
+
 	/*
      * The properties that instances of this type can or must have.
      */
@@ -83,7 +83,7 @@ interface ObjectTypeFacet extends AnyTypeFacet {
 	op ObjectType getType(String discriminator) {
 		null
 	}
-	
+
     /*
      * Returns the property which matches the given name or null if no property
      * with the given name exists.
@@ -91,16 +91,16 @@ interface ObjectTypeFacet extends AnyTypeFacet {
     op Property getProperty(String name) {
         properties.findFirst[it.matches(name)]
     }
-    
+
 	op String discriminator() {
-		getDiscriminator	
+		getDiscriminator
 	}
 
 	op String discriminatorValueOrDefault() {
 		if (discriminatorValue === null) name else discriminatorValue
 	}
 }
- 
+
 interface ArrayTypeFacet extends AnyTypeFacet {
 	/*
 	 * Boolean value that indicates if items in the array MUST be unique.
@@ -116,7 +116,7 @@ interface ArrayTypeFacet extends AnyTypeFacet {
 	 * Maximum amount of items in array. Value MUST be equal to or greater than 0.
 	 */
 	UnsignedInteger maxItems
-	
+
     /*
      * Indicates the type that all items in the array are inherited from.
      * Can be a reference to an existing type or an inline type declaration.
@@ -162,7 +162,7 @@ interface CommonNumberTypeFacet extends AnyTypeFacet {
 	 * A numeric instance is valid against "multipleOf" if the result of dividing the instance
 	 * by this keyword's value is an integer.
 	 */
-	PositiveInteger multipleOf		
+	PositiveInteger multipleOf
 }
 
 interface NumberTypeFacet extends CommonNumberTypeFacet {
@@ -208,7 +208,7 @@ interface DateTimeTypeFacet extends AnyTypeFacet {
 	 * uses the "date-time" notation of RFC3339; if format is set to rfc2616, uses the format
 	 * defined in RFC2616.
 	 */
-	DateTimeFormat format	
+	DateTimeFormat format
 }
 
 interface FileTypeFacet  extends AnyTypeFacet {
@@ -231,7 +231,7 @@ interface FileTypeFacet  extends AnyTypeFacet {
         ModelHelper.getMediaTypes(fileTypes)
     }
 }
- 
+
 /*
  * Every type, whether built-in or user-defined, has the any type at the root of its inheritance tree.
  * By definition, the any type is a type which imposes no restrictions, i.e. any instance of data is
@@ -242,7 +242,7 @@ class AnyType extends AnyTypeFacet {
 	 * The type which this type extends.
 	 */
 	refers AnyType ^type opposite subTypes
-	
+
 	refers AnyType[] subTypes opposite ^type
 
     /*
@@ -299,7 +299,7 @@ interface TypedElement extends NamedElement, InlineTypeContainer, AnnotationsFac
      * Specifies if the element is required or not.
      */
     Boolean required = "true"
-    
+
     RegExp pattern
 
     /*
@@ -344,16 +344,16 @@ class ObjectType extends AnyType, ObjectTypeFacet {
 		if (additionalProperties === null && ^type instanceof ObjectType) {
 			(^type as ObjectType).additionalPropertiesInherited()
 		} else if (additionalProperties === null) {
-			true			
-		} 
+			true
+		}
 		else additionalProperties
 	}
-	
+
 	op String discriminator() {
-		if (getDiscriminator === null && ^type instanceof ObjectType) 
-			(^type as ObjectType).discriminator() 
-		else 
-			getDiscriminator	
+		if (getDiscriminator === null && ^type instanceof ObjectType)
+			(^type as ObjectType).discriminator()
+		else
+			getDiscriminator
 	}
 
     /*
@@ -365,12 +365,12 @@ class ObjectType extends AnyType, ObjectTypeFacet {
     refers derived Property[] allProperties get {
         ModelHelper.getAllProperties(this)
     }
-    
+
     op Property getProperty(String name) {
         val Property p = properties.findFirst[it.matches(name)]
         if (p === null && ^type instanceof ObjectType) (^type as ObjectType).getProperty(name) else p
     }
-    
+
     /*
      * Returns the sub type of this type with the given discriminator value.
      * This type can be returned if it has the given discrimintaor.
@@ -381,11 +381,11 @@ class ObjectType extends AnyType, ObjectTypeFacet {
     		this
     	} else {
     		if (isInlineType && ^type instanceof ObjectType) {
-    			(^type as ObjectType).getType(discriminatorValue)  
+    			(^type as ObjectType).getType(discriminatorValue)
     		} else {
     			val ObjectType subType = subTypes.filter(ObjectType).findFirst[it.discriminatorValueOrDefault() == discriminatorValue]
-    	
-    			if (subType === null) 
+
+    			if (subType === null)
     				subTypes.filter(ObjectType).findFirst[it.getType(discriminatorValue) !== null]
     			else
     				subType
@@ -456,7 +456,7 @@ class DateTimeType extends DateTime, DateTimeTypeFacet {
 }
 
 /*
- * The ​file​ type can constrain the content to send through forms. When this type is used in the
+ * The "file" type can constrain the content to send through forms. When this type is used in the
  * context of web forms it SHOULD be represented as a valid file upload in JSON format.
  * File content SHOULD be a base64-encoded string.
  */
@@ -593,7 +593,7 @@ class AnyAnnotationType extends AnyTypeFacet {
 	 * The type which this type extends.
 	 */
 	refers AnyType ^type
-	
+
     /*
      * The locations to which annotations are restricted.
      * If this node is specified, annotations of this type may be applied only on a node corresponding to one of the locations.
@@ -751,7 +751,7 @@ class ArrayInstance extends Instance {
 
 class ObjectInstance extends Instance {
 	contains PropertyValue[] value
-	
+
 	op Instance getValue(String name) {
 		value.findFirst[it.name == name]?.value
 	}
@@ -767,7 +767,7 @@ interface ProtocolsFacet {
 	/*
 	 * The protocols supported by this element.
 	 */
-	String[] protocols	
+	String[] protocols
 }
 
 

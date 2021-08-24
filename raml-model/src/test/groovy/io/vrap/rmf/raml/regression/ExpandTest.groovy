@@ -177,6 +177,37 @@ class ExpandTest extends RegressionTest {
         }
     }
 
+    def "resource type templates" () {
+        when:
+        RamlModelResult<Api> ramlModelResult = constructApi(
+                '''\
+        #%RAML 1.0
+        title: Some API
+        traits:
+          errorable:
+        resourceTypes:
+            baseResource:
+                get:
+                    is:
+                        - errorable
+                    displayName: Get <<resourceType>> by <<testName>>
+                    description: Get <<resourceType>> by <<testName | !lowercamelcase>>
+        /category:
+            type:
+                baseResource:
+                   resourceType: Bar
+                   testName: FOO
+        ''')
+        then:
+        ramlModelResult.validationResults.size() == 0
+        ramlModelResult.rootObject.resources.size() == 1
+        with(ramlModelResult.rootObject.resources[0]) {
+            methods.size() == 1
+            methods[0].displayName.value == "Get Bar by FOO"
+            methods[0].description.value == "Get Bar by foo"
+        }
+    }
+
     def "resource type with usage" () {
         when:
         RamlModelResult<Api> ramlModelResult = constructApi(

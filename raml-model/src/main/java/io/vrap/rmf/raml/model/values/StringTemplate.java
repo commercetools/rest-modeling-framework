@@ -176,7 +176,7 @@ public class StringTemplate {
 
         @Override
         public String toString() {
-            return transformations.isEmpty() ? "<<" + param + ">>" : "<<" + param + transformations.stream().collect(Collectors.joining("|", "|", ">>"));
+            return transformations.isEmpty() ? "<<" + param + ">>" : "<<" + param + transformations.stream().collect(Collectors.joining("|!", "|!", ">>"));
         }
 
         public static Expression of(final String param, final List<String> transformations) {
