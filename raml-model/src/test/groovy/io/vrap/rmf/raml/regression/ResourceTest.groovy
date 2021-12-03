@@ -65,6 +65,38 @@ class ResourceTest extends RegressionTest {
         ramlModelResult.rootObject.resources[0].relativeUri.template == '/'
     }
 
+    def "test-string_response-statuscode"() {
+        when:
+        RamlModelResult<Api> ramlModelResult = constructApi(
+                '''\
+        #%RAML 1.0
+        title: Test
+        baseUri: http://example.com
+        mediaType: application/json
+        /a:
+            get:
+              responses:
+                200:
+        /b:
+            get:
+              responses:
+                "201":
+        /c:
+            get:
+              responses:
+                '202':
+        ''')
+        then:
+        ramlModelResult.validationResults.size() == 0
+        ramlModelResult.rootObject.resources.size() == 3
+        ramlModelResult.rootObject.resources[0].relativeUri.template == '/a'
+        ramlModelResult.rootObject.resources[0].methods[0].responses[0].statusCode == "200"
+        ramlModelResult.rootObject.resources[1].relativeUri.template == '/b'
+        ramlModelResult.rootObject.resources[1].methods[0].responses[0].statusCode == "201"
+        ramlModelResult.rootObject.resources[2].relativeUri.template == '/c'
+        ramlModelResult.rootObject.resources[2].methods[0].responses[0].statusCode == "202"
+    }
+
     def "test-base-resource-fullUri"() {
         when:
         RamlModelResult<Api> ramlModelResult = constructApi(

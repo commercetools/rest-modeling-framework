@@ -237,8 +237,11 @@ responsesFacet:
             )
     ;
 
+statusCodeValue:
+    id | INT
+    ;
 responseFacet:
-    statusCode=INT
+    statusCode=statusCodeValue
             (
                 empty=id
                 |   (
