@@ -129,7 +129,7 @@ public class InstanceValidator implements DiagnosticsCreator {
                 if (diagnostic != null) {
                     validationResults.add(diagnostic);
                 }
-            } else if (!typeIs(ANY_TYPE) && !typeInstanceOf(DateTimeTypeFacet.class) && !typeInstanceOf(TypeTemplate.class) && !typeInstanceOf(AnyAnnotationType.class)) {
+            } else if (!typeIs(ANY_TYPE) && !typeInstanceOf(DateTimeTypeFacet.class) && !typeInstanceOf(TypeTemplate.class) && !typeIs(ANY_ANNOTATION_TYPE)) {
                 validationResults.add(error(stringInstance, "Invalid type"));
             }
             return validationResults;
@@ -160,7 +160,7 @@ public class InstanceValidator implements DiagnosticsCreator {
                 }
 
                 validationResults.addAll(validateEnumFacet(numberType, numberInstance));
-            } else if (!typeIs(ANY_TYPE)) {
+            } else if (!typeIs(ANY_TYPE) && !typeIs(ANY_ANNOTATION_TYPE)) {
                 validationResults.add(error(numberInstance, "Invalid type"));
             }
             return validationResults;
@@ -203,7 +203,7 @@ public class InstanceValidator implements DiagnosticsCreator {
                     validationResults.add(error(integerInstance,"Value ''{0}'' > maximum ''{1}''",
                             value, numberType.getMaximum()));
                 }
-            } else if (!typeIs(ANY_TYPE)) {
+            } else if (!typeIs(ANY_TYPE) && !typeIs(ANY_ANNOTATION_TYPE)) {
                 validationResults.add(error(integerInstance,"Invalid type"));
             }
             return validationResults;
@@ -247,7 +247,7 @@ public class InstanceValidator implements DiagnosticsCreator {
                         types.pop();
                     }
                 }
-            } else if (!typeIs(ANY_TYPE)) {
+            } else if (!typeIs(ANY_TYPE) && !typeIs(ANY_ANNOTATION_TYPE)) {
                 validationResults.add(error(arrayInstance, "Invalid type"));
             }
             return validationResults;

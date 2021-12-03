@@ -90,6 +90,39 @@ class AnnotationTest extends RegressionTest {
         ramlModelResult.rootObject.resources[0].getUriParameter("projectKey") != null
     }
 
+    def "annotation-validation"() {
+        when:
+        RamlModelResult<Api> ramlModelResult = constructApi(
+                '''
+        #%RAML 1.0
+        title: Test
+        annotationTypes:
+            tags: any
+            invalid: string
+        types:
+            foo:
+              type: any
+              example:
+                - foo
+            invalidBar:
+              type: string
+              example:
+                - invalidBar
+        /a:
+            (tags):
+              - tag1
+            get:
+        /b:
+            (invalid):
+              - foo
+            get:
+        ''')
+        then:
+        ramlModelResult.validationResults.size() == 2
+        ramlModelResult.validationResults[0].getLine() == 15
+        ramlModelResult.validationResults[1].getLine() == 22
+    }
+
     def "include string annotation"() {
         when:
         writeFile(
