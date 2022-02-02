@@ -306,6 +306,51 @@ class ResourceTest extends RegressionTest {
         categoryExample.getValue("foo").value == "bar"
     }
 
+    def "test-resource-examples-resolved"() {
+        when:
+        writeFile(
+                "example.json",
+                '''{ "foo": "bar" }''')
+        RamlModelResult<Api> ramlModelResult = constructApi(
+                Arrays.asList("example.json"),
+                '''\
+        #%RAML 1.0
+        title: Test
+        types:
+            Cart:
+                type: object
+                properties:
+                    bar: string
+        baseUri: http://example.com/
+        mediaType: application/json
+        resourceTypes:
+            base:
+                get:
+                    body:
+                        application/json:
+                            type: <<resourceType>>
+        /{test}:
+            get:
+            /carts:
+                type:
+                    base:
+                        resourceType: Cart
+                get:
+                    body:
+                        application/json:
+                            example: !include example.json
+        ''')
+        then:
+        ramlModelResult.validationResults.size() == 1
+        ramlModelResult.validationResults[0].message == "Required property 'bar' is missing"
+        ramlModelResult.rootObject.resources[0].resources[0].relativeUri.template == "/carts"
+        AnyType cart = ramlModelResult.rootObject.resources[0].resources[0].getMethod(HttpMethod.GET).getBody("application/json").type
+        cart.name == "Cart"
+
+        ObjectInstance cartExample = cart.examples[0].value
+        cartExample.getValue("foo").value == "bar"
+    }
+
     def "test-resource-type-uri-parameters"() {
         when:
         RamlModelResult<Api> ramlModelResult = constructApi(

@@ -12,7 +12,7 @@ import org.eclipse.emf.ecore.EObject;
 import java.util.*;
 import java.util.stream.Collectors;
 
-class TypesValidator extends AbstractRamlValidator {
+public class TypesValidator extends AbstractRamlValidator {
     private final TypeAndAnnoationTypeValidator typeAndAnnoationTypeValidator = new TypeAndAnnoationTypeValidator();
 
     private final List<ValidatingTypesSwitch> validators = Arrays.asList(
@@ -152,14 +152,6 @@ class TypesValidator extends AbstractRamlValidator {
         }
     }
 
-    private static abstract class ValidatingTypesSwitch extends TypesSwitch<List<Diagnostic>> {
-
-        @Override
-        public final List<Diagnostic> defaultCase(EObject object) {
-            return Collections.emptyList();
-        }
-    }
-
     private static class AnnotationValidator extends ValidatingTypesSwitch {
         private InstanceValidator instanceValidator = new InstanceValidator();
 
@@ -169,7 +161,7 @@ class TypesValidator extends AbstractRamlValidator {
         }
     }
 
-    private static class ExamplesValidator extends ValidatingTypesSwitch {
+    static class ExamplesValidator extends ValidatingTypesSwitch {
         private InstanceValidator instanceValidator = new InstanceValidator();
 
         @Override
@@ -237,7 +229,7 @@ class TypesValidator extends AbstractRamlValidator {
         }
     }
 
-    private class TypeConsistencyCheck extends ValidatingTypesSwitch {
+    static class TypeConsistencyCheck extends ValidatingTypesSwitch {
 
         @Override
         public List<Diagnostic> caseAnyTypeFacet(final AnyTypeFacet anyTypeFacet) {

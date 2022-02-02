@@ -23,9 +23,7 @@ import io.vrap.rmf.raml.persistence.antlr.RAMLParser;
 import io.vrap.rmf.raml.persistence.antlr.RamlNodeTokenSource;
 import io.vrap.rmf.raml.persistence.constructor.ApiConstructor;
 import io.vrap.rmf.raml.persistence.constructor.Scope;
-import io.vrap.rmf.raml.validation.RamlValidationSetup;
-import io.vrap.rmf.raml.validation.RamlValidator;
-import io.vrap.rmf.raml.validation.ResolvedRamlValidator;
+import io.vrap.rmf.raml.validation.*;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.TokenStream;
 import org.eclipse.emf.common.util.TreeIterator;
@@ -39,10 +37,7 @@ import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.util.Diagnostician;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static io.vrap.rmf.nodes.NodeCopier.copy;
@@ -54,13 +49,16 @@ public class RamlModelBuilder {
 
     private final Diagnostician customDiagnostician;
     private final Diagnostician resolvedCustomDiagnostician;
+    private final Diagnostician resolvedDiagnostician;
 
     public RamlModelBuilder() {
+        resolvedDiagnostician = RamlValidationSetup.setupCustomOnly(Collections.singletonList(new ExampleValidator()));
         customDiagnostician = null;
         resolvedCustomDiagnostician = null;
     }
 
     public RamlModelBuilder(List<RamlValidator> customValidators) {
+        resolvedDiagnostician = RamlValidationSetup.setupCustomOnly(Collections.singletonList(new ExampleValidator()));
         customDiagnostician = RamlValidationSetup.setupCustom(customValidators.stream().filter(ramlValidator -> !(ramlValidator instanceof ResolvedRamlValidator)).collect(Collectors.toList()));
         resolvedCustomDiagnostician = RamlValidationSetup.setupCustomOnly(customValidators.stream().filter(ramlValidator -> ramlValidator instanceof ResolvedRamlValidator).collect(Collectors.toList()));
     }
@@ -95,6 +93,9 @@ public class RamlModelBuilder {
                         resolveToApi(rootObject) :
                         rootObject;
 
+                if (resolvedDiagnostician != null) {
+                    errors.addAll(((RamlResource)resolved.eResource()).validate(resolvedDiagnostician));
+                }
                 if (resolvedCustomDiagnostician != null) {
                     errors.addAll(((RamlResource)resolved.eResource()).validate(resolvedCustomDiagnostician));
                 }
