@@ -8,7 +8,7 @@ package io.vrap.rmf.raml.persistence.antlr;
 
 tokens {
     MAP_START, MAP_END, LIST_START, LIST_END, SCALAR,
-    INT, FLOAT, BOOL,
+    INT, FLOAT, BOOL, NULL,
     ANNOTATION_TYPE_REF, RELATIVE_URI, MEDIA_TYPE
 }
 
@@ -764,6 +764,7 @@ id:
     |   'strict' | 'displayName' | 'description'
     |   RELATIVE_URI
     |   SCALAR
+    |   NULL
     ;
 
 requiredFacet:

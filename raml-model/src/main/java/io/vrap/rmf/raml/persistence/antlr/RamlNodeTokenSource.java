@@ -88,7 +88,7 @@ public class RamlNodeTokenSource implements TokenSource {
                     type = RAMLParser.LIST_END;
                     break;
                 case NodeParser.NULL:
-                    type = RAMLParser.SCALAR;
+                    type = RAMLParser.NULL;
                     break;
                 default:
                     type = nodeToken.getType();

@@ -37,4 +37,24 @@ class InstanceHelperTest extends Specification {
         RamlModelResult<Instance> result = InstanceHelper.parseAndValidate(json, objectType)
         result.validationResults.empty == false
     }
+
+    def "parseNull"() {
+        when:
+        String json = '{ "test": null }'
+        then:
+        RamlModelResult<Instance> result = InstanceHelper.parseAndValidate(json, objectType)
+        ((ObjectInstance)result.rootObject).getValue("test") instanceof NullInstance
+        ((ObjectInstance)result.rootObject).getValue("test").value == null
+    }
+
+    def "parseNullObject"() {
+        when:
+        String json = '{ attributes: { "test": null} }'
+        then:
+        RamlModelResult<Instance> result = InstanceHelper.parseAndValidate(json, objectType)
+        ObjectInstance root =  result.rootObject
+        ObjectInstance attributes = root.getValue("attributes")
+        attributes.getValue("test") instanceof NullInstance
+        attributes.getValue("test").value == null
+    }
 }

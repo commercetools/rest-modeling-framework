@@ -1,5 +1,6 @@
 package io.vrap.rmf.raml.persistence.constructor;
 
+import io.vrap.rmf.nodes.NullNode;
 import io.vrap.rmf.raml.model.types.*;
 import io.vrap.rmf.raml.persistence.antlr.RAMLParser;
 
@@ -124,6 +125,9 @@ public class InstanceConstructor extends AbstractScopedVisitor<Instance> {
 
     @Override
     public Instance visitStringInstance(final RAMLParser.StringInstanceContext ctx) {
+        if (ctx.value != null && ctx.value.start != null && ctx.value.start.getType() == RAMLParser.NULL) {
+            return create(NULL_INSTANCE, ctx);
+        }
         final StringInstance stringInstance = create(STRING_INSTANCE, ctx);
         stringInstance.setValue(ctx.getText());
         return stringInstance;

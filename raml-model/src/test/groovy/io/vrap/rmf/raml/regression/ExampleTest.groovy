@@ -173,6 +173,29 @@ class ExampleTest extends RegressionTest {
         ramlModelResult.validationResults.size() == 0
     }
 
+    def "null-example-object"() {
+        when:
+        writeFile(
+                "example.json",
+                '''
+                { "attributes": {"attribute-to-delete": null } }
+                ''')
+        RamlModelResult<Api> ramlModelResult = constructApi(
+                Arrays.asList("example.json"),
+                '''\
+                #%RAML 1.0
+                title: Null example
+                
+                types:
+                    Foo:
+                        type: object
+                        example: !include example.json
+                ''')
+        then:
+        ramlModelResult.validationResults.size() == 0
+        ramlModelResult.getRootObject().getType("Foo").examples[0].getInstanceValue() != null
+    }
+
     def "number-example-object-invalid"() {
         when:
         RamlModelResult<Api> ramlModelResult = constructApi(
