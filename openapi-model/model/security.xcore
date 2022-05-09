@@ -1,0 +1,7 @@
+@Ecore(nsPrefix="security",nsURI="http://www.vrap.io/openapi/security")
+@GenModel(
+    modelDirectory="/openapi-model/src/main/java-gen",
+    complianceLevel="8.0"
+)
+package com.commercetools.rmf.openapi.model.security
+

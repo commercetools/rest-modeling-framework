@@ -1,0 +1,5 @@
+@Ecore(nsPrefix="responses",nsURI="http://www.vrap.io/openapi/responses")
+@GenModel(modelDirectory="/openapi-model/src/main/java-gen",
+    complianceLevel="8.0")
+package com.commercetools.rmf.openapi.model.responses
+

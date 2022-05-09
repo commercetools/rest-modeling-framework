@@ -1,0 +1,60 @@
+@Ecore(nsPrefix="types",nsURI="http://www.vrap.io/openapi/types")
+@GenModel(modelDirectory="/openapi-model/src/main/java-gen",
+    complianceLevel="8.0")
+package com.commercetools.rmf.openapi.model.types
+
+import com.commercetools.rmf.openapi.model.elements.NamedElement
+import com.commercetools.rmf.openapi.model.values.UnsignedInteger
+import com.commercetools.rmf.openapi.model.values.PositiveInteger
+import com.commercetools.rmf.openapi.model.values.MediaTypes
+
+interface Instance {
+	op Object getValue()
+}
+
+class NullInstance extends Instance {
+    op Object getValue() {
+        null
+    }
+}
+
+class StringInstance extends Instance {
+	String value
+}
+
+class BooleanInstance extends Instance {
+	Boolean value
+}
+
+class NumberInstance extends Instance {
+	BigDecimal value
+}
+
+class IntegerInstance extends Instance {
+	BigInteger value
+}
+
+class ArrayInstance extends Instance {
+	contains Instance[] value
+}
+
+class ObjectInstance extends Instance {
+	contains PropertyValue[] value
+
+	op Instance getValue(String name) {
+		value.findFirst[it.name == name]?.value
+	}
+}
+
+class PropertyValue {
+	String name
+	contains Instance value
+}
+
+interface ValueInstanceFacet {
+    contains Instance value
+
+    op Object getInstanceValue() {
+        return value?.getValue()
+    }
+}

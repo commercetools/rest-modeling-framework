@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
+
+<!--
+-->
+
+<plugin>
+
+   <extension point="org.eclipse.emf.ecore.generated_package">
+      <!-- @generated elements -->
+      <package
+            uri="http://www.vrap.io/raml/elements"
+            class="com.commercetools.rmf.openapi.model.elements.ElementsPackage"
+            genModel="model/elements.xcore"/>
+   </extension>
+
+   <extension point="org.eclipse.emf.ecore.generated_package">
+      <!-- @generated modules -->
+      <package
+            uri="http://www.vrap.io/raml/modules"
+            class="com.commercetools.rmf.openapi.model.modules.ModulesPackage"
+            genModel="model/modules.xcore"/>
+   </extension>
+
+   <extension point="org.eclipse.emf.ecore.generated_package">
+      <!-- @generated resources -->
+      <package
+            uri="http://www.vrap.io/raml/resources"
+            class="com.commercetools.rmf.openapi.model.resources.ResourcesPackage"
+            genModel="model/resources.xcore"/>
+   </extension>
+
+   <extension point="org.eclipse.emf.ecore.generated_package">
+      <!-- @generated types -->
+      <package
+            uri="http://www.vrap.io/raml/types"
+            class="com.commercetools.rmf.openapi.model.types.TypesPackage"
+            genModel="model/types.xcore"/>
+   </extension>
+
+   <extension point="org.eclipse.emf.ecore.generated_package">
+      <!-- @generated security -->
+      <package
+            uri="http://www.vrap.io/raml/security"
+            class="com.commercetools.rmf.openapi.model.security.SecurityPackage"
+            genModel="model/security.xcore"/>
+   </extension>
+
+   <extension point="org.eclipse.emf.ecore.generated_package">
+      <!-- @generated responses -->
+      <package
+            uri="http://www.vrap.io/raml/responses"
+            class="com.commercetools.rmf.openapi.model.responses.ResponsesPackage"
+            genModel="model/responses.xcore"/>
+   </extension>
+
+   <extension point="org.eclipse.emf.ecore.generated_package">
+      <!-- @generated values -->
+      <package
+            uri="http://www.vrap.io/raml/values"
+            class="com.commercetools.rmf.openapi.model.values.ValuesPackage"
+            genModel="model/values.xcore"/>
+   </extension>
+
+</plugin>

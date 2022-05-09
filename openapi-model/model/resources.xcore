@@ -1,0 +1,14 @@
+@Ecore(nsPrefix="resources",nsURI="http://www.vrap.io/openapi/resources")
+@GenModel(modelDirectory="/openapi-model/src/main/java-gen",
+    complianceLevel="8.0")
+package com.commercetools.rmf.openapi.model.resources
+
+import com.commercetools.rmf.openapi.model.types.Instance
+import com.commercetools.rmf.openapi.model.elements.NamedElement
+
+import com.damnhandy.uri.template.UriTemplate
+
+type UriTemplate wraps UriTemplate
+create {
+	UriTemplate.fromTemplate(it)
+}

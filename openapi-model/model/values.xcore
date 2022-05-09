@@ -1,0 +1,26 @@
+@Ecore(nsPrefix="values",nsURI="http://www.vrap.io/openapi/values")
+@GenModel(
+    modelDirectory="openapi-model/src/main/java-gen",
+    complianceLevel="8.0"
+)
+package com.commercetools.rmf.openapi.model.values
+
+import com.google.common.net.MediaType
+import org.eclipse.emf.common.util.EList
+
+/**
+ * An integer that is >= 0.
+ */
+type UnsignedInteger wraps Integer
+
+/**
+ * An integer that is > 0.
+ */
+type PositiveInteger wraps Integer
+
+type MediaType wraps MediaType
+create {
+	MediaType.parse(it)
+}
+
+type MediaTypes wraps EList<MediaType>

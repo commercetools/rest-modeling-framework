@@ -1,0 +1,54 @@
+apply plugin: 'com.github.johnrengelman.shadow'
+
+sourceSets {
+    test {
+        resources {
+            srcDirs += "${buildDir}/resources/test/raml"
+        }
+    }
+}
+
+generateGrammarSource {
+    outputDirectory = file('src/main/java-gen/com/commercetools/rmf/openapi/persistence/antlr')
+    arguments += ['-visitor']
+    outputs.upToDateWhen { false }
+}
+
+generateXtext {
+    outputs.upToDateWhen { false }
+}
+
+clean {
+    delete 'src/main/java-gen'
+}
+
+dependencies {
+    api project(':functional-utils')
+    api project(':antlr-utils')
+
+    api yaml.snakeyaml
+    api google.guava
+
+    api jackson_core.core
+    api hypertino.inflector
+    api damnhandy.handy_uri_templates
+
+    testImplementation junit.junit
+    testImplementation junit.dataprovider
+    testImplementation assertj.core
+
+    testImplementation spockframework.spock_core
+}
+
+shadowJar {
+    append 'plugin.properties'
+}
+
+configurations.all {
+    if (name.contains("Tooling")) {
+        dependencies {
+            add(name, "org.eclipse.xtend:org.eclipse.xtend.core:$xtextVersion")
+            add(name, platform("org.eclipse.xtext:xtext-dev-bom:$xtextVersion"))
+        }
+    }
+}
