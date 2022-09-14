@@ -184,6 +184,63 @@ class DiscriminatorTest extends RegressionTest {
         ramlModelResult.validationResults.size() == 0
     }
 
+    def "discriminator-property-enum"() {
+        when:
+        RamlModelResult<Api> ramlModelResult = constructApi(
+                '''
+                #%RAML 1.0
+                title: Import sink types.
+                                
+                types:
+                  PropEnum:
+                    type: string
+                    enum:
+                      - foo
+                      - bar
+                  Predicate:
+                    discriminator: type
+                    type: object
+                    properties:
+                      type:
+                        type: PropEnum
+                  BazPredicate:
+                    type: Predicate
+                    discriminatorValue: baz
+                    properties:
+                      expression:
+                        type: string
+                  BarPredicate:
+                    type: Predicate
+                    discriminatorValue: bar
+                    properties:
+                      expression:
+                        type: string
+                  InlinePredicate:
+                    discriminator: type
+                    type: object
+                    properties:
+                      type:
+                        description: lorem ipsum
+                        type: PropEnum
+                  InlineBazPredicate:
+                    type: InlinePredicate
+                    discriminatorValue: foobar
+                    properties:
+                      expression:
+                        type: string
+                  InlineBarPredicate:
+                    type: InlinePredicate
+                    discriminatorValue: bar
+                    properties:
+                      expression:
+                        type: string
+                ''')
+        then:
+        ramlModelResult.validationResults.size() == 2
+        ramlModelResult.validationResults[0].message == "Discriminator value 'baz' not found in enum of type 'PropEnum'"
+        ramlModelResult.validationResults[1].message == "Discriminator value 'foobar' not found in enum of type 'PropEnum'"
+    }
+
     def "additional-field-validation"() {
         when:
         RamlModelResult<Api> ramlModelResult = constructApi(

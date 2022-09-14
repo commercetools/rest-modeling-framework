@@ -128,6 +128,7 @@ public class TypesValidator extends AbstractRamlValidator {
                     final Set<String> discriminatorValues = new HashSet<>();
                     discriminatorValues.add(objectType.discriminatorValueOrDefault());
                     validateDiscriminatorValueUniqueness(objectType, discriminatorValues, validationResults);
+                    validateDiscriminatorValueEnum(objectType, discriminatorProperty, validationResults);
                 }
             }
             return validationResults;
@@ -148,6 +149,31 @@ public class TypesValidator extends AbstractRamlValidator {
                 }
                 // TODO make sure that inheritance doesn't contain cycles
                 validateDiscriminatorValueUniqueness(subType, discriminatorValues, validationResults);
+            }
+        }
+
+        private void validateDiscriminatorValueEnum(final ObjectType objectType, final Property discriminatorProperty, final List<Diagnostic> validationResults) {
+            AnyType discriminatorPropertyType = discriminatorProperty.getType();
+            if (discriminatorPropertyType.isInlineType()) {
+                discriminatorPropertyType = discriminatorPropertyType.getType();
+            }
+            if (discriminatorPropertyType.getEnum().isEmpty()) {
+                return;
+            }
+            final List<ObjectType> properSubTypes = objectType.getSubTypes().stream()
+                                                              .filter(ObjectType.class::isInstance)
+                                                              .map(ObjectType.class::cast)
+                                                              .filter(o -> !o.isInlineType())
+                                                              .collect(Collectors.toList());
+            Set<String> enumValues = discriminatorPropertyType.getEnum().stream().filter(StringInstance.class::isInstance).map(StringInstance.class::cast).map(StringInstance::getValue).collect(Collectors.toSet());
+
+            for (final ObjectType subType : properSubTypes) {
+                final String discriminatorValue = subType.discriminatorValueOrDefault();
+                if (!enumValues.contains(discriminatorValue)) {
+                    validationResults.add(error(subType, "Discriminator value ''{0}'' not found in enum of type ''{1}''", discriminatorValue, discriminatorPropertyType.getName()));
+                }
+                // TODO make sure that inheritance doesn'discriminatorPropertyType contain cycles
+                validateDiscriminatorValueEnum(subType, discriminatorProperty, validationResults);
             }
         }
     }
