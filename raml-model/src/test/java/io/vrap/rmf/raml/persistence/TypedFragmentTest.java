@@ -5,7 +5,7 @@ import io.vrap.rmf.raml.model.types.Property;
 import io.vrap.rmf.raml.model.types.StringAnnotationType;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.resource.Resource;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 

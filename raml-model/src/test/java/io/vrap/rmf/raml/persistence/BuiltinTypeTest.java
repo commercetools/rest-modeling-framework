@@ -5,7 +5,7 @@ import io.vrap.rmf.raml.model.types.AnyType;
 import io.vrap.rmf.raml.model.types.BuiltinType;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 

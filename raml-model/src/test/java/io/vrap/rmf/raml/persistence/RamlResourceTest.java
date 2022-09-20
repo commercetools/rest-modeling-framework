@@ -7,8 +7,7 @@ import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 
@@ -129,8 +128,6 @@ public class RamlResourceTest implements ResourceFixtures {
         assertThat(type).isEqualTo(superType);
     }
 
-    @Ignore
-    @Test
     public void apiViaHttp() {
         final URI uri = URI.createURI("http://localhost:5050/api-raml/");
         final Resource resource = fromUri(uri);

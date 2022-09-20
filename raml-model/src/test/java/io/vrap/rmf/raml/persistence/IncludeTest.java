@@ -6,7 +6,7 @@ import io.vrap.rmf.raml.model.types.ObjectType;
 import io.vrap.rmf.raml.model.types.Property;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.resource.Resource;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 

@@ -1,7 +1,7 @@
 package io.vrap.rmf.raml.persistence.antlr;
 
 import org.antlr.v4.runtime.Token;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.net.URL;
 

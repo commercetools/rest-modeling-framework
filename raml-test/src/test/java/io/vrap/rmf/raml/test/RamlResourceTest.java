@@ -6,8 +6,8 @@ import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.net.URL;
@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assume.assumeTrue;
 
 public class RamlResourceTest implements ResourceFixtures {
     private final static URL tckURL = RamlResourceTest.class.getResource("/raml-tck-wip-2.0.0/tests");
@@ -46,7 +45,7 @@ public class RamlResourceTest implements ResourceFixtures {
     @Test
     public void apiSuperCrossReferencer() {
         final File apiFile = new File("/Users/mkoester/Development/commercetools-api-reference/api.raml");
-        assumeTrue(apiFile.exists());
+        assertThat(apiFile.exists()).isTrue();
 
         final URI fileURI = URI.createURI(apiFile.toURI().toString());
         final Resource resource = fromUri(fileURI);
@@ -65,7 +64,7 @@ public class RamlResourceTest implements ResourceFixtures {
         assertThat(subTypes).hasSize(3);
     }
 
-    @Ignore
+    @Disabled
     @Test
     public void apiViaHttp() {
         final URI uri = URI.createURI("http://localhost:5050/api-raml/");

@@ -1,7 +1,7 @@
 package io.vrap.rmf.raml.test;
 
 import org.eclipse.emf.ecore.resource.Resource;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 
