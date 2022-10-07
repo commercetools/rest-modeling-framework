@@ -17,7 +17,7 @@ public interface DiagnosticsCreator {
     }
 
     default Diagnostic create(final int severity, final EObject eObject, final String messagePattern, final Object... messageArgs) {
-        final String message = MessageFormat.format(messagePattern, messageArgs);
-        return new BasicDiagnostic(severity, null, -1, message, new Object[] { eObject });
+        final Violation violation = new Violation(severity, (Class<DiagnosticsCreator>) this.getClass(), eObject, messagePattern, messageArgs);
+        return new BasicDiagnostic(severity, null, -1, violation.getMessage(), new Object[] { eObject, this.getClass().getSimpleName(), violation });
     }
 }
