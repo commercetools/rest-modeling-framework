@@ -7,6 +7,10 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 /**
  * This class is used to report validation results as {@link Resource.Diagnostic}.
  */
@@ -16,13 +20,19 @@ public class RamlDiagnostic implements Resource.Diagnostic {
     private final String location;
     private final int line;
     private final int column;
+    private final List<?> data;
 
     private RamlDiagnostic(final int severity, final String message, final String location, final int line, final int column) {
+        this(severity, message, location, line, column, Collections.emptyList());
+    }
+
+    private RamlDiagnostic(final int severity, final String message, final String location, final int line, final int column, final List<?> data) {
         this.severity = severity;
         this.message = message;
         this.location = location == null ? "<unkown-location>" : location;
         this.line = line;
         this.column = column;
+        this.data = data;
     }
 
     @Override
@@ -49,6 +59,8 @@ public class RamlDiagnostic implements Resource.Diagnostic {
         return severity;
     }
 
+    public List<?> getData() { return data; }
+
     @Override
     public String toString() {
         return String.format("%s (%s,%d,%d)", message, location, getLine(), column);
@@ -59,6 +71,10 @@ public class RamlDiagnostic implements Resource.Diagnostic {
     }
     public static RamlDiagnostic of(final int severity, final String message, final String location, final int line, final int column) {
         return new RamlDiagnostic(severity, message, location, line, column);
+    }
+
+    public static RamlDiagnostic of(final int severity, final String message, final String location, final int line, final int column, final List<?> data) {
+        return new RamlDiagnostic(severity, message, location, line, column, data);
     }
 
     public static RamlDiagnostic of(org.eclipse.emf.common.util.Diagnostic diagnostic) {
@@ -75,6 +91,6 @@ public class RamlDiagnostic implements Resource.Diagnostic {
                 source = nodeToken.getLocation();
             }
         }
-        return of(diagnostic.getSeverity(), diagnostic.getMessage(), source, line, column);
+        return of(diagnostic.getSeverity(), diagnostic.getMessage(), source, line, column, diagnostic.getData() == null ? Collections.emptyList() : diagnostic.getData() );
     }
 }
