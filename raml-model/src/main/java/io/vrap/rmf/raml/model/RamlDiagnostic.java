@@ -2,6 +2,10 @@ package io.vrap.rmf.raml.model;
 
 import io.vrap.rmf.nodes.antlr.NodeToken;
 import io.vrap.rmf.nodes.antlr.NodeTokenProvider;
+import io.vrap.rmf.raml.persistence.antlr.RAMLParser;
+import io.vrap.rmf.raml.persistence.constructor.RamlParserAdapter;
+import io.vrap.rmf.raml.validation.Source;
+import org.antlr.v4.runtime.tree.TerminalNode;
 import org.eclipse.emf.common.util.Diagnostic;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
@@ -85,7 +89,21 @@ public class RamlDiagnostic implements Resource.Diagnostic {
             final EObject eObject = (EObject) diagnostic.getData().get(0);
             final NodeTokenProvider nodeTokenProvider = (NodeTokenProvider) EcoreUtil.getExistingAdapter(eObject, NodeTokenProvider.class);
             if (nodeTokenProvider != null) {
-                final NodeToken nodeToken = nodeTokenProvider.getStart();
+                final NodeToken nodeToken;
+                if (nodeTokenProvider instanceof RamlParserAdapter && ((RamlParserAdapter) nodeTokenProvider)
+                        .getParserRuleContext() instanceof RAMLParser.TypeDeclarationMapContext) {
+                    nodeToken = ((RamlParserAdapter) nodeTokenProvider)
+                        .getParserRuleContext()
+                        .children
+                        .stream()
+                        .filter(parseTree -> parseTree instanceof TerminalNode)
+                        .findFirst()
+                        .map(parseTree -> ((TerminalNode) parseTree).getSymbol() instanceof NodeToken ? (NodeToken)((TerminalNode) parseTree).getSymbol() : null)
+                        .orElse(nodeTokenProvider.getStart());
+                } else {
+                    nodeToken = nodeTokenProvider.getStart();
+                }
+
                 line = nodeToken.getLine();
                 column = nodeToken.getCharPositionInLine();
                 source = nodeToken.getLocation();

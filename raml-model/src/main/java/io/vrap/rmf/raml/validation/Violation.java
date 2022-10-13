@@ -23,7 +23,7 @@ public class Violation {
         this.messageArgs = messageArgs;
         this.severity = severity;
         this.source = getSource(object);
-        this.message = MessageFormat.format("{0}: {1}", rule.getSimpleName(), MessageFormat.format(messagePattern, messageArgs));
+        this.message = MessageFormat.format(messagePattern, messageArgs);
     }
 
     private Source getSource(EObject object) {
@@ -61,5 +61,9 @@ public class Violation {
 
     public String getMessage() {
         return message;
+    }
+
+    public String getDetailMessage() {
+        return MessageFormat.format("{0}: {1}", rule.getSimpleName(), message);
     }
 }
