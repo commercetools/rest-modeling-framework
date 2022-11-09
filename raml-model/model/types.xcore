@@ -386,7 +386,7 @@ class ObjectType extends AnyType, ObjectTypeFacet {
     			val ObjectType subType = subTypes.filter(ObjectType).findFirst[it.discriminatorValueOrDefault() == discriminatorValue]
 
     			if (subType === null)
-    				subTypes.filter(ObjectType).findFirst[it.getType(discriminatorValue) !== null]
+    				subTypes.filter[!it.isInlineType].filter(ObjectType).findFirst[it.getType(discriminatorValue) !== null]
     			else
     				subType
     		}
