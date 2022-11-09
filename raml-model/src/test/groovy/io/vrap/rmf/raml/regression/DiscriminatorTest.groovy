@@ -279,4 +279,47 @@ class DiscriminatorTest extends RegressionTest {
         '{ "name": "Hans", "age": 13, "test2": { "foo": "foo", "bar": { "foo": "bar" }, "baz": { "foo": "bar" } } }'    | 1      | true
         '{ "name": "Hans", "age": 13, "test2": { "foo": "foo", "bar": { "foo": "bar" }, "baz": { "foo": "bar" } } }'    | 0      | false
     }
+
+    def "unknown-discriminator-in-example"() {
+        when:
+
+        RamlModelResult<Api> ramlModelResult = constructApi(
+                '''\
+        #%RAML 1.0
+        title: Some API
+        types:
+            ErrorResponse:
+                type: object
+                properties:
+                    errors:
+                        type: ErrorObject[]
+                example: |
+                  {
+                    "errors": [
+                      {
+                        "code": "SomeErrorCode"
+                      }
+                    ]
+                  }
+            ErrorObject:
+                type: object
+                discriminator: code
+                properties:
+                    code: string
+            BadGatewayError:
+                type: ErrorObject
+                discriminatorValue: bad-gateway
+        /foo:
+          post:
+            body:
+              application/json:
+                type: BadGatewayError
+                description: foo
+        ''')
+        then:
+        ramlModelResult.validationResults.size() == 1
+        with(ramlModelResult.validationResults) {
+            get(0).message == "Invalid discriminator value 'SomeErrorCode' for type 'ErrorObject'"
+        }
+    }
 }
