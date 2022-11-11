@@ -406,6 +406,12 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
                 typesScope -> super.visitTypesFacet(typesFacet));
     }
 
+    @Override
+    public Object visitFacetTypesFacet(RAMLParser.FacetTypesFacetContext facetTypes) {
+        return withinScope(scope.with(FACET_TYPE_FACET__FACET_TYPES),
+                typesScope -> super.visitFacetTypesFacet(facetTypes));
+    }
+
     /**
      * Constructor annotation types from the given {@link RAMLParser.TypesFacetContext}.
      *
@@ -453,7 +459,7 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
                                 itemsFacet.exampleFacet().size() > 0 || itemsFacet.examplesFacet().size() > 0 ||
                                 itemsFacet.defaultFacet().size() > 0 || itemsFacet.enumFacet().size() > 0 ||
                                 itemsFacet.descriptionFacet().size() > 0 || itemsFacet.displayNameFacet().size() > 0 ||
-                                itemsFacet.itemsFacet().size() > 0;
+                                itemsFacet.itemsFacet().size() > 0 || itemsFacet.facetTypesFacet().size() > 0;
                 if (isInlineTypeDeclaration) {
                     typedElementType = create(typedElementType.eClass(), itemsFacet);
                     scope.addValue(INLINE_TYPE_CONTAINER__INLINE_TYPES, typedElementType);
@@ -573,7 +579,7 @@ public abstract class BaseConstructor extends AbstractScopedVisitor<Object> {
                         typedElementMap.exampleFacet().size() > 0 || typedElementMap.examplesFacet().size() > 0 ||
                         typedElementMap.defaultFacet().size() > 0 || typedElementMap.enumFacet().size() > 0 ||
                         typedElementMap.displayNameFacet().size() > 0 || typedElementMap.descriptionFacet().size() > 0 ||
-                        typedElementMap.itemsFacet().size() > 0;
+                        typedElementMap.itemsFacet().size() > 0 || typedElementMap.facetTypesFacet().size() > 0;
         if (isInlineTypeDeclaration) {
             typedElementType = inlineTypeDeclaration(typedElementType, scope, typedElementMap);
             scope.addValue(INLINE_TYPE_CONTAINER__INLINE_TYPES, typedElementType);

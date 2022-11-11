@@ -439,6 +439,18 @@ usesFacet:
         MAP_END
     ;
 
+facetTypesFacet:
+    facet='facets'
+        (
+            empty=id
+            |   (
+                    MAP_START
+                    ( facetTypes+=typedElementFacet )*
+                    MAP_END
+                )
+        )
+    ;
+
 libraryUse:
     name=id libraryUri=id
     ;
@@ -479,6 +491,7 @@ typeDeclarationMap:
             | exampleFacet
             | examplesFacet
             | annotationFacet
+            | facetTypesFacet
         )*
         MAP_END
     ;
@@ -504,6 +517,7 @@ typeDeclarationFragment:
         | exampleFacet
         | examplesFacet
         | annotationFacet
+        | facetTypesFacet
     )*
     MAP_END
     ;
@@ -534,6 +548,7 @@ itemsFacet:
                 | exampleFacet
                 | examplesFacet
                 | annotationFacet
+                | facetTypesFacet
             )*
             MAP_END
         )
@@ -615,6 +630,7 @@ typedElementMap:
                         | annotationFacet
                         | exampleFacet
                         | examplesFacet
+                        | facetTypesFacet
                         | defaultFacet
                     )*
                     MAP_END

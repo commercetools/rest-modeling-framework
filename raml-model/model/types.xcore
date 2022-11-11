@@ -10,7 +10,7 @@ import io.vrap.rmf.raml.model.values.RegExp
 import io.vrap.rmf.raml.model.values.PositiveInteger
 import io.vrap.rmf.raml.model.values.MediaTypes
 
-interface AnyTypeFacet extends AnnotationsFacet, DocumentableElement, NamedElement, InlineTypeContainer {
+interface AnyTypeFacet extends AnnotationsFacet, DocumentableElement, NamedElement, InlineTypeContainer, FacetTypeFacet {
 	op AnyType getType()
 
 	/*
@@ -33,6 +33,20 @@ interface AnyTypeFacet extends AnnotationsFacet, DocumentableElement, NamedEleme
         eContainmentFeature == TypesPackage.Literals.INLINE_TYPE_CONTAINER__INLINE_TYPES
     }
 }
+
+interface FacetTypeFacet {
+    contains CustomFacetType[] facetTypes
+
+    /*
+     * Returns the property which matches the given name or null if no property
+     * with the given name exists.
+     */
+    op CustomFacetType getFacetType(String name) {
+        facetTypes.findFirst[it.matches(name)]
+    }
+}
+
+class CustomFacetType extends TypedElement { }
 
 interface ObjectTypeFacet extends AnyTypeFacet {
 	/*
