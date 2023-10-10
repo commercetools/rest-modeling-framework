@@ -5,7 +5,7 @@ The rest modeling framework provides an EMF based model for RAML api definition 
 The latest unstable release can be retrieved from [Maven](https://search.maven.org/artifact/com.commercetools.rmf/rest-modeling-framework)  with:
 ```gradle
 ext {
-    rmfVersion = "0.2.0-20221109205535"
+    rmfVersion = "0.2.0-20231010123941"
 }
 
 sourceCompatibility = 1.8
