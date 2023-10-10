@@ -4,6 +4,8 @@ import io.vrap.rmf.raml.model.RamlModelResult
 import io.vrap.rmf.raml.model.modules.Api
 import io.vrap.rmf.raml.model.resources.HttpMethod
 import io.vrap.rmf.raml.model.resources.Method
+import io.vrap.rmf.raml.model.types.Annotation
+import io.vrap.rmf.raml.model.types.AnyAnnotationType
 import io.vrap.rmf.raml.model.types.ArrayInstance
 import io.vrap.rmf.raml.model.types.ObjectInstance
 import io.vrap.rmf.raml.model.types.StringInstance
@@ -199,5 +201,38 @@ class AnnotationTest extends RegressionTest {
         then:
         ramlModelResult.validationResults.size() == 0
         ramlModelResult.rootObject.getType("TestType").getAnnotation("postman").value instanceof StringInstance
+    }
+
+    def "validation-of-annotation-library"() {
+        when:
+        writeFile(
+                "annotations.raml",
+                '''
+                #%RAML 1.0 Library
+                usage: defines types
+                
+                annotationTypes:
+                  products: string[]
+                ''')
+        RamlModelResult<Api> ramlModelResult = constructApi(
+                Arrays.asList("annotations.raml"),
+                '''
+        #%RAML 1.0
+        title: "Test"
+        uses:
+          annotations: annotations.raml
+        (annotations.products):
+            - "test"
+        (annotations.invalid):
+            - "test"
+        /projection:
+            get:
+                ''')
+        then:
+        ramlModelResult.validationResults.size() == 1
+        ramlModelResult.validationResults[0].message.startsWith("Annotation 'invalid' can't be resolved")
+        Api api = ramlModelResult.rootObject
+        api.getAnnotation("products") instanceof Annotation
+
     }
 }

@@ -178,12 +178,24 @@ public class TypesValidator extends AbstractRamlValidator {
         }
     }
 
-    private static class AnnotationValidator extends ValidatingTypesSwitch {
+    private class AnnotationValidator extends ValidatingTypesSwitch {
         private InstanceValidator instanceValidator = new InstanceValidator();
 
         @Override
         public List<Diagnostic> caseAnnotation(final Annotation annotation) {
-            return instanceValidator.validate(annotation);
+            final List<Diagnostic> results = new ArrayList<>();
+            results.addAll(validateTypeResolved(annotation));
+            results.addAll(instanceValidator.validate(annotation));
+            return results;
+        }
+
+        private List<Diagnostic> validateTypeResolved(final Annotation anyType) {
+            if (anyType.getType() != null && anyType.getType().eIsProxy()) {
+                return Collections.singletonList(error(anyType, "Annotation ''{0}'' can''t be resolved",
+                        getNameFromProxy(anyType.getType())));
+            } else {
+                return Collections.emptyList();
+            }
         }
     }
 
