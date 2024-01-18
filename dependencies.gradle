@@ -3,7 +3,7 @@ ext {
     spockVersion = "2.2-groovy-3.0"
     jacksonVersion = "2.13.2"
     yaml = [
-            snakeyaml: 'org.yaml:snakeyaml:1.30'
+            snakeyaml: 'org.yaml:snakeyaml:2.2'
     ]
 
     google = [
