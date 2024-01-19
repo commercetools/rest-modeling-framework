@@ -9,7 +9,7 @@ sourceSets {
 }
 
 generateGrammarSource {
-    outputDirectory = file('src/main/java-gen/io/vrap/rmf/raml/persistence/antlr')
+    outputDirectory = file('src/main/java-gen/antlr/io/vrap/rmf/raml/persistence/antlr')
     arguments += ['-visitor']
     outputs.upToDateWhen { false }
 }
@@ -19,7 +19,7 @@ generateXtext {
 }
 
 clean {
-    delete 'src/main/java-gen'
+    delete 'src/main/java-gen/xtext'
 }
 
 dependencies {

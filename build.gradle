@@ -138,6 +138,13 @@ subprojects { project ->
         dependencies {
             antlr _antlr.antlr
         }
+        sourceSets {
+            main {
+                java {
+                    srcDir 'src/main/java-gen/antlr'
+                }
+            }
+        }
     }
 
     if (project.file('model').exists()) {
@@ -156,14 +163,13 @@ subprojects { project ->
                 xcore {
                     setup = 'org.eclipse.emf.ecore.xcore.XcoreStandaloneSetup'
                     generator.outlet.producesJava = true
-                    generator.outlet.cleanAutomatically = false
                 }
             }
             sourceSets {
                 main {
                     srcDir 'model'
                     output {
-                        dir(xtext.languages.xcore.generator.outlet, 'src/main/java-gen')
+                        dir(xtext.languages.xcore.generator.outlet, 'src/main/java-gen/xtext')
                     }
                 }
             }
