@@ -33,7 +33,7 @@ class YamlNodeLexer implements TokenSource {
             ImmutableSet.of(Event.ID.MappingEnd, Event.ID.MappingStart, Event.ID.SequenceEnd, Event.ID.SequenceStart, Event.ID.Scalar);
     private static Map<String, Integer> literalTokenTypes = literalToTokenType(NodeParser.VOCABULARY);
 
-    public static final Mark EMPTY_FILE_MARK = new Mark(null, 0, 0, 0, "", 0);
+    public static final Mark EMPTY_FILE_MARK = new Mark(null, 0, 0, 0, "".toCharArray(), 0);
     public static final ScalarEvent EMPTY_SCALAR_EVENT = new ScalarEvent(null, null, null, "", EMPTY_FILE_MARK, EMPTY_FILE_MARK, DumperOptions.ScalarStyle.PLAIN);
 
     private static final Resolver IMPLICIT_TAG_RESOLVER = new Resolver();

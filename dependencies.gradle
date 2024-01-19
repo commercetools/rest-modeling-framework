@@ -1,23 +1,23 @@
 ext {
-    xtextVersion = '2.28.0'
-    spockVersion = "2.2-groovy-3.0"
-    jacksonVersion = "2.13.2"
+    xtextVersion = '2.33.0'
+    spockVersion = "2.3-groovy-3.0"
+    jacksonVersion = "2.16.1"
     yaml = [
-            snakeyaml: 'org.yaml:snakeyaml:1.30'
+            snakeyaml: 'org.yaml:snakeyaml:2.2'
     ]
 
     google = [
-            guava: 'com.google.guava:guava:30.1-jre'
+            guava: 'com.google.guava:guava:33.0.0-jre'
     ]
 
     commons = [
             lang3: 'org.apache.commons:commons-lang3:3.12',
             cli: 'commons-cli:commons-cli:1.4',
-            io: 'commons-io:commons-io:2.11.0'
+            io: 'commons-io:commons-io:2.15.1'
     ]
 
     _antlr = [
-            antlr: 'org.antlr:antlr4:4.8'
+            antlr: 'org.antlr:antlr4:4.13.1'
     ]
 
     jackson_core = [
@@ -28,9 +28,9 @@ ext {
     ]
 
     emf = [
-            common: 'org.eclipse.emf:org.eclipse.emf.common:2.26.0',
-            ecore: 'org.eclipse.emf:org.eclipse.emf.ecore:2.28.0',
-            ecore_xcore_lib: 'org.eclipse.emf:org.eclipse.emf.ecore.xcore.lib:1.4.0'
+            common: 'org.eclipse.emf:org.eclipse.emf.common:2.29.0',
+            ecore: 'org.eclipse.emf:org.eclipse.emf.ecore:2.35.0',
+            ecore_xcore_lib: 'org.eclipse.emf:org.eclipse.emf.ecore.xcore.lib:1.7.0'
     ]
 
     hypertino = [
@@ -46,11 +46,11 @@ ext {
     ]
 
     assertj = [
-            core: 'org.assertj:assertj-core:3.16.1'
+            core: 'org.assertj:assertj-core:3.25.1'
     ]
 
     junit = [
-            junit: 'org.junit.jupiter:junit-jupiter:5.9.0',
-            dataprovider: 'com.tngtech.junit.dataprovider:junit-jupiter-dataprovider:2.6'
+            junit: 'org.junit.jupiter:junit-jupiter:5.10.1',
+            dataprovider: 'com.tngtech.junit.dataprovider:junit-jupiter-dataprovider:2.10'
     ]
 }
