@@ -18,11 +18,10 @@ plugins {
     id 'groovy'
 
     id 'de.undercouch.download' version '4.0.2'
-    id 'com.jfrog.bintray' version '1.8.3'
-    id 'com.github.johnrengelman.shadow' version '5.2.0' apply false
+    id 'com.github.johnrengelman.shadow' version '7.1.1' apply false
 
-    id 'org.xtext.builder' version '2.0.8' apply false
-    id 'io.github.gradle-nexus.publish-plugin' version '1.1.0'
+    id 'org.xtext.builder' version '4.0.0' apply false
+    id 'io.github.gradle-nexus.publish-plugin' version '1.3.0'
 }
 
 
@@ -157,6 +156,7 @@ subprojects { project ->
                 xcore {
                     setup = 'org.eclipse.emf.ecore.xcore.XcoreStandaloneSetup'
                     generator.outlet.producesJava = true
+                    generator.outlet.cleanAutomatically = false
                 }
             }
             sourceSets {
@@ -177,18 +177,19 @@ subprojects { project ->
             api "org.eclipse.xtext:org.eclipse.xtext.xbase.lib:$xtextVersion"
 
             xtextLanguages 'org.eclipse.jdt:org.eclipse.jdt.core:3.20.0'
-            xtextLanguages 'org.eclipse.text:org.eclipse.text:3.5.101'
-            xtextLanguages 'org.eclipse.core:org.eclipse.core.resources:3.7.100'
+            xtextLanguages 'org.eclipse.platform:org.eclipse.text:3.13.100'
+            xtextLanguages 'org.eclipse.platform:org.eclipse.core.resources:3.20.0'
             xtextLanguages "org.eclipse.xtext:org.eclipse.xtext.ecore:$xtextVersion"
-            xtextLanguages 'org.eclipse.emf:org.eclipse.emf.mwe2.runtime:2.8.3'
-            xtextLanguages 'org.eclipse.emf:org.eclipse.emf.codegen.ecore.xtext:1.2.0'
-            xtextLanguages 'org.eclipse.emf:org.eclipse.emf.common:2.11.0'
-            xtextLanguages 'org.eclipse.emf:org.eclipse.emf.ecore:2.11.0'
-            xtextLanguages 'org.eclipse.emf:org.eclipse.emf.ecore.xmi:2.11.0'
-            xtextLanguages 'org.eclipse.emf:org.eclipse.emf.ecore.xcore:1.3.1'
-            xtextLanguages 'org.eclipse.emf:org.eclipse.emf.ecore.xcore.lib:1.1.100'
-            xtextLanguages 'org.eclipse.emf:org.eclipse.emf.codegen:2.11.0'
-            xtextLanguages 'org.eclipse.emf:org.eclipse.emf.codegen.ecore:2.11.0'
+            xtextLanguages 'org.eclipse.emf:org.eclipse.emf.mwe2.runtime:2.16.0'
+            xtextLanguages 'org.eclipse.emf:org.eclipse.emf.codegen.ecore.xtext:1.8.0'
+            xtextLanguages 'org.eclipse.emf:org.eclipse.emf.common:2.35.0'
+            xtextLanguages 'org.eclipse.emf:org.eclipse.emf.ecore:2.35.0'
+            xtextLanguages 'org.eclipse.emf:org.eclipse.emf.ecore.xmi:2.35.0'
+            xtextLanguages 'org.eclipse.emf:org.eclipse.emf.ecore.xcore:1.27.0'
+            xtextLanguages 'org.eclipse.emf:org.eclipse.emf.ecore.xcore.lib:1.7.0'
+            xtextLanguages 'org.eclipse.emf:org.eclipse.emf.codegen:2.35.0'
+            xtextLanguages 'org.eclipse.emf:org.eclipse.emf.codegen.ecore:2.35.0'
+            xtextLanguages 'org.antlr:antlr-runtime:3.2.0'
         }
     }
 
@@ -206,10 +207,9 @@ subprojects { project ->
 
     task javadocJar(type: Jar) {
         group 'build'
-        classifier 'javadoc'
-        from javadoc
+        archiveClassifier = 'javadoc'
+        from javadoc.destinationDir
     }
-
     artifacts {
         archives javadocJar, sourcesJar
     }
