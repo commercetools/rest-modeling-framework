@@ -77,7 +77,7 @@ public enum StringCaseFormat implements Predicate<String>, Function<String, Stri
     }
 
     static List<String> split(final String value) {
-        return Arrays.asList(value.split("(?<!(^|[A-Z]))(?=[A-Z])|(?<!^)(?=[A-Z][a-z])|[-_]"));
+        return Arrays.asList(value.split("(?<!(^|[A-Z]))(?=[A-Z])|(?<!^)(?=[A-Z][a-z])|[-_.]"));
     }
 
     @VisibleForTesting

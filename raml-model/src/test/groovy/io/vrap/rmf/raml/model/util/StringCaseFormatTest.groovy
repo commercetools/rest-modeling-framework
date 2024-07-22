@@ -77,5 +77,6 @@ class StringCaseFormatTest extends Specification {
         StringCaseFormat.UPPER_UNDERSCORE_CASE | 'aBc-De_f' || 'A_BC_DE_F'
         StringCaseFormat.LOWER_CAMEL_CASE      | 'aBc-De_F'  || 'aBcDeF'
         StringCaseFormat.UPPER_CAMEL_CASE      | 'aBc-De_F'  || 'ABcDeF'
+        StringCaseFormat.UPPER_CAMEL_CASE      | 'aBC.DEf'   || 'ABcDEf'
     }
 }
