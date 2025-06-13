@@ -3,6 +3,10 @@ on:
 
 name: Release to Maven Central
 
+permissions:
+  contents: write
+  actions: write
+
 jobs:
   release:
     name: Build and release

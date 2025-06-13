@@ -3,6 +3,8 @@ on:
 
 name: CI
 
+permissions: {}
+
 jobs:
   ci:
     name: Build and test
