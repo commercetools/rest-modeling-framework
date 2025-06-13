@@ -65,6 +65,12 @@ jobs:
     # - name: Setup runtime (example)
     #   uses: actions/setup-example@v1
 
+    - name: Setup Java
+      uses: actions/setup-java@v4
+      with:
+        java-version: '11'
+        distribution: 'temurin'
+
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
       uses: github/codeql-action/init@v3
